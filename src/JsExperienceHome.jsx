@@ -58,43 +58,58 @@ export default function JsExperienceHome() {
         <section className="jxh-section jxh-section-how" id="how">
           <h2 className="jxh-h2">How it works</h2>
           <p className="jxh-p">
-            As an aspirant you are inducted into a live project — then you work a real day: sync,
-            ship, get reviewed, update status. Here is the flow from day one onward.
+            You apply once, telling us frontend or backend. From there, every step below is real
+            work on a real product — not a simulation.
           </p>
 
           <AspirantJourneyFlow />
 
           <ol className="jxh-journey">
             <li>
-              <strong>Team introduction &amp; key roles</strong>
+              <strong>Apply</strong>
               <p>
-                Meet your Team Lead, Buddy, and Admin. Learn who owns decisions, who unblocks you,
-                and how the project org chart works — so you never feel stranded.
+                Tell us your trade preference — frontend or backend, the only two tracks for now —
+                and a bit about where you are today.
               </p>
             </li>
             <li>
-              <strong>Project overview &amp; goals</strong>
+              <strong>Get matched to an open task</strong>
               <p>
-                Absorb the vision, outcomes, and roadmap. You should be able to explain what the
-                product is shipping toward and why your first tickets matter.
+                We place you on an unassigned task that fits the trade you opted into on your
+                application — a real ticket on a real product, not a made-up exercise.
               </p>
             </li>
             <li>
-              <strong>Workstation setup &amp; tools</strong>
+              <strong>Open your task</strong>
               <p>
-                Get accounts, repo access, and the stack you need. Open your task in the Workbench.
-                Assist Me is there when a skill gap appears mid-ticket — not as a separate course.
+                Read the brief in the Workbench: what it asks for, why it matters to the product,
+                and what "done" looks like.
               </p>
             </li>
             <li>
-              <strong>Typical workday</strong>
+              <strong>Build it — Assist Me or solo</strong>
               <p>
-                Morning sync and task planning. Deep work on your slice. Collaborative problem-solving
-                when you are stuck. Pull request for review. End-of-day status so the team always
-                knows where the work stands.
+                Work it yourself, or lean on Assist Me the moment a skill gap shows up mid-ticket.
+                Either way, the code you ship is yours.
+              </p>
+            </li>
+            <li>
+              <strong>Commit your work</strong>
+              <p>Push your changes and open a pull request against the team's repo.</p>
+            </li>
+            <li>
+              <strong>Review — merged, or feedback and another pass</strong>
+              <p>
+                A reviewer merges it, or sends it back with concrete feedback. You fix it and
+                recommit — the same loop every professional dev goes through.
               </p>
             </li>
           </ol>
+          <p className="jxh-p">
+            Meanwhile: the moment you're matched, you're on that product's team — daily huddles,
+            status updates, reviewers and teammates who know your name. Same scrum rituals as any
+            dev team, not a solo grind.
+          </p>
         </section>
 
         <section className="jxh-section">

@@ -1,20 +1,38 @@
 /**
- * Project induction + workday journey for aspirants (SVG illustration).
+ * Applicant → workday journey (SVG illustration).
  * Decorative; paired with accessible text list in JsExperienceHome.
+ *
+ * Flow depicted: Apply -> matched to an open task (by trade preference, FE/BE) -> open the
+ * task -> build it (Assist Me help or solo) -> commit -> review (merged, or feedback loop back
+ * to commit). A second band below shows the parallel, ongoing part: once assigned, you're on
+ * that product's team, so daily huddles + status updates run alongside the work.
+ *
+ * Layout math (kept simple on purpose, so it stays correct on the next edit):
+ *   6 stages, each stage's group is translate(STAGE_X[i], 20), circle is local cx=90 cy=120 r=90.
+ *   So each circle's global span is [STAGE_X[i], STAGE_X[i]+180], vertical center always y=140.
+ *   Gap between consecutive circles is exactly GAP (40), so arrows drawn in
+ *   [STAGE_X[i]+180, STAGE_X[i+1]] never cross into a circle.
  */
+const STAGE_X = [20, 240, 460, 680, 900, 1120];
+const GAP_MID = STAGE_X.map((x, i) => (i < STAGE_X.length - 1 ? x + 180 + 20 : null)).filter(Boolean);
+const CANVAS_W = STAGE_X[STAGE_X.length - 1] + 180 + 20; // 1320
+const CANVAS_H = 460;
+
 export default function AspirantJourneyFlow() {
   return (
     <figure className="jxh-flow">
       <svg
         className="jxh-flow-svg"
-        viewBox="0 0 1120 420"
+        viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
         role="img"
         aria-labelledby="jxh-flow-title jxh-flow-desc"
       >
-        <title id="jxh-flow-title">Project induction and workday journey</title>
+        <title id="jxh-flow-title">Applicant to workday journey</title>
         <desc id="jxh-flow-desc">
-          Four stages: meet your team, learn the project, set up your tools, then a typical workday
-          of stand-up, deep work, review, and status.
+          Apply, get matched to an open task by your trade preference (frontend or backend),
+          open the task, build it with Assist Me help or on your own, commit your work, then get
+          reviewed — merged, or sent back with feedback to fix and recommit. Meanwhile, as part of
+          that product's team, you join daily huddles and share status like any scrum team.
         </desc>
 
         <defs>
@@ -34,143 +52,201 @@ export default function AspirantJourneyFlow() {
           <filter id="jxhSoft" x="-20%" y="-20%" width="140%" height="140%">
             <feDropShadow dx="0" dy="6" stdDeviation="8" floodColor="#0c1222" floodOpacity="0.08" />
           </filter>
+          <marker id="jxhArrowWarm" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M0 0 L8 4 L0 8 Z" fill="#ea580c" />
+          </marker>
         </defs>
 
-        <rect width="1120" height="420" rx="20" fill="url(#jxhGBg)" />
+        <rect width={CANVAS_W} height={CANVAS_H} rx="20" fill="url(#jxhGBg)" />
 
-        {/* path spine */}
-        <path
-          d="M145 175 H320 M400 175 H575 M655 175 H830 M910 175 H975"
-          stroke="#0e7490"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeDasharray="0"
-          opacity="0.35"
-        />
-        {[320, 575, 830].map((x) => (
-          <polygon key={x} points={`${x},175 ${x - 10},168 ${x - 10},182`} fill="#0e7490" opacity="0.45" />
+        {/* spine: one short arrow per gap between circles, never crossing into a circle */}
+        {GAP_MID.map((gx, i) => (
+          <g key={i}>
+            <path d={`M${gx - 20} 140 H${gx + 20}`} stroke="#0e7490" strokeWidth="3" strokeLinecap="round" opacity="0.35" />
+            <polygon points={`${gx + 20},140 ${gx + 10},133 ${gx + 10},147`} fill="#0e7490" opacity="0.45" />
+          </g>
         ))}
 
-        {/* ── Stage 1: Team ── */}
-        <g transform="translate(40,48)" filter="url(#jxhSoft)">
-          <circle cx="105" cy="128" r="118" fill="#fff" stroke="url(#jxhGRing)" strokeWidth="3.5" />
-          <rect x="48" y="18" width="114" height="22" rx="11" fill="#0e7490" />
-          <text x="105" y="33" textAnchor="middle" fill="#fff" fontSize="9" fontWeight="700" fontFamily="Plus Jakarta Sans, sans-serif" letterSpacing="0.06em">
-            WELCOME
+        {/* ── Stage 1: Apply ── */}
+        <g transform={`translate(${STAGE_X[0]},20)`} filter="url(#jxhSoft)">
+          <circle cx="90" cy="120" r="90" fill="#fff" stroke="url(#jxhGRing)" strokeWidth="3.5" />
+          <rect x="40" y="24" width="90" height="16" rx="8" fill="#0e7490" />
+          <text x="85" y="36" textAnchor="middle" fill="#fff" fontSize="8" fontWeight="700" fontFamily="Plus Jakarta Sans, sans-serif" letterSpacing="0.06em">
+            START
           </text>
-          {/* people */}
-          <g transform="translate(42,70)">
-            <circle cx="28" cy="22" r="14" fill="#155e75" />
-            <path d="M8 62c2-18 14-28 28-28s26 10 28 28" fill="#0e7490" opacity="0.85" />
-            <circle cx="78" cy="26" r="13" fill="#fb923c" />
-            <path d="M58 64c2-16 12-24 20-24s18 8 20 24" fill="#ea580c" opacity="0.9" />
-            <circle cx="52" cy="48" r="11" fill="#38bdf8" />
-            <path d="M36 78c1-12 8-18 16-18s15 6 16 18" fill="#0284c7" />
-            {/* handshake hint */}
-            <path d="M40 52h24" stroke="#0c1222" strokeWidth="2" strokeLinecap="round" opacity="0.35" />
-          </g>
-          <text x="105" y="210" textAnchor="middle" fill="#0c1222" fontSize="12" fontWeight="700" fontFamily="Fraunces, Georgia, serif">
-            1 · Meet the team
+          <rect x="52" y="62" width="66" height="76" rx="6" fill="#e8f4f7" stroke="#0e7490" strokeWidth="1.5" />
+          <rect x="62" y="76" width="46" height="4" rx="2" fill="#0e7490" opacity="0.55" />
+          <rect x="62" y="88" width="34" height="4" rx="2" fill="#0e7490" opacity="0.35" />
+          <rect x="62" y="100" width="40" height="4" rx="2" fill="#0e7490" opacity="0.35" />
+          <circle cx="102" cy="122" r="14" fill="url(#jxhGWarm)" />
+          <path d="M95 122 l5 5 l9 -10" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <text x="90" y="176" textAnchor="middle" fill="#0c1222" fontSize="13" fontWeight="700" fontFamily="Fraunces, Georgia, serif">
+            1 · Apply
           </text>
-          <text x="105" y="228" textAnchor="middle" fill="#3d4a63" fontSize="9.5" fontFamily="Plus Jakarta Sans, sans-serif">
-            Lead · Buddy · Admin
+          <text x="90" y="196" textAnchor="middle" fill="#3d4a63" fontSize="10" fontFamily="Plus Jakarta Sans, sans-serif">
+            Pick FE or BE
           </text>
         </g>
 
-        {/* ── Stage 2: Project ── */}
-        <g transform="translate(295,48)" filter="url(#jxhSoft)">
-          <circle cx="105" cy="128" r="118" fill="#fff" stroke="url(#jxhGRing)" strokeWidth="3.5" />
-          {/* map / roadmap board */}
-          <rect x="42" y="58" width="126" height="78" rx="8" fill="#e8f4f7" stroke="#0e7490" strokeWidth="1.5" />
-          <circle cx="70" cy="88" r="6" fill="#0e7490" />
-          <circle cx="110" cy="78" r="6" fill="#38bdf8" />
-          <circle cx="145" cy="100" r="6" fill="#fb923c" />
-          <path d="M70 88 L110 78 L145 100" fill="none" stroke="#155e75" strokeWidth="1.5" opacity="0.7" />
-          <rect x="52" y="122" width="40" height="5" rx="2" fill="#0e7490" opacity="0.35" />
-          <rect x="100" y="122" width="52" height="5" rx="2" fill="#0e7490" opacity="0.2" />
-          {/* target */}
-          <circle cx="160" cy="52" r="16" fill="none" stroke="url(#jxhGWarm)" strokeWidth="2.5" />
-          <circle cx="160" cy="52" r="6" fill="#ea580c" />
-          <text x="105" y="210" textAnchor="middle" fill="#0c1222" fontSize="12" fontWeight="700" fontFamily="Fraunces, Georgia, serif">
-            2 · Project vision
+        {/* ── Stage 2: Matched ── */}
+        <g transform={`translate(${STAGE_X[1]},20)`} filter="url(#jxhSoft)">
+          <circle cx="90" cy="120" r="90" fill="#fff" stroke="url(#jxhGRing)" strokeWidth="3.5" />
+          <circle cx="58" cy="110" r="22" fill="#155e75" />
+          <text x="58" y="115" textAnchor="middle" fill="#fff" fontSize="9" fontWeight="700" fontFamily="Plus Jakarta Sans, sans-serif">
+            YOU
           </text>
-          <text x="105" y="228" textAnchor="middle" fill="#3d4a63" fontSize="9.5" fontFamily="Plus Jakarta Sans, sans-serif">
-            Goals · Roadmap · Outcomes
+          <path d="M80 110 H98" stroke="#0e7490" strokeWidth="3" strokeDasharray="4 4" />
+          <rect x="98" y="90" width="44" height="40" rx="8" fill="#fff7ed" stroke="#ea580c" strokeWidth="1.5" />
+          <text x="120" y="114" textAnchor="middle" fill="#c2410c" fontSize="8" fontWeight="700" fontFamily="Plus Jakarta Sans, sans-serif">
+            TASK
+          </text>
+          <text x="90" y="176" textAnchor="middle" fill="#0c1222" fontSize="13" fontWeight="700" fontFamily="Fraunces, Georgia, serif">
+            2 · Get matched
+          </text>
+          <text x="90" y="196" textAnchor="middle" fill="#3d4a63" fontSize="10" fontFamily="Plus Jakarta Sans, sans-serif">
+            To an open task
           </text>
         </g>
 
-        {/* ── Stage 3: Tools ── */}
-        <g transform="translate(550,48)" filter="url(#jxhSoft)">
-          <circle cx="105" cy="128" r="118" fill="#fff" stroke="url(#jxhGRing)" strokeWidth="3.5" />
-          {/* dual monitors */}
-          <rect x="38" y="68" width="58" height="42" rx="4" fill="#0c1222" />
-          <rect x="42" y="72" width="50" height="30" rx="2" fill="#164e63" />
-          <rect x="46" y="78" width="28" height="3" rx="1" fill="#67e8f9" opacity="0.8" />
-          <rect x="46" y="85" width="20" height="3" rx="1" fill="#67e8f9" opacity="0.5" />
-          <rect x="108" y="62" width="64" height="48" rx="4" fill="#0c1222" />
-          <rect x="112" y="66" width="56" height="36" rx="2" fill="#155e75" />
-          <text x="140" y="88" textAnchor="middle" fill="#a5f3fc" fontSize="11" fontFamily="DM Mono, monospace">{`</>`}</text>
-          {/* laptop + guide */}
-          <rect x="70" y="122" width="50" height="32" rx="3" fill="#334155" />
-          <rect x="74" y="126" width="42" height="22" rx="2" fill="#e0f2fe" />
-          <rect x="128" y="118" width="28" height="36" rx="2" fill="#fb923c" />
-          <rect x="132" y="124" width="20" height="2" fill="#fff" opacity="0.7" />
-          <rect x="132" y="130" width="16" height="2" fill="#fff" opacity="0.45" />
-          <text x="105" y="210" textAnchor="middle" fill="#0c1222" fontSize="12" fontWeight="700" fontFamily="Fraunces, Georgia, serif">
-            3 · Tools &amp; access
+        {/* ── Stage 3: Open task ── */}
+        <g transform={`translate(${STAGE_X[2]},20)`} filter="url(#jxhSoft)">
+          <circle cx="90" cy="120" r="90" fill="#fff" stroke="url(#jxhGRing)" strokeWidth="3.5" />
+          <path d="M46 78 h34 l8 10 h44 v46 h-86 z" fill="#e8f4f7" stroke="#0e7490" strokeWidth="1.5" />
+          <path d="M46 88 l-6 40 h86 l8 -40 z" fill="#fff" stroke="#0e7490" strokeWidth="1.5" />
+          <rect x="58" y="112" width="40" height="4" rx="2" fill="#0e7490" opacity="0.45" />
+          <rect x="58" y="122" width="26" height="4" rx="2" fill="#0e7490" opacity="0.3" />
+          <text x="90" y="176" textAnchor="middle" fill="#0c1222" fontSize="13" fontWeight="700" fontFamily="Fraunces, Georgia, serif">
+            3 · Open the task
           </text>
-          <text x="105" y="228" textAnchor="middle" fill="#3d4a63" fontSize="9.5" fontFamily="Plus Jakarta Sans, sans-serif">
-            Accounts · Repo · Assist Me
+          <text x="90" y="196" textAnchor="middle" fill="#3d4a63" fontSize="10" fontFamily="Plus Jakarta Sans, sans-serif">
+            Read the brief
           </text>
         </g>
 
-        {/* ── Stage 4: Workday ── */}
-        <g transform="translate(805,48)" filter="url(#jxhSoft)">
-          <circle cx="105" cy="128" r="118" fill="#fff" stroke="url(#jxhGRing)" strokeWidth="3.5" />
-          {/* table + team */}
-          <ellipse cx="105" cy="118" rx="52" ry="14" fill="#e8f4f7" stroke="#0e7490" strokeWidth="1.2" />
-          <circle cx="72" cy="98" r="9" fill="#155e75" />
-          <circle cx="98" cy="92" r="9" fill="#0e7490" />
-          <circle cx="124" cy="92" r="9" fill="#fb923c" />
-          <circle cx="146" cy="100" r="9" fill="#0284c7" />
-          {/* orbit badges */}
-          <g fontFamily="Plus Jakarta Sans, sans-serif" fontSize="7.5" fontWeight="700" fill="#155e75">
-            <rect x="28" y="48" width="58" height="16" rx="8" fill="#e8f4f7" stroke="#0e7490" />
-            <text x="57" y="59" textAnchor="middle">
+        {/* ── Stage 4: Build it (Assist Me or solo) ── */}
+        <g transform={`translate(${STAGE_X[3]},20)`} filter="url(#jxhSoft)">
+          <circle cx="90" cy="120" r="90" fill="#fff" stroke="url(#jxhGRing)" strokeWidth="3.5" />
+          <circle cx="90" cy="66" r="7" fill="url(#jxhGRing)" />
+          <path d="M90 73 V86" stroke="#0e7490" strokeWidth="2.5" />
+          <path d="M90 86 C90 98 56 94 56 108" fill="none" stroke="#0e7490" strokeWidth="2.5" />
+          <path d="M90 86 C90 98 124 94 124 108" fill="none" stroke="#0e7490" strokeWidth="2.5" />
+          <rect x="28" y="108" width="56" height="20" rx="10" fill="#e8f4f7" stroke="#0e7490" />
+          <text x="56" y="122" textAnchor="middle" fill="#155e75" fontSize="7.5" fontWeight="700" fontFamily="Plus Jakarta Sans, sans-serif">
+            ASSIST ME
+          </text>
+          <rect x="96" y="108" width="56" height="20" rx="10" fill="#fff7ed" stroke="#ea580c" />
+          <text x="124" y="122" textAnchor="middle" fill="#c2410c" fontSize="7.5" fontWeight="700" fontFamily="Plus Jakarta Sans, sans-serif">
+            SOLO
+          </text>
+          <text x="90" y="176" textAnchor="middle" fill="#0c1222" fontSize="13" fontWeight="700" fontFamily="Fraunces, Georgia, serif">
+            4 · Build it
+          </text>
+          <text x="90" y="196" textAnchor="middle" fill="#3d4a63" fontSize="10" fontFamily="Plus Jakarta Sans, sans-serif">
+            Your call, either way
+          </text>
+        </g>
+
+        {/* ── Stage 5: Commit ── */}
+        <g transform={`translate(${STAGE_X[4]},20)`} filter="url(#jxhSoft)">
+          <circle cx="90" cy="120" r="90" fill="#fff" stroke="url(#jxhGRing)" strokeWidth="3.5" />
+          <path d="M62 66 V150" stroke="#0e7490" strokeWidth="2.5" />
+          <path d="M62 92 C62 108 112 100 112 118" fill="none" stroke="#0e7490" strokeWidth="2.5" opacity="0.6" />
+          <circle cx="62" cy="70" r="8" fill="#94a3b8" />
+          <circle cx="62" cy="118" r="9" fill="url(#jxhGWarm)" />
+          <circle cx="112" cy="122" r="8" fill="#94a3b8" opacity="0.7" />
+          <rect x="30" y="132" width="64" height="16" rx="8" fill="#fff7ed" stroke="#ea580c" />
+          <text x="62" y="144" textAnchor="middle" fill="#c2410c" fontSize="7.5" fontWeight="700" fontFamily="Plus Jakarta Sans, sans-serif">
+            git commit
+          </text>
+          <text x="90" y="176" textAnchor="middle" fill="#0c1222" fontSize="13" fontWeight="700" fontFamily="Fraunces, Georgia, serif">
+            5 · Commit
+          </text>
+          <text x="90" y="196" textAnchor="middle" fill="#3d4a63" fontSize="10" fontFamily="Plus Jakarta Sans, sans-serif">
+            Push your work
+          </text>
+        </g>
+
+        {/* ── Stage 6: Review (merge or feedback loop) ── */}
+        <g transform={`translate(${STAGE_X[5]},20)`} filter="url(#jxhSoft)">
+          <circle cx="90" cy="120" r="90" fill="#fff" stroke="url(#jxhGRing)" strokeWidth="3.5" />
+          <path d="M62 70 C62 90 90 86 90 104" fill="none" stroke="#0e7490" strokeWidth="2.5" />
+          <path d="M118 70 C118 90 90 86 90 104" fill="none" stroke="#0e7490" strokeWidth="2.5" />
+          <circle cx="62" cy="64" r="7" fill="#94a3b8" />
+          <circle cx="118" cy="64" r="7" fill="#94a3b8" />
+          <circle cx="90" cy="114" r="18" fill="url(#jxhGRing)" />
+          <path d="M81 114 l6 7 l13 -15" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M55 138 C22 150 20 108 48 92" fill="none" stroke="#ea580c" strokeWidth="2" strokeDasharray="3 4" markerEnd="url(#jxhArrowWarm)" />
+          <text x="90" y="176" textAnchor="middle" fill="#0c1222" fontSize="13" fontWeight="700" fontFamily="Fraunces, Georgia, serif">
+            6 · Review
+          </text>
+          <text x="90" y="196" textAnchor="middle" fill="#3d4a63" fontSize="9.5" fontFamily="Plus Jakarta Sans, sans-serif">
+            Merged, or feedback + recommit
+          </text>
+        </g>
+
+        {/* ── Meanwhile band: on the product team ── */}
+        <g transform="translate(20,262)">
+          <rect x="0" y="0" width={CANVAS_W - 40} height="118" rx="16" fill="#ffffff" stroke="#0e7490" strokeWidth="1.5" strokeOpacity="0.35" />
+          <text x="24" y="26" fill="#5c6b86" fontSize="10.5" fontWeight="700" fontFamily="Plus Jakarta Sans, sans-serif" letterSpacing="0.08em">
+            MEANWHILE — YOU'RE ON THAT PRODUCT'S TEAM
+          </text>
+
+          <g transform="translate(40,44)">
+            <ellipse cx="20" cy="20" rx="26" ry="18" fill="#e8f4f7" stroke="#0e7490" strokeWidth="1.5" />
+            <path d="M6 34 l-6 10 12 -4 z" fill="#e8f4f7" stroke="#0e7490" strokeWidth="1.5" />
+            <ellipse cx="52" cy="12" rx="20" ry="14" fill="#fff7ed" stroke="#ea580c" strokeWidth="1.5" />
+            <path d="M64 22 l6 8 -10 -3 z" fill="#fff7ed" stroke="#ea580c" strokeWidth="1.5" />
+            <text x="34" y="24" textAnchor="middle" fill="#155e75" fontSize="7" fontWeight="700" fontFamily="Plus Jakarta Sans, sans-serif">
               STAND-UP
             </text>
-            <rect x="128" y="48" width="52" height="16" rx="8" fill="#fff7ed" stroke="#ea580c" />
-            <text x="154" y="59" textAnchor="middle" fill="#c2410c">
-              DEEP WORK
+          </g>
+          <text x="46" y="98" fill="#3d4a63" fontSize="10" fontFamily="Plus Jakarta Sans, sans-serif">
+            Daily huddle
+          </text>
+
+          <g transform="translate(240,44)">
+            <rect x="0" y="0" width="66" height="46" rx="6" fill="#e8f4f7" stroke="#0e7490" strokeWidth="1.5" />
+            <rect x="10" y="10" width="30" height="4" rx="2" fill="#0e7490" opacity="0.5" />
+            <circle cx="52" cy="12" r="5" fill="url(#jxhGWarm)" />
+            <rect x="10" y="20" width="46" height="4" rx="2" fill="#0e7490" opacity="0.3" />
+            <rect x="10" y="30" width="36" height="4" rx="2" fill="#0e7490" opacity="0.3" />
+          </g>
+          <text x="240" y="106" fill="#3d4a63" fontSize="10" fontFamily="Plus Jakarta Sans, sans-serif">
+            Status updates
+          </text>
+
+          <g transform="translate(440,46)">
+            <circle cx="16" cy="20" r="14" fill="#155e75" />
+            <circle cx="46" cy="16" r="13" fill="#0e7490" />
+            <circle cx="76" cy="22" r="12" fill="#fb923c" />
+            <circle cx="104" cy="18" r="11" fill="#38bdf8" />
+          </g>
+          <text x="440" y="98" fill="#3d4a63" fontSize="10" fontFamily="Plus Jakarta Sans, sans-serif">
+            Reviewers &amp; teammates
+          </text>
+
+          <g transform="translate(680,32)">
+            <rect x="0" y="0" width="180" height="58" rx="10" fill="#fff7ed" stroke="#ea580c" strokeWidth="1.2" />
+            <text x="90" y="26" textAnchor="middle" fill="#c2410c" fontSize="9.5" fontWeight="700" fontFamily="Plus Jakarta Sans, sans-serif">
+              Same scrum rituals
             </text>
-            <rect x="36" y="148" width="48" height="16" rx="8" fill="#e8f4f7" stroke="#0e7490" />
-            <text x="60" y="159" textAnchor="middle">
-              PR REVIEW
-            </text>
-            <rect x="118" y="148" width="58" height="16" rx="8" fill="#e8f4f7" stroke="#0e7490" />
-            <text x="147" y="159" textAnchor="middle">
-              EOD STATUS
+            <text x="90" y="42" textAnchor="middle" fill="#9a3412" fontSize="9" fontFamily="Plus Jakarta Sans, sans-serif">
+              as any dev team
             </text>
           </g>
-          <text x="105" y="210" textAnchor="middle" fill="#0c1222" fontSize="12" fontWeight="700" fontFamily="Fraunces, Georgia, serif">
-            4 · Your workday
-          </text>
-          <text x="105" y="228" textAnchor="middle" fill="#3d4a63" fontSize="9.5" fontFamily="Plus Jakarta Sans, sans-serif">
-            Sync · Ship · Review · Update
-          </text>
         </g>
 
         <text
-          x="560"
-          y="392"
+          x={CANVAS_W / 2}
+          y="428"
           textAnchor="middle"
           fill="#5c6b86"
           fontSize="11"
           fontWeight="600"
           fontFamily="Plus Jakarta Sans, sans-serif"
-          letterSpacing="0.12em"
+          letterSpacing="0.1em"
         >
-          ASPIRANT JOURNEY · INDUCTION → WORKDAY
+          APPLICANT JOURNEY · APPLY → MATCHED → BUILD → REVIEW
         </text>
       </svg>
     </figure>
