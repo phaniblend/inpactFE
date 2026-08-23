@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SKILL_LEVELS, BE_SKILL_LEVELS } from "./skillLevels.js";
-import { RESERVED_PROJECT_IDS, taskMeta, isCoreOnlyTrade } from "./matching.js";
 import { useAuth } from "../auth/useAuth.js";
 import "./CohortMatching.css";
 
@@ -56,16 +55,13 @@ function roleCardCopy(trade) {
  * "guaranteed instant placement." Core-only trades (matching.js's CORE_ONLY_TRADES — Product design,
  * for now) are excluded even if open tasks exist: that work stays with -core roles, not JS applicants.*/
 async function fetchAvailableTrades() {
-  const res = await fetch("/api/onedev/issues?offset=0&count=200");
+  // Public, no session required — the server does the same filtering that used to happen here
+  // against the raw (and, until today, unauthenticated) OneDev issue list. See
+  // server/recruit-router.js's GET /open-trades for why this moved server-side.
+  const res = await fetch("/api/recruit/open-trades");
   if (!res.ok) throw new Error(`Request failed (${res.status})`);
-  const issues = await res.json();
-  const seen = new Map(); // lowercase -> original casing, first-seen wins
-  for (const issue of issues) {
-    if (RESERVED_PROJECT_IDS.has(issue.projectId) || issue.state !== "Open") continue;
-    const trade = taskMeta(issue.description).trade;
-    if (trade && !isCoreOnlyTrade(trade) && !seen.has(trade.toLowerCase())) seen.set(trade.toLowerCase(), trade);
-  }
-  return [...seen.values()];
+  const { trades } = await res.json();
+  return trades || [];
 }
 
 const ASPIRATION_LEVELS = SKILL_LEVELS.filter((l) => l.value !== "none");
