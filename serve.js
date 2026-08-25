@@ -28,13 +28,16 @@ const API_TARGET = (process.env.API_INTERNAL_URL || "http://127.0.0.1:3000").rep
 
 const app = express();
 
+// Mounted at the app level (not `app.use("/api", ...)`) on purpose: Express strips the mount
+// path from req.url before handing off to a path-mounted middleware, which silently dropped the
+// /api prefix on every proxied request — inpact-api's routes are mounted at /api/... and returned
+// a bare "Not Found" for everything, found live testing this. `pathFilter` here does the "only
+// touch /api" matching instead, while forwarding the ORIGINAL req.url (prefix intact) upstream.
 app.use(
-  "/api",
   createProxyMiddleware({
+    pathFilter: "/api",
     target: API_TARGET,
     changeOrigin: true,
-    // Keep the /api prefix on the outgoing request — the API service's own routes expect it
-    // (server/index.js mounts everything under /api/...).
   }),
 );
 
