@@ -106,8 +106,8 @@ const T = {
 }
 
 const LINES = [
-  { id: 'cin-L1', text: 'Think and react in React.' },
-  { id: 'cin-L2', text: 'Type your future with TypeScript.' },
+  { id: 'cin-L1', text: 'Code your way into enterprise software.' },
+  { id: 'cin-L2', text: 'Join a team. Ship real work.' },
   { id: 'cin-L3', text: '' },
   { id: 'cin-L4', text: 'Start doing.  Stop watching.' },
 ]
