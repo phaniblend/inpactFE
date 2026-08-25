@@ -14,7 +14,6 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
-import { createProxyMiddleware } from "http-proxy-middleware";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, "dist");
@@ -27,19 +26,41 @@ const PORT = Number(process.env.PORT) || 3000;
 const API_TARGET = (process.env.API_INTERNAL_URL || "http://127.0.0.1:3000").replace(/\/+$/, "");
 
 const app = express();
+app.use(express.json());
 
-// Mounted at the app level (not `app.use("/api", ...)`) on purpose: Express strips the mount
-// path from req.url before handing off to a path-mounted middleware, which silently dropped the
-// /api prefix on every proxied request — inpact-api's routes are mounted at /api/... and returned
-// a bare "Not Found" for everything, found live testing this. `pathFilter` here does the "only
-// touch /api" matching instead, while forwarding the ORIGINAL req.url (prefix intact) upstream.
-app.use(
-  createProxyMiddleware({
-    pathFilter: "/api",
-    target: API_TARGET,
-    changeOrigin: true,
-  }),
-);
+// Manual proxy, not http-proxy-middleware: two path-mounting attempts (`app.use("/api", ...)`
+// with plain middleware and with pathFilter) both silently dropped or mismatched the /api prefix
+// in production, found live twice. This is the exact pattern already proven working in
+// server/index.js's /api/onedev and /api/mattermost routes — plain fetch, full control over the
+// forwarded path.
+app.use("/api", async (req, res) => {
+  try {
+    const target = `${API_TARGET}/api${req.url}`;
+    const hasBody = !["GET", "HEAD"].includes(req.method);
+    const upstream = await fetch(target, {
+      method: req.method,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": req.headers["content-type"] || "application/json",
+        // Session auth (auth-router.js's ipf_session cookie) rides on this — without forwarding
+        // it, every signed-in request through this proxy would silently look logged-out.
+        ...(req.headers.cookie ? { Cookie: req.headers.cookie } : {}),
+      },
+      body: hasBody ? JSON.stringify(req.body ?? {}) : undefined,
+    });
+    // Forward every Set-Cookie the upstream sends back (login, logout, refresh) — a single
+    // res.setHeader would only keep the last one if there's more than one.
+    const setCookie = typeof upstream.headers.getSetCookie === "function" ? upstream.headers.getSetCookie() : [];
+    if (setCookie.length) res.setHeader("Set-Cookie", setCookie);
+    const text = await upstream.text();
+    res.status(upstream.status);
+    res.setHeader("Content-Type", upstream.headers.get("content-type") || "application/json");
+    res.send(text);
+  } catch (err) {
+    console.error("[api-proxy] upstream error:", err.message);
+    res.status(502).json({ error: "API upstream error" });
+  }
+});
 
 app.use(express.static(distDir));
 
