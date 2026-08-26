@@ -67,6 +67,81 @@ async function fetchAvailableTrades() {
 const ASPIRATION_LEVELS = SKILL_LEVELS.filter((l) => l.value !== "none");
 const BE_ASPIRATION_LEVELS = BE_SKILL_LEVELS;
 
+// Career-counselor pre-step (Coding only): gather prior languages + what pulls the applicant,
+// then recommend a focus + starting skill level from the same taxonomy Apply already uses for
+// matching (skillLevels.js) — this doesn't invent a parallel system, it just decides the default
+// for the picker below instead of leaving it to a cold guess.
+const LANGUAGE_OPTIONS = [
+  { value: "html-css", label: "HTML & CSS", side: "frontend" },
+  { value: "javascript", label: "JavaScript", side: "frontend" },
+  { value: "typescript", label: "TypeScript", side: "frontend" },
+  { value: "react", label: "React", side: "frontend" },
+  { value: "angular", label: "Angular", side: "frontend" },
+  { value: "vue", label: "Vue", side: "frontend" },
+  { value: "nodejs", label: "Node.js", side: "backend" },
+  { value: "python", label: "Python", side: "backend" },
+  { value: "java", label: "Java", side: "backend" },
+  { value: "csharp", label: "C#", side: "backend" },
+  { value: "php", label: "PHP", side: "backend" },
+  { value: "ruby", label: "Ruby", side: "backend" },
+  { value: "go", label: "Go", side: "backend" },
+  { value: "sql", label: "SQL / databases", side: "backend" },
+  { value: "other", label: "Something else", side: null },
+];
+
+/** Recommend { focus, skillLevel, beSkillLevel, why } from prior-knowledge signal. Reuses
+ * skillLevels.js's own rungs so the recommendation and the picker below always agree. */
+function recommend({ priorKnowledge, knownLanguages, interestPull }) {
+  if (priorKnowledge !== "yes") {
+    // No prior code: recommend by stated interest, defaulting to Frontend — JS/React is the
+    // friendlier on-ramp and matches how the FE ladder starts at "none".
+    const focus = interestPull === "backend" ? "backend" : "frontend";
+    return {
+      focus,
+      skillLevel: focus !== "backend" ? "none" : "",
+      beSkillLevel: focus === "backend" ? "http-api" : "",
+      why:
+        focus === "backend"
+          ? "You said backend logic is what pulls you — we'll start you on HTTP APIs, the language-agnostic on-ramp."
+          : "With no prior code yet, Frontend (HTML/CSS → JavaScript → React) is the most approachable starting point.",
+    };
+  }
+
+  const feKnown = new Set(knownLanguages.filter((v) => LANGUAGE_OPTIONS.find((o) => o.value === v)?.side === "frontend"));
+  const beKnown = new Set(knownLanguages.filter((v) => LANGUAGE_OPTIONS.find((o) => o.value === v)?.side === "backend"));
+  let focus;
+  if (feKnown.size && beKnown.size) focus = "both";
+  else if (beKnown.size) focus = "backend";
+  else if (feKnown.size) focus = "frontend";
+  else focus = interestPull === "backend" ? "backend" : "frontend"; // knew languages but picked "other" only
+
+  const feLevel = feKnown.has("react") || feKnown.has("angular") || feKnown.has("vue")
+    ? "framework"
+    : feKnown.has("typescript")
+      ? "ts"
+      : feKnown.has("javascript")
+        ? "js"
+        : feKnown.has("html-css")
+          ? "html-css"
+          : "none";
+  const beLevel = beKnown.has("sql") || beKnown.size >= 2 ? "crud" : beKnown.size ? "http-api" : "http-api";
+
+  const knownLabel = knownLanguages
+    .map((v) => LANGUAGE_OPTIONS.find((o) => o.value === v)?.label)
+    .filter(Boolean)
+    .join(", ");
+  return {
+    focus,
+    skillLevel: focus !== "backend" ? feLevel : "",
+    beSkillLevel: focus !== "frontend" ? beLevel : "",
+    why: knownLabel
+      ? `Based on your experience with ${knownLabel}, we recommend ${
+          focus === "both" ? "starting with both Frontend and Backend" : focus === "backend" ? "Backend" : "Frontend"
+        } — that's where your existing skills carry over directly.`
+      : "We recommend Frontend (HTML/CSS → JavaScript → React) as your starting track.",
+  };
+}
+
 // No email field anymore — signing in with Google (below) IS how we get a verified, reachable
 // email, so asking for one by hand and trusting it unverified was redundant. See EMPTY's lack of
 // an `email` key: the submitted email always comes from the server's own session, never form state.
@@ -80,6 +155,12 @@ const EMPTY = {
   codingFocus: "both",
   note: "",
   ownershipAck: false,
+  // Career-counselor signal — client-side only for computing the recommendation; folded into
+  // `note` at submit time (see submitApplication) since the backend schema has no dedicated
+  // fields for these, and a reviewer should still be able to see the raw answers.
+  priorKnowledge: "",
+  knownLanguages: [],
+  interestPull: "",
 };
 
 // Founder call 2026-08-09 (v2): signing in isn't a separate mid-form gate — someone fills out the
@@ -132,6 +213,27 @@ export default function Apply() {
       // the body: the server requires this route's session and reads the verified email from it —
       // see recruit-router.js's own comment for why (this used to be a free-text field).
       const isDataCoding = data.trade.toLowerCase() === "coding";
+      // Fold the counselor's raw signal into the note — there's no dedicated backend field for
+      // "prior languages known," but a human reviewer (or the applicant re-reading their own
+      // application) should still see what was actually said, not just the resulting focus/level.
+      const counselorNote =
+        isDataCoding && data.priorKnowledge
+          ? data.priorKnowledge === "yes"
+            ? `Prior coding experience: ${
+                data.knownLanguages
+                  .map((v) => LANGUAGE_OPTIONS.find((o) => o.value === v)?.label)
+                  .filter(Boolean)
+                  .join(", ") || "yes, unspecified languages"
+              }.`
+            : `No prior coding experience. Drawn to: ${
+                data.interestPull === "backend"
+                  ? "backend logic/data"
+                  : data.interestPull === "frontend"
+                    ? "frontend UI/interaction"
+                    : "not sure yet"
+              }.`
+          : "";
+      const fullNote = [counselorNote, data.note].filter(Boolean).join(" ");
       const res = await fetch("/api/recruit/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -143,7 +245,7 @@ export default function Apply() {
           aspiration: isDataCoding ? data.aspiration || undefined : undefined,
           beAspiration: isDataCoding ? data.beAspiration || undefined : undefined,
           codingFocus: isDataCoding ? data.codingFocus || "both" : undefined,
-          note: data.note || undefined,
+          note: fullNote || undefined,
           ownershipAck: true,
         }),
       });
@@ -224,7 +326,30 @@ export default function Apply() {
       beSkillLevel: "",
       aspiration: "",
       beAspiration: "",
+      priorKnowledge: "",
+      knownLanguages: [],
+      interestPull: "",
     }));
+  }
+
+  function toggleLanguage(value) {
+    setForm((f) => ({
+      ...f,
+      knownLanguages: f.knownLanguages.includes(value)
+        ? f.knownLanguages.filter((v) => v !== value)
+        : [...f.knownLanguages, value],
+    }));
+  }
+
+  const counselorReady =
+    form.priorKnowledge === "no" || (form.priorKnowledge === "yes" && (form.knownLanguages.length > 0 || form.interestPull));
+  const rec = counselorReady
+    ? recommend({ priorKnowledge: form.priorKnowledge, knownLanguages: form.knownLanguages, interestPull: form.interestPull })
+    : null;
+
+  function applyRecommendation() {
+    if (!rec) return;
+    setForm((f) => ({ ...f, codingFocus: rec.focus, skillLevel: rec.skillLevel, beSkillLevel: rec.beSkillLevel }));
   }
 
   const isCoding = form.trade.toLowerCase() === "coding";
@@ -374,6 +499,88 @@ export default function Apply() {
             </div>
           )}
         </div>
+
+        {isCoding && (
+          <div className="cm-field-group cm-counselor">
+            <span className="cm-field-label">Do you have any prior coding knowledge?</span>
+            <div className="cm-skill-grid">
+              {[
+                { value: "yes", label: "Yes" },
+                { value: "no", label: "No" },
+              ].map((opt) => (
+                <button
+                  type="button"
+                  key={opt.value}
+                  className={`cm-skill-card ${form.priorKnowledge === opt.value ? "cm-skill-card-selected" : ""}`}
+                  onClick={() =>
+                    setForm((f) => ({
+                      ...f,
+                      priorKnowledge: opt.value,
+                      knownLanguages: opt.value === "no" ? [] : f.knownLanguages,
+                    }))
+                  }
+                >
+                  <div className="cm-skill-label">{opt.label}</div>
+                </button>
+              ))}
+            </div>
+
+            {form.priorKnowledge === "yes" && (
+              <>
+                <span className="cm-field-label" style={{ marginTop: 12, display: "block" }}>
+                  Which languages/tools have you used? <span className="cm-hint">pick any that apply</span>
+                </span>
+                <div className="cm-language-grid">
+                  {LANGUAGE_OPTIONS.map((lang) => (
+                    <button
+                      type="button"
+                      key={lang.value}
+                      className={`cm-language-chip ${form.knownLanguages.includes(lang.value) ? "cm-language-chip-selected" : ""}`}
+                      onClick={() => toggleLanguage(lang.value)}
+                    >
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {form.priorKnowledge === "no" && (
+              <>
+                <span className="cm-field-label" style={{ marginTop: 12, display: "block" }}>
+                  What pulls you more?
+                </span>
+                <div className="cm-skill-grid">
+                  {[
+                    { value: "frontend", label: "What users see & interact with", blurb: "Layouts, interactions, UI." },
+                    { value: "backend", label: "What happens behind the scenes", blurb: "Data, logic, rules, APIs." },
+                    { value: "unsure", label: "Not sure yet", blurb: "We'll recommend a starting point." },
+                  ].map((opt) => (
+                    <button
+                      type="button"
+                      key={opt.value}
+                      className={`cm-skill-card ${form.interestPull === opt.value ? "cm-skill-card-selected" : ""}`}
+                      onClick={() => setForm((f) => ({ ...f, interestPull: opt.value }))}
+                    >
+                      <div className="cm-skill-label">{opt.label}</div>
+                      <p className="cm-skill-blurb">{opt.blurb}</p>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {rec && (
+              <div className="cm-recommendation">
+                <div className="cm-recommendation-label">Our recommendation</div>
+                <p className="cm-recommendation-text">{rec.why}</p>
+                <button type="button" className="cm-recommendation-apply" onClick={applyRecommendation}>
+                  Use this recommendation ↓
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {isCoding && (
           <div className="cm-field-group">
