@@ -47,6 +47,15 @@ function roleCardCopy(trade) {
   );
 }
 
+// Real guided support (Assist Me, the counselor flow, the skill-level ladder) only exists for
+// Coding right now. Other trades have real open tasks in OneDev, but nothing to actually guide
+// someone through them yet — so they're shown, not hidden (applicants should see what's coming),
+// but not selectable until there's real support behind them.
+const SUPPORTED_TRADES = new Set(["coding"]);
+function isTradeSupported(trade) {
+  return SUPPORTED_TRADES.has(trade.toLowerCase());
+}
+
 /** Distinct `Trade:` labels (see MatchingQueue.jsx's same marker) across open tasks — real demand,
  * whether or not a specific task is placeable this second. Deliberately NOT filtered by
  * NeedsTutorial/isAssignable (see matching.js): applying is the trigger for automatic matching
@@ -412,7 +421,7 @@ export default function Apply() {
               </p>
             </>
           )}
-          <button type="button" onClick={() => setStatus("idle")}>
+          <button type="button" className="cm-submit-btn" onClick={() => setStatus("idle")}>
             Submit another
           </button>
         </div>
@@ -483,16 +492,26 @@ export default function Apply() {
             <div className="cm-role-grid">
               {trades.map((trade) => {
                 const copy = roleCardCopy(trade);
+                const supported = isTradeSupported(trade);
                 return (
                   <button
                     type="button"
                     key={trade}
-                    className={`cm-role-card ${form.trade === trade ? "cm-role-card-selected" : ""}`}
-                    onClick={() => pickRole(trade)}
+                    disabled={!supported}
+                    aria-disabled={!supported}
+                    className={`cm-role-card ${form.trade === trade ? "cm-role-card-selected" : ""} ${!supported ? "cm-role-card-soon" : ""}`}
+                    onClick={() => supported && pickRole(trade)}
                   >
-                    <div className="cm-role-label">{copy.label}</div>
-                    <p className="cm-role-blurb">{copy.blurb}</p>
-                    {copy.tech && <p className="cm-role-tech">{copy.tech}</p>}
+                    <div className="cm-role-label">
+                      {copy.label}
+                      {!supported && <span className="cm-role-soon-badge">Coming soon</span>}
+                    </div>
+                    <p className="cm-role-blurb">
+                      {supported
+                        ? copy.blurb
+                        : "We're only onboarding Frontend/Backend (Coding) right now — check back soon for this trade."}
+                    </p>
+                    {supported && copy.tech && <p className="cm-role-tech">{copy.tech}</p>}
                   </button>
                 );
               })}
@@ -693,7 +712,7 @@ export default function Apply() {
           <span>{OWNERSHIP_ACK_TEXT}</span>
         </label>
 
-        <button type="submit" disabled={status === "loading" || !canSubmit}>
+        <button type="submit" className="cm-submit-btn" disabled={status === "loading" || !canSubmit}>
           {status === "loading" ? "Submitting…" : isSignedIn ? "Submit application" : "Apply with Google"}
         </button>
         {!isSignedIn && (

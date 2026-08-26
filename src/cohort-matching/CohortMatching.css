@@ -77,8 +77,12 @@
   border-color: #0891b2;
 }
 
-.cm-form button,
-.cm-done button {
+/* Scoped to an explicit class, not a bare `button` element selector — the role/skill/language
+   option cards below are also plain <button> elements inside this same form, and a bare
+   `.cm-form button` selector's specificity (class + element) beat their own single-class
+   selectors, painting every option card solid teal regardless of selected state. Found live:
+   this made a working "Use this recommendation" click look like it did nothing. */
+.cm-submit-btn {
   align-self: flex-start;
   background: #0891b2;
   color: #fff;
@@ -90,7 +94,7 @@
   cursor: pointer;
 }
 
-.cm-form button:disabled {
+.cm-submit-btn:disabled {
   opacity: 0.6;
   cursor: wait;
 }
@@ -409,6 +413,30 @@
   padding: 10px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
+}
+
+.cm-role-card-soon {
+  cursor: not-allowed;
+  opacity: 0.55;
+  background: #f1f5f9;
+}
+
+.cm-role-card-soon:hover {
+  border-color: #dbe3ec;
+}
+
+.cm-role-soon-badge {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  background: #e2e8f0;
+  border-radius: 999px;
+  padding: 2px 8px;
+  vertical-align: middle;
 }
 
 .cm-counselor {
