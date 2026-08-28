@@ -81,7 +81,7 @@ export default function EnterpriseReadinessGate({ onApply, onJustLessons }) {
               lineHeight: 1.35,
             }}
           >
-            Yes — take me to the experience (then Apply)
+            Yes, show me how it works
           </button>
           <button
             type="button"

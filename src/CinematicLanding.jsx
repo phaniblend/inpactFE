@@ -369,7 +369,7 @@ export default function CinematicLanding({ onEnterEnterprise, onEnterLessons }) 
             </p>
             <div className="cin-cta-choices">
               <button type="button" className="cin-cta-btn" onClick={() => onEnterEnterprise?.()}>
-                Yes — show me the experience (then Apply)
+                Yes, show me how it works
               </button>
               <button type="button" className="cin-cta-btn cin-cta-btn-secondary" onClick={() => onEnterLessons?.()}>
                 Not yet — just teach me React with TypeScript
