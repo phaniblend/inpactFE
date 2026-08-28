@@ -2,17 +2,23 @@
  * Applicant → workday journey (SVG illustration).
  * Decorative; paired with accessible text list in JsExperienceHome.
  *
- * Row-based layout, not circles-on-a-spine: each step gets a full-width row (icon badge +
- * title + description), connected top-to-bottom by a single arrowed line down the left margin.
- * Rows give text room to breathe — the earlier circle layout clipped/overflowed text at some
- * viewport widths (found live); a row can just be as tall as its content needs.
+ * Row-based layout: each step is a full-width row (a small line-drawn character
+ * illustration + title + description), connected top-to-bottom by a single arrowed
+ * line down the left margin. Illustrations are hand-drawn scenes (a person doing the
+ * action), not icon-in-a-box glyphs — that flatter icon-pack treatment read as dated
+ * clip art (flagged live); a sketched character scene reads as an actual illustration.
  */
-const ROW_H = 108;
-const ROW_GAP = 14;
-const ICON_COL = 88;
+const ROW_H = 120;
+const ROW_GAP = 16;
+const ICON_COL = 156;
 const PAD_X = 24;
 const PAD_TOP = 24;
-const WIDTH = 900;
+const WIDTH = 920;
+const SCENE_W = 132;
+const SCENE_H = 104;
+
+const INK = "#0e7490";
+const ACCENT = "#ea580c";
 
 const STEPS = [
   {
@@ -58,83 +64,139 @@ const MEANWHILE_Y = rowY(STEPS.length) + 8;
 const MEANWHILE_H = 132;
 const HEIGHT = MEANWHILE_Y + MEANWHILE_H + 40;
 
-function IconApply() {
+const sceneStroke = { fill: "none", stroke: INK, strokeWidth: 3, strokeLinecap: "round", strokeLinejoin: "round" };
+const accentStroke = { fill: "none", stroke: ACCENT, strokeWidth: 3, strokeLinecap: "round", strokeLinejoin: "round" };
+
+function SceneApply() {
   return (
-    <g stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="14" y="8" width="26" height="34" rx="3" />
-      <path d="M20 18h14 M20 25h14 M20 32h8" />
-      <circle cx="34" cy="34" r="9" fill="#ea580c" stroke="none" />
-      <path d="M30.5 34l2.5 2.5 5-5.5" stroke="#fff" strokeWidth="2.2" />
+    <g>
+      <line x1="6" y1="88" x2="126" y2="88" {...sceneStroke} strokeWidth="2.5" />
+      <path d="M40 88 L92 88 L84 78 L48 78 Z" {...sceneStroke} />
+      <rect x="46" y="44" width="28" height="30" rx="2" {...sceneStroke} />
+      <circle cx="70" cy="22" r="9" {...sceneStroke} />
+      <path d="M70 31 C70 42 68 48 70 60" {...sceneStroke} />
+      <path d="M70 42 C60 48 55 56 55 66" {...sceneStroke} />
+      <path d="M70 42 C80 48 85 56 85 66" {...sceneStroke} />
+      <path d="M54 60 l4 4 8 -9" {...accentStroke} strokeWidth="3" />
     </g>
   );
 }
-function IconMatched() {
+
+function SceneMatched() {
   return (
-    <g stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="14" cy="24" r="9" fill="rgba(255,255,255,0.18)" />
-      <rect x="30" y="16" width="18" height="16" rx="3" fill="rgba(255,255,255,0.18)" />
-      <path d="M23 24h6" strokeDasharray="2.5 3" />
-      <path d="M22.5 20.5l1.5 1.5-1.5 1.5" fill="none" />
+    <g>
+      <circle cx="26" cy="26" r="9" {...sceneStroke} />
+      <path d="M26 35 L26 62" {...sceneStroke} />
+      <path d="M26 62 L17 88" {...sceneStroke} />
+      <path d="M26 62 L35 88" {...sceneStroke} />
+      <path d="M26 44 C40 48 50 50 58 52" {...sceneStroke} />
+      <rect x="78" y="28" width="42" height="32" rx="4" {...sceneStroke} />
+      <line x1="86" y1="40" x2="112" y2="40" {...sceneStroke} strokeWidth="2.2" />
+      <line x1="86" y1="50" x2="104" y2="50" {...sceneStroke} strokeWidth="2.2" />
+      <path d="M58 52 L78 52" stroke={INK} strokeWidth="2.2" strokeDasharray="2 6" strokeLinecap="round" />
+      <path d="M68 45 L73 52 L68 59 L63 52 Z" fill={ACCENT} stroke="none" />
     </g>
   );
 }
-function IconOpen() {
+
+function SceneOpen() {
   return (
-    <g stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 18h12l4 5h20v18a2 2 0 0 1-2 2H12a2 2 0 0 1-2-2z" fill="rgba(255,255,255,0.18)" />
-      <path d="M10 24l-2 15a2 2 0 0 0 2 2h30l3-15z" fill="#fff" fillOpacity="0.92" stroke="#0e7490" strokeWidth="1.6" />
+    <g>
+      <circle cx="66" cy="20" r="9" {...sceneStroke} />
+      <path d="M66 29 L66 40" {...sceneStroke} />
+      <path d="M66 38 C54 42 46 46 40 52" {...sceneStroke} />
+      <path d="M66 38 C78 42 86 46 92 52" {...sceneStroke} />
+      <rect x="30" y="52" width="72" height="32" rx="3" {...sceneStroke} />
+      <path d="M30 52 L66 36 L102 52" {...sceneStroke} />
+      <line x1="42" y1="66" x2="90" y2="66" {...sceneStroke} strokeWidth="2.2" />
+      <line x1="42" y1="76" x2="78" y2="76" {...sceneStroke} strokeWidth="2.2" />
     </g>
   );
 }
-function IconBuild() {
+
+function SceneBuild() {
   return (
-    <g stroke="#fff" strokeWidth="2.6" fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 16l-10 12 10 12" />
-      <path d="M38 16l10 12-10 12" />
-      <path d="M31 14l-4 28" strokeWidth="2.2" />
+    <g>
+      <line x1="6" y1="88" x2="126" y2="88" {...sceneStroke} strokeWidth="2.5" />
+      <path d="M40 88 L92 88 L84 78 L48 78 Z" {...sceneStroke} />
+      <rect x="46" y="44" width="28" height="30" rx="2" {...sceneStroke} />
+      <circle cx="70" cy="22" r="9" {...sceneStroke} />
+      <path d="M70 31 C70 42 68 48 70 60" {...sceneStroke} />
+      <path d="M70 40 C58 42 50 50 48 64" {...sceneStroke} />
+      <path d="M70 40 C82 42 90 50 92 64" {...sceneStroke} />
+      <path d="M56 56 l-4 4 4 4 M68 56 l4 4 -4 4 M63 53 l-3 14" {...accentStroke} strokeWidth="2.4" />
     </g>
   );
 }
-function IconCommit() {
+
+function SceneCommit() {
   return (
-    <g stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round">
-      <path d="M28 8v13 M28 27v13" />
-      <circle cx="28" cy="27" r="7" fill="#ea580c" stroke="#fff" strokeWidth="2" />
+    <g>
+      <line x1="104" y1="16" x2="104" y2="90" {...sceneStroke} strokeWidth="2.5" />
+      <path d="M98 22 L104 13 L110 22" {...sceneStroke} strokeWidth="2.5" />
+      <circle cx="104" cy="72" r="4.5" fill="#f8fafc" stroke={INK} strokeWidth="2.5" />
+      <circle cx="104" cy="44" r="5.5" fill={ACCENT} stroke="#f8fafc" strokeWidth="2" />
+      <circle cx="30" cy="26" r="9" {...sceneStroke} />
+      <path d="M30 35 L30 62" {...sceneStroke} />
+      <path d="M30 62 L21 88" {...sceneStroke} />
+      <path d="M30 62 L39 88" {...sceneStroke} />
+      <path d="M30 46 C50 48 72 46 92 44" {...sceneStroke} />
     </g>
   );
 }
-function IconReview() {
+
+function SceneReview() {
   return (
-    <g stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 12l-8 4v10c0 9 6 14 14 17 8-3 14-8 14-17V16l-8-4-6-3z" fill="rgba(255,255,255,0.18)" />
-      <path d="M19 25l6 6 12-13" />
+    <g>
+      <rect x="18" y="30" width="56" height="50" rx="4" {...sceneStroke} />
+      <path d="M25 41 l3 3 6 -7" {...accentStroke} strokeWidth="2.4" />
+      <line x1="40" y1="44" x2="68" y2="44" {...sceneStroke} strokeWidth="2.2" />
+      <path d="M25 55 l3 3 6 -7" {...accentStroke} strokeWidth="2.4" />
+      <line x1="40" y1="58" x2="68" y2="58" {...sceneStroke} strokeWidth="2.2" />
+      <path d="M25 69 l3 3 6 -7" {...accentStroke} strokeWidth="2.4" />
+      <line x1="40" y1="72" x2="60" y2="72" {...sceneStroke} strokeWidth="2.2" />
+      <circle cx="100" cy="26" r="9" {...sceneStroke} />
+      <path d="M100 35 L100 60" {...sceneStroke} />
+      <path d="M100 60 L91 88" {...sceneStroke} />
+      <path d="M100 60 L109 88" {...sceneStroke} />
+      <path d="M100 44 C90 47 82 52 76 58" {...sceneStroke} />
+      <circle cx="64" cy="46" r="11" fill="rgba(14,116,144,0.06)" stroke={INK} strokeWidth="3" />
+      <line x1="72" y1="54" x2="79" y2="61" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
     </g>
   );
 }
-const ICONS = { apply: IconApply, matched: IconMatched, open: IconOpen, build: IconBuild, commit: IconCommit, review: IconReview };
+
+const SCENES = {
+  apply: SceneApply,
+  matched: SceneMatched,
+  open: SceneOpen,
+  build: SceneBuild,
+  commit: SceneCommit,
+  review: SceneReview,
+};
 
 function GlyphHuddle() {
   return (
     <path
       d="M-9 -6a9 7 0 0 1 9-7 9 7 0 0 1 9 7c0 4-4 7-9 7a11 6 0 0 1-3-.4L-8 3l1.6-4.4A6.5 5 0 0 1-9-6z"
       fill="none"
-      stroke="#fff"
-      strokeWidth="2"
+      stroke={ACCENT}
+      strokeWidth="2.2"
       strokeLinejoin="round"
     />
   );
 }
 function GlyphStatus() {
   return (
-    <g stroke="#fff" strokeWidth="2" strokeLinecap="round">
-      <rect x="-8" y="-10" width="16" height="20" rx="2.5" fill="none" />
+    <g stroke={ACCENT} strokeWidth="2.2" strokeLinecap="round" fill="none">
+      <rect x="-8" y="-10" width="16" height="20" rx="2.5" />
       <path d="M-4 -4h8 M-4 1h8 M-4 6h5" />
     </g>
   );
 }
 function GlyphMerge() {
   return (
-    <g stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <g stroke={ACCENT} strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="-7" cy="-7" r="2.6" />
       <circle cx="-7" cy="7" r="2.6" />
       <circle cx="7" cy="-7" r="2.6" />
@@ -144,7 +206,7 @@ function GlyphMerge() {
 }
 function GlyphRitual() {
   return (
-    <g stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <g stroke={ACCENT} strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round">
       <path d="M8 -1a8 8 0 1 1-2.3-5.6" />
       <path d="M8 -9v4.5H3.5" />
     </g>
@@ -165,32 +227,24 @@ export default function AspirantJourneyFlow() {
         className="jxh-flow-svg"
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         role="img"
-        aria-label="Applicant journey: apply, get matched to an open task by trade, open the task, build it with Assist Me or solo, commit, then get reviewed — merged or sent back with feedback to fix and recommit. Meanwhile, once matched, you're on that product's team for daily huddles and status updates."
+        aria-label="Applicant journey: apply, get matched to an open task by trade, open the task, build it with Assist Me or solo, commit, then get reviewed — merged or sent back with feedback to fix and recommit. Meanwhile, once matched, you're on that product's team for daily huddles, status updates, PR reviews and sprint rituals."
       >
         <title>Applicant journey — apply to review</title>
 
         <defs>
-          <linearGradient id="jxhGRing" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#0e7490" />
-            <stop offset="100%" stopColor="#38bdf8" />
-          </linearGradient>
           <marker id="jxhArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
-            <path d="M0 0 L8 4 L0 8 Z" fill="#0e7490" />
+            <path d="M0 0 L8 4 L0 8 Z" fill={INK} />
           </marker>
-          <linearGradient id="jxhGOrange" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#fb923c" />
-            <stop offset="100%" stopColor="#ea580c" />
-          </linearGradient>
         </defs>
 
         <rect width={WIDTH} height={HEIGHT} rx="18" fill="#f8fafc" />
 
-        {/* single connecting line down the icon column, behind the badges */}
+        {/* single connecting line down the icon column, behind the illustrations */}
         <line
           x1={PAD_X + ICON_COL / 2}
-          y1={PAD_TOP + 28}
+          y1={PAD_TOP + 4}
           x2={PAD_X + ICON_COL / 2}
-          y2={rowY(STEPS.length - 1) + 28}
+          y2={rowY(STEPS.length - 1) + ROW_H - 4}
           stroke="#cbd5e1"
           strokeWidth="2"
           strokeDasharray="1 7"
@@ -199,22 +253,24 @@ export default function AspirantJourneyFlow() {
 
         {STEPS.map((step, i) => {
           const y = rowY(i);
-          const Icon = ICONS[step.icon];
+          const Scene = SCENES[step.icon];
+          const sceneX = PAD_X + (ICON_COL - SCENE_W) / 2;
+          const sceneY = y + (ROW_H - SCENE_H) / 2;
           return (
             <g key={step.n}>
-              <rect x={PAD_X} y={y} width={ICON_COL - 16} height={ROW_H} rx="14" fill="url(#jxhGRing)" />
-              <g transform={`translate(${PAD_X + 8}, ${y + (ROW_H - 56) / 2})`}>
-                <Icon />
+              <g transform={`translate(${sceneX}, ${sceneY})`}>
+                <Scene />
               </g>
-              <circle cx={PAD_X + ICON_COL - 16} cy={y + 14} r="12" fill="#ea580c" stroke="#f8fafc" strokeWidth="2.5" />
-              <text x={PAD_X + ICON_COL - 16} y={y + 18} textAnchor="middle" fill="#fff" fontSize="12" fontWeight="700" fontFamily="Plus Jakarta Sans, sans-serif">
+
+              <circle cx={PAD_X + 15} cy={y + 15} r="13" fill={ACCENT} stroke="#f8fafc" strokeWidth="3" />
+              <text x={PAD_X + 15} y={y + 19.5} textAnchor="middle" fill="#fff" fontSize="12" fontWeight="700" fontFamily="Plus Jakarta Sans, sans-serif">
                 {step.n}
               </text>
 
-              <text x={PAD_X + ICON_COL + 16} y={y + 32} fill="#0c1222" fontSize="18" fontWeight="700" fontFamily="Fraunces, Georgia, serif">
+              <text x={PAD_X + ICON_COL + 20} y={y + 40} fill="#0c1222" fontSize="18" fontWeight="700" fontFamily="Fraunces, Georgia, serif">
                 {step.title}
               </text>
-              <text x={PAD_X + ICON_COL + 16} y={y + 58} fill="#475569" fontSize="13.5" fontFamily="Plus Jakarta Sans, sans-serif">
+              <text x={PAD_X + ICON_COL + 20} y={y + 66} fill="#475569" fontSize="13.5" fontFamily="Plus Jakarta Sans, sans-serif">
                 {step.desc}
               </text>
 
@@ -224,7 +280,7 @@ export default function AspirantJourneyFlow() {
                   y1={y + ROW_H + 1}
                   x2={PAD_X + ICON_COL / 2}
                   y2={y + ROW_H + ROW_GAP - 1}
-                  stroke="#0e7490"
+                  stroke={INK}
                   strokeWidth="2.5"
                   markerEnd="url(#jxhArrow)"
                 />
@@ -247,7 +303,7 @@ export default function AspirantJourneyFlow() {
             const Glyph = item.Glyph;
             return (
               <g key={item.label}>
-                <circle cx={cx} cy={cy} r="22" fill="url(#jxhGOrange)" />
+                <circle cx={cx} cy={cy} r="22" fill="#fff" stroke={ACCENT} strokeWidth="1.6" />
                 <g transform={`translate(${cx}, ${cy})`}>
                   <Glyph />
                 </g>

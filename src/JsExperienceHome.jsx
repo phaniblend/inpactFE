@@ -101,14 +101,14 @@ export default function JsExperienceHome() {
               <strong>Review — merged, or feedback and another pass</strong>
               <p>
                 A reviewer merges it, or sends it back with concrete feedback. You fix it and
-                recommit — the same loop every professional dev goes through.
+                recommit until it's merged.
               </p>
             </li>
           </ol>
           <p className="jxh-p">
             Meanwhile: the moment you're matched, you're on that product's team — daily huddles,
-            status updates, reviewers and teammates who know your name. Same scrum rituals as any
-            dev team, not a solo grind.
+            status updates, reviewers and teammates who know your name. Sprint rituals included,
+            not a solo grind.
           </p>
         </section>
 
