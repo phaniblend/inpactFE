@@ -107,7 +107,7 @@ const T = {
 
 const LINES = [
   { id: 'cin-L1', text: 'Code your way into enterprise software.' },
-  { id: 'cin-L2', text: 'Join a team. Ship real work.' },
+  { id: 'cin-L2', text: 'Join a team. Ship real work. Claim the experience.' },
   { id: 'cin-L3', text: '' },
   { id: 'cin-L4', text: 'Start doing.  Stop watching.' },
 ]
