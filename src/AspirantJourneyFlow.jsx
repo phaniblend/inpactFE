@@ -113,6 +113,51 @@ function IconReview() {
 }
 const ICONS = { apply: IconApply, matched: IconMatched, open: IconOpen, build: IconBuild, commit: IconCommit, review: IconReview };
 
+function GlyphHuddle() {
+  return (
+    <path
+      d="M-9 -6a9 7 0 0 1 9-7 9 7 0 0 1 9 7c0 4-4 7-9 7a11 6 0 0 1-3-.4L-8 3l1.6-4.4A6.5 5 0 0 1-9-6z"
+      fill="none"
+      stroke="#fff"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+  );
+}
+function GlyphStatus() {
+  return (
+    <g stroke="#fff" strokeWidth="2" strokeLinecap="round">
+      <rect x="-8" y="-10" width="16" height="20" rx="2.5" fill="none" />
+      <path d="M-4 -4h8 M-4 1h8 M-4 6h5" />
+    </g>
+  );
+}
+function GlyphMerge() {
+  return (
+    <g stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="-7" cy="-7" r="2.6" />
+      <circle cx="-7" cy="7" r="2.6" />
+      <circle cx="7" cy="-7" r="2.6" />
+      <path d="M-7 -4.4V4.4 M-4.4 -7c6 0 9 2.5 9 8.5" />
+    </g>
+  );
+}
+function GlyphRitual() {
+  return (
+    <g stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 -1a8 8 0 1 1-2.3-5.6" />
+      <path d="M8 -9v4.5H3.5" />
+    </g>
+  );
+}
+
+const MEANWHILE_ITEMS = [
+  { label: "Daily huddle", Glyph: GlyphHuddle },
+  { label: "Status updates", Glyph: GlyphStatus },
+  { label: "PR reviews", Glyph: GlyphMerge },
+  { label: "Sprint rituals", Glyph: GlyphRitual },
+];
+
 export default function AspirantJourneyFlow() {
   return (
     <figure className="jxh-flow">
@@ -132,6 +177,10 @@ export default function AspirantJourneyFlow() {
           <marker id="jxhArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
             <path d="M0 0 L8 4 L0 8 Z" fill="#0e7490" />
           </marker>
+          <linearGradient id="jxhGOrange" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#fb923c" />
+            <stop offset="100%" stopColor="#ea580c" />
+          </linearGradient>
         </defs>
 
         <rect width={WIDTH} height={HEIGHT} rx="18" fill="#f8fafc" />
@@ -191,42 +240,31 @@ export default function AspirantJourneyFlow() {
             MEANWHILE — YOU&apos;RE ON THAT PRODUCT&apos;S TEAM
           </text>
 
-          <g transform="translate(24,48)">
-            <ellipse cx="18" cy="18" rx="22" ry="15" fill="#fff" stroke="#ea580c" strokeWidth="1.5" />
-            <path d="M6 30l-5 8 10-3z" fill="#fff" stroke="#ea580c" strokeWidth="1.5" />
-          </g>
-          <text x="24" y="98" fill="#7c2d12" fontSize="12" fontFamily="Plus Jakarta Sans, sans-serif">
-            Daily huddle
-          </text>
-
-          <g transform="translate(210,50)">
-            <rect x="0" y="0" width="56" height="40" rx="6" fill="#fff" stroke="#ea580c" strokeWidth="1.5" />
-            <rect x="9" y="9" width="26" height="3.5" rx="1.5" fill="#ea580c" opacity="0.55" />
-            <rect x="9" y="18" width="38" height="3.5" rx="1.5" fill="#ea580c" opacity="0.3" />
-            <rect x="9" y="27" width="30" height="3.5" rx="1.5" fill="#ea580c" opacity="0.3" />
-          </g>
-          <text x="210" y="108" fill="#7c2d12" fontSize="12" fontFamily="Plus Jakarta Sans, sans-serif">
-            Status updates
-          </text>
-
-          <g transform="translate(390,52)">
-            <circle cx="14" cy="18" r="12" fill="#0e7490" />
-            <circle cx="38" cy="14" r="11" fill="#38bdf8" />
-            <circle cx="60" cy="19" r="10" fill="#ea580c" />
-          </g>
-          <text x="390" y="98" fill="#7c2d12" fontSize="12" fontFamily="Plus Jakarta Sans, sans-serif">
-            Reviewers &amp; teammates
-          </text>
-
-          <g transform={`translate(${WIDTH - PAD_X * 2 - 210}, 40)`}>
-            <rect x="0" y="0" width="190" height="60" rx="10" fill="#ea580c" />
-            <text x="95" y="26" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="700" fontFamily="Plus Jakarta Sans, sans-serif">
-              Same scrum rituals
-            </text>
-            <text x="95" y="44" textAnchor="middle" fill="#ffedd5" fontSize="11" fontFamily="Plus Jakarta Sans, sans-serif">
-              as any dev team
-            </text>
-          </g>
+          {MEANWHILE_ITEMS.map((item, i) => {
+            const colW = (WIDTH - PAD_X * 2) / MEANWHILE_ITEMS.length;
+            const cx = colW * i + colW / 2;
+            const cy = 62;
+            const Glyph = item.Glyph;
+            return (
+              <g key={item.label}>
+                <circle cx={cx} cy={cy} r="22" fill="url(#jxhGOrange)" />
+                <g transform={`translate(${cx}, ${cy})`}>
+                  <Glyph />
+                </g>
+                <text
+                  x={cx}
+                  y={cy + 40}
+                  textAnchor="middle"
+                  fill="#7c2d12"
+                  fontSize="12.5"
+                  fontWeight="600"
+                  fontFamily="Plus Jakarta Sans, sans-serif"
+                >
+                  {item.label}
+                </text>
+              </g>
+            );
+          })}
         </g>
       </svg>
       <figcaption className="jxh-flow-caption">
