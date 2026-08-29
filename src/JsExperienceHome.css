@@ -80,9 +80,9 @@
 
 .jxh-brand {
   margin: 0 0 0.85rem;
-  font-family: Fraunces, Georgia, serif;
+  font-family: "Sora", "Plus Jakarta Sans", system-ui, sans-serif;
   font-size: clamp(2.8rem, 9vw, 4.4rem);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 0.95;
   letter-spacing: -0.03em;
   color: var(--jxh-ink);

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import InpactLogo from "./components/InpactLogo.jsx";
-import AspirantJourneyFlow from "./AspirantJourneyFlow.jsx";
+import HowItWorks from "./HowItWorks.jsx";
 import "./JsExperienceHome.css";
 
 /**
@@ -16,7 +16,7 @@ export default function JsExperienceHome() {
     link.id = "jxh-fonts";
     link.rel = "stylesheet";
     link.href =
-      "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap";
+      "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sora:wght@700;800&display=swap";
     document.head.appendChild(link);
   }, []);
 
@@ -49,67 +49,24 @@ export default function JsExperienceHome() {
             <Link className="jxh-cta-primary" to="/apply">
               Apply — tell us your interests
             </Link>
-            <a className="jxh-cta-quiet" href="#how">
+            <a
+              className="jxh-cta-quiet"
+              href="#how"
+              onClick={(e) => {
+                // Plain href="#how" fights HashRouter — the browser treats the whole thing after
+                // the FIRST "#" as the route, so this would navigate to a nonexistent "/how" route
+                // instead of scrolling (found live: the page went blank). Scroll manually instead.
+                e.preventDefault();
+                document.getElementById("how")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
               How it works
             </a>
           </div>
         </section>
 
         <section className="jxh-section jxh-section-how" id="how">
-          <h2 className="jxh-h2">How it works</h2>
-          <p className="jxh-p">
-            You apply once, telling us frontend or backend. From there, every step below is real
-            work on a real product — not a simulation.
-          </p>
-
-          <AspirantJourneyFlow />
-
-          <ol className="jxh-journey">
-            <li>
-              <strong>Apply</strong>
-              <p>
-                Tell us your trade preference — frontend or backend, the only two tracks for now —
-                and a bit about where you are today.
-              </p>
-            </li>
-            <li>
-              <strong>Get matched to an open task</strong>
-              <p>
-                We place you on an unassigned task that fits the trade you opted into on your
-                application — a real ticket on a real product, not a made-up exercise.
-              </p>
-            </li>
-            <li>
-              <strong>Open your task</strong>
-              <p>
-                Read the brief in the Workbench: what it asks for, why it matters to the product,
-                and what "done" looks like.
-              </p>
-            </li>
-            <li>
-              <strong>Build it — Assist Me or solo</strong>
-              <p>
-                Work it yourself, or lean on Assist Me the moment a skill gap shows up mid-ticket.
-                Either way, the code you ship is yours.
-              </p>
-            </li>
-            <li>
-              <strong>Commit your work</strong>
-              <p>Push your changes and open a pull request against the team's repo.</p>
-            </li>
-            <li>
-              <strong>Review — merged, or feedback and another pass</strong>
-              <p>
-                A reviewer merges it, or sends it back with concrete feedback. You fix it and
-                recommit until it's merged.
-              </p>
-            </li>
-          </ol>
-          <p className="jxh-p">
-            Meanwhile: the moment you're matched, you're on that product's team — daily huddles,
-            status updates, reviewers and teammates who know your name. Sprint rituals included,
-            not a solo grind.
-          </p>
+          <HowItWorks />
         </section>
 
         <section className="jxh-section">
