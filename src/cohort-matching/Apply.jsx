@@ -196,6 +196,10 @@ export default function Apply() {
 
   const [trades, setTrades] = useState(null); // null = loading, [] = loaded but empty
   const [tradesError, setTradesError] = useState(false);
+  // Once true, the manual "prefer frontend/backend/both" + skill-level section is replaced by a
+  // compact confirmation (see applyRecommendation/pickRole below and the render logic further
+  // down) — showing the same choice again right after "Use this recommendation" read as broken.
+  const [recommendationApplied, setRecommendationApplied] = useState(false);
   useEffect(() => {
     fetchAvailableTrades()
       .then(setTrades)
@@ -339,6 +343,7 @@ export default function Apply() {
       knownLanguages: [],
       interestPull: "",
     }));
+    setRecommendationApplied(false);
   }
 
   function toggleLanguage(value) {
@@ -348,6 +353,9 @@ export default function Apply() {
         ? f.knownLanguages.filter((v) => v !== value)
         : [...f.knownLanguages, value],
     }));
+    // Editing the answer the recommendation was based on invalidates an already-applied one —
+    // re-show the (now recalculated) suggestion instead of a stale confirmation.
+    setRecommendationApplied(false);
   }
 
   const counselorReady =
@@ -359,6 +367,7 @@ export default function Apply() {
   function applyRecommendation() {
     if (!rec) return;
     setForm((f) => ({ ...f, codingFocus: rec.focus, skillLevel: rec.skillLevel, beSkillLevel: rec.beSkillLevel }));
+    setRecommendationApplied(true);
   }
 
   const isCoding = form.trade.toLowerCase() === "coding";
@@ -369,6 +378,14 @@ export default function Apply() {
   const skillOk =
     (!needsFeSkill || !!form.skillLevel) && (!needsBeSkill || !!form.beSkillLevel);
   const canSubmit = form.name && form.trade && form.ownershipAck && (!isCoding || skillOk);
+
+  // Plain-language summary of what "Use this recommendation" actually set — shown in place of the
+  // confirmed recommendation banner once applied, so the applicant sees what they agreed to instead
+  // of just a checkmark.
+  const focusLabel = { frontend: "Frontend", backend: "Backend", both: "Frontend & Backend" }[form.codingFocus] || form.codingFocus;
+  const feLevelLabel = SKILL_LEVELS.find((s) => s.value === form.skillLevel)?.label;
+  const beLevelLabel = BE_SKILL_LEVELS.find((s) => s.value === form.beSkillLevel)?.label;
+  const appliedSummary = [focusLabel, feLevelLabel, beLevelLabel].filter(Boolean).join(" · ");
 
   function handleApplyClick(e) {
     e.preventDefault();
@@ -531,13 +548,14 @@ export default function Apply() {
                   type="button"
                   key={opt.value}
                   className={`cm-skill-card ${form.priorKnowledge === opt.value ? "cm-skill-card-selected" : ""}`}
-                  onClick={() =>
+                  onClick={() => {
                     setForm((f) => ({
                       ...f,
                       priorKnowledge: opt.value,
                       knownLanguages: opt.value === "no" ? [] : f.knownLanguages,
-                    }))
-                  }
+                    }));
+                    setRecommendationApplied(false);
+                  }}
                 >
                   <div className="cm-skill-label">{opt.label}</div>
                 </button>
@@ -579,7 +597,10 @@ export default function Apply() {
                       type="button"
                       key={opt.value}
                       className={`cm-skill-card ${form.interestPull === opt.value ? "cm-skill-card-selected" : ""}`}
-                      onClick={() => setForm((f) => ({ ...f, interestPull: opt.value }))}
+                      onClick={() => {
+                        setForm((f) => ({ ...f, interestPull: opt.value }));
+                        setRecommendationApplied(false);
+                      }}
                     >
                       <div className="cm-skill-label">{opt.label}</div>
                       <p className="cm-skill-blurb">{opt.blurb}</p>
@@ -589,19 +610,29 @@ export default function Apply() {
               </>
             )}
 
-            {rec && (
+            {rec && !recommendationApplied && (
               <div className="cm-recommendation">
                 <div className="cm-recommendation-label">Our recommendation</div>
                 <p className="cm-recommendation-text">{rec.why}</p>
                 <button type="button" className="cm-recommendation-apply" onClick={applyRecommendation}>
-                  Use this recommendation ↓
+                  Use this recommendation
+                </button>
+              </div>
+            )}
+
+            {recommendationApplied && (
+              <div className="cm-recommendation cm-recommendation-confirmed">
+                <div className="cm-recommendation-label cm-recommendation-label-confirmed">Track set</div>
+                <p className="cm-recommendation-text cm-recommendation-text-confirmed">{appliedSummary}</p>
+                <button type="button" className="cm-recommendation-change" onClick={() => setRecommendationApplied(false)}>
+                  Choose differently
                 </button>
               </div>
             )}
           </div>
         )}
 
-        {isCoding && (
+        {isCoding && !recommendationApplied && (
           <div className="cm-field-group">
             <span className="cm-field-label">Prefer frontend, backend, or both?</span>
             <div className="cm-skill-grid">

@@ -516,6 +516,40 @@
   background: #c2410c;
 }
 
+/* Confirmed state — after "Use this recommendation" is clicked, this replaces the orange
+   recommendation banner in place, so the applicant sees what they agreed to instead of the same
+   pending suggestion (or, worse, the same picker again further down the form). */
+.cm-recommendation-confirmed {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+  border-left-color: #059669;
+}
+
+.cm-recommendation-label-confirmed {
+  color: #047857;
+}
+
+.cm-recommendation-text-confirmed {
+  color: #065f46;
+  font-weight: 600;
+}
+
+.cm-recommendation-change {
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #047857;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.cm-recommendation-change:hover {
+  color: #065f46;
+}
+
 .cm-aspiration-label {
   display: flex;
   flex-direction: column;
