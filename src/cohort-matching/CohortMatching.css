@@ -451,6 +451,10 @@
   gap: 8px;
 }
 
+.cm-languages-done {
+  margin-top: 12px;
+}
+
 .cm-language-chip {
   font-family: inherit;
   font-size: 12.5px;

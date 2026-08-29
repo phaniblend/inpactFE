@@ -200,6 +200,11 @@ export default function Apply() {
   // compact confirmation (see applyRecommendation/pickRole below and the render logic further
   // down) — showing the same choice again right after "Use this recommendation" read as broken.
   const [recommendationApplied, setRecommendationApplied] = useState(false);
+  // Languages are a multi-select with no single click that means "done" — reacting to the first
+  // chip alone popped the recommendation after just one pick (reported live: clicking "HTML & CSS"
+  // immediately showed a recommendation before other known languages could be added). Require an
+  // explicit "done picking" action instead of inferring it from array length.
+  const [languagesReviewed, setLanguagesReviewed] = useState(false);
   useEffect(() => {
     fetchAvailableTrades()
       .then(setTrades)
@@ -344,6 +349,7 @@ export default function Apply() {
       interestPull: "",
     }));
     setRecommendationApplied(false);
+    setLanguagesReviewed(false);
   }
 
   function toggleLanguage(value) {
@@ -353,18 +359,18 @@ export default function Apply() {
         ? f.knownLanguages.filter((v) => v !== value)
         : [...f.knownLanguages, value],
     }));
-    // Editing the answer the recommendation was based on invalidates an already-applied one —
-    // re-show the (now recalculated) suggestion instead of a stale confirmation.
+    // Still picking — an in-progress selection shouldn't count as reviewed, and editing the answer
+    // an already-applied recommendation was based on invalidates it.
+    setLanguagesReviewed(false);
     setRecommendationApplied(false);
   }
 
-  // Requires an actual answer on both branches — was true the instant priorKnowledge became "no",
-  // before "What pulls you more?" had been touched, so the recommendation defaulted to Frontend
-  // regardless of a stated backend/database pull (found live: recommendation banner showing above
-  // three still-unselected pull cards).
+  // Requires an actual, *completed* answer on both branches — was true the instant priorKnowledge
+  // became "no" (before "What pulls you more?" had been touched) or the instant the first language
+  // chip was clicked (before someone picking several was done selecting) — found live both ways.
   const counselorReady =
     (form.priorKnowledge === "no" && !!form.interestPull) ||
-    (form.priorKnowledge === "yes" && (form.knownLanguages.length > 0 || !!form.interestPull));
+    (form.priorKnowledge === "yes" && (languagesReviewed || !!form.interestPull));
   const rec = counselorReady
     ? recommend({ priorKnowledge: form.priorKnowledge, knownLanguages: form.knownLanguages, interestPull: form.interestPull })
     : null;
@@ -581,6 +587,11 @@ export default function Apply() {
                     </button>
                   ))}
                 </div>
+                {form.knownLanguages.length > 0 && !languagesReviewed && (
+                  <button type="button" className="cm-recommendation-apply cm-languages-done" onClick={() => setLanguagesReviewed(true)}>
+                    Done picking — show my recommendation
+                  </button>
+                )}
               </>
             )}
 
