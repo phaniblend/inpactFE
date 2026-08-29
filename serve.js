@@ -39,6 +39,14 @@ app.use("/api", async (req, res) => {
     const hasBody = !["GET", "HEAD"].includes(req.method);
     const upstream = await fetch(target, {
       method: req.method,
+      // fetch()'s default redirect:"follow" silently followed the API's 302s itself and handed
+      // back the *destination's* body with a 200 — found live on /auth/google/start: instead of
+      // sending the browser to accounts.google.com, this proxy fetched Google's sign-in page
+      // server-side and served its raw HTML from our own origin, breaking Google sign-in outright
+      // (wrong origin for Google's relative assets/cookies/CSRF, no real Google session ever
+      // established). "manual" makes fetch hand back the 3xx itself so we can forward it as a
+      // real redirect below.
+      redirect: "manual",
       headers: {
         Accept: "application/json",
         "Content-Type": req.headers["content-type"] || "application/json",
@@ -52,6 +60,14 @@ app.use("/api", async (req, res) => {
     // res.setHeader would only keep the last one if there's more than one.
     const setCookie = typeof upstream.headers.getSetCookie === "function" ? upstream.headers.getSetCookie() : [];
     if (setCookie.length) res.setHeader("Set-Cookie", setCookie);
+
+    const location = upstream.headers.get("location");
+    if (upstream.status >= 300 && upstream.status < 400 && location) {
+      res.status(upstream.status);
+      res.setHeader("Location", location);
+      return res.end();
+    }
+
     const text = await upstream.text();
     res.status(upstream.status);
     res.setHeader("Content-Type", upstream.headers.get("content-type") || "application/json");
