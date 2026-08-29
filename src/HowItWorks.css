@@ -3,22 +3,22 @@
    leaked into the rest of the page (JsExperienceHome, App shell) had it shipped unscoped. */
 
 .hiw {
-  --hiw-bg: #f8fafc;
+  /* Same teal/navy language as the rest of this page (JsExperienceHome.css's --jxh-* tokens) —
+     this used to run its own separate cyan/teal/amber/monospace system, which is exactly the
+     "too many design elements on one page" problem reported live. One accent (teal) for normal
+     state, emerald reserved for the single "you're done, here's your proof" outcome card. */
   --hiw-card-bg: #ffffff;
   --hiw-border: #e2e8f0;
-  --hiw-border-accent: #0284c7;
-  --hiw-text-main: #0f172a;
-  --hiw-text-muted: #475569;
-  --hiw-text-subtle: #94a3b8;
-  --hiw-cyan: #0284c7;
-  --hiw-cyan-light: #e0f2fe;
-  --hiw-teal: #0d9488;
+  --hiw-border-accent: #0e7490;
+  --hiw-text-main: #0c1222;
+  --hiw-text-muted: #3d4a63;
+  --hiw-text-subtle: #5c6b86;
+  --hiw-accent: #0e7490;
+  --hiw-accent-light: #e8f4f7;
   --hiw-emerald: #059669;
-  --hiw-emerald-light: #ecfdf5;
-  --hiw-amber: #d97706;
-  --hiw-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
 
   color: var(--hiw-text-main);
+  font-family: "Comfortaa", system-ui, sans-serif;
 }
 
 .hiw *,
@@ -48,10 +48,10 @@
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background: var(--hiw-accent-light);
+  border: 1px solid #bae0e8;
   border-radius: 9999px;
-  color: var(--hiw-cyan);
+  color: var(--hiw-accent);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -62,22 +62,23 @@
 .hiw-pill-dot {
   width: 7px;
   height: 7px;
-  background: var(--hiw-cyan);
+  background: var(--hiw-accent);
   border-radius: 50%;
 }
 
 .hiw-title {
-  font-family: Fraunces, Georgia, serif;
-  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-family: "Comfortaa", system-ui, sans-serif;
+  font-size: clamp(1.5rem, 3.2vw, 2.1rem);
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   color: #0f172a;
-  line-height: 1.2;
+  line-height: 1.3;
   margin-bottom: 12px !important;
 }
 
 .hiw-title span {
-  color: var(--hiw-cyan);
+  color: var(--hiw-accent);
 }
 
 .hiw-subtitle {
@@ -89,7 +90,7 @@
 /* Fast-track onboarding ribbon */
 .hiw-onboarding {
   background: #ffffff;
-  border: 1.5px solid #bae6fd;
+  border: 1.5px solid var(--hiw-accent-light);
   border-radius: 16px;
   padding: 24px 28px;
   box-shadow: 0 4px 18px rgba(2, 132, 199, 0.06);
@@ -107,11 +108,12 @@
 }
 
 .hiw-onboarding-lead h3 {
-  font-family: Fraunces, Georgia, serif;
-  font-size: 1.25rem;
+  font-family: "Comfortaa", system-ui, sans-serif;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #0c4a6e;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   margin-bottom: 6px !important;
 }
 
@@ -152,17 +154,18 @@
 }
 
 .hiw-mini-step-tag {
-  font-family: var(--hiw-mono);
   font-size: 0.7rem;
   font-weight: 800;
-  color: var(--hiw-cyan);
+  color: var(--hiw-accent);
   text-transform: uppercase;
   margin-bottom: 4px;
 }
 
 .hiw-mini-step-title {
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   color: #0f172a;
   margin-bottom: 4px;
 }
@@ -209,20 +212,20 @@
 }
 
 .hiw-rhythm-title-group h3 {
-  font-family: Fraunces, Georgia, serif;
-  font-size: 1.1rem;
+  font-family: "Comfortaa", system-ui, sans-serif;
+  font-size: 1rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: #f8fafc;
 }
 
 .hiw-rhythm-tag {
-  font-family: var(--hiw-mono);
   font-size: 0.68rem;
   font-weight: 700;
-  background: rgba(14, 165, 233, 0.15);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(45, 212, 191, 0.15);
+  color: #5eead4;
+  border: 1px solid rgba(94, 234, 212, 0.35);
   padding: 3px 10px;
   border-radius: 999px;
   text-transform: uppercase;
@@ -262,27 +265,22 @@
   margin-top: 2px;
 }
 
-.hiw-rhythm-icon-blue {
-  background: rgba(14, 165, 233, 0.15);
-  border: 1px solid rgba(14, 165, 233, 0.3);
-  color: #38bdf8;
-}
-
-.hiw-rhythm-icon-amber {
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  color: #fbbf24;
-}
-
+/* One teal tint for all three — these used to be blue/amber/green, a third UI hue for every
+   icon with no meaning behind the color choice (found live: exactly the "too many design
+   elements" complaint). Icons differ by shape, not by color. */
+.hiw-rhythm-icon-blue,
+.hiw-rhythm-icon-amber,
 .hiw-rhythm-icon-green {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #34d399;
+  background: rgba(94, 234, 212, 0.15);
+  border: 1px solid rgba(94, 234, 212, 0.3);
+  color: #5eead4;
 }
 
 .hiw-rhythm-item-text h4 {
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   color: #f1f5f9;
   margin-bottom: 4px !important;
 }
@@ -304,15 +302,15 @@
 }
 
 .hiw-section-label h3 {
-  font-family: Fraunces, Georgia, serif;
-  font-size: 1.15rem;
+  font-family: "Comfortaa", system-ui, sans-serif;
+  font-size: 1rem;
   font-weight: 700;
   color: #0f172a;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .hiw-section-label span {
-  font-family: var(--hiw-mono);
   font-size: 0.75rem;
   color: var(--hiw-text-muted);
   font-weight: 600;
@@ -364,11 +362,10 @@
 }
 
 .hiw-step-num {
-  font-family: var(--hiw-mono);
   font-size: 0.75rem;
   font-weight: 800;
-  color: var(--hiw-cyan);
-  background: var(--hiw-cyan-light);
+  color: var(--hiw-accent);
+  background: var(--hiw-accent-light);
   padding: 4px 8px;
   border-radius: 6px;
 }
@@ -379,7 +376,6 @@
 }
 
 .hiw-status-badge {
-  font-family: var(--hiw-mono);
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--hiw-text-subtle);
@@ -409,12 +405,14 @@
 }
 
 .hiw-step-heading {
-  font-family: Fraunces, Georgia, serif;
-  font-size: 1.1rem;
+  font-family: "Comfortaa", system-ui, sans-serif;
+  font-size: 1rem;
   font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
   color: #0f172a;
   margin-bottom: 8px !important;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 .hiw-duty-list {
@@ -441,7 +439,7 @@
 .hiw-check-icon {
   width: 14px;
   height: 14px;
-  stroke: var(--hiw-cyan);
+  stroke: var(--hiw-accent);
   flex-shrink: 0;
   margin-top: 3px;
 }
@@ -449,14 +447,13 @@
 .hiw-micro-box {
   border-radius: 8px;
   padding: 10px 12px;
-  font-family: var(--hiw-mono);
   font-size: 0.75rem;
 }
 
 .hiw-micro-box-amber {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  color: #92400e;
+  background: var(--hiw-accent-light);
+  border: 1px solid #bae0e8;
+  color: #0c4a6e;
 }
 
 .hiw-micro-box-dark {
@@ -466,7 +463,7 @@
 }
 
 .hiw-status-amber {
-  color: #fbbf24;
+  color: #5eead4;
 }
 
 .hiw-status-green {
@@ -486,13 +483,14 @@
 }
 
 .hiw-proof-banner h4 {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   color: #065f46;
   font-weight: 700;
 }
 
 .hiw-proof-byline {
-  font-family: var(--hiw-mono);
   font-size: 0.74rem;
   color: #047857;
   margin-top: 2px;
@@ -503,7 +501,6 @@
   color: #fff;
   padding: 6px 10px;
   border-radius: 6px;
-  font-family: var(--hiw-mono);
   font-size: 0.7rem;
   font-weight: 700;
   display: inline-flex;
@@ -527,9 +524,11 @@
 }
 
 .hiw-loop-cta-text h3 {
-  font-family: Fraunces, Georgia, serif;
-  font-size: 1.05rem;
+  font-family: "Comfortaa", system-ui, sans-serif;
+  font-size: 0.95rem;
   font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .hiw-loop-cta-text p {
@@ -538,21 +537,23 @@
 }
 
 .hiw-cta-btn {
-  background: var(--hiw-cyan);
+  background: var(--hiw-accent);
   color: white;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   font-family: inherit;
   border: none;
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: 999px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+  box-shadow: 0 4px 14px rgba(14, 116, 144, 0.3);
   transition: background 0.2s ease, transform 0.2s ease;
   white-space: nowrap;
 }
 
 .hiw-cta-btn:hover {
-  background: #0369a1;
+  background: #155e75;
   transform: translateY(-1px);
 }

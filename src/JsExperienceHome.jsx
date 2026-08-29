@@ -15,8 +15,7 @@ export default function JsExperienceHome() {
     const link = document.createElement("link");
     link.id = "jxh-fonts";
     link.rel = "stylesheet";
-    link.href =
-      "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sora:wght@700;800&display=swap";
+    link.href = "https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&display=swap";
     document.head.appendChild(link);
   }, []);
 
@@ -33,35 +32,39 @@ export default function JsExperienceHome() {
 
       <main>
         <section className="jxh-hero">
-          <p className="jxh-kicker">For aspirants — students &amp; early-career builders</p>
-          <h1 className="jxh-brand">INPACT</h1>
-          <p className="jxh-headline">
-            Not another coding tutorial.
+          <p className="jxh-kicker">For aspirants • students • early-career builders</p>
+          <h1 className="jxh-headline">
+            Code your way into enterprise software.
             <br />
-            Join the industry — and become hireable by shipping.
-          </p>
-          <p className="jxh-lede">
-            Schools, colleges, and universities teach concepts. We induct you into a product team
-            building enterprise applications that will go live soon for thousands of customers. You
-            learn by doing the work — and leave with proof you can contribute.
-          </p>
-          <div className="jxh-cta-row">
-            <Link className="jxh-cta-primary" to="/apply">
-              Apply — tell us your interests
-            </Link>
-            <a
-              className="jxh-cta-quiet"
-              href="#how"
-              onClick={(e) => {
-                // Plain href="#how" fights HashRouter — the browser treats the whole thing after
-                // the FIRST "#" as the route, so this would navigate to a nonexistent "/how" route
-                // instead of scrolling (found live: the page went blank). Scroll manually instead.
-                e.preventDefault();
-                document.getElementById("how")?.scrollIntoView({ behavior: "smooth" });
-              }}
-            >
-              How it works
-            </a>
+            Join a team. Ship real work. Claim the experience.
+          </h1>
+          <p className="jxh-tagline">Start doing. Stop watching.</p>
+
+          <div className="jxh-hero-card">
+            <h2 className="jxh-hero-card-title">Not another coding tutorial.</h2>
+            <p className="jxh-lede">
+              Schools, colleges, and universities teach concepts. We induct you into a product team
+              building enterprise applications that will go live soon for thousands of customers. You
+              learn by doing the work — and leave with proof you can contribute.
+            </p>
+            <div className="jxh-cta-row">
+              <Link className="jxh-cta-primary" to="/apply">
+                Apply — tell us your interests
+              </Link>
+              <a
+                className="jxh-cta-quiet"
+                href="#how"
+                onClick={(e) => {
+                  // Plain href="#how" fights HashRouter — the browser treats the whole thing after
+                  // the FIRST "#" as the route, so this would navigate to a nonexistent "/how" route
+                  // instead of scrolling (found live: the page went blank). Scroll manually instead.
+                  e.preventDefault();
+                  document.getElementById("how")?.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                How it works
+              </a>
+            </div>
           </div>
         </section>
 
