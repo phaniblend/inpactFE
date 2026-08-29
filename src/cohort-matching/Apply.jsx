@@ -358,8 +358,13 @@ export default function Apply() {
     setRecommendationApplied(false);
   }
 
+  // Requires an actual answer on both branches — was true the instant priorKnowledge became "no",
+  // before "What pulls you more?" had been touched, so the recommendation defaulted to Frontend
+  // regardless of a stated backend/database pull (found live: recommendation banner showing above
+  // three still-unselected pull cards).
   const counselorReady =
-    form.priorKnowledge === "no" || (form.priorKnowledge === "yes" && (form.knownLanguages.length > 0 || form.interestPull));
+    (form.priorKnowledge === "no" && !!form.interestPull) ||
+    (form.priorKnowledge === "yes" && (form.knownLanguages.length > 0 || !!form.interestPull));
   const rec = counselorReady
     ? recommend({ priorKnowledge: form.priorKnowledge, knownLanguages: form.knownLanguages, interestPull: form.interestPull })
     : null;
