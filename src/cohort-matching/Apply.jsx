@@ -181,7 +181,7 @@ const EMPTY = {
 const DRAFT_STORAGE_KEY = "ipf-apply-draft";
 
 const OWNERSHIP_ACK_TEXT =
-  "I understand this is a hands-on training engagement, not employment or a partnership. What I build becomes part of the product for training, portfolio, and reference purposes — I don't hold ownership, equity, or claim to revenue. I keep the experience and a verifiable reference for what I actually built.";
+  "I understand this is a hands-on training engagement, not employment or a partnership. What I build becomes part of the product for training, portfolio, and reference purposes — I don't hold ownership, equity, or claim to revenue in future if any. I keep the experience and a verifiable reference for what I actually built.";
 
 export default function Apply() {
   const [form, setForm] = useState(EMPTY);
