@@ -139,17 +139,16 @@
   margin: 0 0 16px;
 }
 
-.cm-view-task-link {
+/* "Open my task" on the done screen — reuses .cm-submit-btn's solid button styling on an <a> tag
+   instead of a plain text link, which wasn't grabbing attention as the primary (now only) action. */
+.cm-open-task-btn {
   display: inline-block;
   margin-bottom: 8px;
-  color: #0891b2;
-  font-weight: 600;
-  font-size: 14px;
   text-decoration: none;
 }
 
-.cm-view-task-link:hover {
-  text-decoration: underline;
+.cm-open-task-btn:hover {
+  background: #0e7490;
 }
 
 .cm-done-sub {

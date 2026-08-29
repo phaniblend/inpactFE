@@ -422,12 +422,12 @@ export default function Apply() {
                 #{matchResult.task.number} {matchResult.task.title}
               </p>
               <a
-                className="cm-view-task-link"
+                className="cm-submit-btn cm-open-task-btn"
                 href={`#/workbench?highlightTaskId=${matchResult.task.id}&highlightProjectId=${matchResult.task.projectId}`}
               >
-                Open your task →
+                Open my task →
               </a>
-              <p className="cm-done-sub">Open it to start coding. Assist Me is available inside the task if you need a guided lesson.</p>
+              <p className="cm-done-sub">Assist Me is available inside the task if you need a guided lesson.</p>
               <p className="cm-legal-note">
                 You confirmed at apply time that this is a hands-on training engagement — what you build becomes
                 part of {matchResult.task.project} for training, portfolio, and reference purposes, without
@@ -443,9 +443,6 @@ export default function Apply() {
               </p>
             </>
           )}
-          <button type="button" className="cm-submit-btn" onClick={() => setStatus("idle")}>
-            Submit another
-          </button>
         </div>
       </div>
     );
