@@ -351,19 +351,6 @@ export default function HowItWorks() {
               </li>
             </ul>
           </div>
-
-          <div className="hiw-proof-banner">
-            <div>
-              <h4>ShiftCoverage App // Active Feature Shipped</h4>
-              <p className="hiw-proof-byline">Your Name • 3 Live Features Contributed</p>
-            </div>
-            <div className="hiw-proof-chip">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-              VERIFIED EXPERIENCE
-            </div>
-          </div>
         </article>
       </div>
 

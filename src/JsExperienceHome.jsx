@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import InpactLogo from "./components/InpactLogo.jsx";
 import HowItWorks from "./HowItWorks.jsx";
@@ -9,18 +8,8 @@ import "./JsExperienceHome.css";
  * Flow: #/join or #/try → this page → #/apply (interests) → matched product tasks.
  */
 export default function JsExperienceHome() {
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    if (document.getElementById("jxh-fonts")) return;
-    const link = document.createElement("link");
-    link.id = "jxh-fonts";
-    link.rel = "stylesheet";
-    // Comfortaa is here for HowItWorks.jsx's own unified type system (kept on that section only,
-    // not the hero/prose sections around it — see its own scoped .hiw styles).
-    link.href =
-      "https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sora:wght@700;800&display=swap";
-    document.head.appendChild(link);
-  }, []);
+  // Comfortaa loads globally from index.html now (2026-09-05 global font lock) — no
+  // page-specific font injection needed here any more.
 
   return (
     <div className="jxh">
@@ -44,7 +33,7 @@ export default function JsExperienceHome() {
           </p>
           <p className="jxh-lede">
             Schools, colleges, and universities teach concepts. We induct you into a product team
-            building enterprise applications that will go live soon for thousands of customers. You
+            building enterprise applications that will go live soon. You
             learn by doing the work — and leave with proof you can contribute.
           </p>
           <div className="jxh-cta-row">
@@ -85,8 +74,8 @@ export default function JsExperienceHome() {
           <h2 className="jxh-h2">What we are (and are not)</h2>
           <p className="jxh-p">
             We are <strong>experience builders</strong> — and we are the industry floor you stand on.
-            You work with a team of developers on enterprise applications heading to launch, used by
-            thousands of customers. Your tickets ship into that product. Full stop.
+            You work with a team of developers on enterprise applications heading toward real
+            customers. Your tickets ship into that product. Full stop.
           </p>
           <p className="jxh-p">
             We are not a binge-watch course. There is no certificate that replaces a merge. Your

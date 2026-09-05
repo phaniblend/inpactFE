@@ -9,7 +9,7 @@
   min-height: 100vh;
   position: relative;
   color: var(--jxh-ink);
-  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   background: #f3f6f8;
   overflow-x: hidden;
 }
@@ -80,7 +80,7 @@
 
 .jxh-brand {
   margin: 0 0 0.85rem;
-  font-family: "Sora", "Plus Jakarta Sans", system-ui, sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: clamp(2.8rem, 9vw, 4.4rem);
   font-weight: 800;
   line-height: 0.95;
@@ -92,7 +92,7 @@
 .jxh-headline {
   margin: 0 0 1.15rem;
   max-width: 18ch;
-  font-family: Fraunces, Georgia, serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: clamp(1.45rem, 3.6vw, 2rem);
   font-weight: 600;
   line-height: 1.2;
@@ -162,7 +162,7 @@
 
 .jxh-h2 {
   margin: 0 0 0.85rem;
-  font-family: Fraunces, Georgia, serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: clamp(1.25rem, 2.5vw, 1.55rem);
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -270,7 +270,7 @@
   margin-bottom: 0.3rem;
   font-size: 1rem;
   color: var(--jxh-ink);
-  font-family: Fraunces, Georgia, serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-weight: 600;
 }
 

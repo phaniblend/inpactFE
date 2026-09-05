@@ -2,7 +2,7 @@
   max-width: 780px;
   margin: 0 auto;
   padding: 40px 24px 90px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   color: #0f172a;
 }
 
@@ -22,7 +22,7 @@
 }
 
 .ids-header h1 {
-  font-family: 'Syne', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 26px;
   margin: 0 0 8px;
 }
@@ -55,7 +55,7 @@
 }
 
 .ids-catalog-group h3 {
-  font-family: 'Syne', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 14px;
   margin: 14px 0 8px;
 }
@@ -195,7 +195,7 @@
 }
 
 .ids-section h2 {
-  font-family: 'Syne', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 18px;
   margin: 0 0 12px;
 }

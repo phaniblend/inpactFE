@@ -2,7 +2,7 @@
   max-width: 900px;
   margin: 0 auto;
   padding: 40px 24px 90px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   color: #0f172a;
 }
 
@@ -22,7 +22,7 @@
 }
 
 .pdstudio-header h1 {
-  font-family: 'Syne', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 30px;
   margin: 0 0 8px;
 }
@@ -299,7 +299,7 @@
 }
 
 .pdstudio-panel h2 {
-  font-family: 'Syne', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 19px;
   margin: 0 0 16px;
   color: #0369a1;
@@ -598,7 +598,7 @@
 }
 
 .pdstudio-publish-panel h3 {
-  font-family: 'Syne', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 16px;
   margin: 0;
   color: #0f172a;
@@ -671,7 +671,7 @@
 }
 
 .pdstudio-similar h2 {
-  font-family: "Syne", sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 20px;
   margin: 0 0 10px;
   color: #92400e;

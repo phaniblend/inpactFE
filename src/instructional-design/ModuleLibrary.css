@@ -2,7 +2,7 @@
   max-width: 1080px;
   margin: 0 auto;
   padding: 40px 24px 90px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   color: #0f172a;
 }
 
@@ -22,7 +22,7 @@
 }
 
 .mlib-header h1 {
-  font-family: 'Syne', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 27px;
   margin: 0 0 8px;
 }
@@ -71,7 +71,7 @@
 }
 
 .mlib-tile-value {
-  font-family: 'Syne', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 30px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -101,7 +101,7 @@
 }
 
 .mlib-organic h2 {
-  font-family: 'Syne', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 15px;
   margin: 0 0 4px;
   color: #0369a1;
@@ -141,7 +141,7 @@
 }
 
 .mlib-category h2 {
-  font-family: 'Syne', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 17px;
   margin: 0 0 14px;
   padding-bottom: 8px;

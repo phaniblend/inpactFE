@@ -3,7 +3,7 @@
   max-width: 720px;
   margin: 0 auto;
   padding: 40px 24px 90px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   color: #0f172a;
 }
 
@@ -23,7 +23,7 @@
 }
 
 .cm-header h1 {
-  font-family: 'Syne', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 27px;
   margin: 0 0 8px;
 }
@@ -117,7 +117,7 @@
 }
 
 .cm-done h1 {
-  font-family: 'Syne', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 24px;
   margin: 0 0 10px;
 }
@@ -137,6 +137,12 @@
   padding: 10px 14px;
   border-radius: 0 6px 6px 0;
   margin: 0 0 16px;
+}
+
+.cm-done-story {
+  font-size: 13px;
+  color: #64748b;
+  margin: -8px 0 18px;
 }
 
 /* "Open my task" on the done screen — reuses .cm-submit-btn's solid button styling on an <a> tag
@@ -186,7 +192,7 @@
 }
 
 .cm-section h2 {
-  font-family: 'Syne', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   font-size: 18px;
   margin: 0 0 14px;
 }
@@ -535,6 +541,12 @@
 .cm-recommendation-text-confirmed {
   color: #065f46;
   font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.cm-recommendation-summary-label {
+  font-weight: 700;
+  color: #047857;
 }
 
 .cm-recommendation-change {

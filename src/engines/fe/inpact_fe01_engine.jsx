@@ -322,7 +322,7 @@ const aspectRatioBox = [
 // ── FIX 2: FONTS — prevent shift when font loads ──────────────
 const fontFace = [
   "@font-face {",
-  "  font-family: 'MyFont';",
+  "  font-family: "Comfortaa", system-ui, sans-serif;",
   "  src: url('/fonts/myfont.woff2') format('woff2');",
   "  font-display: optional;",
   "}",

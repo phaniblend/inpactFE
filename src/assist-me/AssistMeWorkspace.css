@@ -1,7 +1,7 @@
 .amw {
   height: 100vh;
   display: flex;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
   background: #1e1e1e;
   color: #d4d4d4;
 }
@@ -193,7 +193,7 @@
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Comfortaa", system-ui, sans-serif;
 }
 
 .amw-bubble-toggle {
