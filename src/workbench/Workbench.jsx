@@ -57,6 +57,8 @@ function parseTaskFields(description) {
     story: field("Story"),
     trade: field("Trade"),
     techLevel: field("TechLevel"),
+    codingFocus: field("CodingFocus"),
+    techStack: field("TechStack"),
     acceptance: field("AcceptanceCriteria")
       .split(";")
       .map((s) => s.trim())
@@ -69,7 +71,37 @@ function taskSearchText(task) {
   const acRaw = /^AcceptanceCriteria:\s*(.+)$/m.exec(desc)?.[1] || "";
   const trade = /^Trade:\s*(.+)$/m.exec(desc)?.[1] || "";
   const tech = /^TechLevel:\s*(.+)$/m.exec(desc)?.[1] || "";
-  return `${task.title} ${acRaw.replace(/;/g, " ")} ${trade} ${tech}`.trim();
+  const techStack = /^TechStack:\s*(.+)$/m.exec(desc)?.[1] || "";
+  return `${task.title} ${acRaw.replace(/;/g, " ")} ${trade} ${tech} ${techStack}`.trim();
+}
+
+/**
+ * Product overview is stored (see scripts/seed-smb-pipeline.mjs's `overview` /
+ * fix-reviewreplyinbox-descriptions.mjs) as a hook sentence, a blank line, then short
+ * `N. Label: detail` lines — one verb-led action per line. Parsed into {hook, steps} so it can
+ * render as a real scannable list (bold label, one-line outcome) instead of one dense paragraph —
+ * flagged live 2026-09-03: the first version was five numbered clauses run together inside a
+ * single paragraph, which reads as a wall of text rather than "how it works at a glance". Falls
+ * back to rendering the raw text as one paragraph when it doesn't match this shape (a product that
+ * hasn't been rewritten to it yet, or a generic placeholder like SpecForge's default project blurb)
+ * — never silently drops content it can't parse.
+ */
+function parseProductOverview(text) {
+  if (!text) return null;
+  const [hookPart, ...rest] = text.trim().split(/\n{2,}/);
+  const stepLines = rest
+    .join("\n")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+  const steps = stepLines
+    .map((l) => {
+      const m = /^\d+\.\s*([^:]+):\s*(.+)$/.exec(l);
+      return m ? { label: m[1].trim(), detail: m[2].trim() } : null;
+    })
+    .filter(Boolean);
+  const parsed = stepLines.length > 0 && steps.length === stepLines.length;
+  return { hook: hookPart.trim(), steps: parsed ? steps : [], raw: text.trim() };
 }
 
 function humanDescription(description) {
@@ -344,7 +376,6 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
   const prose = humanDescription(task.description);
   const assist = parseAssistInfo(task.description);
   const waitingOnLesson = assist.status === "blocked";
-  const [tab, setTab] = useState("story"); // story | assistance
   const [assistOpen, setAssistOpen] = useState(false);
   // The same interactive preview Assist Me shows mid-lesson (DesignMockPreview), surfaced right on
   // the task itself so a dev can see the target screen before ever opening Assist Me. Only exists
@@ -354,12 +385,28 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
   // write-smb-assist-engines.mjs — the 40 hand-authored seed modules, no network needed) first,
   // then GET /api/id/design-mock as a fallback for modules Gemini generated at runtime (PD Studio
   // -> SpecForge -> ID Studio), which have no entry in that build-time file.
+  //
+  // Backend tasks get the same underlying data, framed differently (found live 2026-09-01, twice):
+  // first pass hid it outright for `backend` tasks, since a click-to-reveal "Try the mock" button
+  // implies a screen to explore and a pure-API task has none — but that left the task with nothing
+  // but a one-line AC ("409 when package already fully used"), no clearer to a developer than the
+  // bare title. The actual content (a real request/response contract) was the right context all
+  // along; only the "click to preview a screen" framing was wrong for it. So: FE tasks still get a
+  // clickable "Try the mock" button + modal; backend tasks get the API-shaped mock rendered inline,
+  // always visible, no click required — DesignMockPreview itself already labels that shape "API
+  // CONTRACT" instead of "DESIGN MOCK" for exactly this case.
   const [mockOpen, setMockOpen] = useState(false);
   const [dynamicMock, setDynamicMock] = useState(null);
   const staticMock = assist.tag ? DESIGN_MOCKS[assist.tag] : null;
-  const designMock = staticMock || dynamicMock;
+  const rawMock = staticMock || dynamicMock;
+  const isBackendTask = fields.codingFocus === "backend";
+  const mockIsApiShaped = rawMock && String(rawMock.kind || "").includes("api");
+  const designMock = isBackendTask ? null : rawMock; // drives the clickable "Try the mock" button/modal
+  const inlineApiContract = isBackendTask && mockIsApiShaped ? rawMock : null; // shown inline, no click
   useEffect(() => {
     setDynamicMock(null);
+    // Fetched for backend tasks too now — inlineApiContract needs it just as much as the FE
+    // clickable button does, only the display (inline vs. click-to-reveal) differs.
     if (staticMock || !assist.tag) return;
     let cancelled = false;
     fetch(`/api/id/design-mock?tag=${encodeURIComponent(assist.tag)}`)
@@ -380,24 +427,62 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [mockOpen]);
+  // `projects` is only ever populated for the core/admin board — a JS session's Workbench never
+  // fetches the full delivery-project list (deliberate, 2026-08-09: a JS should see only their own
+  // slice, not the whole product catalog), so this lookup always misses for a JS user, silently
+  // falling back to placeholder text with no real clone/PR link at all. Found live 2026-09-01 by
+  // actually reading this screen as a brand-new dev would: "where's the git link?" — there wasn't
+  // one. `/api/recruit/my-tasks` already embeds a plain project name on every task it returns
+  // (`task.project`) for exactly this display purpose; use it when the admin-board lookup is empty.
   const project = projects.find((p) => p.id === task.projectId);
-  const projectPath = project?.path || project?.name || null;
+  const projectPath = project?.path || project?.name || task.project || null;
+
+  // Product Overview — a crisp, plain-language "how does this product actually work" walkthrough,
+  // one per product, read from the product's own OneDev project description (see
+  // scripts/seed-smb-pipeline.mjs's `overview` / server/specforge-router.js's ensureDeliveryProject
+  // call). Fetched by this one specific project id rather than reused from the bulk `projects` prop
+  // above — that list is deliberately never fetched at all for a JS session (see the comment on
+  // `project` above); a single project's own description is a different, narrower thing than the
+  // whole catalog, and /api/onedev only requires a signed-in session either way (server/index.js).
+  // Found live 2026-09-03: a learner opened a real task with nothing telling them what the product
+  // even *is*, only what this one task's acceptance criteria were.
+  const [productOverview, setProductOverview] = useState(null);
+  useEffect(() => {
+    setProductOverview(null);
+    if (!task.projectId) return;
+    let cancelled = false;
+    fetch(`/api/onedev/projects/${task.projectId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled) setProductOverview(data?.description || null);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [task.projectId]);
   const cloneUrl = projectPath ? `http://localhost:6610/${projectPath}.git` : null;
   const pullsUrl = projectPath ? `http://localhost:6610/${projectPath}/~pulls` : "http://localhost:6610";
+  // Found live 2026-09-04 testing the real end-to-end flow a second time: a branch name built
+  // only from the task title collides across every applicant ever matched to this task, since the
+  // title is shared but each applicant gets their own issue instance. The first applicant's push
+  // creates the remote branch; every later applicant's local clone (singleBranch, fetches only
+  // main) then tries to push a new, unrelated history onto that existing branch name and fails —
+  // isomorphic-git can't resolve the remote tip's commit object because it was never fetched.
+  // task.id is the actual matched-instance id (one per applicant), so folding it in keeps every
+  // applicant on their own branch without needing to fetch or reconcile anyone else's history.
   const branchHint = `js/${(task.title || "task")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "")
-    .slice(0, 40)}`;
+    .slice(0, 40)}-${task.id}`;
 
   function openAssistance() {
     setAssistOpen(true);
-    setTab("assistance");
   }
 
   function closeAssistance() {
     setAssistOpen(false);
-    setTab("story");
   }
 
   return (
@@ -428,35 +513,9 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
         </div>
       )}
 
-      {assistOpen && (
-        <div className="workbench-task-tabs" role="tablist" aria-label="Task views">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "story"}
-            className={`workbench-task-tab${tab === "story" ? " is-active" : ""}`}
-            onClick={() => setTab("story")}
-          >
-            Story
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "assistance"}
-            className={`workbench-task-tab${tab === "assistance" ? " is-active" : ""}`}
-            onClick={() => setTab("assistance")}
-          >
-            Assistance
-          </button>
-        </div>
-      )}
+      <section className="workbench-task-panel">
 
-      <section
-        className="workbench-task-panel"
-        role="tabpanel"
-        hidden={assistOpen && tab !== "story"}
-      >
-        {(fields.epic || fields.story || fields.trade) && (
+        {(fields.epic || fields.story || fields.trade || fields.techStack) && (
           <div className="workbench-task-meta">
             {fields.epic && (
               <span>
@@ -473,8 +532,37 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
                 Trade <strong>{fields.trade}</strong>
               </span>
             )}
+            {fields.techStack && (
+              <span>
+                Tech <strong>{fields.techStack}</strong>
+              </span>
+            )}
           </div>
         )}
+
+        {productOverview &&
+          (() => {
+            const ov = parseProductOverview(productOverview);
+            return (
+              <div className="workbench-task-overview">
+                <div className="workbench-task-overview-label">Product overview</div>
+                {ov.steps.length > 0 ? (
+                  <>
+                    <p>{ov.hook}</p>
+                    <ol className="workbench-task-overview-steps">
+                      {ov.steps.map((s) => (
+                        <li key={s.label}>
+                          <strong>{s.label}:</strong> {s.detail}
+                        </li>
+                      ))}
+                    </ol>
+                  </>
+                ) : (
+                  <p>{ov.raw}</p>
+                )}
+              </div>
+            );
+          })()}
 
         {prose && <p className="workbench-task-body">{prose}</p>}
 
@@ -489,6 +577,8 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
           </div>
         )}
 
+        {inlineApiContract && <DesignMockPreview mock={inlineApiContract} />}
+
         {designMock && (
           <button type="button" className="workbench-try-mock-btn" onClick={() => setMockOpen(true)}>
             ▶ Try the mock
@@ -499,10 +589,10 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
           <pre className="workbench-task-raw">{task.description}</pre>
         )}
 
-        {!waitingOnLesson && !assistOpen && (
+        {!waitingOnLesson && (
           <div className="workbench-assist-start workbench-assist-start-inline">
             <p className="workbench-assist-blurb">
-              Stuck or learning the pattern for this task? Assist Me opens a guided lesson in a full tab — you
+              Stuck or learning the pattern for this task? Assist Me opens a guided lesson right here — you
               stay on this task.
             </p>
             <button type="button" className="workbench-assist-btn" onClick={openAssistance}>
@@ -511,7 +601,7 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
           </div>
         )}
 
-        {isJS && !assistOpen && (
+        {isJS && (
           <div className="workbench-submit-box">
             <h3>Submit your work (Pull Request)</h3>
             <ol className="workbench-submit-steps">
@@ -522,7 +612,7 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
                     : <code>{cloneUrl}</code>
                   </>
                 ) : (
-                  " from OneDev (project git URL)."
+                  " (project git URL)."
                 )}
               </li>
               <li>
@@ -539,21 +629,24 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
             </ol>
           </div>
         )}
+
       </section>
 
+      {/* Lightbox over the task page, not a tab that replaces it — found live 2026-09-01: "Assist
+          Me opens a guided lesson in a full tab" read as though the task itself navigated away.
+          Story stays exactly as it was underneath; clicking the scrim (not the panel itself)
+          closes back to it, same click-outside convention as the "Try the mock" modal below. */}
       {assistOpen && (
-        <section
-          className="workbench-task-panel workbench-task-panel-assist"
-          role="tabpanel"
-          hidden={tab !== "assistance"}
-        >
-          <TaskAssistPanel
-            task={task}
-            publishedModules={publishedModules}
-            autoStart
-            onCloseLesson={closeAssistance}
-          />
-        </section>
+        <div className="workbench-assist-overlay" role="presentation" onClick={(e) => e.target === e.currentTarget && closeAssistance()}>
+          <div className="workbench-assist-lightbox" role="dialog" aria-modal="true" aria-label="Assist Me">
+            <TaskAssistPanel
+              task={task}
+              publishedModules={publishedModules}
+              autoStart
+              onCloseLesson={closeAssistance}
+            />
+          </div>
+        </div>
       )}
 
       {mockOpen && designMock && (
@@ -585,7 +678,7 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
 }
 
 export default function Workbench() {
-  const { session, status: authStatus } = useAuth();
+  const { session, status: authStatus, logout } = useAuth();
   const isJS = session?.accountType === "js" && !hasRole(session, OPS_ROLES);
 
   const [projects, setProjects] = useState([]);
@@ -775,6 +868,14 @@ export default function Workbench() {
           <header className="workbench-header">
             <div className="workbench-kicker">Your work</div>
             <h1>Your tasks</h1>
+            <div className="workbench-auth-strip" style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8, fontSize: 13 }}>
+              <span>
+                Signed in as <strong>{session?.name}</strong> ({session?.email}).
+              </span>
+              <button type="button" onClick={logout} style={{ background: "none", border: "none", color: "#0891b2", cursor: "pointer", padding: 0 }}>
+                Sign out
+              </button>
+            </div>
           </header>
           <OpenTaskView
             task={openedTask}
@@ -793,6 +894,17 @@ export default function Workbench() {
           <div className="workbench-kicker">Your work</div>
           <h1>Your tasks</h1>
           <p className="workbench-sub">Open a task to start. If you need help, Assist Me is inside each task.</p>
+          {/* Found live 2026-09-01: Apply has a sign-out link once signed in, Workbench never did —
+              a JS landing here directly (a bookmark, a matched-confirmation link) had no way to sign
+              out without navigating back to Apply first. Same control, same place it lives there. */}
+          <div className="workbench-auth-strip" style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8, fontSize: 13 }}>
+            <span>
+              Signed in as <strong>{session?.name}</strong> ({session?.email}).
+            </span>
+            <button type="button" onClick={logout} style={{ background: "none", border: "none", color: "#0891b2", cursor: "pointer", padding: 0 }}>
+              Sign out
+            </button>
+          </div>
         </header>
 
         {wireNote && <div className="workbench-tutorial-done">{wireNote}</div>}
