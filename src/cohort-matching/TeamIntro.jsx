@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { COHORT_PROJECT_ID } from "./matching.js";
+import { notifyTeam } from "../team-messaging/notify.js";
 import "./TeamIntro.css";
+
+// One shared Town Square channel today, not a channel per product — real, already-working
+// infrastructure (MatchingQueue.jsx already posts real match notifications here) rather than
+// something new to stand up. A channel per product is a real, larger upgrade (needs a named
+// channel created in Mattermost's own UI per product, then routing notifyTeam's payload at that
+// channel) — worth doing later, not a blocker for a real "say hello" today.
+const TEAM_CHAT_URL = "https://mattermost-production-ad0c.up.railway.app/inpact/channels/town-square";
 
 async function api(path) {
   const res = await fetch(`/api/onedev${path}`);
@@ -85,6 +93,20 @@ export default function TeamIntro({ projectName, myName }) {
   }, [projectName]);
 
   const isSolo = roster && (roster.length === 0 || (roster.length === 1 && roster[0].name === myName));
+  const myTask = roster?.find((r) => r.name === myName)?.taskTitle;
+
+  // idle -> sending -> sent. notifyTeam() (team-messaging/notify.js) already swallows its own
+  // failures (a slow/down webhook shouldn't be the reason someone can't get into the room) — this
+  // just tracks the click-to-feedback moment, not whether the post itself actually landed.
+  const [helloState, setHelloState] = useState("idle");
+  async function sayHello() {
+    setHelloState("sending");
+    await notifyTeam(
+      `👋 ${myName || "Someone"} just joined the ${projectName} team${myTask ? ` — working on "${myTask}"` : ""}. Say hi!`
+    );
+    setHelloState("sent");
+    window.open(TEAM_CHAT_URL, "_blank", "noopener,noreferrer");
+  }
 
   return (
     <div className="ti-root">
@@ -115,6 +137,11 @@ export default function TeamIntro({ projectName, myName }) {
               </li>
             ))}
           </ul>
+        )}
+        {!error && roster && (
+          <button type="button" className="ti-say-hello-btn" onClick={sayHello} disabled={helloState === "sending"}>
+            {helloState === "sent" ? "Said hello — opening team chat…" : helloState === "sending" ? "Saying hello…" : "👋 Say hello to the team"}
+          </button>
         )}
       </section>
 
