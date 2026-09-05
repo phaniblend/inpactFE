@@ -134,158 +134,79 @@ ${conceptExtra}`,
     },
     steps: [
       {
-        // Fix 3: explicit component-shell step — before anything else, name and export the
-        // function this lesson's code actually merges into in a real codebase.
-        paal: "Define the component function shell this code will live in",
-        think: `This code is not a floating script — it merges into a real component in a real codebase. Every piece you write in the next few steps (the type, the state, the rendered rows, the form) has to live inside one function. What do you name that function, and what is the smallest thing it can return before it has any data at all?`,
-        why: `A React component is just a function that returns JSX — naming and exporting that shell first is what lets every later step (and a real pull request) attach to something. ${usecase}`,
-        hint: `export function ${component}() {\n  return <div />;\n}`,
-        analog: `export function BookingsList() {\n  return <div />;\n}`,
-        seed: `// This becomes a real component in the codebase — start with an empty shell.\n`,
-        starter: `// This becomes a real component in the codebase — start with an empty shell.\n\n`,
-        expected: `export function ${component}() {\n  return <div />;\n}\n`,
-        keywords: ["export", "function", component, "return"],
-        mc: [
-          `export function ${component}() { return <div />; }`,
-          "Write the JSX first, then wrap it in a function later",
-          "Skip the function — a component can be a bare object of props",
-        ],
-        correct: `export function ${component}() { return <div />; }`,
-        wrong: "Start from an empty, exported function component — everything else nests inside it.",
-        ok: "Correct — every later step builds inside this shell.",
-        preCheckHint:
-          "A component is a function that returns JSX. Before it renders any real data, it can return almost nothing at all — an empty element is a perfectly valid starting point.",
-        deepDiveHook: `A component is a function, and a function needs a body before it needs contents. Naming and exporting the shell first — before any data or markup exists — is what turns a lesson's worth of steps into one real, mergeable file instead of loose snippets.`,
-        taskPanel: `Every step from here on adds to one function. Write and export a function named \`${component}\` that returns \`<div />\`.\n\nYour task: define and export ${component} as a function component returning <div />.`,
-      },
-      {
-        paal: "Define a TypeScript type for one item in a list",
+        // Redesign (per ID review): the old template opened with two pure-scaffolding steps —
+        // an empty exported shell, then a type in isolation. Neither is a move in the actual
+        // algorithm. This step merges them: the real content is modeling the record's shape
+        // (including the implicit id field, matching real data), and the component shell is
+        // just the container that decision needs to live in — not a lesson of its own.
+        paal: `Model one list item as a type, then set up the component around it`,
         think: thinkPrompt({
           mockLabel: `MOCK ROW — ${screenTitle}`,
           mockBody: sampleRowLines(fields),
-          mechanism: `Every value with a shape needs one type to describe that shape — and a list screen renders many values of the exact same shape, over and over.`,
-          question: `Looking at the mock row above, what does that shared type need to name — including a field the mock never shows on screen at all?`,
+          mechanism: `Every value with a shape needs one type to describe that shape before any component can safely hold or render it — and that type has to sit alongside the function that will actually use it.`,
+          question: `Looking at the mock row above, what does the shared type need to name — including a field the mock never shows on screen at all — and what does the component that will render it need to be called?`,
         }),
-        why: `${usecase} If list rows and form fields do not share one shape, some rows end up missing a field, or the form saves a field the list can never display — a type names that shared shape once, so the compiler catches the mismatch before a user does.`,
-        hint: `Write a TypeScript type named ${Type} with id plus: ${fields.map((f) => f.name).join(", ")}. Every row also needs id — the mock never shows it, but the list and the API both key off it.`,
-        analog: analogType,
-        seed: `export function ${component}() {\n  return <div />;\n}\n\n// Describe one list item. The list and form will use this type.\n`,
-        starter: `export function ${component}() {\n  return <div />;\n}\n\n// Describe one list item. The list and form will use this type.\n\n`,
+        why: `${usecase} If list rows and form fields do not share one shape, some rows end up missing a field, or the form saves a field the list can never display — a type names that shared shape once, so the compiler catches the mismatch before a user does. Naming and exporting the component next to it is what lets every later step, and a real pull request, attach real behavior to something that already exists.`,
+        hint: `type ${Type} = { id: string; ${fields.map((f) => `${f.name}: ${f.ts};`).join(" ")} }\n\nexport function ${component}() {\n  return <div />;\n}`,
+        analog: `export type Guest = {\n  id: string;\n  name: string;\n  note: string;\n};\n\nexport function GuestList() {\n  return <div />;\n}`,
+        seed: ``,
+        starter: ``,
         expected: `${typeBody}\n\nexport function ${component}() {\n  return <div />;\n}\n`,
-        keywords: keywordsType,
+        keywords: [...keywordsType, "export", "function", component, "return"],
         mc: [
-          `Build one type for a single ${Type} row (id, ${fields.map((f) => f.name).join(", ")})`,
-          "Lock every screen to final copy and branding before modeling how one row looks",
-          "Wait until every backend endpoint exists before rendering any UI",
+          `Define type ${Type} (id + ${fields.map((f) => f.name).join(", ")}), then export function ${component}() returning <div />`,
+          "Skip the type and write JSX directly against untyped objects",
+          "Wait until every backend endpoint exists before modeling the row or the component",
         ],
-        correct: `Build one type for a single ${Type} row (id, ${fields.map((f) => f.name).join(", ")})`,
-        wrong: "Start with a type for one record. Layout and APIs come after the data shape exists.",
-        ok: "Correct — one type for one list item.",
+        correct: `Define type ${Type} (id + ${fields.map((f) => f.name).join(", ")}), then export function ${component}() returning <div />`,
+        wrong: "Start with a type for one record, then the component shell that will use it — layout and APIs come after the data shape exists.",
+        ok: "Correct — the data shape and the component both exist now; every later step builds inside this.",
         preCheckHint:
-          "A TypeScript type is a contract: it names every field a value must have, so a mismatched shape becomes a compile error instead of a runtime surprise later.",
-        deepDiveHook: `One shared type is a single source of truth for what a record looks like. When the list, the form, and the API all reference the same type, renaming or removing a field breaks the build immediately — a compiler error, not a bug report from someone who hit it in production. That is the real payoff: refactor safety, not just editor autocomplete.`,
+          "A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.",
+        deepDiveHook: `One shared type is a single source of truth for what a record looks like — when the list, the form, and the API all reference it, a renamed or removed field breaks the build immediately instead of failing silently in production. Pairing that with the component's own shell in the same step is what turns this from "a type file" into a real, mergeable start on the actual screen.`,
         taskPanel: taskPanelText({
-          paal: "Define a TypeScript type for one item in a list",
+          paal: `Model one list item as a type, then set up the component around it`,
           mockLabel: `MOCK ROW — ${screenTitle}`,
           mockBody: sampleRowLines(fields),
           implicitNote: `Every row also needs a unique \`id\` — not shown in the mock, but required to track, update, and key each item.`,
-          task: `write \`type ${Type}\` with \`id\` plus ${fields.map((f) => f.name).join(", ")}.`,
+          task: `write \`type ${Type}\` with \`id\` plus ${fields.map((f) => f.name).join(", ")}, then define and export ${component} as a function component returning <div /> — every step from here on edits this same file.`,
         }),
       },
       {
-        paal: "Store a list in React state with useState so the UI re-renders",
+        // Redesign: the old template spent three separate steps on useState, map+key, and the
+        // empty branch. All three are one real decision — where the array lives, and how the
+        // render splits into its two genuine cases (nothing yet vs. some rows) — so they merge
+        // into one step instead of three trivial ones.
+        paal: `Hold ${listVar} in state and render it — rows when present, a message when empty`,
         think: thinkPrompt({
           mockLabel: `LIST — ${screenTitle}`,
-          mockBody: `  ${fields[0]?.sample || "Row A"}\n  ${fields[1]?.sample || "Row B"}   (grows by one every time ${submitLabel.toLowerCase()} is used)`,
-          mechanism: `React only redraws a component when the value it reads changes through React itself — a plain variable can change without React ever finding out.`,
-          question: `Where should this growing array live so the screen actually redraws every time a row is added?`,
+          mockBody: `  ${fields[0]?.sample || "Row A"}\n  ${fields[1]?.sample || "Row B"}\n\nEMPTY — "${emptyMsg}"`,
+          mechanism: `React only redraws a component when the value it reads changes through React's own state — a plain variable can change without React ever finding out — and a zero-length array is a normal, common state that a bare map() renders as nothing at all, with no explanation for the user.`,
+          question: `Given both the sample rows and the empty case above, where does this growing array need to live, and what two branches does the render need to cover?`,
         }),
-        why: `A plain array in a variable will not make React redraw — useState is the list the screen actually watches. ${usecase}`,
-        hint: `useState<${Type}[]>([]). Import useState.`,
-        analog: `const [guests, setGuests] = useState<Guest[]>([]);`,
+        why: `${usecase} A plain array in a variable will not make React redraw, and a list that renders as literally nothing when empty looks broken — useState gives the screen something to watch, and branching on length before mapping is what keeps a brand-new list from looking like a bug.`,
+        hint: `const [${listVar}, ${setList}] = useState<${Type}[]>([]);\nreturn ${listVar}.length === 0 ? <p>${emptyMsg}</p> : <ul>{${listVar}.map((a) => <li key={a.id}>{a.${fields[0].name}}</li>)}</ul>;`,
+        analog: `const [guests, setGuests] = useState<Guest[]>([]);\nreturn guests.length === 0 ? (\n  <p>No names yet.</p>\n) : (\n  <ul>\n    {guests.map((g) => (\n      <li key={g.id}>{g.name}</li>\n    ))}\n  </ul>\n);`,
         seed: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  return <div />;\n}\n`,
-        starter: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  // list state here\n  return <div />;\n}\n`,
-        expected: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  const [${listVar}, ${setList}] = useState<${Type}[]>([]);\n  return <div />;\n}\n`,
-        keywords: ["useState", listVar, setList, Type],
+        starter: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  // list state here\n  return (\n    <div>\n      {/* empty or list */}\n    </div>\n  );\n}\n`,
+        expected: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  const [${listVar}, ${setList}] = useState<${Type}[]>([]);\n  return (\n    <div>\n      {${listVar}.length === 0 ? (\n        <p>${emptyMsg}</p>\n      ) : (\n        <ul>\n          {${listVar}.map((a) => (\n            <li key={a.id}>{a.${fields[0].name}}</li>\n          ))}\n        </ul>\n      )}\n    </div>\n  );\n}\n`,
+        keywords: ["useState", listVar, setList, "length", "map", "key"],
         mc: [
-          `const [${listVar}, ${setList}] = useState<${Type}[]>([]);`,
-          `let ${listVar} = [];`,
-          `const ${listVar} = fetch('/api');`,
+          "useState for the array; branch on length === 0 before mapping rows with a stable key",
+          `let ${listVar} = [] and mutate it directly on every update`,
+          "always render the mapped rows, even when the array is empty",
         ],
-        correct: `const [${listVar}, ${setList}] = useState<${Type}[]>([]);`,
-        wrong: "List data must live in useState, not a bare let or an un-awaited fetch.",
+        correct: "useState for the array; branch on length === 0 before mapping rows with a stable key",
+        wrong: "List data must live in useState, and the render has to branch on length before mapping.",
+        ok: "Correct — the list is real state, and both the empty and populated cases are covered.",
         preCheckHint:
-          "To re-render a component, we need to update the value it watches through React's own state mechanism — a hook that both holds the current value and gives you a setter to update it.",
-        deepDiveHook: `A plain variable and a piece of React state can hold the identical value, yet behave completely differently: mutating a variable is invisible to React, while calling a state setter schedules a re-render. State is not just storage — it is storage React is subscribed to.`,
+          "To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. Once it does, checking its length before deciding what to render is just an ordinary conditional — the empty case and the list case are two branches of one render.",
+        deepDiveHook: `A plain variable and a piece of React state can hold the identical value yet behave completely differently — mutating a variable is invisible to React, while calling a state setter schedules a re-render. And an empty array is not a missing feature to handle later; it is one of exactly two branches every list render has from the very first render.`,
         taskPanel: taskPanelText({
-          paal: "Store a list in React state with useState so the UI re-renders",
+          paal: `Hold ${listVar} in state and render it — rows when present, a message when empty`,
           mockLabel: `LIST — ${screenTitle}`,
-          mockBody: `  ${fields[0]?.sample || "Row A"}\n  ${fields[1]?.sample || "Row B"}`,
-          task: `hold ${listVar} in state that React watches, typed as ${Type}[], starting empty.`,
-        }),
-      },
-      {
-        paal: "Render each item in a list as a row with a stable key",
-        think: thinkPrompt({
-          mockLabel: `LIST — ${screenTitle}`,
-          mockBody: `  ${fields[0]?.sample || "Row A"}\n  ${fields[1]?.sample || "Row B"}`,
-          mechanism: `Turning an array into UI is a mapping operation — one array item becomes one rendered element — and React needs a stable identifier per element to tell rows apart across re-renders.`,
-          question: `You already have the array in state. How do you turn it into the stacked rows shown above?`,
-        }),
-        why: `map() walks the array and returns one element per item; a stable key tells React which row is which when the list changes. ${usecase}`,
-        hint: `${listVar}.map((a) => <li key={a.id}>...</li>)`,
-        analog: `return (\n  <ul>\n    {guests.map((g) => (\n      <li key={g.id}>{g.name}</li>\n    ))}\n  </ul>\n);`,
-        seed: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  const [${listVar}, ${setList}] = useState<${Type}[]>([]);\n  return <div />;\n}\n`,
-        starter: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  const [${listVar}, ${setList}] = useState<${Type}[]>([]);\n  return (\n    <ul>\n      {/* map rows */}\n    </ul>\n  );\n}\n`,
-        expected: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  const [${listVar}, ${setList}] = useState<${Type}[]>([]);\n  return (\n    <ul>\n      {${listVar}.map((a) => (\n        <li key={a.id}>{a.${fields[0].name}}</li>\n      ))}\n    </ul>\n  );\n}\n`,
-        keywords: ["map", "key", "a.id", listVar],
-        mc: [
-          "map each item to a row and set key={item.id}",
-          "print the array with JSON.stringify in one <p>",
-          "hard-code three <li> tags and ignore state",
-        ],
-        correct: "map each item to a row and set key={item.id}",
-        wrong: "Use map + a stable key from the item id.",
-        preCheckHint:
-          "Now that you have the data as an array you can iterate over, JSX only works inside a return (or an assignment) — so the mapped rows have to be handed back with return, not left as a bare expression.",
-        deepDiveHook: `map() over an array of data and map() over an array of JSX elements are the same operation — the only difference is what you return from the callback. A stable key is what lets React reuse a row's DOM node instead of tearing it down and rebuilding it when the array changes.`,
-        taskPanel: taskPanelText({
-          paal: "Render each item in a list as a row with a stable key",
-          mockLabel: `LIST — ${screenTitle}`,
-          mockBody: `  ${fields[0]?.sample || "Row A"}\n  ${fields[1]?.sample || "Row B"}`,
-          task: `now that you have the data as an array you can iterate over, return the JSX that renders each item as a row with key={item.id}.`,
-        }),
-      },
-      {
-        paal: "Show an empty message when the list has no items",
-        think: thinkPrompt({
-          mockLabel: `EMPTY — ${screenTitle}`,
-          mockBody: `  "${emptyMsg}"`,
-          mechanism: `An array with zero items is a valid, common state — code that only knows how to map rows renders nothing at all when the array is empty, with no explanation for the user.`,
-          question: `When should the UI show the empty message above instead of the (empty) list?`,
-        }),
-        why: `An empty list should not look broken — a clear empty state tells the user they can add the first row. ${usecase}`,
-        hint: `${listVar}.length === 0 ? <p>${emptyMsg}</p> : <ul>...</ul>`,
-        analog: `guests.length === 0 ? <p>No names yet.</p> : <ul>...</ul>`,
-        seed: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  const [${listVar}] = useState<${Type}[]>([]);\n  return <ul>{${listVar}.map((a) => <li key={a.id}>{a.${fields[0].name}}</li>)}</ul>;\n}\n`,
-        starter: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  const [${listVar}] = useState<${Type}[]>([]);\n  return (\n    <div>\n      {/* empty or list */}\n    </div>\n  );\n}\n`,
-        expected: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  const [${listVar}] = useState<${Type}[]>([]);\n  return (\n    <div>\n      {${listVar}.length === 0 ? (\n        <p>${emptyMsg}</p>\n      ) : (\n        <ul>\n          {${listVar}.map((a) => (\n            <li key={a.id}>{a.${fields[0].name}}</li>\n          ))}\n        </ul>\n      )}\n    </div>\n  );\n}\n`,
-        keywords: ["length", "===", "0", emptyMsg.split(" ")[0]],
-        mc: [
-          "if length === 0 show empty message, else map the list",
-          "always show both empty message and the list",
-          "throw if the list is empty",
-        ],
-        correct: "if length === 0 show empty message, else map the list",
-        wrong: "Branch on length before mapping.",
-        preCheckHint:
-          "Checking a number against zero before deciding what to render is an ordinary conditional — the empty case and the list case are just two branches of the same render.",
-        deepDiveHook: `An empty state is not a missing feature to bolt on later — it is one of exactly two branches every list render has from the start (zero items, or some items). Treating it as a first-class branch, not an afterthought, is what keeps a brand-new account from looking like a broken one.`,
-        taskPanel: taskPanelText({
-          paal: "Show an empty message when the list has no items",
-          mockLabel: `EMPTY — ${screenTitle}`,
-          mockBody: `  "${emptyMsg}"`,
-          task: `render the empty message above when ${listVar}.length === 0, and the mapped rows otherwise.`,
+          mockBody: `  ${fields[0]?.sample || "Row A"}\n  ${fields[1]?.sample || "Row B"}\n\nEMPTY — "${emptyMsg}"`,
+          task: `hold ${listVar} in state typed as ${Type}[], starting empty, then render the empty message when ${listVar}.length === 0 and the mapped rows (key={item.id}) otherwise.`,
         }),
       },
       {
@@ -738,36 +659,50 @@ function filterListModule(cfg) {
   // list+form template — Objectives already lists the filter skill; Lesson copy has to match.
   const base = listFormModule(cfg);
   base.concept = `${base.concept.trimEnd()}\n  Filter   →  only matching rows render — the full list stays in state\n`;
-  // Index 3, not 2: listFormModule now opens with the Fix-3 component-shell step, which
-  // shifted "render each item" (the step this override replaces) down by one.
-  base.steps[3] = {
-    ...base.steps[3],
-    paal: "Filter the list in the UI so only matching rows render",
+  const { Type, component, listVar, setList, emptyMsg, screenTitle, fields, usecase } = cfg;
+  const typeFields = fields.map((f) => `  ${f.name}: ${f.ts};`).join("\n");
+  const typeBody = `export type ${Type} = {\n  id: string;\n${typeFields}\n};`;
+  // A concrete filter, not a placeholder "...": most boards already carry a status field whose
+  // sample is exactly the target state this board narrows to (e.g. "accepted", "overdue") — use
+  // it. The one board with no status field (day-board, filtered by provider) falls back to its
+  // first field, which is exactly what it filters by.
+  const filterField = (fields.find((f) => f.name === "status") || fields[0]).name;
+  const filterValue = (fields.find((f) => f.name === "status") || fields[0]).sample;
+  // Redesign: since listFormModule now merges state + render + empty into one step (index 1),
+  // the filter folds into that same step instead of getting a step of its own — it's the same
+  // rendering decision, just narrowed by one extra .filter() call before the map.
+  base.steps[1] = {
+    ...base.steps[1],
+    paal: `Hold ${listVar} in state and render only the matching rows — filtered, with an empty state`,
     think: thinkPrompt({
-      mockLabel: `LIST (filtered) — ${cfg.screenTitle}`,
-      mockBody: `  ${cfg.fields[0]?.sample || "Row A"}\n  ${cfg.fields[1]?.sample || "Row B"}   (only rows matching the current filter)`,
-      mechanism: `Filtering for display means computing a smaller array from the full one with .filter() — the state array itself never loses any rows.`,
-      question: `How do you keep the complete ${cfg.listVar} list in state but only render the subset above?`,
+      mockLabel: `LIST (filtered) — ${screenTitle}`,
+      mockBody: `  ${fields[0]?.sample || "Row A"}\n  ${fields[1]?.sample || "Row B"}   (only rows where ${filterField} is ${JSON.stringify(filterValue)})\n\nEMPTY — "${emptyMsg}"`,
+      mechanism: `Filtering for display means computing a smaller array from the full one with .filter() before mapping — the state array itself never loses any rows, and a zero-length filtered result is still an empty case worth its own message.`,
+      question: `How do you keep the complete ${listVar} list in state, render only the subset above, and still show a clear message when that subset is empty?`,
     }),
-    why: `Filtering in render (or with a derived array) lets users scan what matters without deleting other rows from state. ${cfg.usecase}`,
-    hint: `${cfg.listVar}.filter(...).map(...)`,
-    analog: `return (\n  <ul>\n    {guests.filter((g) => g.note.includes(q)).map((g) => (\n      <li key={g.id}>{g.name}</li>\n    ))}\n  </ul>\n);`,
-    keywords: ["filter", "map", cfg.listVar],
+    why: `${usecase} Filtering in render lets users scan what matters without deleting other rows from state, and the empty case still needs its own message — an empty filtered view should not look like a broken screen.`,
+    hint: `const [${listVar}, ${setList}] = useState<${Type}[]>([]);\nconst visible = ${listVar}.filter((a) => a.${filterField} === ${JSON.stringify(filterValue)});\nreturn visible.length === 0 ? <p>${emptyMsg}</p> : <ul>{visible.map((a) => <li key={a.id}>{a.${fields[0].name}}</li>)}</ul>;`,
+    analog: `const visible = guests.filter((g) => g.status === "active");\nreturn visible.length === 0 ? (\n  <p>No matches.</p>\n) : (\n  <ul>\n    {visible.map((g) => (\n      <li key={g.id}>{g.name}</li>\n    ))}\n  </ul>\n);`,
+    seed: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  return <div />;\n}\n`,
+    starter: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  // list state here\n  return (\n    <div>\n      {/* filter, then empty or list */}\n    </div>\n  );\n}\n`,
+    expected: `import { useState } from "react";\n\n${typeBody}\n\nexport function ${component}() {\n  const [${listVar}, ${setList}] = useState<${Type}[]>([]);\n  const visible = ${listVar}.filter((a) => a.${filterField} === ${JSON.stringify(filterValue)});\n  return (\n    <div>\n      {visible.length === 0 ? (\n        <p>${emptyMsg}</p>\n      ) : (\n        <ul>\n          {visible.map((a) => (\n            <li key={a.id}>{a.${fields[0].name}}</li>\n          ))}\n        </ul>\n      )}\n    </div>\n  );\n}\n`,
+    keywords: ["useState", listVar, "filter", "map", "length"],
     mc: [
-      "keep full list in state; filter before map for display",
+      "keep the full list in state; filter before map; branch on the filtered length for the empty message",
       "delete non-matching rows from state permanently",
-      "hide the list and show only alerts",
+      "hide the whole list whenever any filter is active",
     ],
-    correct: "keep full list in state; filter before map for display",
-    wrong: "Filter for display; do not destroy the source list.",
+    correct: "keep the full list in state; filter before map; branch on the filtered length for the empty message",
+    wrong: "Filter for display only — state keeps every row, and the empty check runs on the filtered result, not the original.",
+    ok: "Correct — the full list stays in state, and only the matching rows (or an honest empty message) render.",
     preCheckHint:
-      "Filtering an array for display and mutating the array in state are two different operations — .filter() always returns a brand-new array and never touches the one it was called on.",
-    deepDiveHook: `.filter() followed by .map() is a pipeline, not a special React trick: narrow the array down to what should render, then turn what's left into rows. The state array underneath never shrinks — only the rendered subset does — so switching or clearing the filter always has the full data to fall back to.`,
+      ".filter() always returns a brand-new array and never touches the one it was called on — so the full list stays in state, and the array you check for \"empty\" and then map is the filtered one, not the original.",
+    deepDiveHook: `.filter() followed by .map() is a pipeline, not a special React trick: narrow the array down to what should render, then turn what's left into rows. Checking the narrowed array's length — not the original's — is what keeps the empty state honest about the current view instead of the whole dataset.`,
     taskPanel: taskPanelText({
-      paal: "Filter the list in the UI so only matching rows render",
-      mockLabel: `LIST (filtered) — ${cfg.screenTitle}`,
-      mockBody: `  ${cfg.fields[0]?.sample || "Row A"}\n  ${cfg.fields[1]?.sample || "Row B"}`,
-      task: `render ${cfg.listVar}.filter(...) mapped to rows — keep the full array in state, only narrow what's displayed.`,
+      paal: `Hold ${listVar} in state and render only the matching rows — filtered, with an empty state`,
+      mockLabel: `LIST (filtered) — ${screenTitle}`,
+      mockBody: `  ${fields[0]?.sample || "Row A"}\n  ${fields[1]?.sample || "Row B"}\n\nEMPTY — "${emptyMsg}"`,
+      task: `hold ${listVar} in state typed as ${Type}[], render ${listVar}.filter((a) => a.${filterField} === ${JSON.stringify(filterValue)}) mapped to rows (key={item.id}), and show the empty message when that filtered result has zero items.`,
     }),
   };
   return base;

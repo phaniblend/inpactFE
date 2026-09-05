@@ -24,76 +24,13 @@ export const NODES = [
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Define the component function shell this code will live in","Define a TypeScript type for one item in a list","Store a list in React state with useState so the UI re-renders","Filter the list in the UI so only matching rows render","Show an empty message when the list has no items","Wire controlled inputs so form fields live in React state","On submit, preventDefault, append one item to the list, and clear the form"],
+    items: ["Model one list item as a type, then set up the component around it","Hold requests in state and render only the matching rows — filtered, with an empty state","Wire controlled inputs so form fields live in React state","On submit, preventDefault, append one item to the list, and clear the form"],
   },
   {
     id: "step1",
     type: "question",
-    phase: "Step 1 of 7",
-    paal: `Every step from here on adds to one function. Write and export a function named \`OpenShiftBoard\` that returns \`<div />\`.
-
-Your task: define and export OpenShiftBoard as a function component returning <div />.`,
-    hint: `export function OpenShiftBoard() {
-  return <div />;
-}`,
-    example_code: `export function BookingsList() {
-  return <div />;
-}`,
-    think_prompt: `This code is not a floating script — it merges into a real component in a real codebase. Every piece you write in the next few steps (the type, the state, the rendered rows, the form) has to live inside one function. What do you name that function, and what is the smallest thing it can return before it has any data at all?`,
-    mc_options: ["export function OpenShiftBoard() { return <div />; }","Write the JSX first, then wrap it in a function later","Skip the function — a component can be a bare object of props"],
-    mc_correct_option: "export function OpenShiftBoard() { return <div />; }",
-    mc_anchor: "export function OpenShiftBoard() { retur",
-    why_this_matters: `A React component is just a function that returns JSX — naming and exporting that shell first is what lets every later step (and a real pull request) attach to something. Managers filter to open coverage only. Same filter-before-map skill as other desks.`,
-    answer_keywords: ["export","function","OpenShiftBoard","return"],
-    seed_code: `// This becomes a real component in the codebase — start with an empty shell.
-`,
-    starter_code: `// This becomes a real component in the codebase — start with an empty shell.
-
-`,
-    feedback_correct: "Correct — every later step builds inside this shell.",
-    feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Start from an empty, exported function component — everything else nests inside it.",
-    // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
-    // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
-    pre_check_hint: `A component is a function that returns JSX. Before it renders any real data, it can return almost nothing at all — an empty element is a perfectly valid starting point.`,
-    expected: `export function OpenShiftBoard() {
-  return <div />;
-}
-`,
-    analog_example: `export function BookingsList() {
-  return <div />;
-}`,
-    deepDiveLabel: "Why this step matters",
-    deepDive: {
-      // Fix 7: lead with the general concept (why a shared pattern matters), not the task
-      // instruction restated verbatim.
-      hook: `A component is a function, and a function needs a body before it needs contents. Naming and exporting the shell first — before any data or markup exists — is what turns a lesson's worth of steps into one real, mergeable file instead of loose snippets.`,
-      pain: "Skipping this step leaves later code with no data shape or no source of truth.",
-      mentalModel: `Build a screen that lists requests and a form to add one:
-
-  List     →  each row is one CoverageRequest
-  Empty    →  a message when the list has no items
-  Form     →  Shift id, Reason, Status
-  Submit   →  the new row appears on the list
-  Filter   →  only matching rows render — the full list stays in state
-`,
-      discover: `export function OpenShiftBoard() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
-      watchOut: "Do not turn a single import or interface into its own lesson.",
-      dryRun: "Write the same step for a different resource with the same shape.",
-      build: `export function OpenShiftBoard() {
-  return <div />;
-}`,
-    },
-  },
-  {
-    id: "step2",
-    type: "question",
-    phase: "Step 2 of 7",
-    paal: `Define a TypeScript type for one item in a list
+    phase: "Step 1 of 4",
+    paal: `Model one list item as a type, then set up the component around it
 
 MOCK ROW — Open shifts
   Shift id: "s-3"
@@ -102,13 +39,21 @@ MOCK ROW — Open shifts
 
 Every row also needs a unique \`id\` — not shown in the mock, but required to track, update, and key each item.
 
-Your task: write \`type CoverageRequest\` with \`id\` plus shiftId, reason, status.`,
-    hint: `Write a TypeScript type named CoverageRequest with id plus: shiftId, reason, status. Every row also needs id — the mock never shows it, but the list and the API both key off it.`,
+Your task: write \`type CoverageRequest\` with \`id\` plus shiftId, reason, status, then define and export OpenShiftBoard as a function component returning <div /> — every step from here on edits this same file.`,
+    hint: `type CoverageRequest = { id: string; shiftId: string; reason: string; status: string; }
+
+export function OpenShiftBoard() {
+  return <div />;
+}`,
     example_code: `export type Guest = {
   id: string;
   name: string;
   note: string;
-};`,
+};
+
+export function GuestList() {
+  return <div />;
+}`,
     think_prompt: `\`\`\`text
 MOCK ROW — Open shifts
   Shift id: "s-3"
@@ -116,31 +61,20 @@ MOCK ROW — Open shifts
   Status: "open"
 \`\`\`
 
-Every value with a shape needs one type to describe that shape — and a list screen renders many values of the exact same shape, over and over. Looking at the mock row above, what does that shared type need to name — including a field the mock never shows on screen at all?`,
-    mc_options: ["Build one type for a single CoverageRequest row (id, shiftId, reason, status)","Lock every screen to final copy and branding before modeling how one row looks","Wait until every backend endpoint exists before rendering any UI"],
-    mc_correct_option: "Build one type for a single CoverageRequest row (id, shiftId, reason, status)",
-    mc_anchor: "Build one type for a single CoverageRequ",
-    why_this_matters: `Managers filter to open coverage only. Same filter-before-map skill as other desks. If list rows and form fields do not share one shape, some rows end up missing a field, or the form saves a field the list can never display — a type names that shared shape once, so the compiler catches the mismatch before a user does.`,
-    answer_keywords: ["export","type","CoverageRequest","shiftId","reason","status"],
-    seed_code: `export function OpenShiftBoard() {
-  return <div />;
-}
-
-// Describe one list item. The list and form will use this type.
-`,
-    starter_code: `export function OpenShiftBoard() {
-  return <div />;
-}
-
-// Describe one list item. The list and form will use this type.
-
-`,
-    feedback_correct: "Correct — one type for one list item.",
+Every value with a shape needs one type to describe that shape before any component can safely hold or render it — and that type has to sit alongside the function that will actually use it. Looking at the mock row above, what does the shared type need to name — including a field the mock never shows on screen at all — and what does the component that will render it need to be called?`,
+    mc_options: ["Define type CoverageRequest (id + shiftId, reason, status), then export function OpenShiftBoard() returning <div />","Skip the type and write JSX directly against untyped objects","Wait until every backend endpoint exists before modeling the row or the component"],
+    mc_correct_option: "Define type CoverageRequest (id + shiftId, reason, status), then export function OpenShiftBoard() returning <div />",
+    mc_anchor: "Define type CoverageRequest (id + shiftI",
+    why_this_matters: `Managers filter to open coverage only. Same filter-before-map skill as other desks. If list rows and form fields do not share one shape, some rows end up missing a field, or the form saves a field the list can never display — a type names that shared shape once, so the compiler catches the mismatch before a user does. Naming and exporting the component next to it is what lets every later step, and a real pull request, attach real behavior to something that already exists.`,
+    answer_keywords: ["export","type","CoverageRequest","shiftId","reason","status","export","function","OpenShiftBoard","return"],
+    seed_code: ``,
+    starter_code: ``,
+    feedback_correct: "Correct — the data shape and the component both exist now; every later step builds inside this.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Start with a type for one record. Layout and APIs come after the data shape exists.",
+    feedback_wrong: "Start with a type for one record, then the component shell that will use it — layout and APIs come after the data shape exists.",
     // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
     // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
-    pre_check_hint: `A TypeScript type is a contract: it names every field a value must have, so a mismatched shape becomes a compile error instead of a runtime surprise later.`,
+    pre_check_hint: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     expected: `export type CoverageRequest = {
   id: string;
   shiftId: string;
@@ -156,12 +90,16 @@ export function OpenShiftBoard() {
   id: string;
   name: string;
   note: string;
-};`,
+};
+
+export function GuestList() {
+  return <div />;
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `One shared type is a single source of truth for what a record looks like. When the list, the form, and the API all reference the same type, renaming or removing a field breaks the build immediately — a compiler error, not a bug report from someone who hit it in production. That is the real payoff: refactor safety, not just editor autocomplete.`,
+      hook: `One shared type is a single source of truth for what a record looks like — when the list, the form, and the API all reference it, a renamed or removed field breaks the build immediately instead of failing silently in production. Pairing that with the component's own shell in the same step is what turns this from "a type file" into a real, mergeable start on the actual screen.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists requests and a form to add one:
 
@@ -185,34 +123,53 @@ export function OpenShiftBoard() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `Write a TypeScript type named CoverageRequest with id plus: shiftId, reason, status. Every row also needs id — the mock never shows it, but the list and the API both key off it.`,
+      build: `type CoverageRequest = { id: string; shiftId: string; reason: string; status: string; }
+
+export function OpenShiftBoard() {
+  return <div />;
+}`,
     },
   },
   {
-    id: "step3",
+    id: "step2",
     type: "question",
-    phase: "Step 3 of 7",
-    paal: `Store a list in React state with useState so the UI re-renders
+    phase: "Step 2 of 4",
+    paal: `Hold requests in state and render only the matching rows — filtered, with an empty state
 
-LIST — Open shifts
+LIST (filtered) — Open shifts
   s-3
   Sick
 
-Your task: hold requests in state that React watches, typed as CoverageRequest[], starting empty.`,
-    hint: `useState<CoverageRequest[]>([]). Import useState.`,
-    example_code: `const [guests, setGuests] = useState<Guest[]>([]);`,
+EMPTY — "No open coverage."
+
+Your task: hold requests in state typed as CoverageRequest[], render requests.filter((a) => a.status === "open") mapped to rows (key={item.id}), and show the empty message when that filtered result has zero items.`,
+    hint: `const [requests, setRequests] = useState<CoverageRequest[]>([]);
+const visible = requests.filter((a) => a.status === "open");
+return visible.length === 0 ? <p>No open coverage.</p> : <ul>{visible.map((a) => <li key={a.id}>{a.shiftId}</li>)}</ul>;`,
+    example_code: `const visible = guests.filter((g) => g.status === "active");
+return visible.length === 0 ? (
+  <p>No matches.</p>
+) : (
+  <ul>
+    {visible.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
+);`,
     think_prompt: `\`\`\`text
-LIST — Open shifts
+LIST (filtered) — Open shifts
   s-3
-  Sick   (grows by one every time request is used)
+  Sick   (only rows where status is "open")
+
+EMPTY — "No open coverage."
 \`\`\`
 
-React only redraws a component when the value it reads changes through React itself — a plain variable can change without React ever finding out. Where should this growing array live so the screen actually redraws every time a row is added?`,
-    mc_options: ["const [requests, setRequests] = useState<CoverageRequest[]>([]);","let requests = [];","const requests = fetch('/api');"],
-    mc_correct_option: "const [requests, setRequests] = useState<CoverageRequest[]>([]);",
-    mc_anchor: "const [requests, setRequests] = useState",
-    why_this_matters: `A plain array in a variable will not make React redraw — useState is the list the screen actually watches. Managers filter to open coverage only. Same filter-before-map skill as other desks.`,
-    answer_keywords: ["useState","requests","setRequests","CoverageRequest"],
+Filtering for display means computing a smaller array from the full one with .filter() before mapping — the state array itself never loses any rows, and a zero-length filtered result is still an empty case worth its own message. How do you keep the complete requests list in state, render only the subset above, and still show a clear message when that subset is empty?`,
+    mc_options: ["keep the full list in state; filter before map; branch on the filtered length for the empty message","delete non-matching rows from state permanently","hide the whole list whenever any filter is active"],
+    mc_correct_option: "keep the full list in state; filter before map; branch on the filtered length for the empty message",
+    mc_anchor: "keep the full list in state; filter befo",
+    why_this_matters: `Managers filter to open coverage only. Same filter-before-map skill as other desks. Filtering in render lets users scan what matters without deleting other rows from state, and the empty case still needs its own message — an empty filtered view should not look like a broken screen.`,
+    answer_keywords: ["useState","requests","filter","map","length"],
     seed_code: `import { useState } from "react";
 
 export type CoverageRequest = {
@@ -237,261 +194,19 @@ export type CoverageRequest = {
 
 export function OpenShiftBoard() {
   // list state here
-  return <div />;
-}
-`,
-    feedback_correct: "Correct — keep going.",
-    feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "List data must live in useState, not a bare let or an un-awaited fetch.",
-    // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
-    // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
-    pre_check_hint: `To re-render a component, we need to update the value it watches through React's own state mechanism — a hook that both holds the current value and gives you a setter to update it.`,
-    expected: `import { useState } from "react";
-
-export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  status: string;
-};
-
-export function OpenShiftBoard() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  return <div />;
-}
-`,
-    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);`,
-    deepDiveLabel: "Why this step matters",
-    deepDive: {
-      // Fix 7: lead with the general concept (why a shared pattern matters), not the task
-      // instruction restated verbatim.
-      hook: `A plain variable and a piece of React state can hold the identical value, yet behave completely differently: mutating a variable is invisible to React, while calling a state setter schedules a re-render. State is not just storage — it is storage React is subscribed to.`,
-      pain: "Skipping this step leaves later code with no data shape or no source of truth.",
-      mentalModel: `Build a screen that lists requests and a form to add one:
-
-  List     →  each row is one CoverageRequest
-  Empty    →  a message when the list has no items
-  Form     →  Shift id, Reason, Status
-  Submit   →  the new row appears on the list
-  Filter   →  only matching rows render — the full list stays in state
-`,
-      discover: `import { useState } from "react";
-
-export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  status: string;
-};
-
-export function OpenShiftBoard() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
-      watchOut: "Do not turn a single import or interface into its own lesson.",
-      dryRun: "Write the same step for a different resource with the same shape.",
-      build: `useState<CoverageRequest[]>([]). Import useState.`,
-    },
-  },
-  {
-    id: "step4",
-    type: "question",
-    phase: "Step 4 of 7",
-    paal: `Filter the list in the UI so only matching rows render
-
-LIST (filtered) — Open shifts
-  s-3
-  Sick
-
-Your task: render requests.filter(...) mapped to rows — keep the full array in state, only narrow what's displayed.`,
-    hint: `requests.filter(...).map(...)`,
-    example_code: `return (
-  <ul>
-    {guests.filter((g) => g.note.includes(q)).map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
-);`,
-    think_prompt: `\`\`\`text
-LIST (filtered) — Open shifts
-  s-3
-  Sick   (only rows matching the current filter)
-\`\`\`
-
-Filtering for display means computing a smaller array from the full one with .filter() — the state array itself never loses any rows. How do you keep the complete requests list in state but only render the subset above?`,
-    mc_options: ["keep full list in state; filter before map for display","delete non-matching rows from state permanently","hide the list and show only alerts"],
-    mc_correct_option: "keep full list in state; filter before map for display",
-    mc_anchor: "keep full list in state; filter before m",
-    why_this_matters: `Filtering in render (or with a derived array) lets users scan what matters without deleting other rows from state. Managers filter to open coverage only. Same filter-before-map skill as other desks.`,
-    answer_keywords: ["filter","map","requests"],
-    seed_code: `import { useState } from "react";
-
-export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  status: string;
-};
-
-export function OpenShiftBoard() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  return <div />;
-}
-`,
-    starter_code: `import { useState } from "react";
-
-export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  status: string;
-};
-
-export function OpenShiftBoard() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  return (
-    <ul>
-      {/* map rows */}
-    </ul>
-  );
-}
-`,
-    feedback_correct: "Correct — keep going.",
-    feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Filter for display; do not destroy the source list.",
-    // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
-    // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
-    pre_check_hint: `Filtering an array for display and mutating the array in state are two different operations — .filter() always returns a brand-new array and never touches the one it was called on.`,
-    expected: `import { useState } from "react";
-
-export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  status: string;
-};
-
-export function OpenShiftBoard() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  return (
-    <ul>
-      {requests.map((a) => (
-        <li key={a.id}>{a.shiftId}</li>
-      ))}
-    </ul>
-  );
-}
-`,
-    analog_example: `return (
-  <ul>
-    {guests.filter((g) => g.note.includes(q)).map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
-);`,
-    deepDiveLabel: "Why this step matters",
-    deepDive: {
-      // Fix 7: lead with the general concept (why a shared pattern matters), not the task
-      // instruction restated verbatim.
-      hook: `.filter() followed by .map() is a pipeline, not a special React trick: narrow the array down to what should render, then turn what's left into rows. The state array underneath never shrinks — only the rendered subset does — so switching or clearing the filter always has the full data to fall back to.`,
-      pain: "Skipping this step leaves later code with no data shape or no source of truth.",
-      mentalModel: `Build a screen that lists requests and a form to add one:
-
-  List     →  each row is one CoverageRequest
-  Empty    →  a message when the list has no items
-  Form     →  Shift id, Reason, Status
-  Submit   →  the new row appears on the list
-  Filter   →  only matching rows render — the full list stays in state
-`,
-      discover: `import { useState } from "react";
-
-export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  status: string;
-};
-
-export function OpenShiftBoard() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  return (
-    <ul>
-      {requests.map((a) => (
-        <li key={a.id}>{a.shiftId}</li>
-      ))}
-    </ul>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
-      watchOut: "Do not turn a single import or interface into its own lesson.",
-      dryRun: "Write the same step for a different resource with the same shape.",
-      build: `requests.filter(...).map(...)`,
-    },
-  },
-  {
-    id: "step5",
-    type: "question",
-    phase: "Step 5 of 7",
-    paal: `Show an empty message when the list has no items
-
-EMPTY — Open shifts
-  "No open coverage."
-
-Your task: render the empty message above when requests.length === 0, and the mapped rows otherwise.`,
-    hint: `requests.length === 0 ? <p>No open coverage.</p> : <ul>...</ul>`,
-    example_code: `guests.length === 0 ? <p>No names yet.</p> : <ul>...</ul>`,
-    think_prompt: `\`\`\`text
-EMPTY — Open shifts
-  "No open coverage."
-\`\`\`
-
-An array with zero items is a valid, common state — code that only knows how to map rows renders nothing at all when the array is empty, with no explanation for the user. When should the UI show the empty message above instead of the (empty) list?`,
-    mc_options: ["if length === 0 show empty message, else map the list","always show both empty message and the list","throw if the list is empty"],
-    mc_correct_option: "if length === 0 show empty message, else map the list",
-    mc_anchor: "if length === 0 show empty message, else",
-    why_this_matters: `An empty list should not look broken — a clear empty state tells the user they can add the first row. Managers filter to open coverage only. Same filter-before-map skill as other desks.`,
-    answer_keywords: ["length","===","0","No"],
-    seed_code: `import { useState } from "react";
-
-export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  status: string;
-};
-
-export function OpenShiftBoard() {
-  const [requests] = useState<CoverageRequest[]>([]);
-  return <ul>{requests.map((a) => <li key={a.id}>{a.shiftId}</li>)}</ul>;
-}
-`,
-    starter_code: `import { useState } from "react";
-
-export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  status: string;
-};
-
-export function OpenShiftBoard() {
-  const [requests] = useState<CoverageRequest[]>([]);
   return (
     <div>
-      {/* empty or list */}
+      {/* filter, then empty or list */}
     </div>
   );
 }
 `,
-    feedback_correct: "Correct — keep going.",
+    feedback_correct: "Correct — the full list stays in state, and only the matching rows (or an honest empty message) render.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Branch on length before mapping.",
+    feedback_wrong: "Filter for display only — state keeps every row, and the empty check runs on the filtered result, not the original.",
     // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
     // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
-    pre_check_hint: `Checking a number against zero before deciding what to render is an ordinary conditional — the empty case and the list case are just two branches of the same render.`,
+    pre_check_hint: `.filter() always returns a brand-new array and never touches the one it was called on — so the full list stays in state, and the array you check for "empty" and then map is the filtered one, not the original.`,
     expected: `import { useState } from "react";
 
 export type CoverageRequest = {
@@ -502,14 +217,15 @@ export type CoverageRequest = {
 };
 
 export function OpenShiftBoard() {
-  const [requests] = useState<CoverageRequest[]>([]);
+  const [requests, setRequests] = useState<CoverageRequest[]>([]);
+  const visible = requests.filter((a) => a.status === "open");
   return (
     <div>
-      {requests.length === 0 ? (
+      {visible.length === 0 ? (
         <p>No open coverage.</p>
       ) : (
         <ul>
-          {requests.map((a) => (
+          {visible.map((a) => (
             <li key={a.id}>{a.shiftId}</li>
           ))}
         </ul>
@@ -518,12 +234,21 @@ export function OpenShiftBoard() {
   );
 }
 `,
-    analog_example: `guests.length === 0 ? <p>No names yet.</p> : <ul>...</ul>`,
+    analog_example: `const visible = guests.filter((g) => g.status === "active");
+return visible.length === 0 ? (
+  <p>No matches.</p>
+) : (
+  <ul>
+    {visible.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
+);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `An empty state is not a missing feature to bolt on later — it is one of exactly two branches every list render has from the start (zero items, or some items). Treating it as a first-class branch, not an afterthought, is what keeps a brand-new account from looking like a broken one.`,
+      hook: `.filter() followed by .map() is a pipeline, not a special React trick: narrow the array down to what should render, then turn what's left into rows. Checking the narrowed array's length — not the original's — is what keeps the empty state honest about the current view instead of the whole dataset.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists requests and a form to add one:
 
@@ -543,14 +268,15 @@ export type CoverageRequest = {
 };
 
 export function OpenShiftBoard() {
-  const [requests] = useState<CoverageRequest[]>([]);
+  const [requests, setRequests] = useState<CoverageRequest[]>([]);
+  const visible = requests.filter((a) => a.status === "open");
   return (
     <div>
-      {requests.length === 0 ? (
+      {visible.length === 0 ? (
         <p>No open coverage.</p>
       ) : (
         <ul>
-          {requests.map((a) => (
+          {visible.map((a) => (
             <li key={a.id}>{a.shiftId}</li>
           ))}
         </ul>
@@ -562,13 +288,15 @@ export function OpenShiftBoard() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `requests.length === 0 ? <p>No open coverage.</p> : <ul>...</ul>`,
+      build: `const [requests, setRequests] = useState<CoverageRequest[]>([]);
+const visible = requests.filter((a) => a.status === "open");
+return visible.length === 0 ? <p>No open coverage.</p> : <ul>{visible.map((a) => <li key={a.id}>{a.shiftId}</li>)}</ul>;`,
     },
   },
   {
-    id: "step6",
+    id: "step3",
     type: "question",
-    phase: "Step 6 of 7",
+    phase: "Step 3 of 4",
     paal: `Wire controlled inputs so form fields live in React state
 
 FORM — Open shifts
@@ -697,9 +425,9 @@ export function OpenShiftBoard() {
     },
   },
   {
-    id: "step7",
+    id: "step4",
     type: "question",
-    phase: "Step 7 of 7",
+    phase: "Step 4 of 4",
     paal: `On submit, preventDefault, append one item to the list, and clear the form
 
 FORM — Open shifts
@@ -898,9 +626,6 @@ const sideItems = [
   { label: "Step 2", id: "step2" },
   { label: "Step 3", id: "step3" },
   { label: "Step 4", id: "step4" },
-  { label: "Step 5", id: "step5" },
-  { label: "Step 6", id: "step6" },
-  { label: "Step 7", id: "step7" },
 ];
 
 export default createINPACTEngine({
