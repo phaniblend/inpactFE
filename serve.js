@@ -26,7 +26,22 @@ const PORT = Number(process.env.PORT) || 3000;
 const API_TARGET = (process.env.API_INTERNAL_URL || "http://127.0.0.1:3000").replace(/\/+$/, "");
 
 const app = express();
-app.use(express.json());
+
+// Raw byte capture, not express.json() — found live 2026-09-05: express.json() only parses
+// application/json bodies, leaving req.body as {} for anything else (notably the binary
+// application/x-git-upload-pack-request bodies the in-browser dev workspace's real git
+// clone/commit/push sends through here). The old code below then did
+// `JSON.stringify(req.body ?? {})`, silently replacing that entire binary negotiation payload
+// with the two-byte string "{}" before forwarding it upstream — OneDev received a garbled/empty
+// request and fell back to some default response instead of erroring, so the clone *looked*
+// successful but was silently missing the exact commit the negotiation should have asked for
+// (surfaced as "Failed to checkout main because commit X is not available locally" much later,
+// nowhere near this file — traced end to end with a from-scratch repro before touching this line).
+// `type: () => true` matches every request body regardless of Content-Type; GET/HEAD requests
+// simply produce an empty Buffer. Raw bytes of a JSON body are still valid JSON once forwarded, so
+// this doesn't change behavior for any existing JSON route — it only stops corrupting the ones
+// that were never JSON to begin with.
+app.use(express.raw({ type: () => true, limit: "80mb" }));
 
 // Manual proxy, not http-proxy-middleware: two path-mounting attempts (`app.use("/api", ...)`
 // with plain middleware and with pathFilter) both silently dropped or mismatched the /api prefix
@@ -48,13 +63,13 @@ app.use("/api", async (req, res) => {
       // real redirect below.
       redirect: "manual",
       headers: {
-        Accept: "application/json",
+        Accept: req.headers["accept"] || "application/json",
         "Content-Type": req.headers["content-type"] || "application/json",
         // Session auth (auth-router.js's ipf_session cookie) rides on this — without forwarding
         // it, every signed-in request through this proxy would silently look logged-out.
         ...(req.headers.cookie ? { Cookie: req.headers.cookie } : {}),
       },
-      body: hasBody ? JSON.stringify(req.body ?? {}) : undefined,
+      body: hasBody ? req.body : undefined,
     });
     // Forward every Set-Cookie the upstream sends back (login, logout, refresh) — a single
     // res.setHeader would only keep the last one if there's more than one.
@@ -68,10 +83,13 @@ app.use("/api", async (req, res) => {
       return res.end();
     }
 
-    const text = await upstream.text();
+    // Buffered, not text-decoded — the old `.text()` here ran every response (git packfiles
+    // included) through UTF-8 text decoding, which corrupts arbitrary binary bytes that aren't
+    // valid UTF-8. Bytes in, bytes out, same as the git-proxy-router.js pattern this mirrors.
+    const buf = Buffer.from(await upstream.arrayBuffer());
     res.status(upstream.status);
     res.setHeader("Content-Type", upstream.headers.get("content-type") || "application/json");
-    res.send(text);
+    res.send(buf);
   } catch (err) {
     console.error("[api-proxy] upstream error:", err.message);
     res.status(502).json({ error: "API upstream error" });
