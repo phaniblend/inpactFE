@@ -60,7 +60,7 @@ export default function GitPanel({ branch, changedFiles, onCommitPush, pushing, 
         <div className="gp-success">
           Pushed to <code>{lastPushedBranch}</code>.{" "}
           <a href={pullsUrl} target="_blank" rel="noreferrer">
-            Open a Pull Request on OneDev →
+            Open a Pull Request →
           </a>
         </div>
       ) : null}
