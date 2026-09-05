@@ -434,14 +434,20 @@ export default function Apply() {
   }, [rec?.focus, codingFocusTouched]);
 
   // Same live-sync, for the comfort-level tiles — see skillLevelTouched's own comment above.
+  // "none" is deliberately excluded from the sync (found live 2026-09-05): it's a legitimate
+  // recommendation for someone with no prior coding knowledge — applyRecommendation below still
+  // submits it correctly when "Use this recommendation and apply" is clicked — but pre-highlighting
+  // "None yet" on their behalf read as the form deciding for them before they'd touched anything.
+  // Leaving the tile open until they actually pick one (any one, including "None yet" itself) is
+  // the honest state for a comfort-level question specifically.
   useEffect(() => {
-    if (rec && !skillLevelTouched) {
-      setForm((f) => (f.skillLevel === (rec.skillLevel || "") ? f : { ...f, skillLevel: rec.skillLevel || "" }));
+    if (rec && !skillLevelTouched && rec.skillLevel && rec.skillLevel !== "none") {
+      setForm((f) => (f.skillLevel === rec.skillLevel ? f : { ...f, skillLevel: rec.skillLevel }));
     }
   }, [rec?.skillLevel, skillLevelTouched]);
   useEffect(() => {
-    if (rec && !beSkillLevelTouched) {
-      setForm((f) => (f.beSkillLevel === (rec.beSkillLevel || "") ? f : { ...f, beSkillLevel: rec.beSkillLevel || "" }));
+    if (rec && !beSkillLevelTouched && rec.beSkillLevel && rec.beSkillLevel !== "none") {
+      setForm((f) => (f.beSkillLevel === rec.beSkillLevel ? f : { ...f, beSkillLevel: rec.beSkillLevel }));
     }
   }, [rec?.beSkillLevel, beSkillLevelTouched]);
 
