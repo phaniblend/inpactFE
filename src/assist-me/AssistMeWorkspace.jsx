@@ -6,7 +6,7 @@ import "./AssistMeWorkspace.css";
 // — the real IPAAL UI. We only fall back to reading NODES for mode=local (instructions-only).
 const ASSIST_MODULES = import.meta.glob("../engines/assist/*.{jsx,tsx}", { eager: true });
 
-function findModuleBySlug(slug) {
+export function findModuleBySlug(slug) {
   const entry = Object.entries(ASSIST_MODULES).find(([path]) =>
     path.includes(`inpact_assist_${slug}_engine`),
   );
