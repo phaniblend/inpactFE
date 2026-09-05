@@ -461,8 +461,15 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
       cancelled = true;
     };
   }, [task.projectId]);
-  const cloneUrl = projectPath ? `http://localhost:6610/${projectPath}.git` : null;
-  const pullsUrl = projectPath ? `http://localhost:6610/${projectPath}/~pulls` : "http://localhost:6610";
+  // This repo (inpactFE) deploys to production, where OneDev is a real remote instance, not the
+  // localhost:6610 the local dev machine's own OneDev container answers to — found live 2026-09-05:
+  // a real applicant on inpact.live was handed a clone URL pointing at their own laptop's port
+  // 6610, which nothing is listening on. Hardcoded to this repo specifically (IPAAL's own
+  // Workbench.jsx correctly keeps localhost:6610 for local dev) rather than an env var, since
+  // there's nowhere yet to set one for this deployment.
+  const ONEDEV_PUBLIC_URL = "https://onedev-production-e1df.up.railway.app";
+  const cloneUrl = projectPath ? `${ONEDEV_PUBLIC_URL}/${projectPath}.git` : null;
+  const pullsUrl = projectPath ? `${ONEDEV_PUBLIC_URL}/${projectPath}/~pulls` : ONEDEV_PUBLIC_URL;
   // Found live 2026-09-04 testing the real end-to-end flow a second time: a branch name built
   // only from the task title collides across every applicant ever matched to this task, since the
   // title is shared but each applicant gets their own issue instance. The first applicant's push
