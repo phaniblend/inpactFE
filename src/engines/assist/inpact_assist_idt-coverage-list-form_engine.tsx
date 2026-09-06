@@ -29,7 +29,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Create an item blueprint for shift requests and assemble the display container.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/CoverageDesk.tsx\` before anything else. Every step from here on edits that same file.
+
+Create an item blueprint for shift requests and assemble the display container.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -126,7 +130,9 @@ export function CoverageDesk() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Keep shift requests in memory; render each open slot as a row, or show "All shifts fully staffed" if empty.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Keep shift requests in memory; render each open slot as a row, or show "All shifts fully staffed" if empty.
 
 WHAT YOU'LL NEED
 - State array holding coverage items.
@@ -295,7 +301,9 @@ export function CoverageDesk() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect input boxes to state so requested roles and shift hours are tracked character-by-character.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect input boxes to state so requested roles and shift hours are tracked character-by-character.
 
 WHAT YOU'LL NEED
 - State variables for shift and role inputs.
@@ -436,7 +444,9 @@ export function CoverageDesk() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Prevent form submission refresh, append the shift request to the list, and empty the inputs.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Prevent form submission refresh, append the shift request to the list, and empty the inputs.
 
 WHAT YOU'LL NEED
 - e.preventDefault() call.

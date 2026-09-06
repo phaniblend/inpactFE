@@ -21,11 +21,14 @@ import { parseAssistGuides, parseCatalog } from "./parse-review-content.mjs";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ASSIST_DIR = path.resolve(__dirname, "../src/engines/assist");
 
+const LANGUAGE_LINE =
+  "You're writing this in TypeScript + React — a `.tsx` file (TypeScript types alongside JSX markup).";
+
 const FILES = [
-  { file: "inpact_assist_idt-erp-inventory-table_engine.tsx", title: "Inventory master table" },
-  { file: "inpact_assist_idt-erp-po-form_engine.tsx", title: "Purchase order form & receive modal" },
-  { file: "inpact_assist_idt-erp-reports-dashboard_engine.tsx", title: "Financial reporting dashboard" },
-  { file: "inpact_assist_idt-erp-so-pipeline_engine.tsx", title: "Sales order pipeline view" },
+  { file: "inpact_assist_idt-erp-inventory-table_engine.tsx", title: "Inventory master table", filePath: "src/components/InventoryTable.tsx" },
+  { file: "inpact_assist_idt-erp-po-form_engine.tsx", title: "Purchase order form & receive modal", filePath: "src/components/PurchaseOrderForm.tsx" },
+  { file: "inpact_assist_idt-erp-reports-dashboard_engine.tsx", title: "Financial reporting dashboard", filePath: "src/components/ReportsDashboard.tsx" },
+  { file: "inpact_assist_idt-erp-so-pipeline_engine.tsx", title: "Sales order pipeline view", filePath: "src/components/SalesOrderPipeline.tsx" },
 ];
 
 const guides = parseAssistGuides();
@@ -35,9 +38,13 @@ function esc(s) {
   return String(s).replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$\{/g, "\\${");
 }
 
-function buildTaskPanel(catalogText, guide) {
+function buildTaskPanel(catalogText, guide, filePath, isFirstStep) {
   const needsBlock = guide.needs.length ? `\n\nWHAT YOU'LL NEED\n${guide.needs.map((n) => `- ${n}`).join("\n")}` : "";
-  return `${catalogText}${needsBlock}\n\nYour task: ${guide.goal}`;
+  const createFileLine =
+    isFirstStep && filePath
+      ? `This file doesn't exist yet — you're the first to touch it. Create it at \`${filePath}\` before anything else. Every step from here on edits that same file.\n\n`
+      : "";
+  return `${LANGUAGE_LINE}\n\n${createFileLine}${catalogText}${needsBlock}\n\nYour task: ${guide.goal}`;
 }
 
 function replaceField(text, fieldName, endMarker, newValue) {
@@ -76,7 +83,7 @@ function replaceAllDeepDiveHooks(text, newValuesInOrder) {
   return text;
 }
 
-for (const { file, title } of FILES) {
+for (const { file, title, filePath: taskFilePath } of FILES) {
   const guideSteps = guides.get(title);
   const catalogSteps = catalog.get(title);
   if (!guideSteps || !catalogSteps) {
@@ -118,7 +125,7 @@ for (const { file, title } of FILES) {
     const sliceEnd = stepStarts[i + 1];
     let stepText = text.slice(sliceStart, sliceEnd);
 
-    const taskPanel = buildTaskPanel(catalogText, guide);
+    const taskPanel = buildTaskPanel(catalogText, guide, taskFilePath, i === 0);
     const hintText = guide.howToMap.map((line, n2) => `${n2 + 1}. ${line}`).join("\n");
 
     stepText = replaceField(stepText, "paal", "`,\n    hint:", taskPanel);

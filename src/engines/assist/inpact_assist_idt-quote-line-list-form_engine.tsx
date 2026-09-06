@@ -29,7 +29,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Create a blueprint for an individual line item (description, quantity, price) and build the table frame.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/QuoteLines.tsx\` before anything else. Every step from here on edits that same file.
+
+Create a blueprint for an individual line item (description, quantity, price) and build the table frame.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -124,7 +128,9 @@ export function QuoteLines() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Store line items in state; render an itemized row for each entry, or a "No items added to estimate" message.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Store line items in state; render an itemized row for each entry, or a "No items added to estimate" message.
 
 WHAT YOU'LL NEED
 - State array holding line items.
@@ -293,7 +299,9 @@ export function QuoteLines() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect item description and price inputs to state to capture values as the user types.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect item description and price inputs to state to capture values as the user types.
 
 WHAT YOU'LL NEED
 - State hooks for label and price inputs.
@@ -432,7 +440,9 @@ export function QuoteLines() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Intercept submit, add the new item line to the running quote, and clear the inputs.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Intercept submit, add the new item line to the running quote, and clear the inputs.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

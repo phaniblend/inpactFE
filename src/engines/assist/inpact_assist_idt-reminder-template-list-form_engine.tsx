@@ -29,7 +29,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model a template blueprint (template name, subject, body text) and build the template gallery shell.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/TemplateDesk.tsx\` before anything else. Every step from here on edits that same file.
+
+Model a template blueprint (template name, subject, body text) and build the template gallery shell.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -124,7 +128,9 @@ export function TemplateDesk() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold templates in memory; render each reusable template card, or show "No saved templates found" when empty.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Hold templates in memory; render each reusable template card, or show "No saved templates found" when empty.
 
 WHAT YOU'LL NEED
 - State array holding template items.
@@ -293,7 +299,9 @@ export function TemplateDesk() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Wire template name and message textareas to state so drafting happens in real time.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Wire template name and message textareas to state so drafting happens in real time.
 
 WHAT YOU'LL NEED
 - State hooks for name and template text inputs.
@@ -432,7 +440,9 @@ export function TemplateDesk() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Intercept submission, save the new template to the gallery, and clear the inputs.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Intercept submission, save the new template to the gallery, and clear the inputs.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

@@ -29,7 +29,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Create a customer review blueprint (reviewer, star rating, feedback text) and build the inbox view.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/ReviewInbox.tsx\` before anything else. Every step from here on edits that same file.
+
+Create a customer review blueprint (reviewer, star rating, feedback text) and build the inbox view.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -124,7 +128,9 @@ export function ReviewInbox() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Store reviews in memory; display each review card, or show a "No customer reviews yet" message when empty.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Store reviews in memory; display each review card, or show a "No customer reviews yet" message when empty.
 
 WHAT YOU'LL NEED
 - State array holding reviews.
@@ -293,7 +299,9 @@ export function ReviewInbox() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Wire star rating and review comment fields to state for real-time tracking.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Wire star rating and review comment fields to state for real-time tracking.
 
 WHAT YOU'LL NEED
 - State hooks for reviewer and comment inputs.
@@ -432,7 +440,9 @@ export function ReviewInbox() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Block default page reload, drop the review into the inbox, and clear the form fields.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Block default page reload, drop the review into the inbox, and clear the form fields.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Set up memory storage for notification logs and an ID generator for reminder tokens.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/reminders.ts\` before anything else. Every step from here on edits that same file.
+
+Set up memory storage for notification logs and an ID generator for reminder tokens.
 
 WHAT YOU'LL NEED
 - An array holding reminder records.
@@ -104,7 +108,9 @@ export function getStore() { return reminders; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Reject reminder requests that omit the invoice ID, destination address, or contact channel (400).
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Reject reminder requests that omit the invoice ID, destination address, or contact channel (400).
 
 WHAT YOU'LL NEED
 - Checks verifying required body properties.
@@ -192,7 +198,9 @@ export function validateReminder(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Inspect stored reminders to verify no pending nudge already exists for that specific invoice on that same channel.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Inspect stored reminders to verify no pending nudge already exists for that specific invoice on that same channel.
 
 WHAT YOU'LL NEED
 - An array search checking for matching invoiceId and channel.
@@ -283,7 +291,9 @@ export function hasPendingReminder(candidate) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Build GET to list reminders and POST to create nudges, sending a 409 conflict if a duplicate reminder is already queued.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Build GET to list reminders and POST to create nudges, sending a 409 conflict if a duplicate reminder is already queued.
 
 WHAT YOU'LL NEED
 - GET endpoint returning stored reminders.

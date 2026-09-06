@@ -30,7 +30,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model an invoice item with a status tag and prepare the overdue board layout.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/OverdueBoard.tsx\` before anything else. Every step from here on edits that same file.
+
+Model an invoice item with a status tag and prepare the overdue board layout.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -129,7 +133,9 @@ export function OverdueBoard() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Filter invoices in memory to display only overdue rows, showing an "All accounts current" banner if none exist.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Filter invoices in memory to display only overdue rows, showing an "All accounts current" banner if none exist.
 
 WHAT YOU'LL NEED
 - State array holding all invoices.
@@ -305,7 +311,9 @@ export function OverdueBoard() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect input boxes to state so new billing data is tracked cleanly.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect input boxes to state so new billing data is tracked cleanly.
 
 WHAT YOU'LL NEED
 - State hooks for client, amount, and status.
@@ -447,7 +455,9 @@ export function OverdueBoard() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Intercept form submit, append the invoice to the main list, reset the form, and let the overdue filter manage display.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Intercept form submit, append the invoice to the main list, reset the form, and let the overdue filter manage display.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

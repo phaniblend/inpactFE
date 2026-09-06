@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Set up memory storage for estimates and an ID generator for unique quote numbers.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/quotes.ts\` before anything else. Every step from here on edits that same file.
+
+Set up memory storage for estimates and an ID generator for unique quote numbers.
 
 WHAT YOU'LL NEED
 - An array holding quote records.
@@ -104,7 +108,9 @@ export function getStore() { return quotes; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Validate that incoming quote payloads include customer details, item totals, and expiration dates.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Validate that incoming quote payloads include customer details, item totals, and expiration dates.
 
 WHAT YOU'LL NEED
 - Checks verifying required body properties.
@@ -192,7 +198,9 @@ export function validateQuote(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Calculate status on the server based on customer action and current date ("open", "expired", or "accepted").
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Calculate status on the server based on customer action and current date ("open", "expired", or "accepted").
 
 WHAT YOU'LL NEED
 - Evaluation checking acceptance flags and expiration dates.
@@ -281,7 +289,9 @@ export function deriveQuoteStatus(row, now = new Date()) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Provide a GET endpoint to list quotes and a POST endpoint that attaches the calculated status before saving.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Provide a GET endpoint to list quotes and a POST endpoint that attaches the calculated status before saving.
 
 WHAT YOU'LL NEED
 - GET endpoint returning stored quotes.

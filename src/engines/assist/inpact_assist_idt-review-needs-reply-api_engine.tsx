@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Set up memory storage for client feedback and an ID generator for unique review records.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/reviews.ts\` before anything else. Every step from here on edits that same file.
+
+Set up memory storage for client feedback and an ID generator for unique review records.
 
 WHAT YOU'LL NEED
 - An array holding review records.
@@ -104,7 +108,9 @@ export function getStore() { return reviews; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Validate that submitted reviews include a customer name, rating, and feedback comment.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Validate that submitted reviews include a customer name, rating, and feedback comment.
 
 WHAT YOU'LL NEED
 - Checks verifying required body properties.
@@ -194,7 +200,9 @@ export function validateReview(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Check whether an official reply is attached; if missing, have the server tag it as "needs-reply".
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Check whether an official reply is attached; if missing, have the server tag it as "needs-reply".
 
 WHAT YOU'LL NEED
 - Check verifying if a reply text or flag exists.
@@ -271,7 +279,9 @@ export function deriveReviewStatus(row, now = new Date()) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Provide GET to view feedback and POST to log reviews with their calculated status attached.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Provide GET to view feedback and POST to log reviews with their calculated status attached.
 
 WHAT YOU'LL NEED
 - GET endpoint returning stored reviews.

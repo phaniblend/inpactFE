@@ -29,7 +29,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Create a blueprint for service packages (client, total sessions, price) and construct the component shell.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/PackageDesk.tsx\` before anything else. Every step from here on edits that same file.
+
+Create a blueprint for service packages (client, total sessions, price) and construct the component shell.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -124,7 +128,9 @@ export function PackageDesk() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Store sold packages in memory; list every active card, or render "No packages sold yet" if empty.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Store sold packages in memory; list every active card, or render "No packages sold yet" if empty.
 
 WHAT YOU'LL NEED
 - State array holding package cards.
@@ -293,7 +299,9 @@ export function PackageDesk() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Wire client name and session count inputs to state for live synchronization.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Wire client name and session count inputs to state for live synchronization.
 
 WHAT YOU'LL NEED
 - State hooks for client and punch count inputs.
@@ -432,7 +440,9 @@ export function PackageDesk() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Stop page reload on click, append the new package card to the list, and empty the input fields.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Stop page reload on click, append the new package card to the list, and empty the input fields.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

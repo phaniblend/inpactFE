@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Establish memory storage for message templates and an ID helper for unique template keys.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/reminder-templates.ts\` before anything else. Every step from here on edits that same file.
+
+Establish memory storage for message templates and an ID helper for unique template keys.
 
 WHAT YOU'LL NEED
 - An array holding template records.
@@ -104,7 +108,9 @@ export function getStore() { return templates; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Reject template submissions that lack a name, channel type, or message body (400).
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Reject template submissions that lack a name, channel type, or message body (400).
 
 WHAT YOU'LL NEED
 - Checks verifying required body properties.
@@ -192,7 +198,9 @@ export function validateTemplate(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Inspect stored templates to guarantee no template shares the exact same name on that channel.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Inspect stored templates to guarantee no template shares the exact same name on that channel.
 
 WHAT YOU'LL NEED
 - An array search checking for matching channel and name.
@@ -281,7 +289,9 @@ export function hasTemplateName(candidate) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Expose GET for template retrieval and POST for saving, returning 409 if a duplicate name is detected.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Expose GET for template retrieval and POST for saving, returning 409 if a duplicate name is detected.
 
 WHAT YOU'LL NEED
 - GET endpoint returning stored templates.

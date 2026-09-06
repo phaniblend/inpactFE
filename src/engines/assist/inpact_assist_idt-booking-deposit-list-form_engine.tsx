@@ -29,7 +29,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Design a blueprint for a deposit record (customer, amount) and build the shell container.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/DepositDesk.tsx\` before anything else. Every step from here on edits that same file.
+
+Design a blueprint for a deposit record (customer, amount) and build the shell container.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -126,7 +130,9 @@ export function DepositDesk() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold deposits in memory; show a transaction row for each payment, or an "All deposits clear" message when empty.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Hold deposits in memory; show a transaction row for each payment, or an "All deposits clear" message when empty.
 
 WHAT YOU'LL NEED
 - State array holding deposits.
@@ -295,7 +301,9 @@ export function DepositDesk() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Wire payment amount and customer fields to memory so keystrokes register in real time.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Wire payment amount and customer fields to memory so keystrokes register in real time.
 
 WHAT YOU'LL NEED
 - Separate state hooks for client and amount.
@@ -436,7 +444,9 @@ export function DepositDesk() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Block the default page reload, drop the new deposit into the ledger, and clear the input boxes.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Block the default page reload, drop the new deposit into the ledger, and clear the input boxes.
 
 WHAT YOU'LL NEED
 - e.preventDefault() to stop page reload.

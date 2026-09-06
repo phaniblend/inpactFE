@@ -37,7 +37,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 5",
-    paal: `Lay the foundation with a blueprint and a container
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/AcceptedBoard.tsx\` before anything else. Every step from here on edits that same file.
+
+Lay the foundation with a blueprint and a container
 
 MOCK ROW — Accepted quotes
   Client: "Patel Home"
@@ -138,7 +142,9 @@ export function AcceptedBoard() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 5",
-    paal: `Show only the quotes you want — and handle empty searches gracefully
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Show only the quotes you want — and handle empty searches gracefully
 
 LIST (filtered) — Accepted quotes
   Patel Home
@@ -298,7 +304,9 @@ return visible.length === 0 ? <p>No accepted quotes.</p> : <ul>{visible.map((a) 
     id: "step3",
     type: "question",
     phase: "Step 3 of 5",
-    paal: `Connect text boxes so the computer remembers every keystroke
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect text boxes so the computer remembers every keystroke
 
 FORM — Accepted quotes
   [ Client ]  [ Total ]  [ Status ]   → Create
@@ -426,7 +434,9 @@ export function AcceptedBoard() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 5",
-    paal: `Save the new quote, add it to the list, and reset the form
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Save the new quote, add it to the list, and reset the form
 
 FORM — Accepted quotes
   [ Client ]  [ Total ]  [ Status ]   → Create
@@ -616,7 +626,9 @@ export function AcceptedBoard() {
     id: "step5",
     type: "question",
     phase: "Step 5 of 5",
-    paal: `Add an "Accept" button to move quotes into the accepted board
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Add an "Accept" button to move quotes into the accepted board
 
 Your task: write a click handler that updates one quote's status to "accepted" by id, split the list into a Pending section (status !== "accepted", each row with an Accept button) and an Accepted section (status === "accepted"), and wire each Accept button to call it.`,
     hint: `function acceptQuote(id: string) {

@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Create an in-memory storage drawer and an ID generator to give each booking a unique receipt number.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/appointments.ts\` before anything else. Every step from here on edits that same file.
+
+Create an in-memory storage drawer and an ID generator to give each booking a unique receipt number.
 
 WHAT YOU'LL NEED
 - A module-level array variable acting as the database.
@@ -106,7 +110,9 @@ export function getStore() { return appointments; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Check incoming requests for missing patient names or times, rejecting incomplete data with an error (400).
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Check incoming requests for missing patient names or times, rejecting incomplete data with an error (400).
 
 WHAT YOU'LL NEED
 - An inspection of incoming request fields.
@@ -196,7 +202,9 @@ export function validateAppointment(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Scan existing appointments to confirm no other booking already occupies that exact time slot.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Scan existing appointments to confirm no other booking already occupies that exact time slot.
 
 WHAT YOU'LL NEED
 - A search through the existing records array.
@@ -281,7 +289,9 @@ export function hasSlotConflict(candidate) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Provide a GET doorway to read bookings and a POST doorway that blocks overlapping times with a conflict error (409).
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Provide a GET doorway to read bookings and a POST doorway that blocks overlapping times with a conflict error (409).
 
 WHAT YOU'LL NEED
 - A GET handler returning the records array with status 200.

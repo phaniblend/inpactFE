@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Set up a reminder memory drawer and an ID generator for tracking notification receipts.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/scheduled-reminders.ts\` before anything else. Every step from here on edits that same file.
+
+Set up a reminder memory drawer and an ID generator for tracking notification receipts.
 
 WHAT YOU'LL NEED
 - An array holding reminder records.
@@ -104,7 +108,9 @@ export function getStore() { return reminders; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Ensure incoming requests include a target recipient and scheduled dispatch timestamp.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Ensure incoming requests include a target recipient and scheduled dispatch timestamp.
 
 WHAT YOU'LL NEED
 - Checks verifying required body properties.
@@ -192,7 +198,9 @@ export function validateScheduledReminder(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Have the server verify whether the dispatch time has passed to classify the record as "due" or "sent".
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Have the server verify whether the dispatch time has passed to classify the record as "due" or "sent".
 
 WHAT YOU'LL NEED
 - Timestamp comparison evaluating whether sendTime is past.
@@ -271,7 +279,9 @@ export function deriveReminderStatus(row, now = new Date()) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Expose GET to retrieve reminders and POST to record reminders with their calculated dispatch status.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Expose GET to retrieve reminders and POST to record reminders with their calculated dispatch status.
 
 WHAT YOU'LL NEED
 - GET endpoint returning stored reminders.

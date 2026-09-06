@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Create an in-memory customer drawer and an ID generator to assign unique lead tracking tags.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/leads.ts\` before anything else. Every step from here on edits that same file.
+
+Create an in-memory customer drawer and an ID generator to assign unique lead tracking tags.
 
 WHAT YOU'LL NEED
 - An array holding lead records.
@@ -104,7 +108,9 @@ export function getStore() { return leads; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Validate that submitted leads contain valid contact info before accepting them.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Validate that submitted leads contain valid contact info before accepting them.
 
 WHAT YOU'LL NEED
 - Checks verifying required body properties.
@@ -192,7 +198,9 @@ export function validateLead(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Let the server evaluate the lead's last interaction date to classify it as "fresh" or "stale".
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Let the server evaluate the lead's last interaction date to classify it as "fresh" or "stale".
 
 WHAT YOU'LL NEED
 - Timestamp comparison evaluating elapsed time.
@@ -271,7 +279,9 @@ export function deriveLeadStatus(row, now = new Date()) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Expose GET to list leads and POST to save new leads with their server-assigned freshness status.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Expose GET to list leads and POST to save new leads with their server-assigned freshness status.
 
 WHAT YOU'LL NEED
 - GET endpoint returning stored leads.

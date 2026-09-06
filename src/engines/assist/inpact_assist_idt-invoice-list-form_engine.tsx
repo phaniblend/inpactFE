@@ -29,7 +29,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Outline an invoice blueprint (invoice number, client, total) and build the page shell.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/InvoiceDesk.tsx\` before anything else. Every step from here on edits that same file.
+
+Outline an invoice blueprint (invoice number, client, total) and build the page shell.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -126,7 +130,9 @@ export function InvoiceDesk() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Store invoices in memory; render an itemized row for each bill, or a "No invoices issued" screen if empty.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Store invoices in memory; render an itemized row for each bill, or a "No invoices issued" screen if empty.
 
 WHAT YOU'LL NEED
 - State array holding invoices.
@@ -295,7 +301,9 @@ export function InvoiceDesk() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect text inputs to memory so recipient and billing numbers are saved with every keystroke.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect text inputs to memory so recipient and billing numbers are saved with every keystroke.
 
 WHAT YOU'LL NEED
 - State hooks for client and amount.
@@ -436,7 +444,9 @@ export function InvoiceDesk() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Prevent default submission refresh, push the fresh invoice into the list, and wipe the inputs clean.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Prevent default submission refresh, push the fresh invoice into the list, and wipe the inputs clean.
 
 WHAT YOU'LL NEED
 - e.preventDefault() call.

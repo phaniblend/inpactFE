@@ -29,7 +29,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Define a quote blueprint (client, project name, total estimate) and set up the outer display container.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/QuoteDesk.tsx\` before anything else. Every step from here on edits that same file.
+
+Define a quote blueprint (client, project name, total estimate) and set up the outer display container.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -124,7 +128,9 @@ export function QuoteDesk() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Keep quotes in state; display each estimate row, or show "No estimates created yet" when empty.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Keep quotes in state; display each estimate row, or show "No estimates created yet" when empty.
 
 WHAT YOU'LL NEED
 - State array holding estimates.
@@ -293,7 +299,9 @@ export function QuoteDesk() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect client and estimate inputs directly to state for real-time tracking.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect client and estimate inputs directly to state for real-time tracking.
 
 WHAT YOU'LL NEED
 - State hooks for client and estimate inputs.
@@ -432,7 +440,9 @@ export function QuoteDesk() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Prevent form submission reload, append the new estimate to the list, and wipe the inputs clean.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Prevent form submission reload, append the new estimate to the list, and wipe the inputs clean.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

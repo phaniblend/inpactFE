@@ -30,7 +30,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model a review item with a reply status and construct the urgent board view.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/UnansweredBoard.tsx\` before anything else. Every step from here on edits that same file.
+
+Model a review item with a reply status and construct the urgent board view.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -126,7 +130,9 @@ export function UnansweredBoard() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Filter reviews to display only those needing a reply, showing "All reviews answered!" when the queue is clear.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Filter reviews to display only those needing a reply, showing "All reviews answered!" when the queue is clear.
 
 WHAT YOU'LL NEED
 - State array holding all reviews.
@@ -302,7 +308,9 @@ export function UnansweredBoard() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect input boxes to state to capture review logging details cleanly.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect input boxes to state to capture review logging details cleanly.
 
 WHAT YOU'LL NEED
 - State hooks for reviewer and status inputs.
@@ -440,7 +448,9 @@ export function UnansweredBoard() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Intercept submit, save the review to memory, clear the form, and let the unanswered filter place it on the board.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Intercept submit, save the review to memory, clear the form, and let the unanswered filter place it on the board.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

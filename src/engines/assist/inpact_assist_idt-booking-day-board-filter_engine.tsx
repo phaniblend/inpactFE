@@ -30,7 +30,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Define the appointment blueprint (including the provider name) and set up the day-board screen layout.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/DayBoard.tsx\` before anything else. Every step from here on edits that same file.
+
+Define the appointment blueprint (including the provider name) and set up the day-board screen layout.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -129,7 +133,9 @@ export function DayBoard() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `View appointments through a provider filter lens, displaying only their patients or a "No visits for this provider" message.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+View appointments through a provider filter lens, displaying only their patients or a "No visits for this provider" message.
 
 WHAT YOU'LL NEED
 - Array state holding appointments.
@@ -300,7 +306,9 @@ export function DayBoard() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect input text boxes to memory so newly entered appointment details are tracked live.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect input text boxes to memory so newly entered appointment details are tracked live.
 
 WHAT YOU'LL NEED
 - State variables for provider, patient, and time.
@@ -446,7 +454,9 @@ export function DayBoard() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Intercept submission, add the new visit to memory, clear the form, and let the provider filter sort it.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Intercept submission, add the new visit to memory, clear the form, and let the provider filter sort it.
 
 WHAT YOU'LL NEED
 - Form submission interceptor.

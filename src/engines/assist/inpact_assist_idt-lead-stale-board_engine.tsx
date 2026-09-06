@@ -30,7 +30,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model a lead entry with contact timestamps and build the outreach board container.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/StaleBoard.tsx\` before anything else. Every step from here on edits that same file.
+
+Model a lead entry with contact timestamps and build the outreach board container.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -126,7 +130,9 @@ export function StaleBoard() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Filter the list to surface only stale leads that need attention, displaying "Great job! No stale leads" when clear.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Filter the list to surface only stale leads that need attention, displaying "Great job! No stale leads" when clear.
 
 WHAT YOU'LL NEED
 - State array holding all leads.
@@ -302,7 +308,9 @@ export function StaleBoard() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect input boxes to state to capture lead outreach details smoothly.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect input boxes to state to capture lead outreach details smoothly.
 
 WHAT YOU'LL NEED
 - State hooks for name and status.
@@ -440,7 +448,9 @@ export function StaleBoard() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Prevent page refresh on submit, append the lead to state, clear the form, and let the stale filter categorize it.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Prevent page refresh on submit, append the lead to state, clear the form, and let the stale filter categorize it.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

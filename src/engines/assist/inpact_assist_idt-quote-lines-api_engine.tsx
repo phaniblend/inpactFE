@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Create an in-memory line-item store and an ID generator to stamp unique line IDs.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/quote-lines.ts\` before anything else. Every step from here on edits that same file.
+
+Create an in-memory line-item store and an ID generator to stamp unique line IDs.
 
 WHAT YOU'LL NEED
 - An array holding line records.
@@ -104,7 +108,9 @@ export function getStore() { return lines; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Require that line-item submissions include an estimate ID, item name, and price (400).
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Require that line-item submissions include an estimate ID, item name, and price (400).
 
 WHAT YOU'LL NEED
 - Checks verifying required body properties.
@@ -192,7 +198,9 @@ export function validateLine(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Check existing line items on that quote to ensure the same item name is not entered twice.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Check existing line items on that quote to ensure the same item name is not entered twice.
 
 WHAT YOU'LL NEED
 - An array search checking for matching quoteId and label.
@@ -277,7 +285,9 @@ export function hasDuplicateLine(candidate) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Expose GET to list lines and POST to create new lines, returning a 409 error if that item label is already present.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Expose GET to list lines and POST to create new lines, returning a 409 error if that item label is already present.
 
 WHAT YOU'LL NEED
 - GET endpoint returning stored line items.

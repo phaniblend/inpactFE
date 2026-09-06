@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Set up a note storage drawer in memory and an ID generator for unique note references.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/lead-notes.ts\` before anything else. Every step from here on edits that same file.
+
+Set up a note storage drawer in memory and an ID generator for unique note references.
 
 WHAT YOU'LL NEED
 - An array holding note records.
@@ -104,7 +108,9 @@ export function getStore() { return notes; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Require that all note submissions contain both a lead ID and non-empty note content (400).
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Require that all note submissions contain both a lead ID and non-empty note content (400).
 
 WHAT YOU'LL NEED
 - Checks verifying required body properties.
@@ -192,7 +198,9 @@ export function validateNote(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Search existing notes to ensure this exact message hasn't already been logged for this lead.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Search existing notes to ensure this exact message hasn't already been logged for this lead.
 
 WHAT YOU'LL NEED
 - An array search checking for matching leadId and text.
@@ -277,7 +285,9 @@ export function isDuplicateNote(candidate) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Expose a GET endpoint to view notes and a POST endpoint that returns 409 if a matching note already exists.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Expose a GET endpoint to view notes and a POST endpoint that returns 409 if a matching note already exists.
 
 WHAT YOU'LL NEED
 - GET endpoint returning stored notes.

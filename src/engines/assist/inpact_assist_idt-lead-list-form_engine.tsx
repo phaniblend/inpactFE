@@ -29,7 +29,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Define the shape of a sales lead (name, email, company) and build the inbox frame.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/LeadInbox.tsx\` before anything else. Every step from here on edits that same file.
+
+Define the shape of a sales lead (name, email, company) and build the inbox frame.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -124,7 +128,9 @@ export function LeadInbox() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold leads in state; render each contact card, or display "Inbox zero — no new leads" when empty.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Hold leads in state; render each contact card, or display "Inbox zero — no new leads" when empty.
 
 WHAT YOU'LL NEED
 - State array holding leads.
@@ -293,7 +299,9 @@ export function LeadInbox() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect form fields to state so potential client details are captured live as you type.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect form fields to state so potential client details are captured live as you type.
 
 WHAT YOU'LL NEED
 - State hooks for name and email.
@@ -432,7 +440,9 @@ export function LeadInbox() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Stop the submit button from reloading the page, stack the lead into your inbox, and reset the form fields.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Stop the submit button from reloading the page, stack the lead into your inbox, and reset the form fields.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

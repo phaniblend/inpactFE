@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Set up a shift-coverage memory drawer and an ID generator for unique coverage tickets.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/coverage.ts\` before anything else. Every step from here on edits that same file.
+
+Set up a shift-coverage memory drawer and an ID generator for unique coverage tickets.
 
 WHAT YOU'LL NEED
 - An array holding coverage items.
@@ -106,7 +110,9 @@ export function getStore() { return coverage; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Check that coverage requests include a shift date, role, and department before proceeding.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Check that coverage requests include a shift date, role, and department before proceeding.
 
 WHAT YOU'LL NEED
 - Check for shift date and department on req.body.
@@ -194,7 +200,9 @@ export function validateCoverage(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Have the server assign "open" if no worker is attached or "filled" once an employee is assigned.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Have the server assign "open" if no worker is attached or "filled" once an employee is assigned.
 
 WHAT YOU'LL NEED
 - Server check verifying if an employee ID or assignee is attached.
@@ -269,7 +277,9 @@ export function deriveCoverageStatus(row, now = new Date()) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Build endpoints to fetch all coverage tickets (GET) and register new requests with their calculated status (POST).
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Build endpoints to fetch all coverage tickets (GET) and register new requests with their calculated status (POST).
 
 WHAT YOU'LL NEED
 - GET returning all coverage records.

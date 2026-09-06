@@ -30,7 +30,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Create a shift blueprint with staffing status and assemble the board frame.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/OpenShiftBoard.tsx\` before anything else. Every step from here on edits that same file.
+
+Create a shift blueprint with staffing status and assemble the board frame.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -126,7 +130,9 @@ export function OpenShiftBoard() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Filter shifts to isolate unfilled openings, displaying a "Schedule fully covered" notice if all slots are staffed.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Filter shifts to isolate unfilled openings, displaying a "Schedule fully covered" notice if all slots are staffed.
 
 WHAT YOU'LL NEED
 - State array holding all shifts.
@@ -302,7 +308,9 @@ export function OpenShiftBoard() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Link shift date and role fields to state so live typing is tracked without loss.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Link shift date and role fields to state so live typing is tracked without loss.
 
 WHAT YOU'LL NEED
 - State hooks for role and status inputs.
@@ -440,7 +448,9 @@ export function OpenShiftBoard() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Intercept submission, save the open shift to memory, reset the form, and let the unfilled filter render it.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Intercept submission, save the open shift to memory, reset the form, and let the unfilled filter render it.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

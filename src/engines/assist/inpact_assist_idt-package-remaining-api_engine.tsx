@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Build an in-memory card archive and an ID generator for unique pass codes.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/packages.ts\` before anything else. Every step from here on edits that same file.
+
+Build an in-memory card archive and an ID generator for unique pass codes.
 
 WHAT YOU'LL NEED
 - An array holding package records.
@@ -104,7 +108,9 @@ export function getStore() { return packages; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Verify that new package requests specify a valid customer and a positive starting punch total.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Verify that new package requests specify a valid customer and a positive starting punch total.
 
 WHAT YOU'LL NEED
 - Checks verifying required body properties.
@@ -194,7 +200,9 @@ export function validatePackage(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Compute the status on the server—labeling it "remaining" if punches are available, or "empty" if zero.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Compute the status on the server—labeling it "remaining" if punches are available, or "empty" if zero.
 
 WHAT YOU'LL NEED
 - Numeric comparison checking if remaining punches are greater than zero.
@@ -269,7 +277,9 @@ export function derivePackageStatus(row) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Expose GET to fetch packages and POST to create packages with the server-derived status included.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Expose GET to fetch packages and POST to create packages with the server-derived status included.
 
 WHAT YOU'LL NEED
 - GET endpoint returning stored packages.

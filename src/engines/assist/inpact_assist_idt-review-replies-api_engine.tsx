@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Establish an in-memory replies drawer and an ID tool to generate unique response IDs.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/review-replies.ts\` before anything else. Every step from here on edits that same file.
+
+Establish an in-memory replies drawer and an ID tool to generate unique response IDs.
 
 WHAT YOU'LL NEED
 - An array holding reply records.
@@ -104,7 +108,9 @@ export function getStore() { return replies; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Check that submitted replies contain a review ID, responder name, and message body (400).
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Check that submitted replies contain a review ID, responder name, and message body (400).
 
 WHAT YOU'LL NEED
 - Checks verifying required body properties.
@@ -192,7 +198,9 @@ export function validateReply(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Scan existing replies to verify this review hasn't already received a response on this channel.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Scan existing replies to verify this review hasn't already received a response on this channel.
 
 WHAT YOU'LL NEED
 - An array search checking for matching reviewId and channel.
@@ -277,7 +285,9 @@ export function hasReplyAlready(candidate) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Expose GET to list responses and POST to submit replies, returning a 409 conflict error if a response already exists.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Expose GET to list responses and POST to submit replies, returning a 409 conflict error if a response already exists.
 
 WHAT YOU'LL NEED
 - GET endpoint returning stored replies.

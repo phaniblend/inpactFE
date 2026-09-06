@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Establish memory storage for redemptions and an ID tool for generating transaction tags.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/punches.ts\` before anything else. Every step from here on edits that same file.
+
+Establish memory storage for redemptions and an ID tool for generating transaction tags.
 
 WHAT YOU'LL NEED
 - An array holding redemption records.
@@ -104,7 +108,9 @@ export function getStore() { return punches; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Ensure incoming punch requests include a valid package ID and user confirmation (400).
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Ensure incoming punch requests include a valid package ID and user confirmation (400).
 
 WHAT YOU'LL NEED
 - Checks verifying required body properties.
@@ -192,7 +198,9 @@ export function validatePunch(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Check the customer's balance to confirm they still have punches left to redeem.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Check the customer's balance to confirm they still have punches left to redeem.
 
 WHAT YOU'LL NEED
 - Lookup checking remaining balance for the requested package.
@@ -271,7 +279,9 @@ export function isPackageEmpty(candidate) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Expose GET for redemption history and POST to redeem a punch, returning a 409 conflict error if zero punches remain.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Expose GET for redemption history and POST to redeem a punch, returning a 409 conflict error if zero punches remain.
 
 WHAT YOU'LL NEED
 - GET endpoint returning stored redemptions.

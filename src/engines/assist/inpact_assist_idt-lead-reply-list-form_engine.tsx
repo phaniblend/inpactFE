@@ -29,7 +29,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Outline the blueprint for a customer reply note and build the container component.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/ReplyDesk.tsx\` before anything else. Every step from here on edits that same file.
+
+Outline the blueprint for a customer reply note and build the container component.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -124,7 +128,9 @@ export function ReplyDesk() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Store notes in memory; display the conversation thread row by row, or a "No replies logged yet" note if empty.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Store notes in memory; display the conversation thread row by row, or a "No replies logged yet" note if empty.
 
 WHAT YOU'LL NEED
 - State array holding reply notes.
@@ -293,7 +299,9 @@ export function ReplyDesk() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect the reply textarea to state so typed thoughts are saved on every key press.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect the reply textarea to state so typed thoughts are saved on every key press.
 
 WHAT YOU'LL NEED
 - State hooks for author and body.
@@ -432,7 +440,9 @@ export function ReplyDesk() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Prevent form submission refresh, append the note to the thread, and clear the text area.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Prevent form submission refresh, append the note to the thread, and clear the text area.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

@@ -31,7 +31,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 5",
-    paal: `Model customer info, item details, and order rows, assembling the pipeline view shell.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/SalesOrderPipeline.tsx\` before anything else. Every step from here on edits that same file.
+
+Model customer info, item details, and order rows, assembling the pipeline view shell.
 
 WHAT YOU'LL NEED
 - Customer type (id, name)
@@ -85,7 +89,9 @@ export function SalesPipeline() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 5",
-    paal: `Store customer lists, inventory options, current order lines, and any order warnings in state.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Store customer lists, inventory options, current order lines, and any order warnings in state.
 
 WHAT YOU'LL NEED
 - State for customers list.
@@ -134,7 +140,9 @@ const [error, setError] = useState<string | null>(null);`,
     id: "step3",
     type: "question",
     phase: "Step 3 of 5",
-    paal: `Fetch real customers and current warehouse item quantities from the server on load.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Fetch real customers and current warehouse item quantities from the server on load.
 
 WHAT YOU'LL NEED
 - useEffect with [] dependency array.
@@ -191,7 +199,9 @@ Your task: Fetch customer records and catalog availability on page mount.`,
     id: "step4",
     type: "question",
     phase: "Step 4 of 5",
-    paal: `Post the sales order to the server, catching and showing a friendly alert if requested quantities exceed current stock.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Post the sales order to the server, catching and showing a friendly alert if requested quantities exceed current stock.
 
 WHAT YOU'LL NEED
 - POST request sending customerId and lines.
@@ -258,7 +268,9 @@ Your task: Send the completed sales order to the server and display an error if 
     id: "step5",
     type: "question",
     phase: "Step 5 of 5",
-    paal: `Call the fulfillment endpoint on the server and update the order's status pill to "Fulfilled" right on screen.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Call the fulfillment endpoint on the server and update the order's status pill to "Fulfilled" right on screen.
 
 WHAT YOU'LL NEED
 - POST call targeting /api/so/:id/fulfill.

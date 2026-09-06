@@ -30,7 +30,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model a reminder item with delivery timestamps and assemble the active board container.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/DueBoard.tsx\` before anything else. Every step from here on edits that same file.
+
+Model a reminder item with delivery timestamps and assemble the active board container.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -126,7 +130,9 @@ export function DueBoard() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Filter reminders to display only those whose scheduled time is due right now, showing "All caught up" if clear.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Filter reminders to display only those whose scheduled time is due right now, showing "All caught up" if clear.
 
 WHAT YOU'LL NEED
 - State array holding all reminders.
@@ -302,7 +308,9 @@ export function DueBoard() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect reminder fields to state so typed messages and times stay synced.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect reminder fields to state so typed messages and times stay synced.
 
 WHAT YOU'LL NEED
 - State hooks for recipient and status inputs.
@@ -440,7 +448,9 @@ export function DueBoard() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Stop page reload on submit, append the reminder to state, clear the form, and let the due filter sort it.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Stop page reload on submit, append the reminder to state, clear the form, and let the due filter sort it.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

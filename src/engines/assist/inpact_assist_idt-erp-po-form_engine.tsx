@@ -34,7 +34,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 5",
-    paal: `Define blueprints for vendors, items, and line items, then create the purchase order screen layout.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/PurchaseOrderForm.tsx\` before anything else. Every step from here on edits that same file.
+
+Define blueprints for vendors, items, and line items, then create the purchase order screen layout.
 
 WHAT YOU'LL NEED
 - Vendor type (id, name)
@@ -88,7 +92,9 @@ export function PurchaseOrderManager() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 5",
-    paal: `Set up memory storage for available vendors, item options, and the items currently added to the order.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Set up memory storage for available vendors, item options, and the items currently added to the order.
 
 WHAT YOU'LL NEED
 - State for vendor list.
@@ -134,7 +140,9 @@ const [orderLines, setOrderLines] = useState<LineEntry[]>([]);`,
     id: "step3",
     type: "question",
     phase: "Step 3 of 5",
-    paal: `Fetch active vendors and item catalogs from the server on initial load.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Fetch active vendors and item catalogs from the server on initial load.
 
 WHAT YOU'LL NEED
 - useEffect with [] dependency array.
@@ -191,7 +199,9 @@ Your task: Load live vendor and catalog lists from the API on mount.`,
     id: "step4",
     type: "question",
     phase: "Step 4 of 5",
-    paal: `Submit the completed order to the server using a POST call, creating an official pending purchase order.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Submit the completed order to the server using a POST call, creating an official pending purchase order.
 
 WHAT YOU'LL NEED
 - Submission handler triggering fetch with method POST.
@@ -248,7 +258,9 @@ Your task: Submit the constructed purchase order lines and selected vendor to th
     id: "step5",
     type: "question",
     phase: "Step 5 of 5",
-    paal: `Send a receive confirmation call to the server to mark items arrived and immediately reflect updated warehouse counts.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Send a receive confirmation call to the server to mark items arrived and immediately reflect updated warehouse counts.
 
 WHAT YOU'LL NEED
 - Function taking the purchase order ID.

@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Set up an in-memory ledger and an ID helper to stamp each payment with a distinct ID.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/deposits.ts\` before anything else. Every step from here on edits that same file.
+
+Set up an in-memory ledger and an ID helper to stamp each payment with a distinct ID.
 
 WHAT YOU'LL NEED
 - An in-memory array holding deposit objects.
@@ -106,7 +110,9 @@ export function getStore() { return deposits; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Validate that incoming deposits include an amount greater than zero and a valid customer reference.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Validate that incoming deposits include an amount greater than zero and a valid customer reference.
 
 WHAT YOU'LL NEED
 - Checks for missing client or amount fields.
@@ -196,7 +202,9 @@ export function validateDeposit(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Let the server determine whether the deposit is "held" or "applied" based on balance rules rather than client input.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Let the server determine whether the deposit is "held" or "applied" based on balance rules rather than client input.
 
 WHAT YOU'LL NEED
 - Business logic inspecting payment values or account flags.
@@ -273,7 +281,9 @@ export function deriveDepositStatus(row, now = new Date()) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Set up a GET route to list deposits and a POST route that attaches the server-verified status on save.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Set up a GET route to list deposits and a POST route that attaches the server-verified status on save.
 
 WHAT YOU'LL NEED
 - GET endpoint returning all stored deposits.

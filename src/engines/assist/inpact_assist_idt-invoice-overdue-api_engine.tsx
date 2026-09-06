@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Create an in-memory invoice store and an ID generator for unique billing numbers.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/invoices.ts\` before anything else. Every step from here on edits that same file.
+
+Create an in-memory invoice store and an ID generator for unique billing numbers.
 
 WHAT YOU'LL NEED
 - An array holding invoice records.
@@ -106,7 +110,9 @@ export function getStore() { return invoices; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Validate that new invoice entries contain a positive balance and a valid customer ID.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Validate that new invoice entries contain a positive balance and a valid customer ID.
 
 WHAT YOU'LL NEED
 - Checks for required body fields.
@@ -194,7 +200,9 @@ export function validateInvoice(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Have the server compare the due date against the current date to determine if it is "current" or "overdue".
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Have the server compare the due date against the current date to determine if it is "current" or "overdue".
 
 WHAT YOU'LL NEED
 - Date comparison logic comparing dueDate against Date.now().
@@ -273,7 +281,9 @@ export function deriveStatus(row, now = new Date()) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Implement a GET route to list invoices and a POST route that stamps the computed overdue status before saving.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Implement a GET route to list invoices and a POST route that stamps the computed overdue status before saving.
 
 WHAT YOU'LL NEED
 - GET endpoint returning the storage array.

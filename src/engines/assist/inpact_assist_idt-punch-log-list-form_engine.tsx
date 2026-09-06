@@ -29,7 +29,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model a punch redemption entry (package ID, date, attendant) and set up the log layout.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/PunchDesk.tsx\` before anything else. Every step from here on edits that same file.
+
+Model a punch redemption entry (package ID, date, attendant) and set up the log layout.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -124,7 +128,9 @@ export function PunchDesk() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Maintain punch redemptions in state; show each logged punch, or an "Empty log — no punches redeemed" note.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Maintain punch redemptions in state; show each logged punch, or an "Empty log — no punches redeemed" note.
 
 WHAT YOU'LL NEED
 - State array holding redemptions.
@@ -293,7 +299,9 @@ export function PunchDesk() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect redemption input boxes to state so session selections are tracked cleanly.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect redemption input boxes to state so session selections are tracked cleanly.
 
 WHAT YOU'LL NEED
 - State hook for package ID.
@@ -428,7 +436,9 @@ export function PunchDesk() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Prevent default form reload, append the redemption event to the log, and reset the form fields.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Prevent default form reload, append the redemption event to the log, and reset the form fields.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

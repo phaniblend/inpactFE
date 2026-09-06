@@ -29,7 +29,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Outline a schedule blueprint (event title, notify time) and construct the component shell.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/ReminderHub.tsx\` before anything else. Every step from here on edits that same file.
+
+Outline a schedule blueprint (event title, notify time) and construct the component shell.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -124,7 +128,9 @@ export function ReminderHub() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Store scheduled reminders in state; show an event row for each entry, or a "No events scheduled" fallback.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Store scheduled reminders in state; show an event row for each entry, or a "No events scheduled" fallback.
 
 WHAT YOU'LL NEED
 - State array holding scheduled reminders.
@@ -293,7 +299,9 @@ export function ReminderHub() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect the title and date picker inputs to state to track user choices live.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect the title and date picker inputs to state to track user choices live.
 
 WHAT YOU'LL NEED
 - State hooks for title and scheduledFor inputs.
@@ -432,7 +440,9 @@ export function ReminderHub() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Prevent default submit refresh, append the event to the schedule list, and reset the inputs.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Prevent default submit refresh, append the event to the schedule list, and reset the inputs.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

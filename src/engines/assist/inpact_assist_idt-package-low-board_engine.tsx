@@ -30,7 +30,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Define the punch-card blueprint (including remaining punch count) and build the alert board shell.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/LowPackageBoard.tsx\` before anything else. Every step from here on edits that same file.
+
+Define the punch-card blueprint (including remaining punch count) and build the alert board shell.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -126,7 +130,9 @@ export function LowPackageBoard() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Filter packages to show only those with 1 or 2 punches left, showing "All client balances healthy" if empty.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Filter packages to show only those with 1 or 2 punches left, showing "All client balances healthy" if empty.
 
 WHAT YOU'LL NEED
 - State array holding all packages.
@@ -302,7 +308,9 @@ export function LowPackageBoard() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Link package form inputs to state so edits are tracked in real time.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Link package form inputs to state so edits are tracked in real time.
 
 WHAT YOU'LL NEED
 - State hooks for client and remaining punches.
@@ -442,7 +450,9 @@ export function LowPackageBoard() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Prevent submit reload, append the package to state, clear the inputs, and let the low-balance filter display it.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Prevent submit reload, append the package to state, clear the inputs, and let the low-balance filter display it.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

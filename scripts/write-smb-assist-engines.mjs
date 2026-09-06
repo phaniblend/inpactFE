@@ -100,6 +100,11 @@ function listFormModule(cfg) {
     tag,
     title,
     shortName,
+    // Absolute-beginner orientation — which language/file type this task is written in, and
+    // (for step 1 specifically, the first time this file is touched) exactly where to create it.
+    // Injected into every step's task panel by apply-review-content.mjs's buildTaskPanel().
+    language: "You're writing this in TypeScript + React — a `.tsx` file (TypeScript types alongside JSX markup).",
+    filePath: `src/components/${component}.tsx`,
     analog: "Name list (list + add form)",
     concept: `Build a screen that lists ${listVar} and a form to add one:
 
@@ -306,6 +311,8 @@ function conflictApiModule(cfg) {
     tag,
     title,
     shortName,
+    language: "You're writing this in TypeScript — a `.ts` file for a small backend API module (no JSX here).",
+    filePath: `server/routes/${resourcePath.replace(/^\/api\//, "")}.ts`,
     concept: `Implement ${resourcePath} with persistence and a conflict rule:
 
   Store    →  in-memory array of ${Type}
@@ -504,6 +511,8 @@ function derivedApiModule(cfg) {
     tag,
     title,
     shortName,
+    language: "You're writing this in TypeScript — a `.ts` file for a small backend API module (no JSX here).",
+    filePath: `server/routes/${resourcePath.replace(/^\/api\//, "")}.ts`,
     concept: `Implement ${resourcePath} with a derived status:
 
   Store    →  in-memory ${Type} rows

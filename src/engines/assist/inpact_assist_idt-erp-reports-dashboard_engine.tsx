@@ -31,7 +31,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 5",
-    paal: `Create data blueprints for trial balance lines and income statement summaries, setting up the dashboard grid.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/ReportsDashboard.tsx\` before anything else. Every step from here on edits that same file.
+
+Create data blueprints for trial balance lines and income statement summaries, setting up the dashboard grid.
 
 WHAT YOU'LL NEED
 - TrialBalanceLine type (account, debit, credit)
@@ -82,7 +86,9 @@ export function FinancialDashboard() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 5",
-    paal: `Set up state slots to hold the trial balance entries and income statement figures.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Set up state slots to hold the trial balance entries and income statement figures.
 
 WHAT YOU'LL NEED
 - State for the trial balance array.
@@ -124,7 +130,9 @@ const [statement, setStatement] = useState<Statement | null>(null);`,
     id: "step3",
     type: "question",
     phase: "Step 3 of 5",
-    paal: `Request the official trial balance and income statement reports from the API when the dashboard mounts.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Request the official trial balance and income statement reports from the API when the dashboard mounts.
 
 WHAT YOU'LL NEED
 - useEffect with [] dependency.
@@ -181,7 +189,9 @@ Your task: Fetch financial statements from the server on page mount.`,
     id: "step4",
     type: "question",
     phase: "Step 4 of 5",
-    paal: `Render the trial balance table with a visual badge confirming that debits equal credits.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Render the trial balance table with a visual badge confirming that debits equal credits.
 
 WHAT YOU'LL NEED
 - Calculations summing debits and credits.
@@ -258,7 +268,9 @@ return (
     id: "step5",
     type: "question",
     phase: "Step 5 of 5",
-    paal: `Display the income statement cards showing total revenue, total costs, and final net profit.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Display the income statement cards showing total revenue, total costs, and final net profit.
 
 WHAT YOU'LL NEED
 - Null-check guard while statement data loads.

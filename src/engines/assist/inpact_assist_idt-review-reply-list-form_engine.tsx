@@ -29,7 +29,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Create a reply blueprint (response text, author) and assemble the reply thread container.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/ReviewReplyDesk.tsx\` before anything else. Every step from here on edits that same file.
+
+Create a reply blueprint (response text, author) and assemble the reply thread container.
 
 WHAT YOU'LL NEED
 - id (text)
@@ -124,7 +128,9 @@ export function ReviewReplyDesk() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold replies in state; render each response in the thread, or show "No replies posted yet" if empty.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Hold replies in state; render each response in the thread, or show "No replies posted yet" if empty.
 
 WHAT YOU'LL NEED
 - State array holding reply items.
@@ -293,7 +299,9 @@ export function ReviewReplyDesk() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Connect the reply input box to state to track responses as you write them.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Connect the reply input box to state to track responses as you write them.
 
 WHAT YOU'LL NEED
 - State hooks for reviewId and response inputs.
@@ -432,7 +440,9 @@ export function ReviewReplyDesk() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Prevent form submit refresh, append the response to the conversation, and clear the input area.
+    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+
+Prevent form submit refresh, append the response to the conversation, and clear the input area.
 
 WHAT YOU'LL NEED
 - Form interceptor using e.preventDefault().

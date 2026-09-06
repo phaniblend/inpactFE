@@ -28,7 +28,11 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Set up an in-memory schedule store and an ID generator for unique shift slips.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+This file doesn't exist yet — you're the first to touch it. Create it at \`server/routes/shifts.ts\` before anything else. Every step from here on edits that same file.
+
+Set up an in-memory schedule store and an ID generator for unique shift slips.
 
 WHAT YOU'LL NEED
 - An array holding shift records.
@@ -104,7 +108,9 @@ export function getStore() { return shifts; }
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Validate that shift requests include a worker ID, start time, and end time (400).
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Validate that shift requests include a worker ID, start time, and end time (400).
 
 WHAT YOU'LL NEED
 - Checks verifying required body properties.
@@ -192,7 +198,9 @@ export function validateShift(input) {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Check existing assignments to verify this worker isn't already scheduled for another shift during that exact window.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Check existing assignments to verify this worker isn't already scheduled for another shift during that exact window.
 
 WHAT YOU'LL NEED
 - An array search checking for matching workerId and overlapping time windows.
@@ -281,7 +289,9 @@ export function hasWorkerOverlap(candidate) {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `Build GET to view published shifts and POST to create assignments, returning a 409 conflict if the worker is double-booked.
+    paal: `You're writing this in TypeScript — a \`.ts\` file for a small backend API module (no JSX here).
+
+Build GET to view published shifts and POST to create assignments, returning a 409 conflict if the worker is double-booked.
 
 WHAT YOU'LL NEED
 - GET endpoint returning stored shifts.
