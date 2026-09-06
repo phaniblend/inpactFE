@@ -1,5 +1,13 @@
 import createINPACTEngine from "../inpact_engine_shared";
 
+const MENTAL_MODEL = `Build a screen that lists open coverage requests and a form to add one:
+
+  List     →  each row is one CoverageSlot
+  Empty    →  a message when the list has no items
+  Form     →  Shift, Role
+  Submit   →  the new row appears on the list
+`;
+
 export const NODES = [
   {
     id: "intro",
@@ -8,193 +16,175 @@ export const NODES = [
     content: {
       tag: "idt-coverage-list-form",
       title: "Open coverage list + request form",
-      body: `Build a screen that lists requests and a form to add one:
-
-  List     →  each row is one CoverageRequest
-  Empty    →  a message when the list has no items
-  Form     →  Shift id, Reason, Needed by
-  Submit   →  the new row appears on the list
-`,
+      body: MENTAL_MODEL,
       usecase: "Last-minute coverage is another list+form — request goes up, teammates claim later.",
-      designMock: {"kind":"list-and-form","screenTitle":"Coverage","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No open coverage requests.","rows":[{"title":"s-3","subtitle":"Sick","meta":"Fri noon"},{"title":"Second row","subtitle":"Another","meta":"Fri noon"}],"fields":[{"label":"Shift id","sample":"s-3"},{"label":"Reason","sample":"Sick"},{"label":"Needed by","sample":"Fri noon"}],"submitLabel":"Request cover"},
+      designMock: {"kind":"list-and-form","screenTitle":"Coverage","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"All shifts covered","rows":[{"title":"Fri 8am","subtitle":"Barista","meta":""},{"title":"Second row","subtitle":"Another","meta":""}],"fields":[{"label":"Shift","sample":"Fri 8am"},{"label":"Role","sample":"Barista"}],"submitLabel":"Request cover"},
     },
   },
   {
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Create an item blueprint for shift requests and assemble the display container.","Keep shift requests in memory; render each open slot as a row, or show \"All shifts fully staffed\" if empty.","Connect input boxes to state so requested roles and shift hours are tracked character-by-character.","Prevent form submission refresh, append the shift request to the list, and empty the inputs."],
+    items: [
+      "Create a new component file (.tsx), define a TypeScript blueprint for one shift request, and set up an empty component shell.",
+      "Store your shift requests in app memory and render either the list of open shifts or a friendly fallback message.",
+      "Wire your text input fields directly to memory so every keystroke is tracked live.",
+      "On form submit, stop the default page reload, append the new request to your list, and clear the input boxes.",
+    ],
   },
   {
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+    paal: `Create a new component file (.tsx), define a TypeScript blueprint for one shift request, and set up an empty component shell.
 
-This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/CoverageDesk.tsx\` before anything else. Every step from here on edits that same file.
+Create a new file named OpenCoverage.tsx, define a blueprint named CoverageSlot, and export an empty shell component named OpenCoverage.
 
-Create an item blueprint for shift requests and assemble the display container.
+WHAT YOUR BLUEPRINT NEEDS
+- id (text identifier)
+- shift (text describing the shift time or block)
+- role (text describing the role needed)
 
-WHAT YOU'LL NEED
-- id (text)
-- shift (text)
-- role (text)
+Your task: write \`type CoverageSlot\` with id, shift, and role, then define and export OpenCoverage as a function component returning <div /> — every step from here on edits this same file.`,
+    hint: `1. Create the file: Create a new file named OpenCoverage.tsx in your components folder.
+2. Mirror the declaration: Look at "export type Guest = {". Swap Guest with your blueprint name: CoverageSlot.
+3. Fill the properties: Add id, shift, and role on separate lines following that exact pattern (name, colon, type string, semicolon).
+4. Close the blueprint: End with "};" on a new line.
+5. Mirror the component shell: Look at "export function GuestList() { return <div />; }". Replace GuestList with your component name: OpenCoverage.`,
+    example_code: `// GuestList.tsx
+export type Guest = {
+  id: string;
+  name: string;
+  note: string;
+};
 
-Your task: Define the shape of a coverage request and create the outer component.`,
-    hint: `1. Type declaration: Replace CoverageSlot with your type name.
-2. Add fields: Define shift and role as string fields.
-3. Component shell: Declare your component returning an empty <div />.`,
-    example_code: `export type CoverageSlot = {
+export function GuestList() {
+  return <div />;
+}`,
+    think_prompt: `Web apps combine visual layout (React) and strict data rules (TypeScript) into a single .tsx file. Before displaying anything, create OpenCoverage.tsx — inside it, write a TypeScript type (an itemized checklist of fields every shift must have) and a basic React function (the empty display box) so your code editor can catch typos early. Looking at the pattern, what does your blueprint need to name, and what does the component need to be called?`,
+    mc_options: [
+      "Create OpenCoverage.tsx, define type CoverageSlot (id, shift, role), then export function OpenCoverage() returning <div />",
+      "Skip the type and write JSX directly against untyped objects",
+      "Wait until every backend endpoint exists before modeling the row or the component",
+    ],
+    mc_correct_option: "Create OpenCoverage.tsx, define type CoverageSlot (id, shift, role), then export function OpenCoverage() returning <div />",
+    mc_anchor: "Create OpenCoverage.tsx, define type Cov",
+    why_this_matters: `The .tsx extension tells your editor that you are mixing TypeScript rules with visual React code. Declaring the blueprint first turns on autocomplete and helps catch typos before you ever run the code.`,
+    answer_keywords: ["export", "type", "CoverageSlot", "shift", "role", "export", "function", "OpenCoverage", "return"],
+    seed_code: ``,
+    starter_code: ``,
+    feedback_correct: "Correct — the blueprint and the component both exist now; every later step builds inside this.",
+    feedback_partial: "Close — check the hint and try again.",
+    feedback_wrong: "Start with a blueprint for one record, then the empty component shell that will use it.",
+    pre_check_hint: `Web apps combine visual layout (React) and strict data rules (TypeScript) into a single .tsx file. Before displaying anything, create OpenCoverage.tsx. Inside it, write a TypeScript type (an itemized checklist of fields every shift must have) and a basic React function (the empty display box) so your code editor can catch typos early.`,
+    expected: `export type CoverageSlot = {
   id: string;
   shift: string;
   role: string;
 };
 
-export function CoverageManager() {
-  return <div />;
-}`,
-    think_prompt: `\`\`\`text
-MOCK ROW — Coverage
-  Shift id: "s-3"
-  Reason: "Sick"
-  Needed by: "Fri noon"
-\`\`\`
-
-Every value with a shape needs one type to describe that shape before any component can safely hold or render it — and that type has to sit alongside the function that will actually use it. Looking at the mock row above, what does the shared type need to name — including a field the mock never shows on screen at all — and what does the component that will render it need to be called?`,
-    mc_options: ["Define type CoverageRequest (id + shiftId, reason, neededBy), then export function CoverageDesk() returning <div />","Skip the type and write JSX directly against untyped objects","Wait until every backend endpoint exists before modeling the row or the component"],
-    mc_correct_option: "Define type CoverageRequest (id + shiftId, reason, neededBy), then export function CoverageDesk() returning <div />",
-    mc_anchor: "Define type CoverageRequest (id + shiftI",
-    why_this_matters: `A defined shape guarantees your list component knows exactly what information every shift card will display.`,
-    answer_keywords: ["export","type","CoverageRequest","shiftId","reason","neededBy","export","function","CoverageDesk","return"],
-    seed_code: ``,
-    starter_code: ``,
-    feedback_correct: "Correct — the data shape and the component both exist now; every later step builds inside this.",
-    feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Start with a type for one record, then the component shell that will use it — layout and APIs come after the data shape exists.",
-    // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
-    // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
-    pre_check_hint: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
-    expected: `export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
-};
-
-export function CoverageDesk() {
+export function OpenCoverage() {
   return <div />;
 }
 `,
-    analog_example: `export type CoverageSlot = {
+    analog_example: `// GuestList.tsx
+export type Guest = {
   id: string;
-  shift: string;
-  role: string;
+  name: string;
+  note: string;
 };
 
-export function CoverageManager() {
+export function GuestList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      // Fix 7: lead with the general concept (why a shared pattern matters), not the task
-      // instruction restated verbatim.
-      hook: `A defined shape guarantees your list component knows exactly what information every shift card will display.`,
+      hook: `The .tsx extension tells your editor that you are mixing TypeScript rules with visual React code. Declaring the blueprint first turns on autocomplete and helps catch typos before you ever run the code.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
-      mentalModel: `Build a screen that lists requests and a form to add one:
-
-  List     →  each row is one CoverageRequest
-  Empty    →  a message when the list has no items
-  Form     →  Shift id, Reason, Needed by
-  Submit   →  the new row appears on the list
-`,
-      discover: `export type CoverageRequest = {
+      mentalModel: MENTAL_MODEL,
+      discover: `export type CoverageSlot = {
   id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
+  shift: string;
+  role: string;
 };
 
-export function CoverageDesk() {
+export function OpenCoverage() {
   return <div />;
 }
 `,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Type declaration: Replace CoverageSlot with your type name.
-2. Add fields: Define shift and role as string fields.
-3. Component shell: Declare your component returning an empty <div />.`,
+      build: `type CoverageSlot = { id: string; shift: string; role: string; }
+
+export function OpenCoverage() {
+  return <div />;
+}`,
     },
   },
   {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+    paal: `Store your shift requests in app memory and render either the list of open shifts or a friendly fallback message.
 
-Keep shift requests in memory; render each open slot as a row, or show "All shifts fully staffed" if empty.
+Store your coverage requests in a React state array and display each request, or show a polite note when no requests exist.
 
-WHAT YOU'LL NEED
-- State array holding coverage items.
-- Conditional check for empty list.
-- Map loop rendering shift details.
+WHAT YOUR LOGIC NEEDS
+- An array state hook initialized to an empty array typed with CoverageSlot.
+- A conditional check looking at your list's length.
+- A fallback message when length is 0.
+- A .map() loop returning rows when items exist.
 
-Your task: Store coverage requests in state and display them, showing an empty state note if none exist.`,
-    hint: `1. State hook: Declare useState<CoverageSlot[]>([]).
-2. Check length: Render a fallback message if slots.length === 0.
-3. Render rows: Loop over slots with .map(), displaying shift info with a key attribute.`,
-    example_code: `const [slots, setSlots] = useState<CoverageSlot[]>([]);
+Your task: hold requests in state typed as CoverageSlot[], render "All shifts covered" when requests.length === 0, and the mapped rows (key={item.id}) otherwise.`,
+    hint: `1. Initialize memory: Set up your state hook using useState<CoverageSlot[]>([]), importing useState from "react".
+2. Check for empty: Write a ternary condition checking if your state array's .length === 0.
+3. Add the fallback: In the first branch, provide your empty state message (e.g., <p>All shifts covered</p>).
+4. Loop through entries: In the second branch, use .map() to return a row for each item, making sure to assign key={item.id} to the root element.`,
+    example_code: `const [items, setItems] = useState<Guest[]>([]);
 
 return (
   <div>
-    {slots.length === 0 ? (
+    {items.length === 0 ? (
       <p>No open coverage requests</p>
     ) : (
-      slots.map((s) => (
-        <div key={s.id}>
-          {s.shift} - {s.role}
+      items.map((item) => (
+        <div key={item.id}>
+          {item.name} - {item.note}
         </div>
       ))
     )}
   </div>
 );`,
-    think_prompt: `\`\`\`text
-LIST — Coverage
-  s-3
-  Sick
-
-EMPTY — "No open coverage requests."
-\`\`\`
-
-React only redraws a component when the value it reads changes through React's own state — a plain variable can change without React ever finding out — and a zero-length array is a normal, common state that a bare map() renders as nothing at all, with no explanation for the user. Given both the sample rows and the empty case above, where does this growing array need to live, and what two branches does the render need to cover?`,
-    mc_options: ["useState for the array; branch on length === 0 before mapping rows with a stable key","let requests = [] and mutate it directly on every update","always render the mapped rows, even when the array is empty"],
+    think_prompt: `Standard variables disappear when a page updates, so we use a React memory hook (useState) to track the list. We then check if the collection is empty: if it has 0 items, display a clear "All shifts covered" note; if it has items, loop through and display each shift row. Where does this array need to live, and what two branches does the render need to cover?`,
+    mc_options: [
+      "useState for the array; branch on length === 0 before mapping rows with a stable key",
+      "let requests = [] and mutate it directly on every update",
+      "always render the mapped rows, even when the array is empty",
+    ],
     mc_correct_option: "useState for the array; branch on length === 0 before mapping rows with a stable key",
     mc_anchor: "useState for the array; branch on length",
-    why_this_matters: `Users can immediately see whether all shifts are staffed or if openings remain.`,
-    answer_keywords: ["useState","requests","setRequests","length","map","key"],
-    seed_code: `import { useState } from "react";
-
-export type CoverageRequest = {
+    why_this_matters: `Checking if the list is empty ensures that first-time users see a helpful status message rather than a confusing, blank screen.`,
+    answer_keywords: ["useState", "requests", "setRequests", "length", "map", "key"],
+    seed_code: `export type CoverageSlot = {
   id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
+  shift: string;
+  role: string;
 };
 
-export function CoverageDesk() {
+export function OpenCoverage() {
   return <div />;
 }
 `,
     starter_code: `import { useState } from "react";
 
-export type CoverageRequest = {
+export type CoverageSlot = {
   id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
+  shift: string;
+  role: string;
 };
 
-export function CoverageDesk() {
+export function OpenCoverage() {
   // list state here
   return (
     <div>
@@ -206,28 +196,25 @@ export function CoverageDesk() {
     feedback_correct: "Correct — the list is real state, and both the empty and populated cases are covered.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "List data must live in useState, and the render has to branch on length before mapping.",
-    // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
-    // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
-    pre_check_hint: `To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. Once it does, checking its length before deciding what to render is just an ordinary conditional — the empty case and the list case are two branches of one render.`,
+    pre_check_hint: `Standard variables disappear when a page updates, so we use a React memory hook (useState) to track the list. We then check if the collection is empty: if it has 0 items, display a clear "All shifts covered" note; if it has items, loop through and display each shift row.`,
     expected: `import { useState } from "react";
 
-export type CoverageRequest = {
+export type CoverageSlot = {
   id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
+  shift: string;
+  role: string;
 };
 
-export function CoverageDesk() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
+export function OpenCoverage() {
+  const [requests, setRequests] = useState<CoverageSlot[]>([]);
   return (
     <div>
       {requests.length === 0 ? (
-        <p>No open coverage requests.</p>
+        <p>All shifts covered</p>
       ) : (
         <ul>
-          {requests.map((a) => (
-            <li key={a.id}>{a.shiftId}</li>
+          {requests.map((r) => (
+            <li key={r.id}>{r.shift} — {r.role}</li>
           ))}
         </ul>
       )}
@@ -235,16 +222,16 @@ export function CoverageDesk() {
   );
 }
 `,
-    analog_example: `const [slots, setSlots] = useState<CoverageSlot[]>([]);
+    analog_example: `const [items, setItems] = useState<Guest[]>([]);
 
 return (
   <div>
-    {slots.length === 0 ? (
+    {items.length === 0 ? (
       <p>No open coverage requests</p>
     ) : (
-      slots.map((s) => (
-        <div key={s.id}>
-          {s.shift} - {s.role}
+      items.map((item) => (
+        <div key={item.id}>
+          {item.name} - {item.note}
         </div>
       ))
     )}
@@ -252,36 +239,27 @@ return (
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      // Fix 7: lead with the general concept (why a shared pattern matters), not the task
-      // instruction restated verbatim.
-      hook: `Users can immediately see whether all shifts are staffed or if openings remain.`,
+      hook: `Checking if the list is empty ensures that first-time users see a helpful status message rather than a confusing, blank screen.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
-      mentalModel: `Build a screen that lists requests and a form to add one:
-
-  List     →  each row is one CoverageRequest
-  Empty    →  a message when the list has no items
-  Form     →  Shift id, Reason, Needed by
-  Submit   →  the new row appears on the list
-`,
+      mentalModel: MENTAL_MODEL,
       discover: `import { useState } from "react";
 
-export type CoverageRequest = {
+export type CoverageSlot = {
   id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
+  shift: string;
+  role: string;
 };
 
-export function CoverageDesk() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
+export function OpenCoverage() {
+  const [requests, setRequests] = useState<CoverageSlot[]>([]);
   return (
     <div>
       {requests.length === 0 ? (
-        <p>No open coverage requests.</p>
+        <p>All shifts covered</p>
       ) : (
         <ul>
-          {requests.map((a) => (
-            <li key={a.id}>{a.shiftId}</li>
+          {requests.map((r) => (
+            <li key={r.id}>{r.shift} — {r.role}</li>
           ))}
         </ul>
       )}
@@ -292,68 +270,79 @@ export function CoverageDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. State hook: Declare useState<CoverageSlot[]>([]).
-2. Check length: Render a fallback message if slots.length === 0.
-3. Render rows: Loop over slots with .map(), displaying shift info with a key attribute.`,
+      build: `1. Initialize memory: useState<CoverageSlot[]>([]).
+2. Check for empty: .length === 0.
+3. Add the fallback: <p>All shifts covered</p>.
+4. Loop through entries: .map() with key={item.id}.`,
     },
   },
   {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+    paal: `Wire your text input fields directly to memory so every keystroke is tracked live.
 
-Connect input boxes to state so requested roles and shift hours are tracked character-by-character.
+Create text boxes for the shift timing and the required role, wiring both directly to individual React state variables.
 
-WHAT YOU'LL NEED
-- State variables for shift and role inputs.
-- Value and onChange props wired on each field.
+WHAT YOUR LOGIC NEEDS
+- Two separate string state hooks (one for shift, one for role).
+- Inputs with value bound to their matching state variable.
+- Inputs with onChange updating their state variable using e.target.value.
 
-Your task: Bind shift time and role input fields to React state.`,
-    hint: `1. Declare states: Call useState("") for shift and role.
-2. Connect inputs: Set value={shift} and value={role}.
-3. Update on keystroke: Set onChange handlers to update state with e.target.value.`,
-    example_code: `const [shift, setShift] = useState("");
-const [role, setRole] = useState("");
+Your task: add state values for shift and role, then wire each input's value and onChange to it.`,
+    hint: `1. Initialize field states: Declare const [shift, setShift] = useState("") and const [role, setRole] = useState("").
+2. Connect the display: Add two <input /> elements inside your form, setting value={shift} on the first and value={role} on the second.
+3. Capture keystrokes: On each input, provide onChange={(e) => setYourField(e.target.value)} to forward user typing directly into state.`,
+    example_code: `const [name, setName] = useState("");
+const [note, setNote] = useState("");
 
-<input value={shift} onChange={(e) => setShift(e.target.value)} />
-<input value={role} onChange={(e) => setRole(e.target.value)} />`,
-    think_prompt: `\`\`\`text
-FORM — Coverage
-  [ Shift id ]  [ Reason ]  [ Needed by ]   → Request cover
-\`\`\`
-
-A form field's text can live in the DOM itself (uncontrolled) or in React state (controlled) — a controlled input reads its value from state and writes every keystroke back into that same state. Where does each field's typed text need to live so what you type is exactly what submit will save?`,
-    mc_options: ["value from state, onChange writes back to state","read the input only on submit via document.getElementById","store the DOM node in a global"],
+return (
+  <form>
+    <input
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+      placeholder="Name"
+    />
+    <input
+      value={note}
+      onChange={(e) => setNote(e.target.value)}
+      placeholder="Note"
+    />
+  </form>
+);`,
+    think_prompt: `Instead of letting the browser manage inputs on its own, React uses "controlled inputs." Each text box reads its displayed characters directly from memory (value) and immediately saves new keystrokes into memory (onChange), ensuring you always have total control over the typed data. Where does each field's typed text need to live?`,
+    mc_options: [
+      "value from state, onChange writes back to state",
+      "read the input only on submit via document.getElementById",
+      "store the DOM node in a global",
+    ],
     mc_correct_option: "value from state, onChange writes back to state",
     mc_anchor: "value from state, onChange writes back t",
-    why_this_matters: `React tracks every change live, making form submission straightforward and bug-free.`,
-    answer_keywords: ["useState","value=","onChange","shiftId","reason","neededBy"],
+    why_this_matters: `Controlled inputs keep the screen and memory in sync at all times, making it easy to validate text, enable buttons, or package the data on submit.`,
+    answer_keywords: ["useState", "value=", "onChange", "shift", "role"],
     seed_code: `import { useState } from "react";
 
-export type CoverageRequest = {
+export type CoverageSlot = {
   id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
+  shift: string;
+  role: string;
 };
 
-export function CoverageDesk() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
+export function OpenCoverage() {
+  const [requests, setRequests] = useState<CoverageSlot[]>([]);
   return <form />;
 }
 `,
     starter_code: `import { useState } from "react";
 
-export type CoverageRequest = {
+export type CoverageSlot = {
   id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
+  shift: string;
+  role: string;
 };
 
-export function CoverageDesk() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
+export function OpenCoverage() {
+  const [requests, setRequests] = useState<CoverageSlot[]>([]);
   // field state
   return (
     <form>
@@ -365,143 +354,129 @@ export function CoverageDesk() {
     feedback_correct: "Correct — keep going.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Controlled inputs: value and onChange both talk to React state.",
-    // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
-    // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
-    pre_check_hint: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
+    pre_check_hint: `Instead of letting the browser manage inputs on its own, React uses "controlled inputs." Each text box reads its displayed characters directly from memory (value) and immediately saves new keystrokes into memory (onChange).`,
     expected: `import { useState } from "react";
 
-export type CoverageRequest = {
+export type CoverageSlot = {
   id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
+  shift: string;
+  role: string;
 };
 
-export function CoverageDesk() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  const [shiftId, setShiftId] = useState("");
-  const [reason, setReason] = useState("");
-  const [neededBy, setNeededBy] = useState("");
+export function OpenCoverage() {
+  const [requests, setRequests] = useState<CoverageSlot[]>([]);
+  const [shift, setShift] = useState("");
+  const [role, setRole] = useState("");
   return (
     <form>
-        <input value={shiftId} onChange={(e) => setShiftId(e.target.value)} placeholder="Shift id" />
-        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" />
-        <input value={neededBy} onChange={(e) => setNeededBy(e.target.value)} placeholder="Needed by" />
+      <input value={shift} onChange={(e) => setShift(e.target.value)} placeholder="Shift" />
+      <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" />
     </form>
   );
 }
 `,
-    analog_example: `const [shift, setShift] = useState("");
+    analog_example: `const [name, setName] = useState("");
+const [note, setNote] = useState("");
+
+return (
+  <form>
+    <input
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+      placeholder="Name"
+    />
+    <input
+      value={note}
+      onChange={(e) => setNote(e.target.value)}
+      placeholder="Note"
+    />
+  </form>
+);`,
+    deepDiveLabel: "Why this step matters",
+    deepDive: {
+      hook: `Controlled inputs keep the screen and memory in sync at all times, making it easy to validate text, enable buttons, or package the data on submit.`,
+      pain: "Skipping this step leaves later code with no data shape or no source of truth.",
+      mentalModel: MENTAL_MODEL,
+      discover: `const [shift, setShift] = useState("");
 const [role, setRole] = useState("");
 
 <input value={shift} onChange={(e) => setShift(e.target.value)} />
 <input value={role} onChange={(e) => setRole(e.target.value)} />`,
-    deepDiveLabel: "Why this step matters",
-    deepDive: {
-      // Fix 7: lead with the general concept (why a shared pattern matters), not the task
-      // instruction restated verbatim.
-      hook: `React tracks every change live, making form submission straightforward and bug-free.`,
-      pain: "Skipping this step leaves later code with no data shape or no source of truth.",
-      mentalModel: `Build a screen that lists requests and a form to add one:
-
-  List     →  each row is one CoverageRequest
-  Empty    →  a message when the list has no items
-  Form     →  Shift id, Reason, Needed by
-  Submit   →  the new row appears on the list
-`,
-      discover: `import { useState } from "react";
-
-export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
-};
-
-export function CoverageDesk() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  const [shiftId, setShiftId] = useState("");
-  const [reason, setReason] = useState("");
-  const [neededBy, setNeededBy] = useState("");
-  return (
-    <form>
-        <input value={shiftId} onChange={(e) => setShiftId(e.target.value)} placeholder="Shift id" />
-        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" />
-        <input value={neededBy} onChange={(e) => setNeededBy(e.target.value)} placeholder="Needed by" />
-    </form>
-  );
-}
-`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Declare states: Call useState("") for shift and role.
-2. Connect inputs: Set value={shift} and value={role}.
-3. Update on keystroke: Set onChange handlers to update state with e.target.value.`,
+      build: `1. Declare states: useState("") for shift and role.
+2. Connect the display: value={shift} / value={role}.
+3. Capture keystrokes: onChange={(e) => setYourField(e.target.value)}.`,
     },
   },
   {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+    paal: `On form submit, stop the default page reload, append the new request to your list, and clear the input boxes.
 
-Prevent form submission refresh, append the shift request to the list, and empty the inputs.
+Intercept the form submission, build a new CoverageSlot item, add it to your requests list in state, and clear the input fields.
 
-WHAT YOU'LL NEED
-- e.preventDefault() call.
-- New object creation with unique ID.
-- Spread update to state.
-- State setters called with empty strings.
+WHAT YOUR LOGIC NEEDS
+- A submit handler attached to the form's onSubmit prop.
+- A call to e.preventDefault() to halt full page reloads.
+- A new object combining a unique id with the values from your input states.
+- A state update appending the object using spread syntax (...prev).
+- Cleanup calls resetting input states to "".
 
-Your task: Add the new coverage request to your list without refreshing the page and reset the inputs.`,
-    hint: `1. Intercept submit: Place e.preventDefault() at the start.
-2. Build item: Package id, shift, and role into an object.
-3. Append: Update state using setSlots((prev) => [...prev, entry]).
-4. Clear inputs: Reset both input states to "".`,
-    example_code: `function submitSlot(e: React.FormEvent) {
+Your task: on submit, call preventDefault, build a new CoverageSlot from the field state, add it to requests without mutating the old array, then clear the fields.`,
+    hint: `1. Stop browser reload: Create your submit handler function and place e.preventDefault() on the first line.
+2. Package the item: Build an object containing id: String(Date.now()), shift, and role.
+3. Append to state: Update your list state using the spread pattern: setRequests((prev) => [...prev, nextItem]).
+4. Clear inputs: Call setShift("") and setRole("") right after updating the list so the text boxes empty out.
+5. Wire to form: Add onSubmit={yourHandlerName} to your <form> element.`,
+    example_code: `function handleAdd(e: React.FormEvent) {
   e.preventDefault();
-  const entry = { id: String(Date.now()), shift, role };
-  setSlots((prev) => [...prev, entry]);
-  setShift("");
-  setRole("");
-}`,
-    think_prompt: `\`\`\`text
-FORM — Coverage
-  [ Shift id ]  [ Reason ]  [ Needed by ]   → Request cover
-  (stays on the page — the new row appears in the list above)
-\`\`\`
+  const nextItem = {
+    id: String(Date.now()),
+    name,
+    note,
+  };
+  setItems((prev) => [...prev, nextItem]);
+  setName("");
+  setNote("");
+}
 
-Submitting an HTML form reloads the page by default; canceling that default lets your own handler run instead, and adding to a list in state means building a new array rather than mutating the old one. Given that, what has to happen, in order, when Request cover is used?`,
-    mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
+return (
+  <form onSubmit={handleAdd}>
+    {/* input fields */}
+    <button type="submit">Submit</button>
+  </form>
+);`,
+    think_prompt: `Normal web forms try to refresh the entire browser tab on submit. We hit the brakes with e.preventDefault(), assemble the newly typed values into a single shift object, stack it onto the existing list without erasing older entries, and reset the input boxes to blank for the next request. What has to happen, in order, when Request cover is used?`,
+    mc_options: [
+      "preventDefault, append one item, clear fields",
+      "window.location.reload after every submit",
+      "only console.log the form values",
+    ],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `The schedule updates immediately on screen without jarring browser reloads.
-
-
-================================================================================`,
-    answer_keywords: ["preventDefault","setRequests","prev","shiftId","reason","neededBy"],
+    why_this_matters: `Stopping page refresh keeps the application state intact, allowing the new shift request to appear instantly on screen without a jarring flicker.`,
+    answer_keywords: ["preventDefault", "setRequests", "prev", "shift", "role"],
     seed_code: `import { useState } from "react";
 
-export type CoverageRequest = {
+export type CoverageSlot = {
   id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
+  shift: string;
+  role: string;
 };
 
-export function CoverageDesk() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  const [shiftId, setShiftId] = useState("");
-  const [reason, setReason] = useState("");
-  const [neededBy, setNeededBy] = useState("");
+export function OpenCoverage() {
+  const [requests, setRequests] = useState<CoverageSlot[]>([]);
+  const [shift, setShift] = useState("");
+  const [role, setRole] = useState("");
   return (
     <div>
-      {requests.length === 0 ? <p>No open coverage requests.</p> : <ul>{requests.map((a) => <li key={a.id}>{a.shiftId} · {a.reason} · {a.neededBy}</li>)}</ul>}
+      {requests.length === 0 ? <p>All shifts covered</p> : <ul>{requests.map((r) => <li key={r.id}>{r.shift} — {r.role}</li>)}</ul>}
       <form>
-        <input value={shiftId} onChange={(e) => setShiftId(e.target.value)} placeholder="Shift id" />
-        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" />
-        <input value={neededBy} onChange={(e) => setNeededBy(e.target.value)} placeholder="Needed by" />
+        <input value={shift} onChange={(e) => setShift(e.target.value)} placeholder="Shift" />
+        <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" />
       </form>
     </div>
   );
@@ -509,28 +484,25 @@ export function CoverageDesk() {
 `,
     starter_code: `import { useState } from "react";
 
-export type CoverageRequest = {
+export type CoverageSlot = {
   id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
+  shift: string;
+  role: string;
 };
 
-export function CoverageDesk() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  const [shiftId, setShiftId] = useState("");
-  const [reason, setReason] = useState("");
-  const [neededBy, setNeededBy] = useState("");
-  function onSubmit(e: React.FormEvent) {
+export function OpenCoverage() {
+  const [requests, setRequests] = useState<CoverageSlot[]>([]);
+  const [shift, setShift] = useState("");
+  const [role, setRole] = useState("");
+  function handleAdd(e: React.FormEvent) {
     // submit
   }
   return (
     <div>
-      {requests.length === 0 ? <p>No open coverage requests.</p> : <ul>{requests.map((a) => <li key={a.id}>{a.shiftId} · {a.reason} · {a.neededBy}</li>)}</ul>}
-      <form onSubmit={onSubmit}>
-        <input value={shiftId} onChange={(e) => setShiftId(e.target.value)} placeholder="Shift id" />
-        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" />
-        <input value={neededBy} onChange={(e) => setNeededBy(e.target.value)} placeholder="Needed by" />
+      {requests.length === 0 ? <p>All shifts covered</p> : <ul>{requests.map((r) => <li key={r.id}>{r.shift} — {r.role}</li>)}</ul>}
+      <form onSubmit={handleAdd}>
+        <input value={shift} onChange={(e) => setShift(e.target.value)} placeholder="Shift" />
+        <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" />
         <button type="submit">Request cover</button>
       </form>
     </div>
@@ -540,125 +512,86 @@ export function CoverageDesk() {
     feedback_correct: "Correct — submit updates list state without a reload.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Stay on the page, grow the list, reset the form.",
-    // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
-    // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
     pre_check_hint: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     expected: `import { useState } from "react";
 
-export type CoverageRequest = {
+export type CoverageSlot = {
   id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
+  shift: string;
+  role: string;
 };
 
-export function CoverageDesk() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  const [shiftId, setShiftId] = useState("");
-  const [reason, setReason] = useState("");
-  const [neededBy, setNeededBy] = useState("");
-  function onSubmit(e: React.FormEvent) {
+export function OpenCoverage() {
+  const [requests, setRequests] = useState<CoverageSlot[]>([]);
+  const [shift, setShift] = useState("");
+  const [role, setRole] = useState("");
+
+  function handleAdd(e: React.FormEvent) {
     e.preventDefault();
-    const next: CoverageRequest = { id: String(Date.now()), shiftId, reason, neededBy };
-    setRequests((prev) => [...prev, next]);
-    setShiftId("");
-    setReason("");
-    setNeededBy("");
+    const nextItem: CoverageSlot = { id: String(Date.now()), shift, role };
+    setRequests((prev) => [...prev, nextItem]);
+    setShift("");
+    setRole("");
   }
+
   return (
     <div>
       {requests.length === 0 ? (
-        <p>No open coverage requests.</p>
+        <p>All shifts covered</p>
       ) : (
         <ul>
-          {requests.map((a) => (
-            <li key={a.id}>{a.shiftId} · {a.reason} · {a.neededBy}</li>
+          {requests.map((r) => (
+            <li key={r.id}>{r.shift} — {r.role}</li>
           ))}
         </ul>
       )}
-      <form onSubmit={onSubmit}>
-        <input value={shiftId} onChange={(e) => setShiftId(e.target.value)} placeholder="Shift id" />
-        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" />
-        <input value={neededBy} onChange={(e) => setNeededBy(e.target.value)} placeholder="Needed by" />
+      <form onSubmit={handleAdd}>
+        <input value={shift} onChange={(e) => setShift(e.target.value)} placeholder="Shift" />
+        <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" />
         <button type="submit">Request cover</button>
       </form>
     </div>
   );
 }
 `,
-    analog_example: `function submitSlot(e: React.FormEvent) {
+    analog_example: `function handleAdd(e: React.FormEvent) {
   e.preventDefault();
-  const entry = { id: String(Date.now()), shift, role };
-  setSlots((prev) => [...prev, entry]);
+  const nextItem = {
+    id: String(Date.now()),
+    name,
+    note,
+  };
+  setItems((prev) => [...prev, nextItem]);
+  setName("");
+  setNote("");
+}
+
+return (
+  <form onSubmit={handleAdd}>
+    {/* input fields */}
+    <button type="submit">Submit</button>
+  </form>
+);`,
+    deepDiveLabel: "Why this step matters",
+    deepDive: {
+      hook: `Stopping page refresh keeps the application state intact, allowing the new shift request to appear instantly on screen without a jarring flicker.`,
+      pain: "Skipping this step leaves later code with no data shape or no source of truth.",
+      mentalModel: MENTAL_MODEL,
+      discover: `function handleAdd(e: React.FormEvent) {
+  e.preventDefault();
+  const nextItem: CoverageSlot = { id: String(Date.now()), shift, role };
+  setRequests((prev) => [...prev, nextItem]);
   setShift("");
   setRole("");
 }`,
-    deepDiveLabel: "Why this step matters",
-    deepDive: {
-      // Fix 7: lead with the general concept (why a shared pattern matters), not the task
-      // instruction restated verbatim.
-      hook: `The schedule updates immediately on screen without jarring browser reloads.
-
-
-================================================================================`,
-      pain: "Skipping this step leaves later code with no data shape or no source of truth.",
-      mentalModel: `Build a screen that lists requests and a form to add one:
-
-  List     →  each row is one CoverageRequest
-  Empty    →  a message when the list has no items
-  Form     →  Shift id, Reason, Needed by
-  Submit   →  the new row appears on the list
-`,
-      discover: `import { useState } from "react";
-
-export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  neededBy: string;
-};
-
-export function CoverageDesk() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  const [shiftId, setShiftId] = useState("");
-  const [reason, setReason] = useState("");
-  const [neededBy, setNeededBy] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: CoverageRequest = { id: String(Date.now()), shiftId, reason, neededBy };
-    setRequests((prev) => [...prev, next]);
-    setShiftId("");
-    setReason("");
-    setNeededBy("");
-  }
-  return (
-    <div>
-      {requests.length === 0 ? (
-        <p>No open coverage requests.</p>
-      ) : (
-        <ul>
-          {requests.map((a) => (
-            <li key={a.id}>{a.shiftId} · {a.reason} · {a.neededBy}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={shiftId} onChange={(e) => setShiftId(e.target.value)} placeholder="Shift id" />
-        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" />
-        <input value={neededBy} onChange={(e) => setNeededBy(e.target.value)} placeholder="Needed by" />
-        <button type="submit">Request cover</button>
-      </form>
-    </div>
-  );
-}
-`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Intercept submit: Place e.preventDefault() at the start.
-2. Build item: Package id, shift, and role into an object.
-3. Append: Update state using setSlots((prev) => [...prev, entry]).
-4. Clear inputs: Reset both input states to "".`,
+      build: `1. Stop browser reload: e.preventDefault() first.
+2. Package the item: { id: String(Date.now()), shift, role }.
+3. Append to state: setRequests((prev) => [...prev, nextItem]).
+4. Clear inputs: setShift(""); setRole("").
+5. Wire to form: onSubmit={handleAdd}.`,
     },
   },
 ];

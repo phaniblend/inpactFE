@@ -26,10 +26,20 @@ function loadDoneSet(moduleTag) {
  * `paal` field itself untouched (the old Assist Me lightbox still uses the full version) and just
  * take its first paragraph here: every step in practice states the goal, then a blank line, before
  * any reference block or "Your task" restatement follows.
+ *
+ * Every step's `paal` later also picked up a leading language/file-type line ("You're writing this
+ * in...") and, on step 1, a "this file doesn't exist yet, create it at..." line, both meant for
+ * beginners reading the full Assist Me popup — but as the literal first paragraph here, it made
+ * every step's "What" show that same generic sentence instead of the step's actual goal (found
+ * live 2026-09-06: Step 1 and Step 2 rendered identically). Skip any leading paragraph that's one
+ * of those two preambles and take the first real goal paragraph after them.
  */
+const PAAL_PREAMBLE_RE = /^(You're writing this in|This file doesn't exist yet)/;
 function whatFromPaal(paal) {
   if (!paal) return "";
-  return paal.split("\n\n")[0].trim();
+  const paragraphs = paal.split("\n\n").map((p) => p.trim());
+  const goal = paragraphs.find((p) => p && !PAAL_PREAMBLE_RE.test(p));
+  return goal || paragraphs[0] || "";
 }
 
 function saveDoneSet(moduleTag, set) {

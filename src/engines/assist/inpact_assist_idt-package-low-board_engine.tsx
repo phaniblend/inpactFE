@@ -17,7 +17,7 @@ export const NODES = [
   Filter   →  only matching rows render — the full list stays in state
 `,
       usecase: "Owners upsell when a card is almost empty. Filter for display; keep full packages in state.",
-      designMock: {"kind":"list-and-form","screenTitle":"Almost empty","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No low-balance packages.","rows":[{"title":"Riley","subtitle":"Cut","meta":"low"},{"title":"Second row","subtitle":"Another","meta":"low"}],"fields":[{"label":"Client","sample":"Riley"},{"label":"Service","sample":"Cut"},{"label":"Status","sample":"low"}],"submitLabel":"Sell"},
+      designMock: {"kind":"list-and-form","screenTitle":"Low-balance packages","caption":"This is the screen you are building. Match the pieces — list, empty message, filter — not the brand colors. Try filtering by status.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No low-balance packages.","rows":[{"title":"Riley","subtitle":"Cut","meta":"Low"},{"title":"Jordan","subtitle":"Color","meta":"OK"}],"fields":[{"label":"Status","options":["All","Low","OK"]}],"formMode":"filter","submitLabel":"Filter"},
     },
   },
   {
@@ -482,10 +482,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `The new package is added to the master list, and your filter automatically displays it if its balance is low.
-
-
-================================================================================`,
+    why_this_matters: `The new package is added to the master list, and your filter automatically displays it if its balance is low.`,
     answer_keywords: ["preventDefault","setPackages","prev","client","service","status"],
     seed_code: `import { useState } from "react";
 
@@ -603,10 +600,7 @@ export function LowPackageBoard() {
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `The new package is added to the master list, and your filter automatically displays it if its balance is low.
-
-
-================================================================================`,
+      hook: `The new package is added to the master list, and your filter automatically displays it if its balance is low.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists packages and a form to add one:
 

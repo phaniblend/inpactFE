@@ -920,8 +920,8 @@ export const DESIGN_MOCKS = {
   },
   "idt-package-low-board": {
     "kind": "list-and-form",
-    "screenTitle": "Almost empty",
-    "caption": "This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.",
+    "screenTitle": "Low-balance packages",
+    "caption": "This is the screen you are building. Match the pieces — list, empty message, filter — not the brand colors. Try filtering by status.",
     "listCaption": "LIST — sample rows",
     "emptyCaption": "EMPTY — when there are no rows",
     "emptyMessage": "No low-balance packages.",
@@ -929,28 +929,21 @@ export const DESIGN_MOCKS = {
       {
         "title": "Riley",
         "subtitle": "Cut",
-        "meta": "low"
+        "meta": "Low"
       },
       {
-        "title": "Second row",
-        "subtitle": "Another",
-        "meta": "low"
+        "title": "Jordan",
+        "subtitle": "Color",
+        "meta": "OK"
       }
     ],
     "fields": [
       {
-        "label": "Client",
-        "sample": "Riley"
-      },
-      {
-        "label": "Service",
-        "sample": "Cut"
-      },
-      {
         "label": "Status",
-        "sample": "low"
+        "options": ["All", "Low", "OK"]
       }
     ],
-    "submitLabel": "Sell"
+    "formMode": "filter",
+    "submitLabel": "Filter"
   }
 };

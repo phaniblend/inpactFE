@@ -296,7 +296,14 @@ function conflictApiModule(cfg) {
     fields,
     conflictHint,
     usecase,
+    // Which two fields actually make two rows conflict — defaults to first+last, but that's a
+    // guess: several conflictHints name first+*middle* (e.g. "same leadId + same body"), which
+    // first+last silently gets wrong (caught live 2026-09-06 building the real backend — it was
+    // comparing leadId+channel there, not leadId+body as the hint itself says). Pass explicit
+    // names whenever the conflict fields aren't literally the first and last in `fields`.
+    conflictFields = null,
   } = cfg;
+  const [conflictFieldA, conflictFieldB] = conflictFields || [fields[0].name, fields[fields.length - 1].name];
   const validateChecks = fields
     .map((f) => {
       if (f.ts === "number") {
@@ -313,6 +320,10 @@ function conflictApiModule(cfg) {
     shortName,
     language: "You're writing this in TypeScript — a `.ts` file for a small backend API module (no JSX here).",
     filePath: `server/routes/${resourcePath.replace(/^\/api\//, "")}.ts`,
+    // Raw spec for scripts/generate-smb-backend-routes.mjs — the *real*, deployed implementation
+    // of this resource (see that script's header for why this exists as its own real Express
+    // router now instead of only ever being a lesson spec).
+    apiConfig: { kind: "conflict", store, validateFn, overlapFn, resourcePath, fields, conflictHint, conflictFields: [conflictFieldA, conflictFieldB] },
     concept: `Implement ${resourcePath} with persistence and a conflict rule:
 
   Store    →  in-memory array of ${Type}
@@ -406,7 +417,7 @@ function conflictApiModule(cfg) {
         analog: `function seatTaken(seat, holds) {\n  return holds.some((h) => h.seat === seat);\n}`,
         seed: `let ${store} = [];\nexport function ${validateFn}(input) { return null; }\n`,
         starter: `let ${store} = [];\nexport function ${validateFn}(input) { return null; }\nexport function ${overlapFn}(candidate) {}\n`,
-        expected: `let ${store} = [];\nexport function ${validateFn}(input) { return null; }\nexport function ${overlapFn}(candidate) {\n  return ${store}.some((row) => row.${fields[0].name} === candidate.${fields[0].name} && row.${fields[fields.length - 1].name} === candidate.${fields[fields.length - 1].name});\n}\n`,
+        expected: `let ${store} = [];\nexport function ${validateFn}(input) { return null; }\nexport function ${overlapFn}(candidate) {\n  return ${store}.some((row) => row.${conflictFieldA} === candidate.${conflictFieldA} && row.${conflictFieldB} === candidate.${conflictFieldB});\n}\n`,
         keywords: [overlapFn, "some", fields[0].name],
         mc: [
           "compare candidate against existing rows; true means conflict",
@@ -438,7 +449,7 @@ function conflictApiModule(cfg) {
         analog: `if (seatTaken(body.seat, holds)) return res.status(409).json({ error: "taken" });`,
         seed: `let ${store} = [];\n${NEXT_ID_HELPER}\nexport function ${validateFn}(input) { return null; }\nexport function ${overlapFn}(c) { return false; }\n`,
         starter: `let ${store} = [];\n${NEXT_ID_HELPER}\nexport function ${validateFn}(input) { return null; }\nexport function ${overlapFn}(c) { return false; }\nexport function createHandlers() {\n  return { list() {}, create() {} };\n}\n`,
-        expected: `let ${store} = [];\n${NEXT_ID_HELPER}\nexport function ${validateFn}(input) { return null; }\nexport function ${overlapFn}(candidate) {\n  return ${store}.some((row) => row.${fields[0].name} === candidate.${fields[0].name} && row.${fields[fields.length - 1].name} === candidate.${fields[fields.length - 1].name});\n}\nexport function createHandlers() {\n  return {\n    list(_req, res) {\n      res.json(${store});\n    },\n    create(req, res) {\n      const err = ${validateFn}(req.body);\n      if (err) return res.status(400).json({ error: err });\n      if (${overlapFn}(req.body)) return res.status(409).json({ error: "conflict" });\n      const row = { id: nextId(), ${rowAssign} };\n      ${store}.push(row);\n      res.status(201).json(row);\n    },\n  };\n}\n`,
+        expected: `let ${store} = [];\n${NEXT_ID_HELPER}\nexport function ${validateFn}(input) { return null; }\nexport function ${overlapFn}(candidate) {\n  return ${store}.some((row) => row.${conflictFieldA} === candidate.${conflictFieldA} && row.${conflictFieldB} === candidate.${conflictFieldB});\n}\nexport function createHandlers() {\n  return {\n    list(_req, res) {\n      res.json(${store});\n    },\n    create(req, res) {\n      const err = ${validateFn}(req.body);\n      if (err) return res.status(400).json({ error: err });\n      if (${overlapFn}(req.body)) return res.status(409).json({ error: "conflict" });\n      const row = { id: nextId(), ${rowAssign} };\n      ${store}.push(row);\n      res.status(201).json(row);\n    },\n  };\n}\n`,
         keywords: ["409", "400", "201", validateFn, overlapFn],
         mc: [
           "GET lists store; POST validates, rejects conflict, else 201",
@@ -480,6 +491,24 @@ function derivedApiModule(cfg) {
     statusLate = "overdue",
     statusOpen = "open",
     remainingPair = null,
+    // A genuinely two-state flag (e.g. held/applied) has no "late" branch at all — forcing the
+    // generic paidField+dateField shape onto it picks whatever field happens to be last as a fake
+    // "date" to compare against (caught live 2026-09-06 building the real backend: idt-booking-
+    // deposits-api's fields have no date at all, so the fallback silently grabbed appointmentId).
+    twoState = false,
+    // "if claimedBy set -> filled; else open" is a presence check, not a strict === true boolean
+    // (claimedBy holds who claimed it, not a flag) — distinct from paidField/twoState. The field
+    // is never part of the create payload (nobody claims a request at creation time), so the real
+    // backend also gets a POST <resourcePath>/:id/claim endpoint that sets it — see
+    // generate-smb-backend-routes.mjs.
+    presenceField = null,
+    claimActionName = "claim",
+    // The plain "no paidField at all" branch used to be `new Date(dateField) < now ? stale :
+    // fresh` — for a capture/creation timestamp that's *always* true (nothing gets captured in
+    // the future), so every row was stale from the instant it existed (caught live 2026-09-06:
+    // idt-lead-stale-api's own deriveHint says "older than N days", never implemented as such).
+    // staleAfterDays makes that a real elapsed-time threshold instead.
+    staleAfterDays = null,
   } = cfg;
   const validateChecks = fields
     .map((f) => {
@@ -503,9 +532,15 @@ function derivedApiModule(cfg) {
     fields[fields.length - 1].name;
   const deriveExpected = remainingPair
     ? `let ${store} = [];\nexport function ${validateFn}(input) { return null; }\nexport function ${deriveFn}(row) {\n  if ((row.${remainingPair.used} || 0) >= row.${remainingPair.total}) return "${remainingPair.emptyStatus || "empty"}";\n  return "${remainingPair.activeStatus || "active"}";\n}\n`
-    : paidField
-      ? `let ${store} = [];\nexport function ${validateFn}(input) { return null; }\nexport function ${deriveFn}(row, now = new Date()) {\n  if (row.${paidField} === true) return "${statusDone}";\n  if (new Date(row.${dateField}) < now) return "${statusLate}";\n  return "${statusOpen}";\n}\n`
-      : `let ${store} = [];\nexport function ${validateFn}(input) { return null; }\nexport function ${deriveFn}(row, now = new Date()) {\n  if (new Date(row.${dateField}) < now) return "stale";\n  return "fresh";\n}\n`;
+    : presenceField
+      ? `let ${store} = [];\nexport function ${validateFn}(input) { return null; }\nexport function ${deriveFn}(row) {\n  return row.${presenceField} ? "${statusDone}" : "${statusOpen}";\n}\n`
+      : twoState
+        ? `let ${store} = [];\nexport function ${validateFn}(input) { return null; }\nexport function ${deriveFn}(row) {\n  return row.${paidField} === true ? "${statusDone}" : "${statusOpen}";\n}\n`
+        : paidField
+          ? `let ${store} = [];\nexport function ${validateFn}(input) { return null; }\nexport function ${deriveFn}(row, now = new Date()) {\n  if (row.${paidField} === true) return "${statusDone}";\n  if (new Date(row.${dateField}) < now) return "${statusLate}";\n  return "${statusOpen}";\n}\n`
+          : staleAfterDays
+            ? `let ${store} = [];\nexport function ${validateFn}(input) { return null; }\nexport function ${deriveFn}(row, now = new Date()) {\n  const staleMs = ${staleAfterDays} * 24 * 60 * 60 * 1000;\n  if (now.getTime() - new Date(row.${dateField}).getTime() > staleMs) return "stale";\n  return "fresh";\n}\n`
+            : `let ${store} = [];\nexport function ${validateFn}(input) { return null; }\nexport function ${deriveFn}(row, now = new Date()) {\n  if (new Date(row.${dateField}) < now) return "stale";\n  return "fresh";\n}\n`;
 
   return {
     tag,
@@ -513,6 +548,25 @@ function derivedApiModule(cfg) {
     shortName,
     language: "You're writing this in TypeScript — a `.ts` file for a small backend API module (no JSX here).",
     filePath: `server/routes/${resourcePath.replace(/^\/api\//, "")}.ts`,
+    // Raw spec for scripts/generate-smb-backend-routes.mjs — see that script's header.
+    apiConfig: {
+      kind: "derived",
+      store,
+      validateFn,
+      deriveFn,
+      resourcePath,
+      fields,
+      deriveHint,
+      paidField,
+      statusDone,
+      statusLate,
+      statusOpen,
+      remainingPair,
+      twoState,
+      presenceField,
+      claimActionName,
+      staleAfterDays,
+    },
     concept: `Implement ${resourcePath} with a derived status:
 
   Store    →  in-memory ${Type} rows
@@ -786,7 +840,11 @@ const MODULES = [
     validateFn: "validateDeposit",
     deriveFn: "deriveDepositStatus",
     resourcePath: "/api/deposits",
-    deriveHint: "if appliedAt is set → applied; else held",
+    deriveHint: "if applied is true → applied; else held",
+    paidField: "applied",
+    statusDone: "applied",
+    statusOpen: "held",
+    twoState: true,
     fields: [
       { name: "client", label: "Client", sample: "Priya", ts: "string" },
       { name: "amount", label: "Amount", sample: 40, ts: "number" },
@@ -883,6 +941,10 @@ const MODULES = [
     overlapFn: "hasPendingReminder",
     resourcePath: "/api/reminders",
     conflictHint: "same invoiceId + channel already pending → conflict",
+    // "channel" is the *middle* field here, not the last one — the generic first+last guess
+    // silently checked invoiceId+sendAt instead of invoiceId+channel until this was caught
+    // building the real backend (2026-09-06). Name the real two fields explicitly.
+    conflictFields: ["invoiceId", "channel"],
     fields: [
       { name: "invoiceId", label: "Invoice id", sample: "inv-9", ts: "string" },
       { name: "channel", label: "Channel", sample: "email", ts: "string" },
@@ -940,7 +1002,8 @@ const MODULES = [
     validateFn: "validateLead",
     deriveFn: "deriveLeadStatus",
     resourcePath: "/api/leads",
-    deriveHint: "if capturedAt older than N days → stale; else fresh",
+    deriveHint: "if capturedAt older than 7 days → stale; else fresh",
+    staleAfterDays: 7,
     fields: [
       { name: "name", label: "Name", sample: "Jordan", ts: "string" },
       { name: "source", label: "Source", sample: "Instagram", ts: "string" },
@@ -978,6 +1041,8 @@ const MODULES = [
     overlapFn: "isDuplicateNote",
     resourcePath: "/api/lead-notes",
     conflictHint: "same leadId + same body already stored → conflict",
+    // "body" is the middle field, not the last — see the invoice-reminder-api note above.
+    conflictFields: ["leadId", "body"],
     fields: [
       { name: "leadId", label: "Lead id", sample: "L-1", ts: "string" },
       { name: "body", label: "Body", sample: "Sent price sheet", ts: "string" },
@@ -1073,6 +1138,9 @@ const MODULES = [
     deriveFn: "deriveCoverageStatus",
     resourcePath: "/api/coverage",
     deriveHint: "if claimedBy set → filled; else open",
+    presenceField: "claimedBy",
+    statusDone: "filled",
+    statusOpen: "open",
     fields: [
       { name: "shiftId", label: "Shift id", sample: "s-3", ts: "string" },
       { name: "reason", label: "Reason", sample: "Sick", ts: "string" },
@@ -1172,6 +1240,8 @@ const MODULES = [
     overlapFn: "hasDuplicateLine",
     resourcePath: "/api/quote-lines",
     conflictHint: "same quoteId + same label → conflict",
+    // "label" is the middle field, not the last ("amount") — see the invoice-reminder-api note.
+    conflictFields: ["quoteId", "label"],
     fields: [
       { name: "quoteId", label: "Quote id", sample: "q-1", ts: "string" },
       { name: "label", label: "Label", sample: "Labor", ts: "string" },
@@ -1232,8 +1302,11 @@ const MODULES = [
     deriveHint: "if replied true → answered; else needs-reply",
     paidField: "replied",
     statusDone: "answered",
-    statusLate: "needs-reply",
     statusOpen: "needs-reply",
+    // Genuinely two-state (no "late" branch exists for a review) — statusLate used to be set to
+    // the same value as statusOpen as a workaround, which still ran a nonsensical date check
+    // against `rating` (a number, not a date) every time. twoState skips that branch entirely.
+    twoState: true,
     fields: [
       { name: "author", label: "Author", sample: "Sam", ts: "string" },
       { name: "rating", label: "Rating", sample: 5, ts: "number" },
@@ -1430,11 +1503,15 @@ const MODULES = [
     resourcePath: "/api/packages",
     deriveHint: "used >= total → empty; else active (expose remaining)",
     remainingPair: { used: "usedPunches", total: "totalPunches", emptyStatus: "empty", activeStatus: "active" },
+    // usedPunches used to also sit in `fields` — validated as required client input, then
+    // immediately overwritten to 0 by remainingPair's extraCreate right after, producing a
+    // literal duplicate `usedPunches` key in the created row (caught live 2026-09-06 building the
+    // real backend). It's purely server-managed (starts at 0, climbs via /redeem below) — a
+    // client was never meant to set it at creation.
     fields: [
       { name: "client", label: "Client", sample: "Riley", ts: "string" },
       { name: "service", label: "Service", sample: "Cut", ts: "string" },
       { name: "totalPunches", label: "Total punches", sample: 5, ts: "number" },
-      { name: "usedPunches", label: "Used punches", sample: 2, ts: "number" },
     ],
     usecase:
       "Remaining punches must be computed from totals — clients cannot invent free punches.",
@@ -1584,53 +1661,75 @@ export default createINPACTEngine({
 `;
 }
 
-fs.mkdirSync(ASSIST_DIR, { recursive: true });
+// Everything below only runs when this file is executed directly (`node
+// scripts/write-smb-assist-engines.mjs`) — guarded so other scripts can `import { MODULES }` (or
+// API_RESOURCE_CONFIGS) from this file to reuse the same specs without re-triggering every write.
+// Windows path/URL comparisons (drive-letter casing, slash direction) are unreliable for an exact
+// import.meta.url === file://argv[1] match — comparing basenames is enough here since this file is
+// never invoked under a different name.
+const isMain = process.argv[1] && path.basename(process.argv[1]) === path.basename(fileURLToPath(import.meta.url));
+if (isMain) {
+  fs.mkdirSync(ASSIST_DIR, { recursive: true });
 
-// Review-cycle rewrite (beginner-friendly step titles + ASSIST GUIDE content, from
-// docs/task-catalog-beginner-rewrite.txt + "docs/assistguides for all 40 tasks.txt") — applied to
-// every module's steps before rendering. idt-quote-accepted-board got a bespoke, richer rewrite
-// (a 5th "Accept" step with real new logic) that this generator doesn't produce, so its file is
-// hand-maintained and skipped here entirely — never overwritten by this script.
-const { applyReviewOverrides } = await import("./apply-review-content.mjs");
-const HAND_MAINTAINED_TAGS = new Set(["idt-quote-accepted-board"]);
+  // Review-cycle rewrite (beginner-friendly step titles + ASSIST GUIDE content, from
+  // docs/task-catalog-beginner-rewrite.txt + "docs/assistguides for all 40 tasks.txt") — applied to
+  // every module's steps before rendering. idt-quote-accepted-board got a bespoke, richer rewrite
+  // (a 5th "Accept" step with real new logic) that this generator doesn't produce, so its file is
+  // hand-maintained and skipped here entirely — never overwritten by this script.
+  const { applyReviewOverrides } = await import("./apply-review-content.mjs");
+  const HAND_MAINTAINED_TAGS = new Set([
+    "idt-quote-accepted-board",
+    // Per-task review pass (2026-09-06 onward) — bespoke content replacing the generic template's
+    // output, matching the user's own written Assist Guide for this specific task exactly
+    // (including its own OpenCoverage/CoverageSlot naming). Never overwrite with the generic
+    // listFormModule/filterListModule output.
+    "idt-coverage-list-form",
+    // Design-mock fix (2026-09-06): the real task is a fixed filter ("Filter to low for display;
+    // keep full packages in state") — not an add-a-row form. Hand-set to formMode:"filter" with a
+    // Status dropdown (found live: the generic template gave it a "Sell" button that fabricated
+    // brand-new packages, which has nothing to do with what this task actually builds).
+    "idt-package-low-board",
+  ]);
 
-let ok = 0;
-for (const mod of MODULES) {
-  if (HAND_MAINTAINED_TAGS.has(mod.tag)) {
-    console.log("skipped (hand-maintained)", `inpact_assist_${mod.tag}_engine.tsx`);
+  let ok = 0;
+  for (const mod of MODULES) {
+    if (HAND_MAINTAINED_TAGS.has(mod.tag)) {
+      console.log("skipped (hand-maintained)", `inpact_assist_${mod.tag}_engine.tsx`);
+      ok += 1;
+      continue;
+    }
+    applyReviewOverrides(mod);
+    const code = buildEngine(mod);
+    try {
+      assertValidModule(code);
+    } catch (err) {
+      console.error("INVALID", mod.tag, err.message);
+      process.exitCode = 1;
+      continue;
+    }
+    const file = path.join(ASSIST_DIR, `inpact_assist_${mod.tag}_engine.tsx`);
+    fs.writeFileSync(file, code, "utf8");
+    console.log("wrote", path.basename(file), "steps=", mod.steps.length);
     ok += 1;
-    continue;
   }
-  applyReviewOverrides(mod);
-  const code = buildEngine(mod);
-  try {
-    assertValidModule(code);
-  } catch (err) {
-    console.error("INVALID", mod.tag, err.message);
-    process.exitCode = 1;
-    continue;
+
+  // Companion data file: tag -> designMock, extracted from the same MODULES array that just wrote
+  // the .tsx engines. Lets Workbench's "Try the mock" button render a task's DesignMockPreview
+  // (src/id-module/DesignMockPreview.jsx) by AssistModule tag alone, without importing the full
+  // lesson-engine bundle for every wired task just to read one field off it.
+  const mocksByTag = {};
+  for (const mod of MODULES) {
+    if (mod.designMock) mocksByTag[mod.tag] = mod.designMock;
   }
-  const file = path.join(ASSIST_DIR, `inpact_assist_${mod.tag}_engine.tsx`);
-  fs.writeFileSync(file, code, "utf8");
-  console.log("wrote", path.basename(file), "steps=", mod.steps.length);
-  ok += 1;
+  const mocksFile = path.resolve(__dirname, "../src/id-module/designMocks.generated.js");
+  fs.writeFileSync(
+    mocksFile,
+    `// Generated by scripts/write-smb-assist-engines.mjs — do not hand-edit.\n// tag (AssistModule: value on a task's OneDev issue) -> that module's design mock config.\nexport const DESIGN_MOCKS = ${JSON.stringify(mocksByTag, null, 2)};\n`,
+    "utf8",
+  );
+  console.log(`wrote ${path.basename(mocksFile)} (${Object.keys(mocksByTag).length} mocks)`);
+
+  console.log(`\n${ok}/${MODULES.length} assist engines written.`);
 }
 
-// Companion data file: tag -> designMock, extracted from the same MODULES array that just wrote
-// the .tsx engines. Lets Workbench's "Try the mock" button render a task's DesignMockPreview
-// (src/id-module/DesignMockPreview.jsx) by AssistModule tag alone, without importing the full
-// lesson-engine bundle for every wired task just to read one field off it.
-const mocksByTag = {};
-for (const mod of MODULES) {
-  if (mod.designMock) mocksByTag[mod.tag] = mod.designMock;
-}
-const mocksFile = path.resolve(__dirname, "../src/id-module/designMocks.generated.js");
-fs.writeFileSync(
-  mocksFile,
-  `// Generated by scripts/write-smb-assist-engines.mjs — do not hand-edit.\n// tag (AssistModule: value on a task's OneDev issue) -> that module's design mock config.\nexport const DESIGN_MOCKS = ${JSON.stringify(mocksByTag, null, 2)};\n`,
-  "utf8",
-);
-console.log(`wrote ${path.basename(mocksFile)} (${Object.keys(mocksByTag).length} mocks)`);
-
-console.log(`\n${ok}/${MODULES.length} assist engines written.`);
 export { MODULES };
