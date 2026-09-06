@@ -922,7 +922,7 @@ export const DESIGN_MOCKS = {
     "kind": "list-and-form",
     "screenTitle": "Low-balance packages",
     "caption": "This is the screen you are building. Match the pieces — list, empty message, filter — not the brand colors. Try filtering by status.",
-    "listCaption": "LIST — sample rows",
+    "listCaption": "LIST — sample packages",
     "emptyCaption": "EMPTY — when there are no rows",
     "emptyMessage": "No low-balance packages.",
     "rows": [
