@@ -297,7 +297,7 @@ WHAT YOUR LOGIC NEEDS
 - A disable flag: no package selected, or the selected one has remainingPunches <= 0.
 
 Your task: accept packages/setPackages as props, add selectedPkgId state and a <select> populated from packages, look up the matching package, and disable the redeem button when it's empty or nothing is selected.`,
-    hint: `1. Accept props: type PunchLogProps = { packages: ServicePackage[]; setPackages: ... }; export function PunchLog({ packages, setPackages }: PunchLogProps) { ... }.
+    hint: `1. Accept props: type PunchLogProps = { packages?: ServicePackage[]; setPackages?: ... }; export function PunchLog({ packages = [], setPackages = () => {} }: PunchLogProps) { ... }.
 2. Selected state: Declare const [selectedPkgId, setSelectedPkgId] = useState("").
 3. Find package: const activePkg = packages.find((p) => p.id === selectedPkgId).
 4. Depleted check: Create a boolean flag const isDepleted = !activePkg || activePkg.remainingPunches <= 0.
@@ -350,11 +350,11 @@ export type PunchRecord = {
 };
 
 type PunchLogProps = {
-  packages: ServicePackage[];
-  setPackages: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+  packages?: ServicePackage[];
+  setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
 };
 
-export function PunchLog({ packages, setPackages }: PunchLogProps) {
+export function PunchLog({ packages = [], setPackages = () => {} }: PunchLogProps) {
   const [punches, setPunches] = useState<PunchRecord[]>([]);
   // selected package state + dropdown here
   return (
@@ -367,7 +367,7 @@ export function PunchLog({ packages, setPackages }: PunchLogProps) {
     feedback_correct: "Correct — the dropdown is wired to the shared packages prop, and depleted cards are correctly blocked.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "PunchLog needs the real packages via props, a selected-id state, and a disabled flag driven by remainingPunches.",
-    pre_check_hint: `Create a controlled select input allowing staff to choose which package to punch. If the selected package has remainingPunches <= 0, disable the redeem button to prevent redemption.`,
+    pre_check_hint: `Create a controlled select input allowing staff to choose which package to punch. If the selected package has remainingPunches <= 0, disable the redeem button to prevent redemption. Default packages to [] and setPackages to a no-op so this component is still safe to preview before it's wired to a real catalog.`,
     expected: `import { useState } from "react";
 import type { ServicePackage } from "./PackageList";
 
@@ -379,11 +379,11 @@ export type PunchRecord = {
 };
 
 type PunchLogProps = {
-  packages: ServicePackage[];
-  setPackages: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+  packages?: ServicePackage[];
+  setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
 };
 
-export function PunchLog({ packages, setPackages }: PunchLogProps) {
+export function PunchLog({ packages = [], setPackages = () => {} }: PunchLogProps) {
   const [punches, setPunches] = useState<PunchRecord[]>([]);
   const [selectedPkgId, setSelectedPkgId] = useState("");
   const activePkg = packages.find((p) => p.id === selectedPkgId);
@@ -499,11 +499,11 @@ export type PunchRecord = {
 };
 
 type PunchLogProps = {
-  packages: ServicePackage[];
-  setPackages: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+  packages?: ServicePackage[];
+  setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
 };
 
-export function PunchLog({ packages, setPackages }: PunchLogProps) {
+export function PunchLog({ packages = [], setPackages = () => {} }: PunchLogProps) {
   const [punches, setPunches] = useState<PunchRecord[]>([]);
   const [selectedPkgId, setSelectedPkgId] = useState("");
   const activePkg = packages.find((p) => p.id === selectedPkgId);
@@ -536,11 +536,11 @@ export type PunchRecord = {
 };
 
 type PunchLogProps = {
-  packages: ServicePackage[];
-  setPackages: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+  packages?: ServicePackage[];
+  setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
 };
 
-export function PunchLog({ packages, setPackages }: PunchLogProps) {
+export function PunchLog({ packages = [], setPackages = () => {} }: PunchLogProps) {
   const [punches, setPunches] = useState<PunchRecord[]>([]);
   const [selectedPkgId, setSelectedPkgId] = useState("");
   const activePkg = packages.find((p) => p.id === selectedPkgId);
@@ -581,11 +581,11 @@ export type PunchRecord = {
 };
 
 type PunchLogProps = {
-  packages: ServicePackage[];
-  setPackages: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+  packages?: ServicePackage[];
+  setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
 };
 
-export function PunchLog({ packages, setPackages }: PunchLogProps) {
+export function PunchLog({ packages = [], setPackages = () => {} }: PunchLogProps) {
   const [punches, setPunches] = useState<PunchRecord[]>([]);
   const [selectedPkgId, setSelectedPkgId] = useState("");
   const activePkg = packages.find((p) => p.id === selectedPkgId);

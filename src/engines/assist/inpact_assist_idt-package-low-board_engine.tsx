@@ -44,11 +44,11 @@ WHAT YOUR CODE NEEDS
 - An import of type ServicePackage from PackageList.
 - A component declaration accepting packages as a prop.
 
-Your task: import ServicePackage, declare a BoardProps type holding packages: ServicePackage[], and export LowPackageBoard({ packages }: BoardProps) returning <div /> — every step from here on edits this same file.`,
+Your task: import ServicePackage, declare a BoardProps type holding an optional packages?: ServicePackage[], and export LowPackageBoard({ packages = [] }: BoardProps) returning <div /> — every step from here on edits this same file.`,
     hint: `1. Create file: Add a new file at src/components/LowPackageBoard.tsx.
 2. Import type: Write import type { ServicePackage } from "./PackageList".
-3. Define props: Declare type BoardProps = { packages: ServicePackage[]; }.
-4. Export shell: Export function LowPackageBoard({ packages }: BoardProps) { return <div />; }.`,
+3. Define props: Declare type BoardProps = { packages?: ServicePackage[]; }.
+4. Export shell: Export function LowPackageBoard({ packages = [] }: BoardProps) { return <div />; }.`,
     example_code: `// src/components/RenewalWatchlist.tsx
 import type { GymPass } from "./MembershipCatalog";
 
@@ -61,11 +61,11 @@ export function RenewalWatchlist({ passes }: WatchlistProps) {
 }`,
     think_prompt: `Importing the blueprint from the catalog task (rather than redefining it here) ensures this filtered view always stays in sync with catalog data — one shape, used everywhere. What does this component need to import, and what shape does the prop that carries the master list need?`,
     mc_options: [
-      "import type { ServicePackage } from \"./PackageList\"; define BoardProps { packages: ServicePackage[] }; export LowPackageBoard({ packages }: BoardProps)",
+      "import type { ServicePackage } from \"./PackageList\"; define BoardProps { packages?: ServicePackage[] }; export LowPackageBoard({ packages = [] }: BoardProps)",
       "redefine ServicePackage locally inside LowPackageBoard.tsx",
       "fetch packages itself instead of accepting them as a prop",
     ],
-    mc_correct_option: "import type { ServicePackage } from \"./PackageList\"; define BoardProps { packages: ServicePackage[] }; export LowPackageBoard({ packages }: BoardProps)",
+    mc_correct_option: "import type { ServicePackage } from \"./PackageList\"; define BoardProps { packages?: ServicePackage[] }; export LowPackageBoard({ packages = [] }: BoardProps)",
     mc_anchor: "import type { ServicePackage } from \"./Pa",
     why_this_matters: `Importing the blueprint from the catalog task ensures this filtered view always stays in sync with catalog data.`,
     answer_keywords: ["import", "type", "ServicePackage", "PackageList", "BoardProps", "packages", "LowPackageBoard"],
@@ -74,14 +74,14 @@ export function RenewalWatchlist({ passes }: WatchlistProps) {
     feedback_correct: "Correct — the board now shares the exact same package shape as the catalog, via a prop.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Import the shared type, don't redefine it, and accept packages as a prop rather than owning your own copy.",
-    pre_check_hint: `Dedicated filtered boards need isolated layout containers. Create the component file, import the shared ServicePackage type from PackageList, and export the LowPackageBoard function component.`,
+    pre_check_hint: `Dedicated filtered boards need isolated layout containers. Create the component file, import the shared ServicePackage type from PackageList, and export the LowPackageBoard function component. Default the packages prop to an empty array so this component doesn't crash if you preview it before it's wired to a real catalog.`,
     expected: `import type { ServicePackage } from "./PackageList";
 
 type BoardProps = {
-  packages: ServicePackage[];
+  packages?: ServicePackage[];
 };
 
-export function LowPackageBoard({ packages }: BoardProps) {
+export function LowPackageBoard({ packages = [] }: BoardProps) {
   return <div />;
 }
 `,
@@ -103,10 +103,10 @@ export function RenewalWatchlist({ passes }: WatchlistProps) {
       discover: `import type { ServicePackage } from "./PackageList";
 
 type BoardProps = {
-  packages: ServicePackage[];
+  packages?: ServicePackage[];
 };
 
-export function LowPackageBoard({ packages }: BoardProps) {
+export function LowPackageBoard({ packages = [] }: BoardProps) {
   return <div />;
 }
 `,
@@ -151,20 +151,20 @@ Your task: compute lowPackages = packages.filter(pkg => pkg.status === "low" || 
     seed_code: `import type { ServicePackage } from "./PackageList";
 
 type BoardProps = {
-  packages: ServicePackage[];
+  packages?: ServicePackage[];
 };
 
-export function LowPackageBoard({ packages }: BoardProps) {
+export function LowPackageBoard({ packages = [] }: BoardProps) {
   return <div />;
 }
 `,
     starter_code: `import type { ServicePackage } from "./PackageList";
 
 type BoardProps = {
-  packages: ServicePackage[];
+  packages?: ServicePackage[];
 };
 
-export function LowPackageBoard({ packages }: BoardProps) {
+export function LowPackageBoard({ packages = [] }: BoardProps) {
   // derive lowPackages here
   return <div />;
 }
@@ -176,10 +176,10 @@ export function LowPackageBoard({ packages }: BoardProps) {
     expected: `import type { ServicePackage } from "./PackageList";
 
 type BoardProps = {
-  packages: ServicePackage[];
+  packages?: ServicePackage[];
 };
 
-export function LowPackageBoard({ packages }: BoardProps) {
+export function LowPackageBoard({ packages = [] }: BoardProps) {
   const lowPackages = packages.filter((pkg) => pkg.status === "low" || pkg.status === "empty");
   return <div />;
 }
@@ -248,10 +248,10 @@ Your task: add a heading, then render "All client packages have healthy balances
     seed_code: `import type { ServicePackage } from "./PackageList";
 
 type BoardProps = {
-  packages: ServicePackage[];
+  packages?: ServicePackage[];
 };
 
-export function LowPackageBoard({ packages }: BoardProps) {
+export function LowPackageBoard({ packages = [] }: BoardProps) {
   const lowPackages = packages.filter((pkg) => pkg.status === "low" || pkg.status === "empty");
   return <div />;
 }
@@ -259,10 +259,10 @@ export function LowPackageBoard({ packages }: BoardProps) {
     starter_code: `import type { ServicePackage } from "./PackageList";
 
 type BoardProps = {
-  packages: ServicePackage[];
+  packages?: ServicePackage[];
 };
 
-export function LowPackageBoard({ packages }: BoardProps) {
+export function LowPackageBoard({ packages = [] }: BoardProps) {
   const lowPackages = packages.filter((pkg) => pkg.status === "low" || pkg.status === "empty");
   return (
     <div>
@@ -278,10 +278,10 @@ export function LowPackageBoard({ packages }: BoardProps) {
     expected: `import type { ServicePackage } from "./PackageList";
 
 type BoardProps = {
-  packages: ServicePackage[];
+  packages?: ServicePackage[];
 };
 
-export function LowPackageBoard({ packages }: BoardProps) {
+export function LowPackageBoard({ packages = [] }: BoardProps) {
   const lowPackages = packages.filter((pkg) => pkg.status === "low" || pkg.status === "empty");
 
   return (

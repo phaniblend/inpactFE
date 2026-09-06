@@ -4,6 +4,7 @@ const MENTAL_MODEL = `Build the catalog screen that lists every sold package and
 
   List     →  each row is one ServicePackage
   Empty    →  "No packages sold yet" when the list has no items
+  Props    →  optional packages/setPackages, falling back to local state — works alone now, plugs into the shared catalog once every task is assembled
   Form     →  Client, Service, Total punches
   Submit   →  build the record (with remainingPunches + a derived status), append it, reset the form
 `;
@@ -27,7 +28,7 @@ export const NODES = [
     phase: "Objectives",
     items: [
       "Create the component file, define type ServicePackage, and export the empty PackageList shell.",
-      "Hold packages in state and render cards when present or a message when empty.",
+      "Accept packages/setPackages as optional props with a local-state fallback, and render cards when present or a message when empty.",
       "Wire controlled input text boxes to capture client name, service, and punch count.",
       "On form submit, prevent default reload, append the new package to state, and reset inputs.",
     ],
@@ -139,46 +140,60 @@ export function PackageList() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold packages in state and render cards when present or a message when empty.
+    paal: `Accept packages/setPackages as optional props with a local-state fallback, and render cards when present or a message when empty.
 
-Create a state array for packages and render either the package cards or an empty-state note.
+Create a state array for packages and render either the package cards or an empty-state note. Also accept packages/setPackages as optional props, falling back to your own local state when none are given — this component needs to keep working standing alone right now (while you build and test just this one task), and later plug straight into the shared catalog once every Package Desk task gets assembled together in one page.
 
 WHAT YOUR LOGIC NEEDS
-- A useState hook holding an array of ServicePackage.
+- A useState hook holding an array of ServicePackage, used as the fallback when no props are passed.
+- An optional props type: packages?: ServicePackage[]; setPackages?: the matching state-setter type.
+- Resolved packages/setPackages that use the prop when given, otherwise the local state.
 - A conditional check for packages.length === 0.
 - An array .map() returning card elements.
 
-Your task: hold packages in useState<ServicePackage[]>([]), render "No packages sold yet" when packages.length === 0, and mapped rows (key={pkg.id}) otherwise.`,
-    hint: `1. Initialize state: Declare const [packages, setPackages] = useState<ServicePackage[]>([]).
-2. Check length: In your return block, use a ternary operator: packages.length === 0 ? (...) : (...).
-3. Empty message: Put <p>No packages sold yet</p> in the first branch.
-4. Map cards: In the second branch, map over packages, rendering client, service, remainingPunches, totalPunches, and status with key={pkg.id}.`,
-    example_code: `const [passes, setPasses] = useState<GymPass[]>([]);
+Your task: define PackageListProps with optional packages/setPackages, declare local fallback state, resolve which one to actually use with ??, render "No packages sold yet" when packages.length === 0, and mapped rows (key={pkg.id}) otherwise.`,
+    hint: `1. Define props: type PackageListProps = { packages?: ServicePackage[]; setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>; }.
+2. Accept them: export function PackageList({ packages: packagesProp, setPackages: setPackagesProp }: PackageListProps = {}) { ... }.
+3. Local fallback: Declare const [ownPackages, setOwnPackages] = useState<ServicePackage[]>([]) inside the component.
+4. Resolve which to use: const packages = packagesProp ?? ownPackages; const setPackages = setPackagesProp ?? setOwnPackages;.
+5. Check length: In your return block, use a ternary operator: packages.length === 0 ? (...) : (...).
+6. Empty message: Put <p>No packages sold yet</p> in the first branch.
+7. Map cards: In the second branch, map over packages, rendering client, service, remainingPunches, totalPunches, and status with key={pkg.id}.`,
+    example_code: `type CatalogProps = {
+  passes?: GymPass[];
+  setPasses?: React.Dispatch<React.SetStateAction<GymPass[]>>;
+};
 
-return (
-  <div>
-    {passes.length === 0 ? (
-      <p>No passes currently active.</p>
-    ) : (
-      passes.map((pass) => (
-        <div key={pass.id}>
-          <h4>{pass.member} - {pass.activity}</h4>
-          <p>Visits: {pass.remainingVisits} / {pass.totalVisits} ({pass.status})</p>
-        </div>
-      ))
-    )}
-  </div>
-);`,
-    think_prompt: `A zero-length array is a normal, common state — a bare .map() over it renders nothing, with no explanation for the user. Where does the growing packages array need to live, and what two branches does the render need to cover so first-time users see a helpful note instead of a blank screen?`,
+export function MembershipCatalog({ passes: passesProp, setPasses: setPassesProp }: CatalogProps = {}) {
+  const [ownPasses, setOwnPasses] = useState<GymPass[]>([]);
+  const passes = passesProp ?? ownPasses;
+  const setPasses = setPassesProp ?? setOwnPasses;
+
+  return (
+    <div>
+      {passes.length === 0 ? (
+        <p>No passes currently active.</p>
+      ) : (
+        passes.map((pass) => (
+          <div key={pass.id}>
+            <h4>{pass.member} - {pass.activity}</h4>
+            <p>Visits: {pass.remainingVisits} / {pass.totalVisits} ({pass.status})</p>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}`,
+    think_prompt: `A zero-length array is a normal, common state — a bare .map() over it renders nothing, with no explanation for the user. But this component also needs to work two different ways: alone, while you build and test just this task, and later wired into a shared catalog once every task in the product gets put together on one page. What lets a component do both without two separate versions of itself?`,
     mc_options: [
-      "useState for the array; branch on packages.length === 0 before mapping cards with a stable key",
-      "let packages = [] and mutate it directly on every sale",
-      "always render the mapped cards, even when the array is empty",
+      "an optional packages/setPackages prop pair, resolved with ?? against local useState as the fallback",
+      "always require packages/setPackages as props, even while testing this task alone",
+      "copy the packages array into a module-level global variable",
     ],
-    mc_correct_option: "useState for the array; branch on packages.length === 0 before mapping cards with a stable key",
-    mc_anchor: "useState for the array; branch on packag",
-    why_this_matters: `Providing an explicit empty state ensures first-time users know the catalog is functional rather than broken.`,
-    answer_keywords: ["useState", "packages", "setPackages", "length", "map", "key"],
+    mc_correct_option: "an optional packages/setPackages prop pair, resolved with ?? against local useState as the fallback",
+    mc_anchor: "an optional packages/setPackages prop pai",
+    why_this_matters: `Falling back to local state when no props are given means this exact component works both on its own right now, and inside the shared page you'll build once every task in this product is done.`,
+    answer_keywords: ["packagesProp", "setPackagesProp", "ownPackages", "useState", "packages", "setPackages", "length", "map", "key"],
     seed_code: `export type ServicePackage = {
   id: string;
   client: string;
@@ -203,8 +218,13 @@ export type ServicePackage = {
   status: string;
 };
 
-export function PackageList() {
-  // list state here
+type PackageListProps = {
+  packages?: ServicePackage[];
+  setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+};
+
+export function PackageList({ packages: packagesProp, setPackages: setPackagesProp }: PackageListProps = {}) {
+  // local fallback state + resolved packages/setPackages here
   return (
     <div>
       {/* empty or list */}
@@ -212,10 +232,10 @@ export function PackageList() {
   );
 }
 `,
-    feedback_correct: "Correct — the list is real state, and both the empty and populated cases are covered.",
+    feedback_correct: "Correct — the list is real state (with a props override), and both the empty and populated cases are covered.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "List data must live in useState, and the render has to branch on length before mapping.",
-    pre_check_hint: `To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. Once it does, checking its length before deciding what to render is just an ordinary conditional — the empty case and the list case are two branches of one render.`,
+    feedback_wrong: "Accept optional packages/setPackages props, fall back to local useState, and branch the render on the resolved packages' length.",
+    pre_check_hint: `To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. An optional props pair, resolved with ?? against that local state, lets the same component work standalone or wired to a shared catalog.`,
     expected: `import { useState } from "react";
 
 export type ServicePackage = {
@@ -227,57 +247,16 @@ export type ServicePackage = {
   status: string;
 };
 
-export function PackageList() {
-  const [packages, setPackages] = useState<ServicePackage[]>([]);
-  return (
-    <div>
-      {packages.length === 0 ? (
-        <p>No packages sold yet.</p>
-      ) : (
-        <ul>
-          {packages.map((pkg) => (
-            <li key={pkg.id}>{pkg.client} — {pkg.service}: {pkg.remainingPunches}/{pkg.totalPunches} ({pkg.status})</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-    analog_example: `const [passes, setPasses] = useState<GymPass[]>([]);
-
-return (
-  <div>
-    {passes.length === 0 ? (
-      <p>No passes currently active.</p>
-    ) : (
-      passes.map((pass) => (
-        <div key={pass.id}>
-          <h4>{pass.member} - {pass.activity}</h4>
-          <p>Visits: {pass.remainingVisits} / {pass.totalVisits} ({pass.status})</p>
-        </div>
-      ))
-    )}
-  </div>
-);`,
-    deepDiveLabel: "Why this step matters",
-    deepDive: {
-      hook: `Providing an explicit empty state ensures first-time users know the catalog is functional rather than broken.`,
-      pain: "Skipping this step leaves later code with no data shape or no source of truth.",
-      mentalModel: MENTAL_MODEL,
-      discover: `import { useState } from "react";
-
-export type ServicePackage = {
-  id: string;
-  client: string;
-  service: string;
-  totalPunches: number;
-  remainingPunches: number;
-  status: string;
+type PackageListProps = {
+  packages?: ServicePackage[];
+  setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
 };
 
-export function PackageList() {
-  const [packages, setPackages] = useState<ServicePackage[]>([]);
+export function PackageList({ packages: packagesProp, setPackages: setPackagesProp }: PackageListProps = {}) {
+  const [ownPackages, setOwnPackages] = useState<ServicePackage[]>([]);
+  const packages = packagesProp ?? ownPackages;
+  const setPackages = setPackagesProp ?? setOwnPackages;
+
   return (
     <div>
       {packages.length === 0 ? (
@@ -293,13 +272,47 @@ export function PackageList() {
   );
 }
 `,
+    analog_example: `type CatalogProps = {
+  passes?: GymPass[];
+  setPasses?: React.Dispatch<React.SetStateAction<GymPass[]>>;
+};
+
+export function MembershipCatalog({ passes: passesProp, setPasses: setPassesProp }: CatalogProps = {}) {
+  const [ownPasses, setOwnPasses] = useState<GymPass[]>([]);
+  const passes = passesProp ?? ownPasses;
+  const setPasses = setPassesProp ?? setOwnPasses;
+
+  return (
+    <div>
+      {passes.length === 0 ? (
+        <p>No passes currently active.</p>
+      ) : (
+        passes.map((pass) => (
+          <div key={pass.id}>
+            <h4>{pass.member} - {pass.activity}</h4>
+            <p>Visits: {pass.remainingVisits} / {pass.totalVisits} ({pass.status})</p>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}`,
+    deepDiveLabel: "Why this step matters",
+    deepDive: {
+      hook: `Falling back to local state when no props are given means this exact component works both on its own right now, and inside the shared page you'll build once every task in this product is done.`,
+      pain: "A component that only ever manages its own state can't share data with siblings — a component that only ever takes props can't be tested alone.",
+      mentalModel: MENTAL_MODEL,
+      discover: `const [ownPackages, setOwnPackages] = useState<ServicePackage[]>([]);
+const packages = packagesProp ?? ownPackages;
+const setPackages = setPackagesProp ?? setOwnPackages;`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize state: useState<ServicePackage[]>([]).
-2. Check length: packages.length === 0.
-3. Empty message: "No packages sold yet".
-4. Map cards: key={pkg.id}, showing remainingPunches/totalPunches and status.`,
+      build: `1. Define props: PackageListProps { packages?, setPackages? }.
+2. Accept them: destructure with a default {} param.
+3. Local fallback: useState<ServicePackage[]>([]).
+4. Resolve: packages = packagesProp ?? ownPackages.
+5. Check length + map, same as any list.`,
     },
   },
   {
@@ -347,8 +360,15 @@ export type ServicePackage = {
   status: string;
 };
 
-export function PackageList() {
-  const [packages, setPackages] = useState<ServicePackage[]>([]);
+type PackageListProps = {
+  packages?: ServicePackage[];
+  setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+};
+
+export function PackageList({ packages: packagesProp, setPackages: setPackagesProp }: PackageListProps = {}) {
+  const [ownPackages, setOwnPackages] = useState<ServicePackage[]>([]);
+  const packages = packagesProp ?? ownPackages;
+  const setPackages = setPackagesProp ?? setOwnPackages;
   return <form />;
 }
 `,
@@ -363,8 +383,15 @@ export type ServicePackage = {
   status: string;
 };
 
-export function PackageList() {
-  const [packages, setPackages] = useState<ServicePackage[]>([]);
+type PackageListProps = {
+  packages?: ServicePackage[];
+  setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+};
+
+export function PackageList({ packages: packagesProp, setPackages: setPackagesProp }: PackageListProps = {}) {
+  const [ownPackages, setOwnPackages] = useState<ServicePackage[]>([]);
+  const packages = packagesProp ?? ownPackages;
+  const setPackages = setPackagesProp ?? setOwnPackages;
   // field state
   return (
     <form>
@@ -388,8 +415,15 @@ export type ServicePackage = {
   status: string;
 };
 
-export function PackageList() {
-  const [packages, setPackages] = useState<ServicePackage[]>([]);
+type PackageListProps = {
+  packages?: ServicePackage[];
+  setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+};
+
+export function PackageList({ packages: packagesProp, setPackages: setPackagesProp }: PackageListProps = {}) {
+  const [ownPackages, setOwnPackages] = useState<ServicePackage[]>([]);
+  const packages = packagesProp ?? ownPackages;
+  const setPackages = setPackagesProp ?? setOwnPackages;
   const [client, setClient] = useState("");
   const [service, setService] = useState("");
   const [totalPunches, setTotalPunches] = useState("5");
@@ -441,13 +475,13 @@ Build the submission handler that saves the new package to state without refresh
 WHAT YOUR LOGIC NEEDS
 - e.preventDefault() to halt page refresh.
 - Construction of a new ServicePackage object — remainingPunches starts equal to totalPunches, and status is derived from that count ("low" if 2 or fewer, otherwise "ok").
-- A state update appending the package (...prev).
+- A state update appending the package (...prev) — using the resolved setPackages, so this works whether it's your own local state or the shared one passed in as a prop.
 - Resets clearing the input state variables.
 
-Your task: on submit, call preventDefault, build a new ServicePackage (remainingPunches = totalPunches, status derived from the count), add it to packages without mutating the old array, then clear the fields.`,
+Your task: on submit, call preventDefault, build a new ServicePackage (remainingPunches = totalPunches, status derived from the count), add it via setPackages without mutating the old array, then clear the fields.`,
     hint: `1. Form handler: Declare function handleSell(e: React.FormEvent) and call e.preventDefault() on line 1.
 2. Build record: Create an object with id: \`pkg-\${Date.now()}\`, client, service, totalPunches: Number(totalPunches), remainingPunches: Number(totalPunches), and status: Number(totalPunches) <= 2 ? "low" : "ok".
-3. Append: Update state using setPackages((prev) => [...prev, newPackage]).
+3. Append: Update state using setPackages((prev) => [...prev, newPackage]) — setPackages already resolves to whichever one (prop or local) is actually in use.
 4. Clear form: Call setClient(""), setService(""), and setTotalPunches("5").
 5. Connect form: Attach onSubmit={handleSell} to your <form> tag.`,
     example_code: `function handleSell(e: React.FormEvent) {
@@ -468,11 +502,11 @@ Your task: on submit, call preventDefault, build a new ServicePackage (remaining
 }`,
     think_prompt: `Halting page refresh keeps user state intact and lets the new package render immediately without screen flicker. Given that a brand-new package starts fully loaded, what should remainingPunches equal on creation, and what determines whether its status starts as "low" or "ok"?`,
     mc_options: [
-      "preventDefault, build the record with remainingPunches = totalPunches and a derived status, append it, clear fields",
+      "preventDefault, build the record with remainingPunches = totalPunches and a derived status, append it via setPackages, clear fields",
       "window.location.reload after every sale",
       "only console.log the form values",
     ],
-    mc_correct_option: "preventDefault, build the record with remainingPunches = totalPunches and a derived status, append it, clear fields",
+    mc_correct_option: "preventDefault, build the record with remainingPunches = totalPunches and a derived status, append it via setPackages, clear fields",
     mc_anchor: "preventDefault, build the record with rem",
     why_this_matters: `Halting page refresh keeps user state intact and lets the new package render immediately without screen flicker.`,
     answer_keywords: ["preventDefault", "setPackages", "prev", "remainingPunches", "status"],
@@ -487,8 +521,15 @@ export type ServicePackage = {
   status: string;
 };
 
-export function PackageList() {
-  const [packages, setPackages] = useState<ServicePackage[]>([]);
+type PackageListProps = {
+  packages?: ServicePackage[];
+  setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+};
+
+export function PackageList({ packages: packagesProp, setPackages: setPackagesProp }: PackageListProps = {}) {
+  const [ownPackages, setOwnPackages] = useState<ServicePackage[]>([]);
+  const packages = packagesProp ?? ownPackages;
+  const setPackages = setPackagesProp ?? setOwnPackages;
   const [client, setClient] = useState("");
   const [service, setService] = useState("");
   const [totalPunches, setTotalPunches] = useState("5");
@@ -515,8 +556,15 @@ export type ServicePackage = {
   status: string;
 };
 
-export function PackageList() {
-  const [packages, setPackages] = useState<ServicePackage[]>([]);
+type PackageListProps = {
+  packages?: ServicePackage[];
+  setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+};
+
+export function PackageList({ packages: packagesProp, setPackages: setPackagesProp }: PackageListProps = {}) {
+  const [ownPackages, setOwnPackages] = useState<ServicePackage[]>([]);
+  const packages = packagesProp ?? ownPackages;
+  const setPackages = setPackagesProp ?? setOwnPackages;
   const [client, setClient] = useState("");
   const [service, setService] = useState("");
   const [totalPunches, setTotalPunches] = useState("5");
@@ -536,9 +584,9 @@ export function PackageList() {
   );
 }
 `,
-    feedback_correct: "Correct — submit updates list state without a reload, and the new package's status is derived, not guessed.",
+    feedback_correct: "Correct — submit updates state (props or local) without a reload, and the new package's status is derived, not guessed.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Stay on the page, grow the list, derive status from the punch count, reset the form.",
+    feedback_wrong: "Stay on the page, grow the list via setPackages, derive status from the punch count, reset the form.",
     pre_check_hint: `Form submissions trigger browser page reloads by default. Intercept the submit event with e.preventDefault(), build the new ServicePackage object with calculated initial status, append it to state using spread syntax, and clear the input fields.`,
     expected: `import { useState } from "react";
 
@@ -551,8 +599,15 @@ export type ServicePackage = {
   status: string;
 };
 
-export function PackageList() {
-  const [packages, setPackages] = useState<ServicePackage[]>([]);
+type PackageListProps = {
+  packages?: ServicePackage[];
+  setPackages?: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+};
+
+export function PackageList({ packages: packagesProp, setPackages: setPackagesProp }: PackageListProps = {}) {
+  const [ownPackages, setOwnPackages] = useState<ServicePackage[]>([]);
+  const packages = packagesProp ?? ownPackages;
+  const setPackages = setPackagesProp ?? setOwnPackages;
   const [client, setClient] = useState("");
   const [service, setService] = useState("");
   const [totalPunches, setTotalPunches] = useState("5");
