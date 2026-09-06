@@ -44,6 +44,19 @@
   padding: 24px;
 }
 
+/* Clicking Submit/Apply with a required field still empty scrolls to it instead of doing nothing
+   (the button used to just sit disabled) — this briefly outlines whatever it scrolled to so the
+   jump reads as "look here," not just a random scroll. */
+@keyframes cm-field-flash-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(8, 145, 178, 0); }
+  25%, 75% { box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.55); }
+}
+
+.cm-field-flash {
+  border-radius: 8px;
+  animation: cm-field-flash-pulse 1.6s ease-in-out;
+}
+
 .cm-form label {
   display: flex;
   flex-direction: column;

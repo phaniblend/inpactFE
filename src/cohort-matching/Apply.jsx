@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SKILL_LEVELS, BE_SKILL_LEVELS } from "./skillLevels.js";
 import { useAuth } from "../auth/useAuth.js";
@@ -205,6 +205,14 @@ export default function Apply() {
   const { session, status: authStatus, refresh, logout } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [authNotice, setAuthNotice] = useState(null); // { kind: 'error' | 'signedIn', text }
+
+  // Scroll/focus targets for scrollToFirstMissing() below — one per field canSubmit checks.
+  const nameInputRef = useRef(null);
+  const tradeGroupRef = useRef(null);
+  const feSkillGroupRef = useRef(null);
+  const beSkillGroupRef = useRef(null);
+  const ownershipRef = useRef(null);
+  const flashTimeoutRef = useRef(null);
 
   const [trades, setTrades] = useState(null); // null = loading, [] = loaded but empty
   const [tradesError, setTradesError] = useState(false);
@@ -528,8 +536,33 @@ export default function Apply() {
     beLevelLabel ? { label: "Backend comfort", value: beLevelLabel } : null,
   ].filter(Boolean);
 
+  // The submit button used to just sit disabled with no explanation when a required field was
+  // missing — a click did nothing at all, no different from a dead button (flagged live 2026-09-06).
+  // It's always clickable now; a click while something's missing scrolls to (and briefly highlights)
+  // the first missing field instead of silently no-op'ing, in the same priority order as
+  // `missingReasons` above.
+  function scrollToFirstMissing() {
+    const target =
+      (!form.name && nameInputRef.current) ||
+      (!form.trade && tradeGroupRef.current) ||
+      (isCoding && needsFeSkill && !form.skillLevel && feSkillGroupRef.current) ||
+      (isCoding && needsBeSkill && !form.beSkillLevel && beSkillGroupRef.current) ||
+      (!form.ownershipAck && ownershipRef.current) ||
+      null;
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (typeof target.focus === "function") target.focus({ preventScroll: true });
+    target.classList.add("cm-field-flash");
+    window.clearTimeout(flashTimeoutRef.current);
+    flashTimeoutRef.current = window.setTimeout(() => target.classList.remove("cm-field-flash"), 1600);
+  }
+
   function handleApplyClick(e) {
     e.preventDefault();
+    if (!canSubmit) {
+      scrollToFirstMissing();
+      return;
+    }
     proceedToApply(form);
   }
 
@@ -624,10 +657,10 @@ export default function Apply() {
       <form className="cm-form" onSubmit={handleApplyClick}>
         <label>
           Name
-          <input required value={form.name} onChange={update("name")} placeholder="Your full name" />
+          <input ref={nameInputRef} required value={form.name} onChange={update("name")} placeholder="Your full name" />
         </label>
 
-        <div className="cm-field-group">
+        <div className="cm-field-group" ref={tradeGroupRef} tabIndex={-1}>
           <span className="cm-field-label">What kind of work interests you?</span>
           {trades === null ? (
             <p className="cm-hint">Checking what's open…</p>
@@ -781,7 +814,7 @@ export default function Apply() {
             </div>
 
             {needsFeSkill && (
-              <>
+              <div ref={feSkillGroupRef} tabIndex={-1}>
                 <span className="cm-field-label" style={{ marginTop: 12, display: "block" }}>
                   Frontend comfort today
                 </span>
@@ -813,11 +846,11 @@ export default function Apply() {
                     ))}
                   </select>
                 </label>
-              </>
+              </div>
             )}
 
             {needsBeSkill && (
-              <>
+              <div ref={beSkillGroupRef} tabIndex={-1}>
                 <span className="cm-field-label" style={{ marginTop: 12, display: "block" }}>
                   Backend comfort today{" "}
                   <span className="cm-hint">language-agnostic</span>
@@ -850,7 +883,7 @@ export default function Apply() {
                     ))}
                   </select>
                 </label>
-              </>
+              </div>
             )}
           </div>
         )}
@@ -886,6 +919,7 @@ export default function Apply() {
 
         <label className="cm-consent">
           <input
+            ref={ownershipRef}
             type="checkbox"
             checked={form.ownershipAck}
             onChange={(e) => setForm((f) => ({ ...f, ownershipAck: e.target.checked }))}
@@ -893,7 +927,7 @@ export default function Apply() {
           <span>{OWNERSHIP_ACK_TEXT}</span>
         </label>
 
-        <button type="submit" className="cm-submit-btn" disabled={status === "loading" || !canSubmit}>
+        <button type="submit" className="cm-submit-btn" disabled={status === "loading"}>
           {status === "loading" ? "Submitting…" : isSignedIn ? "Submit application" : "Apply with Google"}
         </button>
         {!canSubmit && missingReasons.length > 0 && (
