@@ -1,5 +1,13 @@
 import createINPACTEngine from "../inpact_engine_shared";
 
+const MENTAL_MODEL = `Build the redemption screen: pick a package, punch a visit off it, see the log:
+
+  Log      →  each row is one PunchRecord (packageId, serviceName, timestamp)
+  Empty    →  "No punches redeemed today" when the log has no items
+  Select   →  a dropdown of active packages, disabled once the picked one is empty
+  Redeem   →  append the punch log AND decrement the matching package's balance
+`;
+
 export const NODES = [
   {
     id: "intro",
@@ -8,192 +16,180 @@ export const NODES = [
     content: {
       tag: "idt-punch-log-list-form",
       title: "Punch log list + redeem form",
-      body: `Build a screen that lists punches and a form to add one:
-
-  List     →  each row is one Punch
-  Empty    →  a message when the list has no items
-  Form     →  Package id, Note, At
-  Submit   →  the new row appears on the list
-`,
-      usecase: "Each visit is a punch row — same list+form skill as every other desk.",
-      designMock: {"kind":"list-and-form","screenTitle":"Punches","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No punches yet.","rows":[{"title":"p-1","subtitle":"Visit 3","meta":"Sat 11:00"},{"title":"Second row","subtitle":"Another","meta":"Sat 11:00"}],"fields":[{"label":"Package id","sample":"p-1"},{"label":"Note","sample":"Visit 3"},{"label":"At","sample":"Sat 11:00"}],"submitLabel":"Redeem"},
+      body: MENTAL_MODEL,
+      usecase: "Each visit is a punch off an existing package — a redemption receipt, not a new sale.",
+      designMock: {"kind":"list-and-form","screenTitle":"Punches","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No punches redeemed today.","rows":[{"title":"Riley","subtitle":"Cut","meta":"Just now"},{"title":"Second row","subtitle":"Another","meta":"Just now"}],"fields":[{"label":"Package","sample":"Riley — Cut (3 left)"}],"submitLabel":"Redeem visit"},
     },
   },
   {
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Model a punch redemption entry (package ID, date, attendant) and set up the log layout.","Maintain punch redemptions in state; show each logged punch, or an \"Empty log — no punches redeemed\" note.","Connect redemption input boxes to state so session selections are tracked cleanly.","Prevent default form reload, append the redemption event to the log, and reset the form fields."],
+    items: [
+      "Create the component file, define type PunchRecord, and build the component shell.",
+      "Hold punch logs in state and render redemption history entries or an empty state message.",
+      "Build a redemption dropdown input and block submission if the selected package is empty.",
+      "On redeem submit, record the punch, decrement the package's punch count, and update its status.",
+    ],
   },
   {
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+    paal: `Create the component file at src/components/PunchLog.tsx, define type PunchRecord, and build the component shell.
 
-This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/PunchDesk.tsx\` before anything else. Every step from here on edits that same file.
+Create src/components/PunchLog.tsx, define the PunchRecord type, and export the component shell.
 
-Model a punch redemption entry (package ID, date, attendant) and set up the log layout.
-
-WHAT YOU'LL NEED
+WHAT YOUR BLUEPRINT NEEDS
 - id (text)
 - packageId (text)
 - timestamp (text)
+- serviceName (text)
 
-Your task: Define the shape of a punch redemption log and create the component shell.`,
-    hint: `1. Blueprint declaration: Rename Redemption to your type name and define required fields.
-2. Shell component: Declare your component returning an empty <div />.`,
-    example_code: `export type Redemption = {
+Your task: write \`type PunchRecord\` with those four fields, then define and export PunchLog as a function component returning <div /> — every step from here on edits this same file.`,
+    hint: `1. Create file: Add a new file at src/components/PunchLog.tsx.
+2. Declare type: Replace SessionAudit with PunchRecord.
+3. Define fields: Add id, packageId, timestamp, and serviceName, all typed as string.
+4. Export component: Declare export function PunchLog() { return <div />; }.`,
+    example_code: `// src/components/SessionAudit.tsx
+export type SessionAudit = {
+  id: string;
+  passId: string;
+  timestamp: string;
+  activityName: string;
+};
+
+export function SessionAuditView() {
+  return <div />;
+}`,
+    think_prompt: `Redemptions represent individual transaction slips, separate from the packages themselves — a PunchRecord doesn't hold a balance, it holds a receipt of one visit being used. What four fields does that receipt need, and what should the component be called?`,
+    mc_options: [
+      "Define type PunchRecord (id, packageId, timestamp, serviceName), then export function PunchLog() returning <div />",
+      "Reuse ServicePackage for punch entries since they're related",
+      "Skip the type and write JSX directly against untyped objects",
+    ],
+    mc_correct_option: "Define type PunchRecord (id, packageId, timestamp, serviceName), then export function PunchLog() returning <div />",
+    mc_anchor: "Define type PunchRecord (id, packageId,",
+    why_this_matters: `Typing the punch record guarantees transaction history retains the package link and service name cleanly.`,
+    answer_keywords: ["export", "type", "PunchRecord", "packageId", "timestamp", "serviceName", "export", "function", "PunchLog"],
+    seed_code: ``,
+    starter_code: ``,
+    feedback_correct: "Correct — the receipt shape and the component both exist now; every later step builds inside this.",
+    feedback_partial: "Close — check the hint and try again.",
+    feedback_wrong: "Start with a blueprint for one redemption receipt, then the empty component shell that will use it.",
+    pre_check_hint: `Redemptions represent individual transaction slips. Create the file, define the PunchRecord type (id, packageId, timestamp, serviceName), and export the component function.`,
+    expected: `export type PunchRecord = {
   id: string;
   packageId: string;
   timestamp: string;
+  serviceName: string;
 };
 
 export function PunchLog() {
-  return <div />;
-}`,
-    think_prompt: `\`\`\`text
-MOCK ROW — Punches
-  Package id: "p-1"
-  Note: "Visit 3"
-  At: "Sat 11:00"
-\`\`\`
-
-Every value with a shape needs one type to describe that shape before any component can safely hold or render it — and that type has to sit alongside the function that will actually use it. Looking at the mock row above, what does the shared type need to name — including a field the mock never shows on screen at all — and what does the component that will render it need to be called?`,
-    mc_options: ["Define type Punch (id + packageId, note, at), then export function PunchDesk() returning <div />","Skip the type and write JSX directly against untyped objects","Wait until every backend endpoint exists before modeling the row or the component"],
-    mc_correct_option: "Define type Punch (id + packageId, note, at), then export function PunchDesk() returning <div />",
-    mc_anchor: "Define type Punch (id + packageId, note,",
-    why_this_matters: `Defining the redemption shape ensures all punch logs share a consistent data structure.`,
-    answer_keywords: ["export","type","Punch","packageId","note","at","export","function","PunchDesk","return"],
-    seed_code: ``,
-    starter_code: ``,
-    feedback_correct: "Correct — the data shape and the component both exist now; every later step builds inside this.",
-    feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Start with a type for one record, then the component shell that will use it — layout and APIs come after the data shape exists.",
-    // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
-    // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
-    pre_check_hint: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
-    expected: `export type Punch = {
-  id: string;
-  packageId: string;
-  note: string;
-  at: string;
-};
-
-export function PunchDesk() {
   return <div />;
 }
 `,
-    analog_example: `export type Redemption = {
+    analog_example: `// src/components/SessionAudit.tsx
+export type SessionAudit = {
   id: string;
-  packageId: string;
+  passId: string;
   timestamp: string;
+  activityName: string;
 };
 
-export function PunchLog() {
+export function SessionAuditView() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      // Fix 7: lead with the general concept (why a shared pattern matters), not the task
-      // instruction restated verbatim.
-      hook: `Defining the redemption shape ensures all punch logs share a consistent data structure.`,
+      hook: `Typing the punch record guarantees transaction history retains the package link and service name cleanly.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
-      mentalModel: `Build a screen that lists punches and a form to add one:
-
-  List     →  each row is one Punch
-  Empty    →  a message when the list has no items
-  Form     →  Package id, Note, At
-  Submit   →  the new row appears on the list
-`,
-      discover: `export type Punch = {
+      mentalModel: MENTAL_MODEL,
+      discover: `export type PunchRecord = {
   id: string;
   packageId: string;
-  note: string;
-  at: string;
+  timestamp: string;
+  serviceName: string;
 };
 
-export function PunchDesk() {
+export function PunchLog() {
   return <div />;
 }
 `,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Blueprint declaration: Rename Redemption to your type name and define required fields.
-2. Shell component: Declare your component returning an empty <div />.`,
+      build: `1. Create file: src/components/PunchLog.tsx.
+2. Declare type: PunchRecord.
+3. Define fields: id, packageId, timestamp, serviceName.
+4. Export component: PunchLog() { return <div />; }`,
     },
   },
   {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+    paal: `Hold punch logs in state and render redemption history entries or an empty state message.
 
-Maintain punch redemptions in state; show each logged punch, or an "Empty log — no punches redeemed" note.
+Create a state array to hold redemptions and display each logged punch row.
 
-WHAT YOU'LL NEED
-- State array holding redemptions.
-- Conditional empty check.
-- Map loop rendering redemption rows.
+WHAT YOUR LOGIC NEEDS
+- A useState array typed with PunchRecord.
+- A conditional render checking punches.length === 0.
+- A .map() of the logged redemption rows.
 
-Your task: Store redemptions in state and display them, showing a placeholder if the log is empty.`,
-    hint: `1. Set up state: Use useState<Redemption[]>([]).
-2. Check for empty: Use punches.length === 0 to render the empty message.
-3. Render entries: Map through punches, passing key={p.id}.`,
-    example_code: `const [punches, setPunches] = useState<Redemption[]>([]);
+Your task: hold punches in useState<PunchRecord[]>([]), render "No punches redeemed today" when empty, and mapped rows (key={punch.id}) showing packageId, serviceName, and timestamp otherwise.`,
+    hint: `1. State setup: Declare const [punches, setPunches] = useState<PunchRecord[]>([]).
+2. Empty check: Use punches.length === 0 ? (...) : (...) in the JSX return.
+3. Fallback: Render <p>No punches redeemed today</p> when empty.
+4. Render rows: Map punches to display packageId, serviceName, and timestamp with key={punch.id}.`,
+    example_code: `const [audits, setAudits] = useState<SessionAudit[]>([]);
 
 return (
   <div>
-    {punches.length === 0 ? (
-      <p>No punches redeemed</p>
+    {audits.length === 0 ? (
+      <p>No sessions redeemed today.</p>
     ) : (
-      punches.map((p) => (
-        <div key={p.id}>
-          Redeemed for {p.packageId} at {p.timestamp}
+      audits.map((a) => (
+        <div key={a.id}>
+          <p>Redeemed pass #{a.passId} ({a.activityName}) at {a.timestamp}</p>
         </div>
       ))
     )}
   </div>
 );`,
-    think_prompt: `\`\`\`text
-LIST — Punches
-  p-1
-  Visit 3
-
-EMPTY — "No punches yet."
-\`\`\`
-
-React only redraws a component when the value it reads changes through React's own state — a plain variable can change without React ever finding out — and a zero-length array is a normal, common state that a bare map() renders as nothing at all, with no explanation for the user. Given both the sample rows and the empty case above, where does this growing array need to live, and what two branches does the render need to cover?`,
-    mc_options: ["useState for the array; branch on length === 0 before mapping rows with a stable key","let punches = [] and mutate it directly on every update","always render the mapped rows, even when the array is empty"],
-    mc_correct_option: "useState for the array; branch on length === 0 before mapping rows with a stable key",
-    mc_anchor: "useState for the array; branch on length",
-    why_this_matters: `A clear empty state prevents users from wondering whether redemptions failed to load.`,
-    answer_keywords: ["useState","punches","setPunches","length","map","key"],
-    seed_code: `import { useState } from "react";
-
-export type Punch = {
+    think_prompt: `Displaying logged punches reassures clients that their visit was successfully counted — but only once the base render works: what two branches does this need, and what does each punch row need to show?`,
+    mc_options: [
+      "useState for the log array; branch on punches.length === 0 before mapping rows with a stable key",
+      "let punches = [] and mutate it directly on every redeem",
+      "always render the mapped rows, even when the array is empty",
+    ],
+    mc_correct_option: "useState for the log array; branch on punches.length === 0 before mapping rows with a stable key",
+    mc_anchor: "useState for the log array; branch on pu",
+    why_this_matters: `Displaying logged punches reassures clients that their visit was successfully counted.`,
+    answer_keywords: ["useState", "punches", "setPunches", "length", "map", "key"],
+    seed_code: `export type PunchRecord = {
   id: string;
   packageId: string;
-  note: string;
-  at: string;
+  timestamp: string;
+  serviceName: string;
 };
 
-export function PunchDesk() {
+export function PunchLog() {
   return <div />;
 }
 `,
     starter_code: `import { useState } from "react";
 
-export type Punch = {
+export type PunchRecord = {
   id: string;
   packageId: string;
-  note: string;
-  at: string;
+  timestamp: string;
+  serviceName: string;
 };
 
-export function PunchDesk() {
-  // list state here
+export function PunchLog() {
+  // log state here
   return (
     <div>
       {/* empty or list */}
@@ -201,31 +197,29 @@ export function PunchDesk() {
   );
 }
 `,
-    feedback_correct: "Correct — the list is real state, and both the empty and populated cases are covered.",
+    feedback_correct: "Correct — the log is real state, and both the empty and populated cases are covered.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "List data must live in useState, and the render has to branch on length before mapping.",
-    // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
-    // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
-    pre_check_hint: `To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. Once it does, checking its length before deciding what to render is just an ordinary conditional — the empty case and the list case are two branches of one render.`,
+    feedback_wrong: "Log data must live in useState, and the render has to branch on length before mapping.",
+    pre_check_hint: `Initialize a state array for punch logs. Check its length: if zero, show "No punches redeemed today"; if records exist, map over them to display timestamp and package details.`,
     expected: `import { useState } from "react";
 
-export type Punch = {
+export type PunchRecord = {
   id: string;
   packageId: string;
-  note: string;
-  at: string;
+  timestamp: string;
+  serviceName: string;
 };
 
-export function PunchDesk() {
-  const [punches, setPunches] = useState<Punch[]>([]);
+export function PunchLog() {
+  const [punches, setPunches] = useState<PunchRecord[]>([]);
   return (
     <div>
       {punches.length === 0 ? (
-        <p>No punches yet.</p>
+        <p>No punches redeemed today.</p>
       ) : (
         <ul>
-          {punches.map((a) => (
-            <li key={a.id}>{a.packageId}</li>
+          {punches.map((punch) => (
+            <li key={punch.id}>{punch.serviceName} — package {punch.packageId} at {punch.timestamp}</li>
           ))}
         </ul>
       )}
@@ -233,16 +227,16 @@ export function PunchDesk() {
   );
 }
 `,
-    analog_example: `const [punches, setPunches] = useState<Redemption[]>([]);
+    analog_example: `const [audits, setAudits] = useState<SessionAudit[]>([]);
 
 return (
   <div>
-    {punches.length === 0 ? (
-      <p>No punches redeemed</p>
+    {audits.length === 0 ? (
+      <p>No sessions redeemed today.</p>
     ) : (
-      punches.map((p) => (
-        <div key={p.id}>
-          Redeemed for {p.packageId} at {p.timestamp}
+      audits.map((a) => (
+        <div key={a.id}>
+          <p>Redeemed pass #{a.passId} ({a.activityName}) at {a.timestamp}</p>
         </div>
       ))
     )}
@@ -250,36 +244,28 @@ return (
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      // Fix 7: lead with the general concept (why a shared pattern matters), not the task
-      // instruction restated verbatim.
-      hook: `A clear empty state prevents users from wondering whether redemptions failed to load.`,
+      hook: `Displaying logged punches reassures clients that their visit was successfully counted.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
-      mentalModel: `Build a screen that lists punches and a form to add one:
-
-  List     →  each row is one Punch
-  Empty    →  a message when the list has no items
-  Form     →  Package id, Note, At
-  Submit   →  the new row appears on the list
-`,
+      mentalModel: MENTAL_MODEL,
       discover: `import { useState } from "react";
 
-export type Punch = {
+export type PunchRecord = {
   id: string;
   packageId: string;
-  note: string;
-  at: string;
+  timestamp: string;
+  serviceName: string;
 };
 
-export function PunchDesk() {
-  const [punches, setPunches] = useState<Punch[]>([]);
+export function PunchLog() {
+  const [punches, setPunches] = useState<PunchRecord[]>([]);
   return (
     <div>
       {punches.length === 0 ? (
-        <p>No punches yet.</p>
+        <p>No punches redeemed today.</p>
       ) : (
         <ul>
-          {punches.map((a) => (
-            <li key={a.id}>{a.packageId}</li>
+          {punches.map((punch) => (
+            <li key={punch.id}>{punch.serviceName} — package {punch.packageId} at {punch.timestamp}</li>
           ))}
         </ul>
       )}
@@ -290,292 +276,366 @@ export function PunchDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Set up state: Use useState<Redemption[]>([]).
-2. Check for empty: Use punches.length === 0 to render the empty message.
-3. Render entries: Map through punches, passing key={p.id}.`,
+      build: `1. State setup: useState<PunchRecord[]>([]).
+2. Empty check: punches.length === 0.
+3. Fallback: "No punches redeemed today".
+4. Render rows: key={punch.id}.`,
     },
   },
   {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+    paal: `Build a redemption dropdown input and block submission if the selected package is empty.
 
-Connect redemption input boxes to state so session selections are tracked cleanly.
+Connect a package selection dropdown to state and disable redemption if the selected package has no visits left.
 
-WHAT YOU'LL NEED
-- State hook for package ID.
-- Value and onChange props wired on inputs.
+WHAT YOUR LOGIC NEEDS
+- PunchLog accepts the active packages collection as a prop (packages / setPackages) — the same list Task 3's PackageList sells into.
+- A state variable holding the selected package's id.
+- A lookup finding the selected package object from packages.
+- A disable flag: no package selected, or the selected one has remainingPunches <= 0.
 
-Your task: Connect punch redemption input fields to React state.`,
-    hint: `1. Initialize states: Call useState("") for packageId.
-2. Wire inputs: Connect value and onChange to the state variable.`,
-    example_code: `const [packageId, setPackageId] = useState("");
+Your task: accept packages/setPackages as props, add selectedPkgId state and a <select> populated from packages, look up the matching package, and disable the redeem button when it's empty or nothing is selected.`,
+    hint: `1. Accept props: type PunchLogProps = { packages: ServicePackage[]; setPackages: ... }; export function PunchLog({ packages, setPackages }: PunchLogProps) { ... }.
+2. Selected state: Declare const [selectedPkgId, setSelectedPkgId] = useState("").
+3. Find package: const activePkg = packages.find((p) => p.id === selectedPkgId).
+4. Depleted check: Create a boolean flag const isDepleted = !activePkg || activePkg.remainingPunches <= 0.
+5. Input bindings: Render a <select> updating selectedPkgId (with one <option> per package), and add disabled={isDepleted} to your submit button.`,
+    example_code: `const [selectedPassId, setSelectedPassId] = useState("");
+const currentPass = passes.find((p) => p.id === selectedPassId);
+const isDepleted = currentPass ? currentPass.remainingVisits <= 0 : true;
 
-<input value={packageId} onChange={(e) => setPackageId(e.target.value)} />`,
-    think_prompt: `\`\`\`text
-FORM — Punches
-  [ Package id ]  [ Note ]  [ At ]   → Redeem
-\`\`\`
-
-A form field's text can live in the DOM itself (uncontrolled) or in React state (controlled) — a controlled input reads its value from state and writes every keystroke back into that same state. Where does each field's typed text need to live so what you type is exactly what submit will save?`,
-    mc_options: ["value from state, onChange writes back to state","read the input only on submit via document.getElementById","store the DOM node in a global"],
-    mc_correct_option: "value from state, onChange writes back to state",
-    mc_anchor: "value from state, onChange writes back t",
-    why_this_matters: `Controlled inputs ensure clean data capture when redeeming punches.`,
-    answer_keywords: ["useState","value=","onChange","packageId","note","at"],
+<select value={selectedPassId} onChange={(e) => setSelectedPassId(e.target.value)}>
+  <option value="">Select a pass</option>
+  {passes.map((p) => (
+    <option key={p.id} value={p.id}>
+      {p.member} - {p.remainingVisits} left
+    </option>
+  ))}
+</select>
+<button disabled={isDepleted}>Redeem Visit</button>`,
+    think_prompt: `Disabling the button immediately stops staff from attempting to punch a card that has no balance left — but PunchLog can only know that if it actually sees the same packages PackageList sold. Where does that shared data need to come from, and what two conditions make redemption unsafe?`,
+    mc_options: [
+      "accept packages as a prop, look it up by selectedPkgId, and disable when nothing is selected or remainingPunches <= 0",
+      "keep a separate local copy of packages inside PunchLog",
+      "only check remainingPunches after the redeem button is clicked",
+    ],
+    mc_correct_option: "accept packages as a prop, look it up by selectedPkgId, and disable when nothing is selected or remainingPunches <= 0",
+    mc_anchor: "accept packages as a prop, look it up by",
+    why_this_matters: `Disabling the button immediately stops staff from attempting to punch a card that has no balance left.`,
+    answer_keywords: ["packages", "selectedPkgId", "find", "remainingPunches", "disabled"],
     seed_code: `import { useState } from "react";
 
-export type Punch = {
+export type PunchRecord = {
   id: string;
   packageId: string;
-  note: string;
-  at: string;
+  timestamp: string;
+  serviceName: string;
 };
 
-export function PunchDesk() {
-  const [punches, setPunches] = useState<Punch[]>([]);
+export function PunchLog() {
+  const [punches, setPunches] = useState<PunchRecord[]>([]);
   return <form />;
 }
 `,
     starter_code: `import { useState } from "react";
+import type { ServicePackage } from "./PackageList";
 
-export type Punch = {
+export type PunchRecord = {
   id: string;
   packageId: string;
-  note: string;
-  at: string;
+  timestamp: string;
+  serviceName: string;
 };
 
-export function PunchDesk() {
-  const [punches, setPunches] = useState<Punch[]>([]);
-  // field state
+type PunchLogProps = {
+  packages: ServicePackage[];
+  setPackages: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+};
+
+export function PunchLog({ packages, setPackages }: PunchLogProps) {
+  const [punches, setPunches] = useState<PunchRecord[]>([]);
+  // selected package state + dropdown here
   return (
     <form>
-      {/* inputs */}
+      {/* select + submit */}
     </form>
   );
 }
 `,
-    feedback_correct: "Correct — keep going.",
+    feedback_correct: "Correct — the dropdown is wired to the shared packages prop, and depleted cards are correctly blocked.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Controlled inputs: value and onChange both talk to React state.",
-    // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
-    // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
-    pre_check_hint: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
+    feedback_wrong: "PunchLog needs the real packages via props, a selected-id state, and a disabled flag driven by remainingPunches.",
+    pre_check_hint: `Create a controlled select input allowing staff to choose which package to punch. If the selected package has remainingPunches <= 0, disable the redeem button to prevent redemption.`,
     expected: `import { useState } from "react";
+import type { ServicePackage } from "./PackageList";
 
-export type Punch = {
+export type PunchRecord = {
   id: string;
   packageId: string;
-  note: string;
-  at: string;
+  timestamp: string;
+  serviceName: string;
 };
 
-export function PunchDesk() {
-  const [punches, setPunches] = useState<Punch[]>([]);
-  const [packageId, setPackageId] = useState("");
-  const [note, setNote] = useState("");
-  const [at, setAt] = useState("");
+type PunchLogProps = {
+  packages: ServicePackage[];
+  setPackages: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+};
+
+export function PunchLog({ packages, setPackages }: PunchLogProps) {
+  const [punches, setPunches] = useState<PunchRecord[]>([]);
+  const [selectedPkgId, setSelectedPkgId] = useState("");
+  const activePkg = packages.find((p) => p.id === selectedPkgId);
+  const isDepleted = !activePkg || activePkg.remainingPunches <= 0;
+
   return (
     <form>
-        <input value={packageId} onChange={(e) => setPackageId(e.target.value)} placeholder="Package id" />
-        <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note" />
-        <input value={at} onChange={(e) => setAt(e.target.value)} placeholder="At" />
+      <select value={selectedPkgId} onChange={(e) => setSelectedPkgId(e.target.value)}>
+        <option value="">Select a package</option>
+        {packages.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.client} — {p.service} ({p.remainingPunches} left)
+          </option>
+        ))}
+      </select>
+      <button type="submit" disabled={isDepleted}>Redeem visit</button>
     </form>
   );
 }
 `,
-    analog_example: `const [packageId, setPackageId] = useState("");
+    analog_example: `const [selectedPassId, setSelectedPassId] = useState("");
+const currentPass = passes.find((p) => p.id === selectedPassId);
+const isDepleted = currentPass ? currentPass.remainingVisits <= 0 : true;
 
-<input value={packageId} onChange={(e) => setPackageId(e.target.value)} />`,
+<select value={selectedPassId} onChange={(e) => setSelectedPassId(e.target.value)}>
+  <option value="">Select a pass</option>
+  {passes.map((p) => (
+    <option key={p.id} value={p.id}>
+      {p.member} - {p.remainingVisits} left
+    </option>
+  ))}
+</select>
+<button disabled={isDepleted}>Redeem Visit</button>`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      // Fix 7: lead with the general concept (why a shared pattern matters), not the task
-      // instruction restated verbatim.
-      hook: `Controlled inputs ensure clean data capture when redeeming punches.`,
-      pain: "Skipping this step leaves later code with no data shape or no source of truth.",
-      mentalModel: `Build a screen that lists punches and a form to add one:
+      hook: `Disabling the button immediately stops staff from attempting to punch a card that has no balance left.`,
+      pain: "A dropdown with its own copy of package data would drift out of sync with what PackageList actually sold.",
+      mentalModel: MENTAL_MODEL,
+      discover: `const activePkg = packages.find((p) => p.id === selectedPkgId);
+const isDepleted = !activePkg || activePkg.remainingPunches <= 0;
 
-  List     →  each row is one Punch
-  Empty    →  a message when the list has no items
-  Form     →  Package id, Note, At
-  Submit   →  the new row appears on the list
-`,
-      discover: `import { useState } from "react";
-
-export type Punch = {
-  id: string;
-  packageId: string;
-  note: string;
-  at: string;
-};
-
-export function PunchDesk() {
-  const [punches, setPunches] = useState<Punch[]>([]);
-  const [packageId, setPackageId] = useState("");
-  const [note, setNote] = useState("");
-  const [at, setAt] = useState("");
-  return (
-    <form>
-        <input value={packageId} onChange={(e) => setPackageId(e.target.value)} placeholder="Package id" />
-        <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note" />
-        <input value={at} onChange={(e) => setAt(e.target.value)} placeholder="At" />
-    </form>
-  );
-}
-`,
+<button type="submit" disabled={isDepleted}>Redeem visit</button>`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize states: Call useState("") for packageId.
-2. Wire inputs: Connect value and onChange to the state variable.`,
+      build: `1. Accept props: packages, setPackages.
+2. Selected state: selectedPkgId.
+3. Find package: packages.find(...).
+4. Depleted check: !activePkg || remainingPunches <= 0.
+5. Input bindings: <select> + disabled button.`,
     },
   },
   {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+    paal: `On redeem submit, record the punch, decrement the package's punch count, and update its status.
 
-Prevent default form reload, append the redemption event to the log, and reset the form fields.
+Append the redemption record to history and deduct 1 visit from the package in state.
 
-WHAT YOU'LL NEED
-- Form interceptor using e.preventDefault().
-- New redemption object creation.
-- Spread update to state.
-- Form reset calls.
+WHAT YOUR LOGIC NEEDS
+- A submit interceptor with e.preventDefault(), guarded so it does nothing when activePkg is missing or already depleted.
+- A new PunchRecord appended to punches state.
+- A package balance update via setPackages, decrementing remainingPunches by 1 and recomputing status ("empty" if it hits 0, "low" if <= 2, else "ok") for the matching package only.
 
-Your task: Append the new redemption to state without a page refresh and reset the form.`,
-    hint: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, packageId, and timestamp into an object.
-3. Append item: Use setPunches((prev) => [...prev, entry]).
-4. Clear form: Reset input states to "".`,
+Your task: on submit, guard against a missing/depleted package, append a new PunchRecord to punches, and update the matching package in the packages prop's state — decrement its remainingPunches and recompute its status without touching any other package.`,
+    hint: `1. Halt refresh: Call e.preventDefault() at the top of handleRedeem.
+2. Guard: If !activePkg || activePkg.remainingPunches <= 0, return early.
+3. Append log: Create a PunchRecord and append it using setPunches((prev) => [...prev, newPunch]).
+4. Deduct balance: Use setPackages(prev => prev.map(...)) to decrement remainingPunches by 1 and update status to "empty" or "low" where p.id === activePkg.id.`,
     example_code: `function handleRedeem(e: React.FormEvent) {
   e.preventDefault();
-  const entry = {
-    id: String(Date.now()),
-    packageId,
+  if (!currentPass || currentPass.remainingVisits <= 0) return;
+
+  const log: SessionAudit = {
+    id: \`audit-\${Date.now()}\`,
+    passId: currentPass.id,
+    activityName: currentPass.activity,
     timestamp: new Date().toLocaleTimeString(),
   };
-  setPunches((prev) => [...prev, entry]);
-  setPackageId("");
+  setAudits((prev) => [...prev, log]);
+
+  setPasses((prev) =>
+    prev.map((p) => {
+      if (p.id !== currentPass.id) return p;
+      const nextRemaining = p.remainingVisits - 1;
+      return {
+        ...p,
+        remainingVisits: nextRemaining,
+        status: nextRemaining <= 0 ? "empty" : nextRemaining <= 2 ? "low" : "ok",
+      };
+    })
+  );
 }`,
-    think_prompt: `\`\`\`text
-FORM — Punches
-  [ Package id ]  [ Note ]  [ At ]   → Redeem
-  (stays on the page — the new row appears in the list above)
-\`\`\`
-
-Submitting an HTML form reloads the page by default; canceling that default lets your own handler run instead, and adding to a list in state means building a new array rather than mutating the old one. Given that, what has to happen, in order, when Redeem is used?`,
-    mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
-    mc_correct_option: "preventDefault, append one item, clear fields",
-    mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `Redemptions appear instantly in the log without page reloads.
-
-
-================================================================================`,
-    answer_keywords: ["preventDefault","setPunches","prev","packageId","note","at"],
+    think_prompt: `Synchronizing the punch log and the package balance in memory ensures immediate visual confirmation on screen. Given .map() never mutates the original array, how do you update exactly one package's remainingPunches and status while leaving every other package in the shared list untouched?`,
+    mc_options: [
+      "guard against a missing/depleted package, append the log, then setPackages(prev => prev.map(...)) updating only the matching id",
+      "mutate activePkg.remainingPunches directly, then re-render",
+      "delete the package from state once it's redeemed",
+    ],
+    mc_correct_option: "guard against a missing/depleted package, append the log, then setPackages(prev => prev.map(...)) updating only the matching id",
+    mc_anchor: "guard against a missing/depleted package,",
+    why_this_matters: `Synchronizing the punch log and the package balance in memory ensures immediate visual confirmation on screen.`,
+    answer_keywords: ["preventDefault", "setPunches", "setPackages", "map", "remainingPunches", "status"],
     seed_code: `import { useState } from "react";
+import type { ServicePackage } from "./PackageList";
 
-export type Punch = {
+export type PunchRecord = {
   id: string;
   packageId: string;
-  note: string;
-  at: string;
+  timestamp: string;
+  serviceName: string;
 };
 
-export function PunchDesk() {
-  const [punches, setPunches] = useState<Punch[]>([]);
-  const [packageId, setPackageId] = useState("");
-  const [note, setNote] = useState("");
-  const [at, setAt] = useState("");
+type PunchLogProps = {
+  packages: ServicePackage[];
+  setPackages: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+};
+
+export function PunchLog({ packages, setPackages }: PunchLogProps) {
+  const [punches, setPunches] = useState<PunchRecord[]>([]);
+  const [selectedPkgId, setSelectedPkgId] = useState("");
+  const activePkg = packages.find((p) => p.id === selectedPkgId);
+  const isDepleted = !activePkg || activePkg.remainingPunches <= 0;
+
   return (
     <div>
-      {punches.length === 0 ? <p>No punches yet.</p> : <ul>{punches.map((a) => <li key={a.id}>{a.packageId} · {a.note} · {a.at}</li>)}</ul>}
+      {punches.length === 0 ? <p>No punches redeemed today.</p> : <ul>{punches.map((p) => <li key={p.id}>{p.serviceName} — package {p.packageId} at {p.timestamp}</li>)}</ul>}
       <form>
-        <input value={packageId} onChange={(e) => setPackageId(e.target.value)} placeholder="Package id" />
-        <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note" />
-        <input value={at} onChange={(e) => setAt(e.target.value)} placeholder="At" />
+        <select value={selectedPkgId} onChange={(e) => setSelectedPkgId(e.target.value)}>
+          <option value="">Select a package</option>
+          {packages.map((p) => (
+            <option key={p.id} value={p.id}>{p.client} — {p.service} ({p.remainingPunches} left)</option>
+          ))}
+        </select>
+        <button type="submit" disabled={isDepleted}>Redeem visit</button>
       </form>
     </div>
   );
 }
 `,
     starter_code: `import { useState } from "react";
+import type { ServicePackage } from "./PackageList";
 
-export type Punch = {
+export type PunchRecord = {
   id: string;
   packageId: string;
-  note: string;
-  at: string;
+  timestamp: string;
+  serviceName: string;
 };
 
-export function PunchDesk() {
-  const [punches, setPunches] = useState<Punch[]>([]);
-  const [packageId, setPackageId] = useState("");
-  const [note, setNote] = useState("");
-  const [at, setAt] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    // submit
+type PunchLogProps = {
+  packages: ServicePackage[];
+  setPackages: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+};
+
+export function PunchLog({ packages, setPackages }: PunchLogProps) {
+  const [punches, setPunches] = useState<PunchRecord[]>([]);
+  const [selectedPkgId, setSelectedPkgId] = useState("");
+  const activePkg = packages.find((p) => p.id === selectedPkgId);
+  const isDepleted = !activePkg || activePkg.remainingPunches <= 0;
+
+  function handleRedeem(e: React.FormEvent) {
+    // redeem
   }
+
   return (
     <div>
-      {punches.length === 0 ? <p>No punches yet.</p> : <ul>{punches.map((a) => <li key={a.id}>{a.packageId} · {a.note} · {a.at}</li>)}</ul>}
-      <form onSubmit={onSubmit}>
-        <input value={packageId} onChange={(e) => setPackageId(e.target.value)} placeholder="Package id" />
-        <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note" />
-        <input value={at} onChange={(e) => setAt(e.target.value)} placeholder="At" />
-        <button type="submit">Redeem</button>
+      {punches.length === 0 ? <p>No punches redeemed today.</p> : <ul>{punches.map((p) => <li key={p.id}>{p.serviceName} — package {p.packageId} at {p.timestamp}</li>)}</ul>}
+      <form onSubmit={handleRedeem}>
+        <select value={selectedPkgId} onChange={(e) => setSelectedPkgId(e.target.value)}>
+          <option value="">Select a package</option>
+          {packages.map((p) => (
+            <option key={p.id} value={p.id}>{p.client} — {p.service} ({p.remainingPunches} left)</option>
+          ))}
+        </select>
+        <button type="submit" disabled={isDepleted}>Redeem visit</button>
       </form>
     </div>
   );
 }
 `,
-    feedback_correct: "Correct — submit updates list state without a reload.",
+    feedback_correct: "Correct — the punch is logged, and exactly one package's balance and status update in place.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Stay on the page, grow the list, reset the form.",
-    // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
-    // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
-    pre_check_hint: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
+    feedback_wrong: "Guard the depleted case, append the log, then update only the matching package via .map().",
+    pre_check_hint: `In the submission handler, create a new PunchRecord, append it to punch state, and update the matching package by subtracting 1 from remainingPunches and setting status to "empty" (if 0) or "low" (if <= 2).`,
     expected: `import { useState } from "react";
+import type { ServicePackage } from "./PackageList";
 
-export type Punch = {
+export type PunchRecord = {
   id: string;
   packageId: string;
-  note: string;
-  at: string;
+  timestamp: string;
+  serviceName: string;
 };
 
-export function PunchDesk() {
-  const [punches, setPunches] = useState<Punch[]>([]);
-  const [packageId, setPackageId] = useState("");
-  const [note, setNote] = useState("");
-  const [at, setAt] = useState("");
-  function onSubmit(e: React.FormEvent) {
+type PunchLogProps = {
+  packages: ServicePackage[];
+  setPackages: React.Dispatch<React.SetStateAction<ServicePackage[]>>;
+};
+
+export function PunchLog({ packages, setPackages }: PunchLogProps) {
+  const [punches, setPunches] = useState<PunchRecord[]>([]);
+  const [selectedPkgId, setSelectedPkgId] = useState("");
+  const activePkg = packages.find((p) => p.id === selectedPkgId);
+  const isDepleted = !activePkg || activePkg.remainingPunches <= 0;
+
+  function handleRedeem(e: React.FormEvent) {
     e.preventDefault();
-    const next: Punch = { id: String(Date.now()), packageId, note, at };
-    setPunches((prev) => [...prev, next]);
-    setPackageId("");
-    setNote("");
-    setAt("");
+    if (!activePkg || activePkg.remainingPunches <= 0) return;
+
+    const log: PunchRecord = {
+      id: \`punch-\${Date.now()}\`,
+      packageId: activePkg.id,
+      serviceName: activePkg.service,
+      timestamp: new Date().toLocaleTimeString(),
+    };
+    setPunches((prev) => [...prev, log]);
+
+    setPackages((prev) =>
+      prev.map((p) => {
+        if (p.id !== activePkg.id) return p;
+        const nextRemaining = p.remainingPunches - 1;
+        return {
+          ...p,
+          remainingPunches: nextRemaining,
+          status: nextRemaining <= 0 ? "empty" : nextRemaining <= 2 ? "low" : "ok",
+        };
+      })
+    );
+    setSelectedPkgId("");
   }
+
   return (
     <div>
       {punches.length === 0 ? (
-        <p>No punches yet.</p>
+        <p>No punches redeemed today.</p>
       ) : (
         <ul>
-          {punches.map((a) => (
-            <li key={a.id}>{a.packageId} · {a.note} · {a.at}</li>
+          {punches.map((p) => (
+            <li key={p.id}>{p.serviceName} — package {p.packageId} at {p.timestamp}</li>
           ))}
         </ul>
       )}
-      <form onSubmit={onSubmit}>
-        <input value={packageId} onChange={(e) => setPackageId(e.target.value)} placeholder="Package id" />
-        <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note" />
-        <input value={at} onChange={(e) => setAt(e.target.value)} placeholder="At" />
-        <button type="submit">Redeem</button>
+      <form onSubmit={handleRedeem}>
+        <select value={selectedPkgId} onChange={(e) => setSelectedPkgId(e.target.value)}>
+          <option value="">Select a package</option>
+          {packages.map((p) => (
+            <option key={p.id} value={p.id}>{p.client} — {p.service} ({p.remainingPunches} left)</option>
+          ))}
+        </select>
+        <button type="submit" disabled={isDepleted}>Redeem visit</button>
       </form>
     </div>
   );
@@ -583,80 +643,51 @@ export function PunchDesk() {
 `,
     analog_example: `function handleRedeem(e: React.FormEvent) {
   e.preventDefault();
-  const entry = {
-    id: String(Date.now()),
-    packageId,
+  if (!currentPass || currentPass.remainingVisits <= 0) return;
+
+  const log: SessionAudit = {
+    id: \`audit-\${Date.now()}\`,
+    passId: currentPass.id,
+    activityName: currentPass.activity,
     timestamp: new Date().toLocaleTimeString(),
   };
-  setPunches((prev) => [...prev, entry]);
-  setPackageId("");
+  setAudits((prev) => [...prev, log]);
+
+  setPasses((prev) =>
+    prev.map((p) => {
+      if (p.id !== currentPass.id) return p;
+      const nextRemaining = p.remainingVisits - 1;
+      return {
+        ...p,
+        remainingVisits: nextRemaining,
+        status: nextRemaining <= 0 ? "empty" : nextRemaining <= 2 ? "low" : "ok",
+      };
+    })
+  );
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      // Fix 7: lead with the general concept (why a shared pattern matters), not the task
-      // instruction restated verbatim.
-      hook: `Redemptions appear instantly in the log without page reloads.
-
-
-================================================================================`,
-      pain: "Skipping this step leaves later code with no data shape or no source of truth.",
-      mentalModel: `Build a screen that lists punches and a form to add one:
-
-  List     →  each row is one Punch
-  Empty    →  a message when the list has no items
-  Form     →  Package id, Note, At
-  Submit   →  the new row appears on the list
-`,
-      discover: `import { useState } from "react";
-
-export type Punch = {
-  id: string;
-  packageId: string;
-  note: string;
-  at: string;
-};
-
-export function PunchDesk() {
-  const [punches, setPunches] = useState<Punch[]>([]);
-  const [packageId, setPackageId] = useState("");
-  const [note, setNote] = useState("");
-  const [at, setAt] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: Punch = { id: String(Date.now()), packageId, note, at };
-    setPunches((prev) => [...prev, next]);
-    setPackageId("");
-    setNote("");
-    setAt("");
-  }
-  return (
-    <div>
-      {punches.length === 0 ? (
-        <p>No punches yet.</p>
-      ) : (
-        <ul>
-          {punches.map((a) => (
-            <li key={a.id}>{a.packageId} · {a.note} · {a.at}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={packageId} onChange={(e) => setPackageId(e.target.value)} placeholder="Package id" />
-        <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note" />
-        <input value={at} onChange={(e) => setAt(e.target.value)} placeholder="At" />
-        <button type="submit">Redeem</button>
-      </form>
-    </div>
-  );
-}
-`,
+      hook: `Synchronizing the punch log and the package balance in memory ensures immediate visual confirmation on screen.`,
+      pain: "Forgetting the depleted guard would let a double-click redeem the same last punch twice, driving a balance negative.",
+      mentalModel: MENTAL_MODEL,
+      discover: `setPackages((prev) =>
+  prev.map((p) => {
+    if (p.id !== activePkg.id) return p;
+    const nextRemaining = p.remainingPunches - 1;
+    return {
+      ...p,
+      remainingPunches: nextRemaining,
+      status: nextRemaining <= 0 ? "empty" : nextRemaining <= 2 ? "low" : "ok",
+    };
+  })
+);`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, packageId, and timestamp into an object.
-3. Append item: Use setPunches((prev) => [...prev, entry]).
-4. Clear form: Reset input states to "".`,
+      build: `1. Halt refresh: e.preventDefault().
+2. Guard: return early if depleted/missing.
+3. Append log: setPunches((prev) => [...prev, log]).
+4. Deduct balance: setPackages(prev => prev.map(...)) on the matching id only.`,
     },
   },
 ];

@@ -879,37 +879,29 @@ export const DESIGN_MOCKS = {
   "idt-punch-log-list-form": {
     "kind": "list-and-form",
     "screenTitle": "Punches",
-    "caption": "This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.",
+    "caption": "This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try picking a package and redeeming.",
     "listCaption": "LIST — sample rows",
     "emptyCaption": "EMPTY — when there are no rows",
-    "emptyMessage": "No punches yet.",
+    "emptyMessage": "No punches redeemed today.",
     "rows": [
       {
-        "title": "p-1",
-        "subtitle": "Visit 3",
-        "meta": "Sat 11:00"
+        "title": "Riley",
+        "subtitle": "Cut",
+        "meta": "Just now"
       },
       {
         "title": "Second row",
         "subtitle": "Another",
-        "meta": "Sat 11:00"
+        "meta": "Just now"
       }
     ],
     "fields": [
       {
-        "label": "Package id",
-        "sample": "p-1"
-      },
-      {
-        "label": "Note",
-        "sample": "Visit 3"
-      },
-      {
-        "label": "At",
-        "sample": "Sat 11:00"
+        "label": "Package",
+        "sample": "Riley — Cut (3 left)"
       }
     ],
-    "submitLabel": "Redeem"
+    "submitLabel": "Redeem visit"
   },
   "idt-punch-redeem-api": {
     "kind": "api-sample",
@@ -921,27 +913,27 @@ export const DESIGN_MOCKS = {
   "idt-package-low-board": {
     "kind": "list-and-form",
     "screenTitle": "Low-balance packages",
-    "meansExplainer": "you need to add a filter dropdown that lets the user narrow the package rows by status (All, Low, OK).",
+    "meansExplainer": "you need to derive a filtered subset of the shared packages list — status \"low\" or \"empty\" — and render it as alert cards, without ever changing the shared list itself.",
     "caption": "This is the screen you are building. Match the pieces — list, empty message, filter — not the brand colors. Try filtering by status.",
     "listCaption": "LIST — sample packages",
     "emptyCaption": "EMPTY — when there are no rows",
-    "emptyMessage": "No low-balance packages.",
+    "emptyMessage": "All client packages have healthy balances.",
     "rows": [
       {
         "title": "Riley",
         "subtitle": "Cut",
-        "meta": "Low"
+        "meta": "low"
       },
       {
         "title": "Jordan",
         "subtitle": "Color",
-        "meta": "OK"
+        "meta": "empty"
       }
     ],
     "fields": [
       {
         "label": "Status",
-        "options": ["All", "Low", "OK"]
+        "options": ["All", "low", "empty", "ok"]
       }
     ],
     "formMode": "filter",

@@ -1689,6 +1689,13 @@ if (isMain) {
     // Status dropdown (found live: the generic template gave it a "Sell" button that fabricated
     // brand-new packages, which has nothing to do with what this task actually builds).
     "idt-package-low-board",
+    // Full Package Desk product rewrite (2026-09-06) — user supplied the complete, authoritative
+    // 5-task breakdown by hand (2 backend tasks done internally, 3 FE tasks assigned to JS devs).
+    // These three FE tasks' real architecture (props-based composition: index.tsx owns packages
+    // state, PackageList/PunchLog/LowPackageBoard all read/write it via props) doesn't match the
+    // generic template's self-contained-component assumption at all. Never regenerate.
+    "idt-package-list-form",
+    "idt-punch-log-list-form",
   ]);
 
   let ok = 0;
