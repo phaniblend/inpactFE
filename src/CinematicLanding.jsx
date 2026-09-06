@@ -273,7 +273,7 @@ export default function CinematicLanding({ onEnterEnterprise, onEnterLessons }) 
       const el = ts - startTs
 
       gridMat.uniforms.uTime.value = ts / 1000
-      gridMat.uniforms.uAlpha.value = 0.82
+      gridMat.uniforms.uAlpha.value = 0.41
 
       if (!typeTriggeredRef.current && el >= T.TYPE_START) {
         typeTriggeredRef.current = true
@@ -309,7 +309,7 @@ export default function CinematicLanding({ onEnterEnterprise, onEnterLessons }) 
       skip: () => {
         if (!startTs) startTs = performance.now()
         startTs = performance.now() - T.TYPE_START - 200
-        gridMat.uniforms.uAlpha.value = 0.82
+        gridMat.uniforms.uAlpha.value = 0.41
         if (hintRef.current) hintRef.current.style.opacity = '0'
         if (!typeTriggeredRef.current) {
           typeTriggeredRef.current = true

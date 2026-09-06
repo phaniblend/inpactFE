@@ -377,7 +377,6 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
   const prose = humanDescription(task.description);
   const assist = parseAssistInfo(task.description);
   const waitingOnLesson = assist.status === "blocked";
-  const [assistOpen, setAssistOpen] = useState(false);
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   // null = choice screen ("continue here online" vs "use my local editor") not answered yet for
   // this open of the modal; "online" mounts the real in-browser editor; "local" shows the manual
@@ -474,15 +473,8 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
       cancelled = true;
     };
   }, [task.projectId]);
-  // This repo (inpactFE) deploys to production, where OneDev is a real remote instance, not the
-  // localhost:6610 the local dev machine's own OneDev container answers to — found live 2026-09-05:
-  // a real applicant on inpact.live was handed a clone URL pointing at their own laptop's port
-  // 6610, which nothing is listening on. Hardcoded to this repo specifically (IPAAL's own
-  // Workbench.jsx correctly keeps localhost:6610 for local dev) rather than an env var, since
-  // there's nowhere yet to set one for this deployment.
-  const ONEDEV_PUBLIC_URL = "https://onedev-production-e1df.up.railway.app";
-  const cloneUrl = projectPath ? `${ONEDEV_PUBLIC_URL}/${projectPath}.git` : null;
-  const pullsUrl = projectPath ? `${ONEDEV_PUBLIC_URL}/${projectPath}/~pulls` : ONEDEV_PUBLIC_URL;
+  const cloneUrl = projectPath ? `http://localhost:6610/${projectPath}.git` : null;
+  const pullsUrl = projectPath ? `http://localhost:6610/${projectPath}/~pulls` : "http://localhost:6610";
   // Found live 2026-09-04 testing the real end-to-end flow a second time: a branch name built
   // only from the task title collides across every applicant ever matched to this task, since the
   // title is shared but each applicant gets their own issue instance. The first applicant's push
@@ -496,14 +488,6 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "")
     .slice(0, 40)}-${task.id}`;
-
-  function openAssistance() {
-    setAssistOpen(true);
-  }
-
-  function closeAssistance() {
-    setAssistOpen(false);
-  }
 
   return (
     <div className="workbench-task-open">
@@ -609,18 +593,6 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
           <pre className="workbench-task-raw">{task.description}</pre>
         )}
 
-        {!waitingOnLesson && (
-          <div className="workbench-assist-start workbench-assist-start-inline">
-            <p className="workbench-assist-blurb">
-              Stuck or learning the pattern for this task? Assist Me opens a guided lesson right here — you
-              stay on this task.
-            </p>
-            <button type="button" className="workbench-assist-btn" onClick={openAssistance}>
-              Assist me
-            </button>
-          </div>
-        )}
-
         {/* Start Dev is the one entry point for submitting work, shown on every task regardless of
             trade — found live 2026-09-05: gating this to Coding only was never actually enforced in
             code, but a QA/Content/Design task with real file output deserves the same button; in
@@ -716,23 +688,6 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Lightbox over the task page, not a tab that replaces it — found live 2026-09-01: "Assist
-          Me opens a guided lesson in a full tab" read as though the task itself navigated away.
-          Story stays exactly as it was underneath; clicking the scrim (not the panel itself)
-          closes back to it, same click-outside convention as the "Try the mock" modal below. */}
-      {assistOpen && (
-        <div className="workbench-assist-overlay" role="presentation" onClick={(e) => e.target === e.currentTarget && closeAssistance()}>
-          <div className="workbench-assist-lightbox" role="dialog" aria-modal="true" aria-label="Assist Me">
-            <TaskAssistPanel
-              task={task}
-              publishedModules={publishedModules}
-              autoStart
-              onCloseLesson={closeAssistance}
-            />
           </div>
         </div>
       )}
