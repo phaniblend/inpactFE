@@ -921,7 +921,7 @@ export const DESIGN_MOCKS = {
   "idt-package-low-board": {
     "kind": "list-and-form",
     "screenTitle": "Low-balance packages",
-    "meansExplainer": "you need to add a filter dropdown that lets the user narrow the package rows by status (All, Low, OK) — not a form to add a new package.",
+    "meansExplainer": "you need to add a filter dropdown that lets the user narrow the package rows by status (All, Low, OK).",
     "caption": "This is the screen you are building. Match the pieces — list, empty message, filter — not the brand colors. Try filtering by status.",
     "listCaption": "LIST — sample packages",
     "emptyCaption": "EMPTY — when there are no rows",

@@ -17,7 +17,7 @@ export const NODES = [
   Filter   →  only matching rows render — the full list stays in state
 `,
       usecase: "Owners upsell when a card is almost empty. Filter for display; keep full packages in state.",
-      designMock: {"kind":"list-and-form","screenTitle":"Low-balance packages","meansExplainer":"you need to add a filter dropdown that lets the user narrow the package rows by status (All, Low, OK) — not a form to add a new package.","caption":"This is the screen you are building. Match the pieces — list, empty message, filter — not the brand colors. Try filtering by status.","listCaption":"LIST — sample packages","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No low-balance packages.","rows":[{"title":"Riley","subtitle":"Cut","meta":"Low"},{"title":"Jordan","subtitle":"Color","meta":"OK"}],"fields":[{"label":"Status","options":["All","Low","OK"]}],"formMode":"filter","submitLabel":"Filter"},
+      designMock: {"kind":"list-and-form","screenTitle":"Low-balance packages","meansExplainer":"you need to add a filter dropdown that lets the user narrow the package rows by status (All, Low, OK).","caption":"This is the screen you are building. Match the pieces — list, empty message, filter — not the brand colors. Try filtering by status.","listCaption":"LIST — sample packages","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No low-balance packages.","rows":[{"title":"Riley","subtitle":"Cut","meta":"Low"},{"title":"Jordan","subtitle":"Color","meta":"OK"}],"fields":[{"label":"Status","options":["All","Low","OK"]}],"formMode":"filter","submitLabel":"Filter"},
     },
   },
   {
