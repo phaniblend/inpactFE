@@ -709,7 +709,9 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
             </div>
             <div className="workbench-mock-modal-body">
               <p className="workbench-mock-bridge">
-                The task title asks you to <strong>{lowerFirst(task.title)}</strong> — here's how that looks in the app:
+                The task title asks you to <strong>{lowerFirst(task.title)}</strong>
+                {designMock.meansExplainer ? <> — which means {designMock.meansExplainer}</> : null} — here's how that looks
+                in the app:
               </p>
               <DesignMockPreview mock={designMock} />
             </div>
