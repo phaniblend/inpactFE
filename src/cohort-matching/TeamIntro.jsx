@@ -3,13 +3,6 @@ import { COHORT_PROJECT_ID } from "./matching.js";
 import { notifyTeam } from "../team-messaging/notify.js";
 import "./TeamIntro.css";
 
-// One shared Town Square channel today, not a channel per product — real, already-working
-// infrastructure (MatchingQueue.jsx already posts real match notifications here) rather than
-// something new to stand up. A channel per product is a real, larger upgrade (needs a named
-// channel created in Mattermost's own UI per product, then routing notifyTeam's payload at that
-// channel) — worth doing later, not a blocker for a real "say hello" today.
-const TEAM_CHAT_URL = "https://mattermost-production-ad0c.up.railway.app/inpact/channels/town-square";
-
 async function api(path) {
   const res = await fetch(`/api/onedev${path}`);
   if (!res.ok) throw new Error(`Request failed (${res.status})`);
@@ -99,13 +92,33 @@ export default function TeamIntro({ projectName, myName }) {
   // failures (a slow/down webhook shouldn't be the reason someone can't get into the room) — this
   // just tracks the click-to-feedback moment, not whether the post itself actually landed.
   const [helloState, setHelloState] = useState("idle");
+  // In-app chat modal — no external tab, no naming the messaging tech underneath. Messages send
+  // to the same shared team channel notifyTeam() already posts to; this window can only show what
+  // *you* send from it (there's no read-back API wired up yet), so the copy is upfront about that
+  // instead of implying a live two-way thread.
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatDraft, setChatDraft] = useState("");
+  const [chatSending, setChatSending] = useState(false);
+
   async function sayHello() {
     setHelloState("sending");
-    await notifyTeam(
-      `👋 ${myName || "Someone"} just joined the ${projectName} team${myTask ? ` — working on "${myTask}"` : ""}. Say hi!`
-    );
+    const text = `👋 ${myName || "Someone"} just joined the ${projectName} team${myTask ? ` — working on "${myTask}"` : ""}. Say hi!`;
+    await notifyTeam(text);
     setHelloState("sent");
-    window.open(TEAM_CHAT_URL, "_blank", "noopener,noreferrer");
+    setChatMessages([{ text, at: Date.now() }]);
+    setChatOpen(true);
+  }
+
+  async function sendChatMessage(e) {
+    e.preventDefault();
+    const text = chatDraft.trim();
+    if (!text || chatSending) return;
+    setChatSending(true);
+    await notifyTeam(`${myName || "Someone"}: ${text}`);
+    setChatMessages((prev) => [...prev, { text, at: Date.now() }]);
+    setChatDraft("");
+    setChatSending(false);
   }
 
   return (
@@ -140,7 +153,12 @@ export default function TeamIntro({ projectName, myName }) {
         )}
         {!error && roster && (
           <button type="button" className="ti-say-hello-btn" onClick={sayHello} disabled={helloState === "sending"}>
-            {helloState === "sent" ? "Said hello — opening team chat…" : helloState === "sending" ? "Saying hello…" : "👋 Say hello to the team"}
+            {helloState === "sent" ? "Said hello — open team chat" : helloState === "sending" ? "Saying hello…" : "👋 Say hello to the team"}
+          </button>
+        )}
+        {helloState === "sent" && !chatOpen && (
+          <button type="button" className="ti-say-hello-btn ti-reopen-chat-btn" onClick={() => setChatOpen(true)}>
+            Open team chat
           </button>
         )}
       </section>
@@ -159,6 +177,41 @@ export default function TeamIntro({ projectName, myName }) {
           ))}
         </div>
       </section>
+
+      {chatOpen && (
+        <div className="ti-chat-overlay" onClick={() => setChatOpen(false)}>
+          <div className="ti-chat-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="ti-chat-header">
+              <h3>Team chat — {projectName}</h3>
+              <button type="button" className="ti-chat-close" onClick={() => setChatOpen(false)} aria-label="Close">
+                ×
+              </button>
+            </div>
+            <p className="ti-hint ti-chat-note">
+              Messages you send here reach your whole team instantly. Replies land in the same shared channel, so check back after saying hello.
+            </p>
+            <div className="ti-chat-messages">
+              {chatMessages.map((m) => (
+                <div className="ti-chat-bubble" key={m.at}>
+                  {m.text}
+                </div>
+              ))}
+            </div>
+            <form className="ti-chat-form" onSubmit={sendChatMessage}>
+              <input
+                className="ti-chat-input"
+                value={chatDraft}
+                onChange={(e) => setChatDraft(e.target.value)}
+                placeholder="Type a message…"
+                disabled={chatSending}
+              />
+              <button type="submit" className="ti-chat-send" disabled={chatSending || !chatDraft.trim()}>
+                {chatSending ? "Sending…" : "Send"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

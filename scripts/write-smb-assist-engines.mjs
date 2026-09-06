@@ -1577,8 +1577,22 @@ export default createINPACTEngine({
 
 fs.mkdirSync(ASSIST_DIR, { recursive: true });
 
+// Review-cycle rewrite (beginner-friendly step titles + ASSIST GUIDE content, from
+// docs/task-catalog-beginner-rewrite.txt + "docs/assistguides for all 40 tasks.txt") — applied to
+// every module's steps before rendering. idt-quote-accepted-board got a bespoke, richer rewrite
+// (a 5th "Accept" step with real new logic) that this generator doesn't produce, so its file is
+// hand-maintained and skipped here entirely — never overwritten by this script.
+const { applyReviewOverrides } = await import("./apply-review-content.mjs");
+const HAND_MAINTAINED_TAGS = new Set(["idt-quote-accepted-board"]);
+
 let ok = 0;
 for (const mod of MODULES) {
+  if (HAND_MAINTAINED_TAGS.has(mod.tag)) {
+    console.log("skipped (hand-maintained)", `inpact_assist_${mod.tag}_engine.tsx`);
+    ok += 1;
+    continue;
+  }
+  applyReviewOverrides(mod);
   const code = buildEngine(mod);
   try {
     assertValidModule(code);

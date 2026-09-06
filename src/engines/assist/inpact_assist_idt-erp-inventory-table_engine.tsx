@@ -23,48 +23,32 @@ export const NODES = [
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: [
-      "Model one inventory item as a type, then set up the component around it",
-      "Store the list in React state with useState",
-      "Fetch real inventory data from the Mini ERP API when the component mounts",
-      "Define TanStack Table columns and instantiate the table",
-      "Render the table's header and rows, with loading and empty states",
-    ],
+    items: ["Create an item blueprint describing an inventory product (SKU, name, stock count, cost).","Set up a storage container in state to hold the incoming catalog.","Fetch the real inventory catalog from the API when the component first appears on screen.","Configure the spreadsheet columns using TanStack Table to map headers to data fields.","Draw table headers and data rows, displaying a loading message while fetching and an empty state if no stock exists."],
   },
   {
     id: "step1",
     type: "question",
     phase: "Step 1 of 6",
-    paal: `Model one inventory item as a type, then set up the component around it
+    paal: `Create an item blueprint describing an inventory product (SKU, name, stock count, cost).
 
-MOCK ROW — Inventory
-  Sku: "WIDGET-01"
-  Cost Price: "7.5"
-  Selling Price: "25"
-  Stock On Hand: 20
+WHAT YOU'LL NEED
+- sku (text)
+- name (text)
+- quantity (number or text)
+- unitPrice (number or text)
 
-The real API sends costPrice and sellingPrice as strings, not numbers — Prisma's exact decimal type serializes to JSON as a string so no precision is ever silently lost. stockOnHand really is a number.
-
-Your task: write \`type Item\` with id (string), sku (string), name (string), costPrice (string), sellingPrice (string), and stockOnHand (number), then define and export InventoryTable as a function component returning <div /> — every step from here on edits this same file.`,
-    hint: `type Item = {
-  id: string;
+Your task: Create the blueprint for an inventory item (SKU, title, stock, cost) and initialize the table component.`,
+    hint: `1. Create type: Define your inventory type with sku, name, quantity, and unitPrice.
+2. Set types: Use string for text and number for counts/costs.
+3. Build container: Set up the component function shell.`,
+    example_code: `export type StockItem = {
   sku: string;
   name: string;
-  costPrice: string;
-  sellingPrice: string;
-  stockOnHand: number;
+  quantity: number;
+  unitPrice: number;
 };
 
 export function InventoryTable() {
-  return <div />;
-}`,
-    example_code: `export type Guest = {
-  id: string;
-  name: string;
-  note: string;
-};
-
-export function GuestList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -78,7 +62,7 @@ Every value with a shape needs one type to describe that shape before any compon
     mc_options: ["Define type Item (costPrice/sellingPrice as string, stockOnHand as number), then export function InventoryTable() returning <div />", "Make every field a number since they are all quantities", "Wait until the table is built before deciding the type or the component"],
     mc_correct_option: "Define type Item (costPrice/sellingPrice as string, stockOnHand as number), then export function InventoryTable() returning <div />",
     mc_anchor: "Define type Item (costPrice/sellingPrice",
-    why_this_matters: `The backend already exists and is running — this task is frontend only, against real endpoints. Getting a field's type wrong here doesn't just fail silently: TypeScript will flag every place you later try to do math on a price string as if it were a number, catching the bug before it ships. Naming and exporting the component next to it is what lets every later step, and a real pull request, attach real behavior to something that already exists.`,
+    why_this_matters: `A precise blueprint ensures that table columns correctly map to valid database properties.`,
     answer_keywords: ["export", "type", "Item", "sku", "costPrice", "sellingPrice", "stockOnHand", "function", "InventoryTable", "return"],
     seed_code: ``,
     starter_code: ``,
@@ -99,18 +83,19 @@ export function InventoryTable() {
   return <div />;
 }
 `,
-    analog_example: `export type Guest = {
-  id: string;
+    analog_example: `export type StockItem = {
+  sku: string;
   name: string;
-  note: string;
+  quantity: number;
+  unitPrice: number;
 };
 
-export function GuestList() {
+export function InventoryTable() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      hook: `A type that matches what the API actually sends — not what "feels like" it should send — is what makes TypeScript useful instead of decorative. A price field typed as string when the API genuinely returns a string means every accidental attempt to do arithmetic on it directly is a compile error, not a NaN a customer sees. Pairing that with the component's own shell in the same step is what turns this from "a type file" into a real, mergeable start on the actual screen.`,
+      hook: `A precise blueprint ensures that table columns correctly map to valid database properties.`,
       pain: "A type that guesses wrong about the API's real shape produces confusing runtime bugs that TypeScript should have caught but didn't.",
       mentalModel: `Build a screen that lists real inventory from a real backend:
 
@@ -142,16 +127,21 @@ export function InventoryTable() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 6",
-    paal: `Store a list in React state with useState so the UI re-renders
+    paal: `Set up a storage container in state to hold the incoming catalog.
 
-Your task: hold items in state that React watches, typed as Item[], starting empty — the real data arrives in the next step.`,
-    hint: `useState<Item[]>([]). Import useState.`,
-    example_code: `const [guests, setGuests] = useState<Guest[]>([]);`,
+WHAT YOU'LL NEED
+- useState typed with an array of your inventory blueprint.
+- Initial value set to an empty array.
+
+Your task: Create a state container in your component to hold the list of inventory items.`,
+    hint: `1. Declare state: Call useState with your item type wrapped in array brackets: <StockItem[]>.
+2. Initialize empty: Pass [] as the initial state so the page can mount safely before data loads.`,
+    example_code: `const [inventory, setInventory] = useState<StockItem[]>([]);`,
     think_prompt: `React only redraws a component when the value it reads changes through React itself — a plain variable can change without React ever finding out, and the real inventory data hasn't even been fetched yet. Where should that eventually-filled array live so the screen redraws the moment it arrives?`,
     mc_options: ["const [items, setItems] = useState<Item[]>([]);", "let items = [];", "const items = fetch('/api/items');"],
     mc_correct_option: "const [items, setItems] = useState<Item[]>([]);",
     mc_anchor: "const [items, setItems] = useState<Item",
-    why_this_matters: `A plain array in a variable will not make React redraw — useState is the list the screen actually watches, and the next step needs somewhere real to put the fetched data. The backend already exists and is running — this task is frontend only, against real endpoints.`,
+    why_this_matters: `Initializing with an empty array prevents "cannot read property of undefined" errors while fetching data.`,
     answer_keywords: ["useState", "items", "setItems", "Item"],
     seed_code: `import { useState } from "react";
 
@@ -204,10 +194,10 @@ export function InventoryTable() {
   return <div />;
 }
 `,
-    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);`,
+    analog_example: `const [inventory, setInventory] = useState<StockItem[]>([]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      hook: `A plain variable and a piece of React state can hold the identical value, yet behave completely differently: mutating a variable is invisible to React, while calling a state setter schedules a re-render. State is not just storage — it is storage React is subscribed to, which matters even more once that storage is about to be filled by a real network response.`,
+      hook: `Initializing with an empty array prevents "cannot read property of undefined" errors while fetching data.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists real inventory from a real backend:
 
@@ -242,26 +232,27 @@ export function InventoryTable() {
     id: "step3",
     type: "question",
     phase: "Step 3 of 6",
-    paal: `Fetch real data from the real Mini ERP API when the component mounts
+    paal: `Fetch the real inventory catalog from the API when the component first appears on screen.
 
-This backend genuinely exists and is running at http://localhost:4100 — no seed data, no mock.
+WHAT YOU'LL NEED
+- A useEffect hook running on mount (empty dependency array []).
+- A fetch call targeting the inventory API endpoint.
+- A state update saving the received data.
 
-Your task: inside a useEffect that runs once on mount (an empty \`[]\` dependency array), call fetch("http://localhost:4100/api/items"), read the response's \`data\` array, and store it with setItems.`,
-    hint: `useEffect(() => {
-  fetch("http://localhost:4100/api/items")
-    .then((res) => res.json())
-    .then((body) => setItems(body.data));
-}, []);`,
+Your task: Load live inventory data from the server the moment the component displays.`,
+    hint: `1. Hook setup: Wrap the request in useEffect with [] as the second argument.
+2. Make the call: Fetch from your ERP inventory endpoint.
+3. Store result: Convert response to json and pass the payload into your state setter.`,
     example_code: `useEffect(() => {
-  fetch("https://api.example.com/guests")
+  fetch("/api/inventory")
     .then((res) => res.json())
-    .then((data) => setGuests(data));
+    .then((data) => setInventory(data));
 }, []);`,
     think_prompt: `A useEffect with an empty dependency array runs exactly once, right after the component's first render — the same moment a component "mounts." A fetch is asynchronous: its result only exists inside a .then() (or after an await), never as fetch()'s own direct return value. Given that, how do you get real data from the real API into this component's state as soon as it loads?`,
     mc_options: ["useEffect(() => { fetch(url).then((r) => r.json()).then((body) => setItems(body.data)); }, [])", "const data = fetch(url); setItems(data);", "Call fetch directly inside the JSX return"],
     mc_correct_option: "useEffect(() => { fetch(url).then((r) => r.json()).then((body) => setItems(body.data)); }, [])",
     mc_anchor: "useEffect(() => { fetch(url).then((r) =>",
-    why_this_matters: `This is the one skill every real, API-backed screen in this app depends on: run a side effect (a network call) exactly once when a component appears, and hand its result to state so React knows to re-render once the real data arrives. The backend already exists and is running — this task is frontend only, against real endpoints.`,
+    why_this_matters: `Running fetch inside useEffect ensures data is fetched once when the page loads rather than on every render.`,
     answer_keywords: ["useEffect", "fetch", "then", "setItems", "json"],
     seed_code: `import { useState } from "react";
 
@@ -324,13 +315,13 @@ export function InventoryTable() {
 }
 `,
     analog_example: `useEffect(() => {
-  fetch("https://api.example.com/guests")
+  fetch("/api/inventory")
     .then((res) => res.json())
-    .then((data) => setGuests(data));
+    .then((data) => setInventory(data));
 }, []);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      hook: `Every real app that isn't a static demo eventually does exactly this: fetch on mount, store in state, let the render just read state. Once this pattern clicks, "where does the data come from" stops being a mystery for any screen — it's always the same three moves, just a different URL and a different shape to map.`,
+      hook: `Running fetch inside useEffect ensures data is fetched once when the page loads rather than on every render.`,
       pain: "Skipping this step leaves the component with a type and a state slot, but no actual data ever arrives — it renders forever empty.",
       mentalModel: `Build a screen that lists real inventory from a real backend:
 
@@ -354,28 +345,32 @@ export function InventoryTable() {
     id: "step4",
     type: "question",
     phase: "Step 4 of 6",
-    paal: `Define TanStack Table columns and instantiate the table
+    paal: `Configure the spreadsheet columns using TanStack Table to map headers to data fields.
 
-TanStack Table doesn't render anything itself — it computes rows, headers, and sorting state from column definitions you hand it, and you render the JSX yourself in the next step.
+WHAT YOU'LL NEED
+- Column definitions mapping headers to property keys.
+- useReactTable hook connecting data and columns.
 
-Your task: use createColumnHelper<Item>() to define columns for sku, name, costPrice, sellingPrice, and stockOnHand, then call useReactTable with that data and those columns, plus getCoreRowModel().`,
-    hint: `const columnHelper = createColumnHelper<Item>();
-const columns = [
-  columnHelper.accessor("sku", { header: "SKU" }),
-  columnHelper.accessor("name", { header: "Name" }),
-  columnHelper.accessor("costPrice", { header: "Cost" }),
-  columnHelper.accessor("sellingPrice", { header: "Price" }),
-  columnHelper.accessor("stockOnHand", { header: "On Hand" }),
+Your task: Configure the table's columns and initialize the TanStack Table instance.`,
+    hint: `1. Define columns: Create an array where each object has accessorKey matching an item property and header for the column title.
+2. Initialize table: Call useReactTable, passing your inventory state as data and your columns array.
+3. Add core model: Supply getCoreRowModel: getCoreRowModel().`,
+    example_code: `const columns = [
+  { accessorKey: "sku", header: "SKU" },
+  { accessorKey: "name", header: "Product" },
+  { accessorKey: "quantity", header: "In Stock" },
 ];
-const table = useReactTable({ data: items, columns, getCoreRowModel: getCoreRowModel() });`,
-    example_code: `const columnHelper = createColumnHelper<Guest>();
-const columns = [columnHelper.accessor("name", { header: "Name" })];
-const table = useReactTable({ data: guests, columns, getCoreRowModel: getCoreRowModel() });`,
+
+const table = useReactTable({
+  data: inventory,
+  columns,
+  getCoreRowModel: getCoreRowModel(),
+});`,
     think_prompt: `A real table library separates "what the columns are" from "how to draw them" — createColumnHelper<Item>() gives you a typed builder for one column per field, and useReactTable turns that column list plus your data array into a table object with everything worked out (headers, rows, cells) but nothing rendered yet. What do the column definitions need to name, and what two things does useReactTable need to be handed?`,
     mc_options: ["Column definitions per field via createColumnHelper, then useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() })", "Write raw <table> HTML by hand and skip the library entirely", "Call useReactTable with just the data array and let it guess the columns"],
     mc_correct_option: "Column definitions per field via createColumnHelper, then useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() })",
     mc_anchor: "Column definitions per field via createCo",
-    why_this_matters: `TanStack Table is what a real enterprise frontend actually uses instead of a hand-rolled <table> — sorting, column widths, and pagination all build on this same column-definition foundation, so getting it set up correctly here is what makes those free later. The backend already exists and is running — this task is frontend only, against real endpoints.`,
+    why_this_matters: `TanStack Table decouples table logic from rendering, making sorting and pagination easier to implement later.`,
     answer_keywords: ["createColumnHelper", "useReactTable", "getCoreRowModel", "columns", "accessor"],
     seed_code: `import { useState, useEffect } from "react";
 
@@ -465,12 +460,20 @@ export function InventoryTable() {
   return <div />;
 }
 `,
-    analog_example: `const columnHelper = createColumnHelper<Guest>();
-const columns = [columnHelper.accessor("name", { header: "Name" })];
-const table = useReactTable({ data: guests, columns, getCoreRowModel: getCoreRowModel() });`,
+    analog_example: `const columns = [
+  { accessorKey: "sku", header: "SKU" },
+  { accessorKey: "name", header: "Product" },
+  { accessorKey: "quantity", header: "In Stock" },
+];
+
+const table = useReactTable({
+  data: inventory,
+  columns,
+  getCoreRowModel: getCoreRowModel(),
+});`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      hook: `Separating column definitions from rendering is what lets the same table configuration support sorting, resizing, and pagination later without a rewrite — you're not building a table, you're building a description of one that a real library knows how to draw.`,
+      hook: `TanStack Table decouples table logic from rendering, making sorting and pagination easier to implement later.`,
       pain: "Skipping proper column definitions means falling back to a hand-rolled table with none of a real table library's features.",
       mentalModel: `Build a screen that lists real inventory from a real backend:
 
@@ -495,36 +498,53 @@ const table = useReactTable({ data: items, columns, getCoreRowModel: getCoreRowM
     id: "step5",
     type: "question",
     phase: "Step 5 of 6",
-    paal: `Render the table's header and rows, with loading and empty states
+    paal: `Draw table headers and data rows, displaying a loading message while fetching and an empty state if no stock exists.
 
-Your task: track whether the fetch has finished with a loading flag, defaulting to true and set to false once real data arrives. Show a loading message while true, an empty message once false with zero items, and otherwise a real <table> built from table.getHeaderGroups() and table.getRowModel().rows, using flexRender for each header and cell.`,
-    hint: `const [loading, setLoading] = useState(true);
-// ...then((body) => { setItems(body.data); setLoading(false); });
-// render:
-loading ? <p>Loading…</p> : items.length === 0 ? <p>No items found.</p> : (
+WHAT YOU'LL NEED
+- Conditional loading indicator while fetching.
+- Table rendering header groups and row models.
+- Empty message if data array is empty.
+
+Your task: Render the HTML table using the TanStack instance, showing loading or empty indicators when appropriate.`,
+    hint: `1. Empty check: Check if data is empty before rendering the table.
+2. Render thead: Map table.getHeaderGroups() to <tr> and headers to <th> using flexRender.
+3. Render tbody: Map table.getRowModel().rows to <tr> and visible cells to <td> using flexRender.`,
+    example_code: `if (inventory.length === 0) return <p>No inventory items found.</p>;
+
+return (
   <table>
     <thead>
-      {table.getHeaderGroups().map((hg) => (
-        <tr key={hg.id}>
-          {hg.headers.map((h) => <th key={h.id}>{flexRender(h.column.columnDef.header, h.getContext())}</th>)}
+      {table.getHeaderGroups().map((headerGroup) => (
+        <tr key={headerGroup.id}>
+          {headerGroup.headers.map((header) => (
+            <th key={header.id}>
+              {flexRender(header.column.columnDef.header, header.getContext())}
+            </th>
+          ))}
         </tr>
       ))}
     </thead>
     <tbody>
       {table.getRowModel().rows.map((row) => (
         <tr key={row.id}>
-          {row.getVisibleCells().map((cell) => <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>)}
+          {row.getVisibleCells().map((cell) => (
+            <td key={cell.id}>
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </td>
+          ))}
         </tr>
       ))}
     </tbody>
   </table>
-)`,
-    example_code: `guests.length === 0 ? <p>No names yet.</p> : <table>...</table>`,
+);`,
     think_prompt: `Right after the component mounts, the fetch hasn't resolved yet — items is still an empty array, exactly the same as it would look if the API had genuinely returned nothing. A real user needs to tell those two situations apart. Given a real table object from useReactTable, what does drawing its actual header and rows look like — and what has to be checked before you even get there?`,
     mc_options: ["a loading flag checked first, then length, then table.getHeaderGroups()/getRowModel().rows via flexRender", "always render the table, even with zero columns loaded", "skip the table object and hand-write <tr> tags from the raw items array"],
     mc_correct_option: "a loading flag checked first, then length, then table.getHeaderGroups()/getRowModel().rows via flexRender",
     mc_anchor: "a loading flag checked first, then lengt",
-    why_this_matters: `A still-loading list should not look empty, and drawing the header/rows from the table object (not the raw array) is what makes every column definition from the last step actually show up on screen. The backend already exists and is running — this task is frontend only, against real endpoints.`,
+    why_this_matters: `Using flexRender properly delegates cell content formatting to TanStack Table.
+
+
+================================================================================`,
     answer_keywords: ["loading", "setLoading", "getHeaderGroups", "getRowModel", "flexRender"],
     seed_code: `import { useState, useEffect } from "react";
 import { createColumnHelper, useReactTable, getCoreRowModel } from "@tanstack/react-table";
@@ -673,10 +693,40 @@ export function InventoryTable() {
   );
 }
 `,
-    analog_example: `guests.length === 0 ? <p>No names yet.</p> : <table>...</table>`,
+    analog_example: `if (inventory.length === 0) return <p>No inventory items found.</p>;
+
+return (
+  <table>
+    <thead>
+      {table.getHeaderGroups().map((headerGroup) => (
+        <tr key={headerGroup.id}>
+          {headerGroup.headers.map((header) => (
+            <th key={header.id}>
+              {flexRender(header.column.columnDef.header, header.getContext())}
+            </th>
+          ))}
+        </tr>
+      ))}
+    </thead>
+    <tbody>
+      {table.getRowModel().rows.map((row) => (
+        <tr key={row.id}>
+          {row.getVisibleCells().map((cell) => (
+            <td key={cell.id}>
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      hook: `flexRender exists because a column's "header" or "cell" can be either plain text or a whole custom component — flexRender is the one function that knows how to draw either correctly, so you never have to branch on which kind a given column used.`,
+      hook: `Using flexRender properly delegates cell content formatting to TanStack Table.
+
+
+================================================================================`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists real inventory from a real backend:
 

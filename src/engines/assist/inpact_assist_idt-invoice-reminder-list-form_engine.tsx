@@ -23,34 +23,29 @@ export const NODES = [
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Model one list item as a type, then set up the component around it","Hold reminders in state and render it — rows when present, a message when empty","Wire controlled inputs so form fields live in React state","On submit, preventDefault, append one item to the list, and clear the form"],
+    items: ["Build a blueprint for scheduled notifications (recipient, message, send time) and set up the outer container.","Store reminders in memory; display each scheduled row, or show \"No pending reminders in queue\" when empty.","Wire the message and date inputs to state to track typed content in real time.","Stop page reload on submit, drop the reminder into the queue, and clear the input boxes."],
   },
   {
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model one list item as a type, then set up the component around it
+    paal: `Build a blueprint for scheduled notifications (recipient, message, send time) and set up the outer container.
 
-MOCK ROW — Reminders
-  Invoice id: "inv-9"
-  Channel: "email"
-  Send at: "Fri 9:00"
+WHAT YOU'LL NEED
+- id (text)
+- target (text)
+- time (text)
 
-Every row also needs a unique \`id\` — not shown in the mock, but required to track, update, and key each item.
-
-Your task: write \`type Reminder\` with \`id\` plus invoiceId, channel, sendAt, then define and export ReminderDesk as a function component returning <div /> — every step from here on edits this same file.`,
-    hint: `type Reminder = { id: string; invoiceId: string; channel: string; sendAt: string; }
-
-export function ReminderDesk() {
-  return <div />;
-}`,
-    example_code: `export type Guest = {
+Your task: Define the reminder blueprint and create the container component.`,
+    hint: `1. Blueprint declaration: Rename ReminderLog to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.`,
+    example_code: `export type ReminderLog = {
   id: string;
-  name: string;
-  note: string;
+  target: string;
+  time: string;
 };
 
-export function GuestList() {
+export function ReminderTracker() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -64,7 +59,7 @@ Every value with a shape needs one type to describe that shape before any compon
     mc_options: ["Define type Reminder (id + invoiceId, channel, sendAt), then export function ReminderDesk() returning <div />","Skip the type and write JSX directly against untyped objects","Wait until every backend endpoint exists before modeling the row or the component"],
     mc_correct_option: "Define type Reminder (id + invoiceId, channel, sendAt), then export function ReminderDesk() returning <div />",
     mc_anchor: "Define type Reminder (id + invoiceId, ch",
-    why_this_matters: `Collections work is a second list+form: who gets nudged, how, and when. If list rows and form fields do not share one shape, some rows end up missing a field, or the form saves a field the list can never display — a type names that shared shape once, so the compiler catches the mismatch before a user does. Naming and exporting the component next to it is what lets every later step, and a real pull request, attach real behavior to something that already exists.`,
+    why_this_matters: `A clear type definition ensures that reminder logs have consistent fields across the app.`,
     answer_keywords: ["export","type","Reminder","invoiceId","channel","sendAt","export","function","ReminderDesk","return"],
     seed_code: ``,
     starter_code: ``,
@@ -85,20 +80,20 @@ export function ReminderDesk() {
   return <div />;
 }
 `,
-    analog_example: `export type Guest = {
+    analog_example: `export type ReminderLog = {
   id: string;
-  name: string;
-  note: string;
+  target: string;
+  time: string;
 };
 
-export function GuestList() {
+export function ReminderTracker() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `One shared type is a single source of truth for what a record looks like — when the list, the form, and the API all reference it, a renamed or removed field breaks the build immediately instead of failing silently in production. Pairing that with the component's own shell in the same step is what turns this from "a type file" into a real, mergeable start on the actual screen.`,
+      hook: `A clear type definition ensures that reminder logs have consistent fields across the app.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists reminders and a form to add one:
 
@@ -121,37 +116,39 @@ export function ReminderDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `type Reminder = { id: string; invoiceId: string; channel: string; sendAt: string; }
-
-export function ReminderDesk() {
-  return <div />;
-}`,
+      build: `1. Blueprint declaration: Rename ReminderLog to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.`,
     },
   },
   {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold reminders in state and render it — rows when present, a message when empty
+    paal: `Store reminders in memory; display each scheduled row, or show "No pending reminders in queue" when empty.
 
-LIST — Reminders
-  inv-9
-  email
+WHAT YOU'LL NEED
+- State array holding reminder items.
+- Conditional empty-state render.
+- Map loop rendering reminder rows.
 
-EMPTY — "No reminders yet."
+Your task: Store reminder logs in state and display them, showing a placeholder message when empty.`,
+    hint: `1. Set up state: Use useState<ReminderLog[]>([]).
+2. Check for empty: Use logs.length === 0 to branch the render.
+3. Render entries: Map through logs, passing key={l.id} and rendering properties.`,
+    example_code: `const [logs, setLogs] = useState<ReminderLog[]>([]);
 
-Your task: hold reminders in state typed as Reminder[], starting empty, then render the empty message when reminders.length === 0 and the mapped rows (key={item.id}) otherwise.`,
-    hint: `const [reminders, setReminders] = useState<Reminder[]>([]);
-return reminders.length === 0 ? <p>No reminders yet.</p> : <ul>{reminders.map((a) => <li key={a.id}>{a.invoiceId}</li>)}</ul>;`,
-    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+return (
+  <div>
+    {logs.length === 0 ? (
+      <p>No reminders logged</p>
+    ) : (
+      logs.map((l) => (
+        <div key={l.id}>
+          {l.target} at {l.time}
+        </div>
+      ))
+    )}
+  </div>
 );`,
     think_prompt: `\`\`\`text
 LIST — Reminders
@@ -165,7 +162,7 @@ React only redraws a component when the value it reads changes through React's o
     mc_options: ["useState for the array; branch on length === 0 before mapping rows with a stable key","let reminders = [] and mutate it directly on every update","always render the mapped rows, even when the array is empty"],
     mc_correct_option: "useState for the array; branch on length === 0 before mapping rows with a stable key",
     mc_anchor: "useState for the array; branch on length",
-    why_this_matters: `Collections work is a second list+form: who gets nudged, how, and when. A plain array in a variable will not make React redraw, and a list that renders as literally nothing when empty looks broken — useState gives the screen something to watch, and branching on length before mapping is what keeps a brand-new list from looking like a bug.`,
+    why_this_matters: `Clear empty-state messaging confirms the system is working even when there are no records.`,
     answer_keywords: ["useState","reminders","setReminders","length","map","key"],
     seed_code: `import { useState } from "react";
 
@@ -230,21 +227,26 @@ export function ReminderDesk() {
   );
 }
 `,
-    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+    analog_example: `const [logs, setLogs] = useState<ReminderLog[]>([]);
+
+return (
+  <div>
+    {logs.length === 0 ? (
+      <p>No reminders logged</p>
+    ) : (
+      logs.map((l) => (
+        <div key={l.id}>
+          {l.target} at {l.time}
+        </div>
+      ))
+    )}
+  </div>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `A plain variable and a piece of React state can hold the identical value yet behave completely differently — mutating a variable is invisible to React, while calling a state setter schedules a re-render. And an empty array is not a missing feature to handle later; it is one of exactly two branches every list render has from the very first render.`,
+      hook: `Clear empty-state messaging confirms the system is working even when there are no records.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists reminders and a form to add one:
 
@@ -282,23 +284,29 @@ export function ReminderDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `const [reminders, setReminders] = useState<Reminder[]>([]);
-return reminders.length === 0 ? <p>No reminders yet.</p> : <ul>{reminders.map((a) => <li key={a.id}>{a.invoiceId}</li>)}</ul>;`,
+      build: `1. Set up state: Use useState<ReminderLog[]>([]).
+2. Check for empty: Use logs.length === 0 to branch the render.
+3. Render entries: Map through logs, passing key={l.id} and rendering properties.`,
     },
   },
   {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Wire controlled inputs so form fields live in React state
+    paal: `Wire the message and date inputs to state to track typed content in real time.
 
-FORM — Reminders
-  [ Invoice id ]  [ Channel ]  [ Send at ]   → Schedule
+WHAT YOU'LL NEED
+- State hooks for target and time inputs.
+- Value and onChange props wired on inputs.
 
-Your task: add one state value per field (invoiceId, channel, sendAt), then wire each input's value and onChange to it.`,
-    hint: `useState("") per field; value={...} onChange sets that state.`,
-    example_code: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+Your task: Connect reminder form inputs to React state.`,
+    hint: `1. Initialize states: Call useState("") for each input.
+2. Wire inputs: Connect value and onChange to each state variable.`,
+    example_code: `const [target, setTarget] = useState("");
+const [time, setTime] = useState("");
+
+<input value={target} onChange={(e) => setTarget(e.target.value)} />
+<input value={time} onChange={(e) => setTime(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Reminders
   [ Invoice id ]  [ Channel ]  [ Send at ]   → Schedule
@@ -308,7 +316,7 @@ A form field's text can live in the DOM itself (uncontrolled) or in React state 
     mc_options: ["value from state, onChange writes back to state","read the input only on submit via document.getElementById","store the DOM node in a global"],
     mc_correct_option: "value from state, onChange writes back to state",
     mc_anchor: "value from state, onChange writes back t",
-    why_this_matters: `Controlled inputs use value from state and onChange to write back, keeping the form and the submit payload in sync. Collections work is a second list+form: who gets nudged, how, and when.`,
+    why_this_matters: `Controlled inputs ensure form data is tracked cleanly before submission.`,
     answer_keywords: ["useState","value=","onChange","invoiceId","channel","sendAt"],
     seed_code: `import { useState } from "react";
 
@@ -372,13 +380,16 @@ export function ReminderDesk() {
   );
 }
 `,
-    analog_example: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+    analog_example: `const [target, setTarget] = useState("");
+const [time, setTime] = useState("");
+
+<input value={target} onChange={(e) => setTarget(e.target.value)} />
+<input value={time} onChange={(e) => setTime(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Controlled vs. uncontrolled is a real, ongoing choice in React forms, not just boilerplate — a controlled input makes React the single source of truth for what is on screen, so validation, clearing, and reading the value on submit are all just state reads, not DOM queries.`,
+      hook: `Controlled inputs ensure form data is tracked cleanly before submission.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists reminders and a form to add one:
 
@@ -413,21 +424,34 @@ export function ReminderDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `useState("") per field; value={...} onChange sets that state.`,
+      build: `1. Initialize states: Call useState("") for each input.
+2. Wire inputs: Connect value and onChange to each state variable.`,
     },
   },
   {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `On submit, preventDefault, append one item to the list, and clear the form
+    paal: `Stop page reload on submit, drop the reminder into the queue, and clear the input boxes.
 
-FORM — Reminders
-  [ Invoice id ]  [ Channel ]  [ Send at ]   → Schedule
+WHAT YOU'LL NEED
+- Form interceptor using e.preventDefault().
+- Object assembly with a unique ID.
+- Spread update to state.
+- Form reset calls.
 
-Your task: on submit: call preventDefault, build a new Reminder from the field state, add it to reminders without mutating the old array, then clear the fields.`,
-    hint: `e.preventDefault(); setReminders((prev) => [...prev, { id: String(Date.now()), invoiceId, channel, sendAt }]); then clear fields.`,
-    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+Your task: Append the new reminder to the list without reloading the page and clear the form inputs.`,
+    hint: `1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, target, and time into a new object.
+3. Append item: Use setLogs((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".`,
+    example_code: `function addReminder(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), target, time };
+  setLogs((prev) => [...prev, entry]);
+  setTarget("");
+  setTime("");
+}`,
     think_prompt: `\`\`\`text
 FORM — Reminders
   [ Invoice id ]  [ Channel ]  [ Send at ]   → Schedule
@@ -438,7 +462,10 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `preventDefault stops navigation; copying the old list plus one new item, then clearing fields, matches the design mock behavior. Collections work is a second list+form: who gets nudged, how, and when.`,
+    why_this_matters: `The reminder log updates instantly without jarring browser reloads.
+
+
+================================================================================`,
     answer_keywords: ["preventDefault","setReminders","prev","invoiceId","channel","sendAt"],
     seed_code: `import { useState } from "react";
 
@@ -545,12 +572,21 @@ export function ReminderDesk() {
   );
 }
 `,
-    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+    analog_example: `function addReminder(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), target, time };
+  setLogs((prev) => [...prev, entry]);
+  setTarget("");
+  setTime("");
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Every controlled form in React follows the same submit shape — cancel the default, derive the new record, update state immutably, reset the inputs — regardless of what the record actually contains. Learning that shape once means every future "add to a list" form is the same four moves with different field names.`,
+      hook: `The reminder log updates instantly without jarring browser reloads.
+
+
+================================================================================`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists reminders and a form to add one:
 
@@ -605,7 +641,10 @@ export function ReminderDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `e.preventDefault(); setReminders((prev) => [...prev, { id: String(Date.now()), invoiceId, channel, sendAt }]); then clear fields.`,
+      build: `1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, target, and time into a new object.
+3. Append item: Use setLogs((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".`,
     },
   },
 ];

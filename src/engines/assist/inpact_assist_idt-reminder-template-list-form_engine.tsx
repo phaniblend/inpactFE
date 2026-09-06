@@ -23,34 +23,29 @@ export const NODES = [
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Model one list item as a type, then set up the component around it","Hold templates in state and render it — rows when present, a message when empty","Wire controlled inputs so form fields live in React state","On submit, preventDefault, append one item to the list, and clear the form"],
+    items: ["Model a template blueprint (template name, subject, body text) and build the template gallery shell.","Hold templates in memory; render each reusable template card, or show \"No saved templates found\" when empty.","Wire template name and message textareas to state so drafting happens in real time.","Intercept submission, save the new template to the gallery, and clear the inputs."],
   },
   {
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model one list item as a type, then set up the component around it
+    paal: `Model a template blueprint (template name, subject, body text) and build the template gallery shell.
 
-MOCK ROW — Templates
-  Name: "Appt tomorrow"
-  Body: "See you at {time}"
-  Channel: "sms"
+WHAT YOU'LL NEED
+- id (text)
+- name (text)
+- template (text)
 
-Every row also needs a unique \`id\` — not shown in the mock, but required to track, update, and key each item.
-
-Your task: write \`type ReminderTemplate\` with \`id\` plus name, body, channel, then define and export TemplateDesk as a function component returning <div /> — every step from here on edits this same file.`,
-    hint: `type ReminderTemplate = { id: string; name: string; body: string; channel: string; }
-
-export function TemplateDesk() {
-  return <div />;
-}`,
-    example_code: `export type Guest = {
+Your task: Define the shape of a reminder template and create the component shell.`,
+    hint: `1. Blueprint declaration: Rename ReminderTemplate to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.`,
+    example_code: `export type ReminderTemplate = {
   id: string;
   name: string;
-  note: string;
+  template: string;
 };
 
-export function GuestList() {
+export function TemplateManager() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -64,7 +59,7 @@ Every value with a shape needs one type to describe that shape before any compon
     mc_options: ["Define type ReminderTemplate (id + name, body, channel), then export function TemplateDesk() returning <div />","Skip the type and write JSX directly against untyped objects","Wait until every backend endpoint exists before modeling the row or the component"],
     mc_correct_option: "Define type ReminderTemplate (id + name, body, channel), then export function TemplateDesk() returning <div />",
     mc_anchor: "Define type ReminderTemplate (id + name,",
-    why_this_matters: `Reusable wording is another list+form — same React skill, different nouns. If list rows and form fields do not share one shape, some rows end up missing a field, or the form saves a field the list can never display — a type names that shared shape once, so the compiler catches the mismatch before a user does. Naming and exporting the component next to it is what lets every later step, and a real pull request, attach real behavior to something that already exists.`,
+    why_this_matters: `Defining the template shape ensures reusable message formats share consistent properties.`,
     answer_keywords: ["export","type","ReminderTemplate","name","body","channel","export","function","TemplateDesk","return"],
     seed_code: ``,
     starter_code: ``,
@@ -85,20 +80,20 @@ export function TemplateDesk() {
   return <div />;
 }
 `,
-    analog_example: `export type Guest = {
+    analog_example: `export type ReminderTemplate = {
   id: string;
   name: string;
-  note: string;
+  template: string;
 };
 
-export function GuestList() {
+export function TemplateManager() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `One shared type is a single source of truth for what a record looks like — when the list, the form, and the API all reference it, a renamed or removed field breaks the build immediately instead of failing silently in production. Pairing that with the component's own shell in the same step is what turns this from "a type file" into a real, mergeable start on the actual screen.`,
+      hook: `Defining the template shape ensures reusable message formats share consistent properties.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists templates and a form to add one:
 
@@ -121,37 +116,39 @@ export function TemplateDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `type ReminderTemplate = { id: string; name: string; body: string; channel: string; }
-
-export function TemplateDesk() {
-  return <div />;
-}`,
+      build: `1. Blueprint declaration: Rename ReminderTemplate to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.`,
     },
   },
   {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold templates in state and render it — rows when present, a message when empty
+    paal: `Hold templates in memory; render each reusable template card, or show "No saved templates found" when empty.
 
-LIST — Templates
-  Appt tomorrow
-  See you at {time}
+WHAT YOU'LL NEED
+- State array holding template items.
+- Conditional empty check.
+- Map loop rendering template cards.
 
-EMPTY — "No templates yet."
+Your task: Store templates in state and display them, showing a placeholder if none exist.`,
+    hint: `1. Set up state: Use useState<ReminderTemplate[]>([]).
+2. Check for empty: Use templates.length === 0 to render the empty message.
+3. Render entries: Map through templates, passing key={t.id}.`,
+    example_code: `const [templates, setTemplates] = useState<ReminderTemplate[]>([]);
 
-Your task: hold templates in state typed as ReminderTemplate[], starting empty, then render the empty message when templates.length === 0 and the mapped rows (key={item.id}) otherwise.`,
-    hint: `const [templates, setTemplates] = useState<ReminderTemplate[]>([]);
-return templates.length === 0 ? <p>No templates yet.</p> : <ul>{templates.map((a) => <li key={a.id}>{a.name}</li>)}</ul>;`,
-    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+return (
+  <div>
+    {templates.length === 0 ? (
+      <p>No templates saved</p>
+    ) : (
+      templates.map((t) => (
+        <div key={t.id}>
+          <strong>{t.name}:</strong> {t.template}
+        </div>
+      ))
+    )}
+  </div>
 );`,
     think_prompt: `\`\`\`text
 LIST — Templates
@@ -165,7 +162,7 @@ React only redraws a component when the value it reads changes through React's o
     mc_options: ["useState for the array; branch on length === 0 before mapping rows with a stable key","let templates = [] and mutate it directly on every update","always render the mapped rows, even when the array is empty"],
     mc_correct_option: "useState for the array; branch on length === 0 before mapping rows with a stable key",
     mc_anchor: "useState for the array; branch on length",
-    why_this_matters: `Reusable wording is another list+form — same React skill, different nouns. A plain array in a variable will not make React redraw, and a list that renders as literally nothing when empty looks broken — useState gives the screen something to watch, and branching on length before mapping is what keeps a brand-new list from looking like a bug.`,
+    why_this_matters: `A clear empty state prevents users from wondering whether saved templates failed to load.`,
     answer_keywords: ["useState","templates","setTemplates","length","map","key"],
     seed_code: `import { useState } from "react";
 
@@ -230,21 +227,26 @@ export function TemplateDesk() {
   );
 }
 `,
-    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+    analog_example: `const [templates, setTemplates] = useState<ReminderTemplate[]>([]);
+
+return (
+  <div>
+    {templates.length === 0 ? (
+      <p>No templates saved</p>
+    ) : (
+      templates.map((t) => (
+        <div key={t.id}>
+          <strong>{t.name}:</strong> {t.template}
+        </div>
+      ))
+    )}
+  </div>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `A plain variable and a piece of React state can hold the identical value yet behave completely differently — mutating a variable is invisible to React, while calling a state setter schedules a re-render. And an empty array is not a missing feature to handle later; it is one of exactly two branches every list render has from the very first render.`,
+      hook: `A clear empty state prevents users from wondering whether saved templates failed to load.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists templates and a form to add one:
 
@@ -282,23 +284,29 @@ export function TemplateDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `const [templates, setTemplates] = useState<ReminderTemplate[]>([]);
-return templates.length === 0 ? <p>No templates yet.</p> : <ul>{templates.map((a) => <li key={a.id}>{a.name}</li>)}</ul>;`,
+      build: `1. Set up state: Use useState<ReminderTemplate[]>([]).
+2. Check for empty: Use templates.length === 0 to render the empty message.
+3. Render entries: Map through templates, passing key={t.id}.`,
     },
   },
   {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Wire controlled inputs so form fields live in React state
+    paal: `Wire template name and message textareas to state so drafting happens in real time.
 
-FORM — Templates
-  [ Name ]  [ Body ]  [ Channel ]   → Save template
+WHAT YOU'LL NEED
+- State hooks for name and template text inputs.
+- Value and onChange props wired on inputs.
 
-Your task: add one state value per field (name, body, channel), then wire each input's value and onChange to it.`,
-    hint: `useState("") per field; value={...} onChange sets that state.`,
+Your task: Connect template creation inputs to React state.`,
+    hint: `1. Initialize states: Call useState("") for name and template.
+2. Wire inputs: Connect value and onChange to each state variable.`,
     example_code: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+const [template, setTemplate] = useState("");
+
+<input value={name} onChange={(e) => setName(e.target.value)} />
+<textarea value={template} onChange={(e) => setTemplate(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Templates
   [ Name ]  [ Body ]  [ Channel ]   → Save template
@@ -308,7 +316,7 @@ A form field's text can live in the DOM itself (uncontrolled) or in React state 
     mc_options: ["value from state, onChange writes back to state","read the input only on submit via document.getElementById","store the DOM node in a global"],
     mc_correct_option: "value from state, onChange writes back to state",
     mc_anchor: "value from state, onChange writes back t",
-    why_this_matters: `Controlled inputs use value from state and onChange to write back, keeping the form and the submit payload in sync. Reusable wording is another list+form — same React skill, different nouns.`,
+    why_this_matters: `Controlled inputs ensure clean data capture when writing new templates.`,
     answer_keywords: ["useState","value=","onChange","name","body","channel"],
     seed_code: `import { useState } from "react";
 
@@ -373,12 +381,15 @@ export function TemplateDesk() {
 }
 `,
     analog_example: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+const [template, setTemplate] = useState("");
+
+<input value={name} onChange={(e) => setName(e.target.value)} />
+<textarea value={template} onChange={(e) => setTemplate(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Controlled vs. uncontrolled is a real, ongoing choice in React forms, not just boilerplate — a controlled input makes React the single source of truth for what is on screen, so validation, clearing, and reading the value on submit are all just state reads, not DOM queries.`,
+      hook: `Controlled inputs ensure clean data capture when writing new templates.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists templates and a form to add one:
 
@@ -413,21 +424,34 @@ export function TemplateDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `useState("") per field; value={...} onChange sets that state.`,
+      build: `1. Initialize states: Call useState("") for name and template.
+2. Wire inputs: Connect value and onChange to each state variable.`,
     },
   },
   {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `On submit, preventDefault, append one item to the list, and clear the form
+    paal: `Intercept submission, save the new template to the gallery, and clear the inputs.
 
-FORM — Templates
-  [ Name ]  [ Body ]  [ Channel ]   → Save template
+WHAT YOU'LL NEED
+- Form interceptor using e.preventDefault().
+- New template object creation.
+- Spread update to state.
+- Form reset calls.
 
-Your task: on submit: call preventDefault, build a new ReminderTemplate from the field state, add it to templates without mutating the old array, then clear the fields.`,
-    hint: `e.preventDefault(); setTemplates((prev) => [...prev, { id: String(Date.now()), name, body, channel }]); then clear fields.`,
-    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+Your task: Append the new template to state without a page refresh and reset the form.`,
+    hint: `1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, name, and template into an object.
+3. Append item: Use setTemplates((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".`,
+    example_code: `function saveTemplate(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), name, template };
+  setTemplates((prev) => [...prev, entry]);
+  setName("");
+  setTemplate("");
+}`,
     think_prompt: `\`\`\`text
 FORM — Templates
   [ Name ]  [ Body ]  [ Channel ]   → Save template
@@ -438,7 +462,10 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `preventDefault stops navigation; copying the old list plus one new item, then clearing fields, matches the design mock behavior. Reusable wording is another list+form — same React skill, different nouns.`,
+    why_this_matters: `Templates appear instantly in the gallery without page reloads.
+
+
+================================================================================`,
     answer_keywords: ["preventDefault","setTemplates","prev","name","body","channel"],
     seed_code: `import { useState } from "react";
 
@@ -545,12 +572,21 @@ export function TemplateDesk() {
   );
 }
 `,
-    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+    analog_example: `function saveTemplate(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), name, template };
+  setTemplates((prev) => [...prev, entry]);
+  setName("");
+  setTemplate("");
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Every controlled form in React follows the same submit shape — cancel the default, derive the new record, update state immutably, reset the inputs — regardless of what the record actually contains. Learning that shape once means every future "add to a list" form is the same four moves with different field names.`,
+      hook: `Templates appear instantly in the gallery without page reloads.
+
+
+================================================================================`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists templates and a form to add one:
 
@@ -605,7 +641,10 @@ export function TemplateDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `e.preventDefault(); setTemplates((prev) => [...prev, { id: String(Date.now()), name, body, channel }]); then clear fields.`,
+      build: `1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, name, and template into an object.
+3. Append item: Use setTemplates((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".`,
     },
   },
 ];

@@ -23,34 +23,30 @@ export const NODES = [
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Model one list item as a type, then set up the component around it","Hold deposits in state and render it — rows when present, a message when empty","Wire controlled inputs so form fields live in React state","On submit, preventDefault, append one item to the list, and clear the form"],
+    items: ["Design a blueprint for a deposit record (customer, amount) and build the shell container.","Hold deposits in memory; show a transaction row for each payment, or an \"All deposits clear\" message when empty.","Wire payment amount and customer fields to memory so keystrokes register in real time.","Block the default page reload, drop the new deposit into the ledger, and clear the input boxes."],
   },
   {
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model one list item as a type, then set up the component around it
+    paal: `Design a blueprint for a deposit record (customer, amount) and build the shell container.
 
-MOCK ROW — Deposits
-  Client: "Priya"
-  Amount: "40"
-  Appointment id: "a-100"
+WHAT YOU'LL NEED
+- id (text)
+- client (text)
+- amount (text)
 
-Every row also needs a unique \`id\` — not shown in the mock, but required to track, update, and key each item.
-
-Your task: write \`type Deposit\` with \`id\` plus client, amount, appointmentId, then define and export DepositDesk as a function component returning <div /> — every step from here on edits this same file.`,
-    hint: `type Deposit = { id: string; client: string; amount: string; appointmentId: string; }
-
-export function DepositDesk() {
-  return <div />;
-}`,
-    example_code: `export type Guest = {
+Your task: Define the shape of a deposit record and create the component container.`,
+    hint: `1. Replace names: Change Payment to your deposit type name and PaymentTracker to your component name.
+2. Populate fields: Write each field on its own line followed by ": string;".
+3. Return container: Keep the "return <div />;" shell in your component.`,
+    example_code: `export type Payment = {
   id: string;
-  name: string;
-  note: string;
+  payer: string;
+  total: string;
 };
 
-export function GuestList() {
+export function PaymentTracker() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -64,7 +60,7 @@ Every value with a shape needs one type to describe that shape before any compon
     mc_options: ["Define type Deposit (id + client, amount, appointmentId), then export function DepositDesk() returning <div />","Skip the type and write JSX directly against untyped objects","Wait until every backend endpoint exists before modeling the row or the component"],
     mc_correct_option: "Define type Deposit (id + client, amount, appointmentId), then export function DepositDesk() returning <div />",
     mc_anchor: "Define type Deposit (id + client, amount",
-    why_this_matters: `Taking a deposit is the same list+form skill as booking — different fields, same React pattern you will reuse on every product desk. If list rows and form fields do not share one shape, some rows end up missing a field, or the form saves a field the list can never display — a type names that shared shape once, so the compiler catches the mismatch before a user does. Naming and exporting the component next to it is what lets every later step, and a real pull request, attach real behavior to something that already exists.`,
+    why_this_matters: `Having an explicit shape for deposits ensures every transaction record has the required bookkeeping fields.`,
     answer_keywords: ["export","type","Deposit","client","amount","appointmentId","export","function","DepositDesk","return"],
     seed_code: ``,
     starter_code: ``,
@@ -85,20 +81,20 @@ export function DepositDesk() {
   return <div />;
 }
 `,
-    analog_example: `export type Guest = {
+    analog_example: `export type Payment = {
   id: string;
-  name: string;
-  note: string;
+  payer: string;
+  total: string;
 };
 
-export function GuestList() {
+export function PaymentTracker() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `One shared type is a single source of truth for what a record looks like — when the list, the form, and the API all reference it, a renamed or removed field breaks the build immediately instead of failing silently in production. Pairing that with the component's own shell in the same step is what turns this from "a type file" into a real, mergeable start on the actual screen.`,
+      hook: `Having an explicit shape for deposits ensures every transaction record has the required bookkeeping fields.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists deposits and a form to add one:
 
@@ -121,37 +117,40 @@ export function DepositDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `type Deposit = { id: string; client: string; amount: string; appointmentId: string; }
-
-export function DepositDesk() {
-  return <div />;
-}`,
+      build: `1. Replace names: Change Payment to your deposit type name and PaymentTracker to your component name.
+2. Populate fields: Write each field on its own line followed by ": string;".
+3. Return container: Keep the "return <div />;" shell in your component.`,
     },
   },
   {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold deposits in state and render it — rows when present, a message when empty
+    paal: `Hold deposits in memory; show a transaction row for each payment, or an "All deposits clear" message when empty.
 
-LIST — Deposits
-  Priya
-  40
+WHAT YOU'LL NEED
+- State array holding deposits.
+- Empty-state conditional render.
+- Array mapping rendering transaction rows.
 
-EMPTY — "No deposits yet."
+Your task: Store deposits in state and display them as rows, showing a message when there are no deposits.`,
+    hint: `1. Declare list state: Initialize useState with an empty array typed with your deposit type.
+2. Conditional check: Use deposits.length === 0 to branch the display.
+3. Render contents: Map over deposits, passing key={d.id} and rendering the client and amount.`,
+    example_code: `const [deposits, setDeposits] = useState<Payment[]>([]);
 
-Your task: hold deposits in state typed as Deposit[], starting empty, then render the empty message when deposits.length === 0 and the mapped rows (key={item.id}) otherwise.`,
-    hint: `const [deposits, setDeposits] = useState<Deposit[]>([]);
-return deposits.length === 0 ? <p>No deposits yet.</p> : <ul>{deposits.map((a) => <li key={a.id}>{a.client}</li>)}</ul>;`,
-    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+return (
+  <div>
+    {deposits.length === 0 ? (
+      <p>No deposits recorded</p>
+    ) : (
+      deposits.map((d) => (
+        <div key={d.id}>
+          {d.payer}: \${d.total}
+        </div>
+      ))
+    )}
+  </div>
 );`,
     think_prompt: `\`\`\`text
 LIST — Deposits
@@ -165,7 +164,7 @@ React only redraws a component when the value it reads changes through React's o
     mc_options: ["useState for the array; branch on length === 0 before mapping rows with a stable key","let deposits = [] and mutate it directly on every update","always render the mapped rows, even when the array is empty"],
     mc_correct_option: "useState for the array; branch on length === 0 before mapping rows with a stable key",
     mc_anchor: "useState for the array; branch on length",
-    why_this_matters: `Taking a deposit is the same list+form skill as booking — different fields, same React pattern you will reuse on every product desk. A plain array in a variable will not make React redraw, and a list that renders as literally nothing when empty looks broken — useState gives the screen something to watch, and branching on length before mapping is what keeps a brand-new list from looking like a bug.`,
+    why_this_matters: `Clear visual feedback when the ledger is empty prevents users from wondering if the application failed to load.`,
     answer_keywords: ["useState","deposits","setDeposits","length","map","key"],
     seed_code: `import { useState } from "react";
 
@@ -230,21 +229,26 @@ export function DepositDesk() {
   );
 }
 `,
-    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+    analog_example: `const [deposits, setDeposits] = useState<Payment[]>([]);
+
+return (
+  <div>
+    {deposits.length === 0 ? (
+      <p>No deposits recorded</p>
+    ) : (
+      deposits.map((d) => (
+        <div key={d.id}>
+          {d.payer}: \${d.total}
+        </div>
+      ))
+    )}
+  </div>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `A plain variable and a piece of React state can hold the identical value yet behave completely differently — mutating a variable is invisible to React, while calling a state setter schedules a re-render. And an empty array is not a missing feature to handle later; it is one of exactly two branches every list render has from the very first render.`,
+      hook: `Clear visual feedback when the ledger is empty prevents users from wondering if the application failed to load.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists deposits and a form to add one:
 
@@ -282,23 +286,30 @@ export function DepositDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `const [deposits, setDeposits] = useState<Deposit[]>([]);
-return deposits.length === 0 ? <p>No deposits yet.</p> : <ul>{deposits.map((a) => <li key={a.id}>{a.client}</li>)}</ul>;`,
+      build: `1. Declare list state: Initialize useState with an empty array typed with your deposit type.
+2. Conditional check: Use deposits.length === 0 to branch the display.
+3. Render contents: Map over deposits, passing key={d.id} and rendering the client and amount.`,
     },
   },
   {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Wire controlled inputs so form fields live in React state
+    paal: `Wire payment amount and customer fields to memory so keystrokes register in real time.
 
-FORM — Deposits
-  [ Client ]  [ Amount ]  [ Appointment id ]   → Take deposit
+WHAT YOU'LL NEED
+- Separate state hooks for client and amount.
+- Inputs bound via value and onChange.
 
-Your task: add one state value per field (client, amount, appointmentId), then wire each input's value and onChange to it.`,
-    hint: `useState("") per field; value={...} onChange sets that state.`,
-    example_code: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+Your task: Bind the client name and deposit amount inputs to React state.`,
+    hint: `1. Initialize states: Create a useState("") for client and one for amount.
+2. Attach props: Assign each state variable to its input's value attribute.
+3. Handle updates: Update the corresponding state inside onChange using e.target.value.`,
+    example_code: `const [payer, setPayer] = useState("");
+const [total, setTotal] = useState("");
+
+<input value={payer} onChange={(e) => setPayer(e.target.value)} />
+<input value={total} onChange={(e) => setTotal(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Deposits
   [ Client ]  [ Amount ]  [ Appointment id ]   → Take deposit
@@ -308,7 +319,7 @@ A form field's text can live in the DOM itself (uncontrolled) or in React state 
     mc_options: ["value from state, onChange writes back to state","read the input only on submit via document.getElementById","store the DOM node in a global"],
     mc_correct_option: "value from state, onChange writes back to state",
     mc_anchor: "value from state, onChange writes back t",
-    why_this_matters: `Controlled inputs use value from state and onChange to write back, keeping the form and the submit payload in sync. Taking a deposit is the same list+form skill as booking — different fields, same React pattern you will reuse on every product desk.`,
+    why_this_matters: `Controlled inputs ensure numbers and strings are sanitized and accessible when the user clicks save.`,
     answer_keywords: ["useState","value=","onChange","client","amount","appointmentId"],
     seed_code: `import { useState } from "react";
 
@@ -372,13 +383,16 @@ export function DepositDesk() {
   );
 }
 `,
-    analog_example: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+    analog_example: `const [payer, setPayer] = useState("");
+const [total, setTotal] = useState("");
+
+<input value={payer} onChange={(e) => setPayer(e.target.value)} />
+<input value={total} onChange={(e) => setTotal(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Controlled vs. uncontrolled is a real, ongoing choice in React forms, not just boilerplate — a controlled input makes React the single source of truth for what is on screen, so validation, clearing, and reading the value on submit are all just state reads, not DOM queries.`,
+      hook: `Controlled inputs ensure numbers and strings are sanitized and accessible when the user clicks save.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists deposits and a form to add one:
 
@@ -413,21 +427,35 @@ export function DepositDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `useState("") per field; value={...} onChange sets that state.`,
+      build: `1. Initialize states: Create a useState("") for client and one for amount.
+2. Attach props: Assign each state variable to its input's value attribute.
+3. Handle updates: Update the corresponding state inside onChange using e.target.value.`,
     },
   },
   {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `On submit, preventDefault, append one item to the list, and clear the form
+    paal: `Block the default page reload, drop the new deposit into the ledger, and clear the input boxes.
 
-FORM — Deposits
-  [ Client ]  [ Amount ]  [ Appointment id ]   → Take deposit
+WHAT YOU'LL NEED
+- e.preventDefault() to stop page reload.
+- A new deposit object with a unique id.
+- State update appending the new object.
+- State cleanup resetting fields.
 
-Your task: on submit: call preventDefault, build a new Deposit from the field state, add it to deposits without mutating the old array, then clear the fields.`,
-    hint: `e.preventDefault(); setDeposits((prev) => [...prev, { id: String(Date.now()), client, amount, appointmentId }]); then clear fields.`,
-    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+Your task: Record the new deposit to the list and clear the input boxes without reloading the page.`,
+    hint: `1. Stop browser action: Put e.preventDefault() first.
+2. Build record: Create an object with an ID and your state fields.
+3. Update list: Append using setDeposits((prev) => [...prev, entry]).
+4. Reset fields: Set both input states back to "".`,
+    example_code: `function onSave(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), payer, total };
+  setDeposits((prev) => [...prev, entry]);
+  setPayer("");
+  setTotal("");
+}`,
     think_prompt: `\`\`\`text
 FORM — Deposits
   [ Client ]  [ Amount ]  [ Appointment id ]   → Take deposit
@@ -438,7 +466,10 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `preventDefault stops navigation; copying the old list plus one new item, then clearing fields, matches the design mock behavior. Taking a deposit is the same list+form skill as booking — different fields, same React pattern you will reuse on every product desk.`,
+    why_this_matters: `Immediate visual feedback gives users confidence that their deposit was recorded accurately.
+
+
+================================================================================`,
     answer_keywords: ["preventDefault","setDeposits","prev","client","amount","appointmentId"],
     seed_code: `import { useState } from "react";
 
@@ -545,12 +576,21 @@ export function DepositDesk() {
   );
 }
 `,
-    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+    analog_example: `function onSave(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), payer, total };
+  setDeposits((prev) => [...prev, entry]);
+  setPayer("");
+  setTotal("");
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Every controlled form in React follows the same submit shape — cancel the default, derive the new record, update state immutably, reset the inputs — regardless of what the record actually contains. Learning that shape once means every future "add to a list" form is the same four moves with different field names.`,
+      hook: `Immediate visual feedback gives users confidence that their deposit was recorded accurately.
+
+
+================================================================================`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists deposits and a form to add one:
 
@@ -605,7 +645,10 @@ export function DepositDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `e.preventDefault(); setDeposits((prev) => [...prev, { id: String(Date.now()), client, amount, appointmentId }]); then clear fields.`,
+      build: `1. Stop browser action: Put e.preventDefault() first.
+2. Build record: Create an object with an ID and your state fields.
+3. Update list: Append using setDeposits((prev) => [...prev, entry]).
+4. Reset fields: Set both input states back to "".`,
     },
   },
 ];

@@ -212,11 +212,6 @@ export default function Apply() {
   // compact confirmation (see applyRecommendation/pickRole below and the render logic further
   // down) — showing the same choice again right after "Use this recommendation" read as broken.
   const [recommendationApplied, setRecommendationApplied] = useState(false);
-  // Languages are a multi-select with no single click that means "done" — reacting to the first
-  // chip alone popped the recommendation after just one pick (reported live: clicking "HTML & CSS"
-  // immediately showed a recommendation before other known languages could be added). Require an
-  // explicit "done picking" action instead of inferring it from array length.
-  const [languagesReviewed, setLanguagesReviewed] = useState(false);
   // `EMPTY.codingFocus` is a fixed "both" so the field always has *some* value to submit if the
   // manual picker below is never touched — but that fixed default was also what the picker's
   // "selected" tile compared against, so "Both" showed highlighted even while the recommendation
@@ -390,7 +385,6 @@ export default function Apply() {
       interestPull: "",
     }));
     setRecommendationApplied(false);
-    setLanguagesReviewed(false);
     setCodingFocusTouched(false);
     setSkillLevelTouched(false);
     setBeSkillLevelTouched(false);
@@ -403,21 +397,21 @@ export default function Apply() {
         ? f.knownLanguages.filter((v) => v !== value)
         : [...f.knownLanguages, value],
     }));
-    // Still picking — an in-progress selection shouldn't count as reviewed, and editing the answer
-    // an already-applied recommendation was based on invalidates it.
-    setLanguagesReviewed(false);
+    // Editing the answer an already-applied recommendation was based on invalidates it.
     setRecommendationApplied(false);
     setCodingFocusTouched(false);
     setSkillLevelTouched(false);
     setBeSkillLevelTouched(false);
   }
 
-  // Requires an actual, *completed* answer on both branches — was true the instant priorKnowledge
+  // Requires an actual, completed answer on both branches — true the instant priorKnowledge
   // became "no" (before "What pulls you more?" had been touched) or the instant the first language
-  // chip was clicked (before someone picking several was done selecting) — found live both ways.
+  // chip was clicked. The recommendation itself lives in a calm section at the page bottom (not an
+  // inline popup next to the picker), so refining it live as more chips are picked reads as normal
+  // feedback rather than a jarring early answer.
   const counselorReady =
     (form.priorKnowledge === "no" && !!form.interestPull) ||
-    (form.priorKnowledge === "yes" && (languagesReviewed || !!form.interestPull));
+    (form.priorKnowledge === "yes" && form.knownLanguages.length > 0);
   const rec = counselorReady
     ? recommend({ priorKnowledge: form.priorKnowledge, knownLanguages: form.knownLanguages, interestPull: form.interestPull })
     : null;
@@ -720,11 +714,6 @@ export default function Apply() {
                     </button>
                   ))}
                 </div>
-                {form.knownLanguages.length > 0 && !languagesReviewed && (
-                  <button type="button" className="cm-recommendation-apply cm-languages-done" onClick={() => setLanguagesReviewed(true)}>
-                    Done picking
-                  </button>
-                )}
               </>
             )}
 

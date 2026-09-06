@@ -23,27 +23,24 @@ export const NODES = [
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Model one list item as a type, then set up the component around it","Hold appointments in state and render it — rows when present, a message when empty","Wire controlled inputs so form fields live in React state","On submit, preventDefault, append one item to the list, and clear the form"],
+    items: ["Create an appointment blueprint (name, time) and set up the outer container component.","Store appointments in app memory; show rows if booked, or a \"No appointments scheduled today\" note if empty.","Connect the booking input boxes directly to memory so names and times are tracked as you type.","Stop the form from refreshing the page on click, append the new appointment to the list, and wipe the inputs clean."],
   },
   {
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model one list item as a type, then set up the component around it
+    paal: `Create an appointment blueprint (name, time) and set up the outer container component.
 
-MOCK ROW — Bookings
-  Provider: "Maya"
-  Service: "Color & cut"
-  Starts at: "Tue 2:00 PM"
+WHAT YOU'LL NEED
+- id (text)
+- patient (text)
+- time (text)
 
-Every row also needs a unique \`id\` — not shown in the mock, but required to track, update, and key each item.
-
-Your task: write \`type Appointment\` with \`id\` plus provider, service, startsAt, then define and export BookingDesk as a function component returning <div /> — every step from here on edits this same file.`,
-    hint: `type Appointment = { id: string; provider: string; service: string; startsAt: string; }
-
-export function BookingDesk() {
-  return <div />;
-}`,
+Your task: Create the blueprint for a single appointment and set up an empty screen frame to hold the view.`,
+    hint: `1. Mirror the declaration: Look at "export type Guest = {". Replace Guest with your task's blueprint name.
+2. Fill the lines: In the example, every detail follows "name: string;". Add your fields one by one using that exact shape (property name, colon, string, semicolon).
+3. Close the blueprint: End with "};" just like the pattern.
+4. Mirror the component frame: Look at "export function GuestList() { ... }". Replace GuestList with your component name, keeping the return structure intact.`,
     example_code: `export type Guest = {
   id: string;
   name: string;
@@ -64,7 +61,7 @@ Every value with a shape needs one type to describe that shape before any compon
     mc_options: ["Define type Appointment (id + provider, service, startsAt), then export function BookingDesk() returning <div />","Skip the type and write JSX directly against untyped objects","Wait until every backend endpoint exists before modeling the row or the component"],
     mc_correct_option: "Define type Appointment (id + provider, service, startsAt), then export function BookingDesk() returning <div />",
     mc_anchor: "Define type Appointment (id + provider, ",
-    why_this_matters: `Most web apps need a screen that lists data as rows you can scan — people, orders, tickets. You also need a form to add a new row, and a clear message when the list is empty. If list rows and form fields do not share one shape, some rows end up missing a field, or the form saves a field the list can never display — a type names that shared shape once, so the compiler catches the mismatch before a user does. Naming and exporting the component next to it is what lets every later step, and a real pull request, attach real behavior to something that already exists.`,
+    why_this_matters: `Writing a type creates an official checklist. Your editor uses it to autocomplete names and underline typos in red before you even run your project.`,
     answer_keywords: ["export","type","Appointment","provider","service","startsAt","export","function","BookingDesk","return"],
     seed_code: ``,
     starter_code: ``,
@@ -98,7 +95,7 @@ export function GuestList() {
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `One shared type is a single source of truth for what a record looks like — when the list, the form, and the API all reference it, a renamed or removed field breaks the build immediately instead of failing silently in production. Pairing that with the component's own shell in the same step is what turns this from "a type file" into a real, mergeable start on the actual screen.`,
+      hook: `Writing a type creates an official checklist. Your editor uses it to autocomplete names and underline typos in red before you even run your project.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists appointments and a form to add one:
 
@@ -121,37 +118,38 @@ export function BookingDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `type Appointment = { id: string; provider: string; service: string; startsAt: string; }
-
-export function BookingDesk() {
-  return <div />;
-}`,
+      build: `1. Mirror the declaration: Look at "export type Guest = {". Replace Guest with your task's blueprint name.
+2. Fill the lines: In the example, every detail follows "name: string;". Add your fields one by one using that exact shape (property name, colon, string, semicolon).
+3. Close the blueprint: End with "};" just like the pattern.
+4. Mirror the component frame: Look at "export function GuestList() { ... }". Replace GuestList with your component name, keeping the return structure intact.`,
     },
   },
   {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold appointments in state and render it — rows when present, a message when empty
+    paal: `Store appointments in app memory; show rows if booked, or a "No appointments scheduled today" note if empty.
 
-LIST — Bookings
-  Maya
-  Color & cut
+WHAT YOU'LL NEED
+- An array state holding items typed with your blueprint.
+- A condition checking if the list length is 0.
+- A fallback message when empty, or a loop drawing each row.
 
-EMPTY — "No appointments yet."
+Your task: Give the app a memory slot for your appointments collection and show either the booked rows or a friendly empty note.`,
+    hint: `1. Set up memory: Replace Guest in useState<Guest[]>([]) with your task's item type.
+2. Check for empty: Check if your array's length equals 0 using a ternary operator (? :).
+3. Render the fallback: Put your polite "no records" text inside the first branch.
+4. Render the list: In the second branch, use .map() to loop through each item, ensuring you pass the unique id into the key attribute.`,
+    example_code: `const [items, setItems] = useState<Guest[]>([]);
 
-Your task: hold appointments in state typed as Appointment[], starting empty, then render the empty message when appointments.length === 0 and the mapped rows (key={item.id}) otherwise.`,
-    hint: `const [appointments, setAppointments] = useState<Appointment[]>([]);
-return appointments.length === 0 ? <p>No appointments yet.</p> : <ul>{appointments.map((a) => <li key={a.id}>{a.provider}</li>)}</ul>;`,
-    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+return (
+  <div>
+    {items.length === 0 ? (
+      <p>No guests yet</p>
+    ) : (
+      items.map((item) => <div key={item.id}>{item.name}</div>)
+    )}
+  </div>
 );`,
     think_prompt: `\`\`\`text
 LIST — Bookings
@@ -165,7 +163,7 @@ React only redraws a component when the value it reads changes through React's o
     mc_options: ["useState for the array; branch on length === 0 before mapping rows with a stable key","let appointments = [] and mutate it directly on every update","always render the mapped rows, even when the array is empty"],
     mc_correct_option: "useState for the array; branch on length === 0 before mapping rows with a stable key",
     mc_anchor: "useState for the array; branch on length",
-    why_this_matters: `Most web apps need a screen that lists data as rows you can scan — people, orders, tickets. You also need a form to add a new row, and a clear message when the list is empty. A plain array in a variable will not make React redraw, and a list that renders as literally nothing when empty looks broken — useState gives the screen something to watch, and branching on length before mapping is what keeps a brand-new list from looking like a bug.`,
+    why_this_matters: `Checking for an empty list guarantees your user never stares at a broken, blank page when no records exist.`,
     answer_keywords: ["useState","appointments","setAppointments","length","map","key"],
     seed_code: `import { useState } from "react";
 
@@ -230,21 +228,22 @@ export function BookingDesk() {
   );
 }
 `,
-    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+    analog_example: `const [items, setItems] = useState<Guest[]>([]);
+
+return (
+  <div>
+    {items.length === 0 ? (
+      <p>No guests yet</p>
+    ) : (
+      items.map((item) => <div key={item.id}>{item.name}</div>)
+    )}
+  </div>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `A plain variable and a piece of React state can hold the identical value yet behave completely differently — mutating a variable is invisible to React, while calling a state setter schedules a re-render. And an empty array is not a missing feature to handle later; it is one of exactly two branches every list render has from the very first render.`,
+      hook: `Checking for an empty list guarantees your user never stares at a broken, blank page when no records exist.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists appointments and a form to add one:
 
@@ -282,23 +281,34 @@ export function BookingDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `const [appointments, setAppointments] = useState<Appointment[]>([]);
-return appointments.length === 0 ? <p>No appointments yet.</p> : <ul>{appointments.map((a) => <li key={a.id}>{a.provider}</li>)}</ul>;`,
+      build: `1. Set up memory: Replace Guest in useState<Guest[]>([]) with your task's item type.
+2. Check for empty: Check if your array's length equals 0 using a ternary operator (? :).
+3. Render the fallback: Put your polite "no records" text inside the first branch.
+4. Render the list: In the second branch, use .map() to loop through each item, ensuring you pass the unique id into the key attribute.`,
     },
   },
   {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Wire controlled inputs so form fields live in React state
+    paal: `Connect the booking input boxes directly to memory so names and times are tracked as you type.
 
-FORM — Bookings
-  [ Provider ]  [ Service ]  [ Starts at ]   → Book
+WHAT YOU'LL NEED
+- State variables for each field the user types.
+- An input with value pointing to state.
+- An onChange handler feeding event text into the setter.
 
-Your task: add one state value per field (provider, service, startsAt), then wire each input's value and onChange to it.`,
-    hint: `useState("") per field; value={...} onChange sets that state.`,
+Your task: Connect your form's text boxes directly to memory so every typed keystroke is saved immediately.`,
+    hint: `1. Create field memory: For every text input, create a pair using useState("").
+2. Bind the screen: In your <input />, point value to that state variable.
+3. Listen for typing: Write onChange={(e) => setYourField(e.target.value)} to forward the typed text into memory.`,
     example_code: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+
+<input
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  placeholder="Enter name"
+/>;`,
     think_prompt: `\`\`\`text
 FORM — Bookings
   [ Provider ]  [ Service ]  [ Starts at ]   → Book
@@ -308,7 +318,7 @@ A form field's text can live in the DOM itself (uncontrolled) or in React state 
     mc_options: ["value from state, onChange writes back to state","read the input only on submit via document.getElementById","store the DOM node in a global"],
     mc_correct_option: "value from state, onChange writes back to state",
     mc_anchor: "value from state, onChange writes back t",
-    why_this_matters: `Controlled inputs use value from state and onChange to write back, keeping the form and the submit payload in sync. Most web apps need a screen that lists data as rows you can scan — people, orders, tickets. You also need a form to add a new row, and a clear message when the list is empty.`,
+    why_this_matters: `When inputs are tied to state, React always knows what the user typed, making validation and saving predictable.`,
     answer_keywords: ["useState","value=","onChange","provider","service","startsAt"],
     seed_code: `import { useState } from "react";
 
@@ -373,12 +383,17 @@ export function BookingDesk() {
 }
 `,
     analog_example: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+
+<input
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  placeholder="Enter name"
+/>;`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Controlled vs. uncontrolled is a real, ongoing choice in React forms, not just boilerplate — a controlled input makes React the single source of truth for what is on screen, so validation, clearing, and reading the value on submit are all just state reads, not DOM queries.`,
+      hook: `When inputs are tied to state, React always knows what the user typed, making validation and saving predictable.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists appointments and a form to add one:
 
@@ -413,21 +428,34 @@ export function BookingDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `useState("") per field; value={...} onChange sets that state.`,
+      build: `1. Create field memory: For every text input, create a pair using useState("").
+2. Bind the screen: In your <input />, point value to that state variable.
+3. Listen for typing: Write onChange={(e) => setYourField(e.target.value)} to forward the typed text into memory.`,
     },
   },
   {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `On submit, preventDefault, append one item to the list, and clear the form
+    paal: `Stop the form from refreshing the page on click, append the new appointment to the list, and wipe the inputs clean.
 
-FORM — Bookings
-  [ Provider ]  [ Service ]  [ Starts at ]   → Book
+WHAT YOU'LL NEED
+- An onSubmit function intercepting form submission.
+- A call to stop the default browser reload.
+- An update adding the new record to your existing list.
+- Resets setting form state variables back to empty strings.
 
-Your task: on submit: call preventDefault, build a new Appointment from the field state, add it to appointments without mutating the old array, then clear the fields.`,
-    hint: `e.preventDefault(); setAppointments((prev) => [...prev, { id: String(Date.now()), provider, service, startsAt }]); then clear fields.`,
-    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+Your task: Save the newly typed item into your collection on submit without refreshing the browser, then reset the text boxes.`,
+    hint: `1. Stop browser reload: Put e.preventDefault() as the very first line inside your submission handler.
+2. Assemble the record: Create an object containing a unique id and the values from your input state.
+3. Append without mutating: Use the spread operator ([...prev, newItem]) inside your list setter to add the new entry safely.
+4. Clean the slate: Call your input state setters with empty strings "" so the form clears.`,
+    example_code: `function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  const newItem = { id: String(Date.now()), name };
+  setItems((prev) => [...prev, newItem]);
+  setName("");
+}`,
     think_prompt: `\`\`\`text
 FORM — Bookings
   [ Provider ]  [ Service ]  [ Starts at ]   → Book
@@ -438,7 +466,10 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `preventDefault stops navigation; copying the old list plus one new item, then clearing fields, matches the design mock behavior. Most web apps need a screen that lists data as rows you can scan — people, orders, tickets. You also need a form to add a new row, and a clear message when the list is empty.`,
+    why_this_matters: `Stopping page reload prevents the entire browser from blinking, creating an instant and seamless app experience.
+
+
+================================================================================`,
     answer_keywords: ["preventDefault","setAppointments","prev","provider","service","startsAt"],
     seed_code: `import { useState } from "react";
 
@@ -545,12 +576,20 @@ export function BookingDesk() {
   );
 }
 `,
-    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+    analog_example: `function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  const newItem = { id: String(Date.now()), name };
+  setItems((prev) => [...prev, newItem]);
+  setName("");
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Every controlled form in React follows the same submit shape — cancel the default, derive the new record, update state immutably, reset the inputs — regardless of what the record actually contains. Learning that shape once means every future "add to a list" form is the same four moves with different field names.`,
+      hook: `Stopping page reload prevents the entire browser from blinking, creating an instant and seamless app experience.
+
+
+================================================================================`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists appointments and a form to add one:
 
@@ -605,7 +644,10 @@ export function BookingDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `e.preventDefault(); setAppointments((prev) => [...prev, { id: String(Date.now()), provider, service, startsAt }]); then clear fields.`,
+      build: `1. Stop browser reload: Put e.preventDefault() as the very first line inside your submission handler.
+2. Assemble the record: Create an object containing a unique id and the values from your input state.
+3. Append without mutating: Use the spread operator ([...prev, newItem]) inside your list setter to add the new entry safely.
+4. Clean the slate: Call your input state setters with empty strings "" so the form clears.`,
     },
   },
 ];

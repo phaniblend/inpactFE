@@ -23,34 +23,29 @@ export const NODES = [
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Model one list item as a type, then set up the component around it","Hold quotes in state and render it — rows when present, a message when empty","Wire controlled inputs so form fields live in React state","On submit, preventDefault, append one item to the list, and clear the form"],
+    items: ["Define a quote blueprint (client, project name, total estimate) and set up the outer display container.","Keep quotes in state; display each estimate row, or show \"No estimates created yet\" when empty.","Connect client and estimate inputs directly to state for real-time tracking.","Prevent form submission reload, append the new estimate to the list, and wipe the inputs clean."],
   },
   {
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model one list item as a type, then set up the component around it
+    paal: `Define a quote blueprint (client, project name, total estimate) and set up the outer display container.
 
-MOCK ROW — Quotes
-  Client: "Patel Home"
-  Total: "1800"
-  Valid until: "2026-09-15"
+WHAT YOU'LL NEED
+- id (text)
+- client (text)
+- estimate (text)
 
-Every row also needs a unique \`id\` — not shown in the mock, but required to track, update, and key each item.
-
-Your task: write \`type Quote\` with \`id\` plus client, total, validUntil, then define and export QuoteDesk as a function component returning <div /> — every step from here on edits this same file.`,
-    hint: `type Quote = { id: string; client: string; total: string; validUntil: string; }
-
-export function QuoteDesk() {
-  return <div />;
-}`,
-    example_code: `export type Guest = {
+Your task: Define the shape of an estimate and create the component shell.`,
+    hint: `1. Blueprint declaration: Rename Estimate to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.`,
+    example_code: `export type Estimate = {
   id: string;
-  name: string;
-  note: string;
+  client: string;
+  estimate: string;
 };
 
-export function GuestList() {
+export function EstimateList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -64,7 +59,7 @@ Every value with a shape needs one type to describe that shape before any compon
     mc_options: ["Define type Quote (id + client, total, validUntil), then export function QuoteDesk() returning <div />","Skip the type and write JSX directly against untyped objects","Wait until every backend endpoint exists before modeling the row or the component"],
     mc_correct_option: "Define type Quote (id + client, total, validUntil), then export function QuoteDesk() returning <div />",
     mc_anchor: "Define type Quote (id + client, total, v",
-    why_this_matters: `Trades lose jobs between estimate and acceptance. A quote list+form is the bridge from lead to cash. If list rows and form fields do not share one shape, some rows end up missing a field, or the form saves a field the list can never display — a type names that shared shape once, so the compiler catches the mismatch before a user does. Naming and exporting the component next to it is what lets every later step, and a real pull request, attach real behavior to something that already exists.`,
+    why_this_matters: `Modeling estimate records ensures consistent summary fields across the app.`,
     answer_keywords: ["export","type","Quote","client","total","validUntil","export","function","QuoteDesk","return"],
     seed_code: ``,
     starter_code: ``,
@@ -85,20 +80,20 @@ export function QuoteDesk() {
   return <div />;
 }
 `,
-    analog_example: `export type Guest = {
+    analog_example: `export type Estimate = {
   id: string;
-  name: string;
-  note: string;
+  client: string;
+  estimate: string;
 };
 
-export function GuestList() {
+export function EstimateList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `One shared type is a single source of truth for what a record looks like — when the list, the form, and the API all reference it, a renamed or removed field breaks the build immediately instead of failing silently in production. Pairing that with the component's own shell in the same step is what turns this from "a type file" into a real, mergeable start on the actual screen.`,
+      hook: `Modeling estimate records ensures consistent summary fields across the app.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists quotes and a form to add one:
 
@@ -121,37 +116,39 @@ export function QuoteDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `type Quote = { id: string; client: string; total: string; validUntil: string; }
-
-export function QuoteDesk() {
-  return <div />;
-}`,
+      build: `1. Blueprint declaration: Rename Estimate to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.`,
     },
   },
   {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold quotes in state and render it — rows when present, a message when empty
+    paal: `Keep quotes in state; display each estimate row, or show "No estimates created yet" when empty.
 
-LIST — Quotes
-  Patel Home
-  1800
+WHAT YOU'LL NEED
+- State array holding estimates.
+- Conditional empty check.
+- Map loop rendering estimate rows.
 
-EMPTY — "No quotes yet."
+Your task: Store estimates in state and display them, showing a placeholder if none exist.`,
+    hint: `1. Set up state: Use useState<Estimate[]>([]).
+2. Check for empty: Use estimates.length === 0 to render the empty message.
+3. Render entries: Map through estimates, passing key={est.id}.`,
+    example_code: `const [estimates, setEstimates] = useState<Estimate[]>([]);
 
-Your task: hold quotes in state typed as Quote[], starting empty, then render the empty message when quotes.length === 0 and the mapped rows (key={item.id}) otherwise.`,
-    hint: `const [quotes, setQuotes] = useState<Quote[]>([]);
-return quotes.length === 0 ? <p>No quotes yet.</p> : <ul>{quotes.map((a) => <li key={a.id}>{a.client}</li>)}</ul>;`,
-    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+return (
+  <div>
+    {estimates.length === 0 ? (
+      <p>No estimates recorded</p>
+    ) : (
+      estimates.map((est) => (
+        <div key={est.id}>
+          {est.client}: \${est.estimate}
+        </div>
+      ))
+    )}
+  </div>
 );`,
     think_prompt: `\`\`\`text
 LIST — Quotes
@@ -165,7 +162,7 @@ React only redraws a component when the value it reads changes through React's o
     mc_options: ["useState for the array; branch on length === 0 before mapping rows with a stable key","let quotes = [] and mutate it directly on every update","always render the mapped rows, even when the array is empty"],
     mc_correct_option: "useState for the array; branch on length === 0 before mapping rows with a stable key",
     mc_anchor: "useState for the array; branch on length",
-    why_this_matters: `Trades lose jobs between estimate and acceptance. A quote list+form is the bridge from lead to cash. A plain array in a variable will not make React redraw, and a list that renders as literally nothing when empty looks broken — useState gives the screen something to watch, and branching on length before mapping is what keeps a brand-new list from looking like a bug.`,
+    why_this_matters: `A clear empty state prevents users from wondering whether estimates failed to load.`,
     answer_keywords: ["useState","quotes","setQuotes","length","map","key"],
     seed_code: `import { useState } from "react";
 
@@ -230,21 +227,26 @@ export function QuoteDesk() {
   );
 }
 `,
-    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+    analog_example: `const [estimates, setEstimates] = useState<Estimate[]>([]);
+
+return (
+  <div>
+    {estimates.length === 0 ? (
+      <p>No estimates recorded</p>
+    ) : (
+      estimates.map((est) => (
+        <div key={est.id}>
+          {est.client}: \${est.estimate}
+        </div>
+      ))
+    )}
+  </div>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `A plain variable and a piece of React state can hold the identical value yet behave completely differently — mutating a variable is invisible to React, while calling a state setter schedules a re-render. And an empty array is not a missing feature to handle later; it is one of exactly two branches every list render has from the very first render.`,
+      hook: `A clear empty state prevents users from wondering whether estimates failed to load.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists quotes and a form to add one:
 
@@ -282,23 +284,29 @@ export function QuoteDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `const [quotes, setQuotes] = useState<Quote[]>([]);
-return quotes.length === 0 ? <p>No quotes yet.</p> : <ul>{quotes.map((a) => <li key={a.id}>{a.client}</li>)}</ul>;`,
+      build: `1. Set up state: Use useState<Estimate[]>([]).
+2. Check for empty: Use estimates.length === 0 to render the empty message.
+3. Render entries: Map through estimates, passing key={est.id}.`,
     },
   },
   {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Wire controlled inputs so form fields live in React state
+    paal: `Connect client and estimate inputs directly to state for real-time tracking.
 
-FORM — Quotes
-  [ Client ]  [ Total ]  [ Valid until ]   → Create quote
+WHAT YOU'LL NEED
+- State hooks for client and estimate inputs.
+- Value and onChange props wired on inputs.
 
-Your task: add one state value per field (client, total, validUntil), then wire each input's value and onChange to it.`,
-    hint: `useState("") per field; value={...} onChange sets that state.`,
-    example_code: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+Your task: Connect estimate input fields to React state.`,
+    hint: `1. Initialize states: Call useState("") for client and estimate.
+2. Wire inputs: Connect value and onChange to each state variable.`,
+    example_code: `const [client, setClient] = useState("");
+const [estimate, setEstimate] = useState("");
+
+<input value={client} onChange={(e) => setClient(e.target.value)} />
+<input value={estimate} onChange={(e) => setEstimate(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Quotes
   [ Client ]  [ Total ]  [ Valid until ]   → Create quote
@@ -308,7 +316,7 @@ A form field's text can live in the DOM itself (uncontrolled) or in React state 
     mc_options: ["value from state, onChange writes back to state","read the input only on submit via document.getElementById","store the DOM node in a global"],
     mc_correct_option: "value from state, onChange writes back to state",
     mc_anchor: "value from state, onChange writes back t",
-    why_this_matters: `Controlled inputs use value from state and onChange to write back, keeping the form and the submit payload in sync. Trades lose jobs between estimate and acceptance. A quote list+form is the bridge from lead to cash.`,
+    why_this_matters: `Controlled inputs ensure clean data capture when creating new estimates.`,
     answer_keywords: ["useState","value=","onChange","client","total","validUntil"],
     seed_code: `import { useState } from "react";
 
@@ -372,13 +380,16 @@ export function QuoteDesk() {
   );
 }
 `,
-    analog_example: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+    analog_example: `const [client, setClient] = useState("");
+const [estimate, setEstimate] = useState("");
+
+<input value={client} onChange={(e) => setClient(e.target.value)} />
+<input value={estimate} onChange={(e) => setEstimate(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Controlled vs. uncontrolled is a real, ongoing choice in React forms, not just boilerplate — a controlled input makes React the single source of truth for what is on screen, so validation, clearing, and reading the value on submit are all just state reads, not DOM queries.`,
+      hook: `Controlled inputs ensure clean data capture when creating new estimates.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists quotes and a form to add one:
 
@@ -413,21 +424,34 @@ export function QuoteDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `useState("") per field; value={...} onChange sets that state.`,
+      build: `1. Initialize states: Call useState("") for client and estimate.
+2. Wire inputs: Connect value and onChange to each state variable.`,
     },
   },
   {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `On submit, preventDefault, append one item to the list, and clear the form
+    paal: `Prevent form submission reload, append the new estimate to the list, and wipe the inputs clean.
 
-FORM — Quotes
-  [ Client ]  [ Total ]  [ Valid until ]   → Create quote
+WHAT YOU'LL NEED
+- Form interceptor using e.preventDefault().
+- New estimate object creation.
+- Spread update to state.
+- Form reset calls.
 
-Your task: on submit: call preventDefault, build a new Quote from the field state, add it to quotes without mutating the old array, then clear the fields.`,
-    hint: `e.preventDefault(); setQuotes((prev) => [...prev, { id: String(Date.now()), client, total, validUntil }]); then clear fields.`,
-    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+Your task: Append the new estimate to state without a page refresh and reset the form.`,
+    hint: `1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, client, and estimate into an object.
+3. Append item: Use setEstimates((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".`,
+    example_code: `function handleCreate(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), client, estimate };
+  setEstimates((prev) => [...prev, entry]);
+  setClient("");
+  setEstimate("");
+}`,
     think_prompt: `\`\`\`text
 FORM — Quotes
   [ Client ]  [ Total ]  [ Valid until ]   → Create quote
@@ -438,7 +462,10 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `preventDefault stops navigation; copying the old list plus one new item, then clearing fields, matches the design mock behavior. Trades lose jobs between estimate and acceptance. A quote list+form is the bridge from lead to cash.`,
+    why_this_matters: `Estimates appear instantly in the list without page reloads.
+
+
+================================================================================`,
     answer_keywords: ["preventDefault","setQuotes","prev","client","total","validUntil"],
     seed_code: `import { useState } from "react";
 
@@ -545,12 +572,21 @@ export function QuoteDesk() {
   );
 }
 `,
-    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+    analog_example: `function handleCreate(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), client, estimate };
+  setEstimates((prev) => [...prev, entry]);
+  setClient("");
+  setEstimate("");
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Every controlled form in React follows the same submit shape — cancel the default, derive the new record, update state immutably, reset the inputs — regardless of what the record actually contains. Learning that shape once means every future "add to a list" form is the same four moves with different field names.`,
+      hook: `Estimates appear instantly in the list without page reloads.
+
+
+================================================================================`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists quotes and a form to add one:
 
@@ -605,7 +641,10 @@ export function QuoteDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `e.preventDefault(); setQuotes((prev) => [...prev, { id: String(Date.now()), client, total, validUntil }]); then clear fields.`,
+      build: `1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, client, and estimate into an object.
+3. Append item: Use setEstimates((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".`,
     },
   },
 ];

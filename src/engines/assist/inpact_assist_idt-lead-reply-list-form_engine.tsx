@@ -23,34 +23,29 @@ export const NODES = [
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Model one list item as a type, then set up the component around it","Hold notes in state and render it — rows when present, a message when empty","Wire controlled inputs so form fields live in React state","On submit, preventDefault, append one item to the list, and clear the form"],
+    items: ["Outline the blueprint for a customer reply note and build the container component.","Store notes in memory; display the conversation thread row by row, or a \"No replies logged yet\" note if empty.","Connect the reply textarea to state so typed thoughts are saved on every key press.","Prevent form submission refresh, append the note to the thread, and clear the text area."],
   },
   {
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model one list item as a type, then set up the component around it
+    paal: `Outline the blueprint for a customer reply note and build the container component.
 
-MOCK ROW — Replies
-  Lead id: "L-1"
-  Body: "Sent price sheet"
-  Channel: "sms"
+WHAT YOU'LL NEED
+- id (text)
+- author (text)
+- body (text)
 
-Every row also needs a unique \`id\` — not shown in the mock, but required to track, update, and key each item.
-
-Your task: write \`type ReplyNote\` with \`id\` plus leadId, body, channel, then define and export ReplyDesk as a function component returning <div /> — every step from here on edits this same file.`,
-    hint: `type ReplyNote = { id: string; leadId: string; body: string; channel: string; }
-
-export function ReplyDesk() {
-  return <div />;
-}`,
-    example_code: `export type Guest = {
+Your task: Define the shape of a reply note and create the component shell.`,
+    hint: `1. Blueprint declaration: Rename ReplyNote to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.`,
+    example_code: `export type ReplyNote = {
   id: string;
-  name: string;
-  note: string;
+  author: string;
+  body: string;
 };
 
-export function GuestList() {
+export function ReplySection() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -64,7 +59,7 @@ Every value with a shape needs one type to describe that shape before any compon
     mc_options: ["Define type ReplyNote (id + leadId, body, channel), then export function ReplyDesk() returning <div />","Skip the type and write JSX directly against untyped objects","Wait until every backend endpoint exists before modeling the row or the component"],
     mc_correct_option: "Define type ReplyNote (id + leadId, body, channel), then export function ReplyDesk() returning <div />",
     mc_anchor: "Define type ReplyNote (id + leadId, body",
-    why_this_matters: `Follow-up is a second list: what we said, on which channel — still list+form. If list rows and form fields do not share one shape, some rows end up missing a field, or the form saves a field the list can never display — a type names that shared shape once, so the compiler catches the mismatch before a user does. Naming and exporting the component next to it is what lets every later step, and a real pull request, attach real behavior to something that already exists.`,
+    why_this_matters: `Defining the reply shape ensures conversation messages share a consistent data structure.`,
     answer_keywords: ["export","type","ReplyNote","leadId","body","channel","export","function","ReplyDesk","return"],
     seed_code: ``,
     starter_code: ``,
@@ -85,20 +80,20 @@ export function ReplyDesk() {
   return <div />;
 }
 `,
-    analog_example: `export type Guest = {
+    analog_example: `export type ReplyNote = {
   id: string;
-  name: string;
-  note: string;
+  author: string;
+  body: string;
 };
 
-export function GuestList() {
+export function ReplySection() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `One shared type is a single source of truth for what a record looks like — when the list, the form, and the API all reference it, a renamed or removed field breaks the build immediately instead of failing silently in production. Pairing that with the component's own shell in the same step is what turns this from "a type file" into a real, mergeable start on the actual screen.`,
+      hook: `Defining the reply shape ensures conversation messages share a consistent data structure.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists notes and a form to add one:
 
@@ -121,37 +116,39 @@ export function ReplyDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `type ReplyNote = { id: string; leadId: string; body: string; channel: string; }
-
-export function ReplyDesk() {
-  return <div />;
-}`,
+      build: `1. Blueprint declaration: Rename ReplyNote to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.`,
     },
   },
   {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold notes in state and render it — rows when present, a message when empty
+    paal: `Store notes in memory; display the conversation thread row by row, or a "No replies logged yet" note if empty.
 
-LIST — Replies
-  L-1
-  Sent price sheet
+WHAT YOU'LL NEED
+- State array holding reply notes.
+- Conditional empty check.
+- Map loop rendering notes.
 
-EMPTY — "No replies yet."
+Your task: Store reply notes in state and display them, showing a placeholder if no replies exist.`,
+    hint: `1. Set up state: Use useState<ReplyNote[]>([]).
+2. Check for empty: Use replies.length === 0 to render the empty message.
+3. Render entries: Map through replies, passing key={r.id}.`,
+    example_code: `const [replies, setReplies] = useState<ReplyNote[]>([]);
 
-Your task: hold notes in state typed as ReplyNote[], starting empty, then render the empty message when notes.length === 0 and the mapped rows (key={item.id}) otherwise.`,
-    hint: `const [notes, setNotes] = useState<ReplyNote[]>([]);
-return notes.length === 0 ? <p>No replies yet.</p> : <ul>{notes.map((a) => <li key={a.id}>{a.leadId}</li>)}</ul>;`,
-    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+return (
+  <div>
+    {replies.length === 0 ? (
+      <p>No replies yet</p>
+    ) : (
+      replies.map((r) => (
+        <div key={r.id}>
+          <strong>{r.author}:</strong> {r.body}
+        </div>
+      ))
+    )}
+  </div>
 );`,
     think_prompt: `\`\`\`text
 LIST — Replies
@@ -165,7 +162,7 @@ React only redraws a component when the value it reads changes through React's o
     mc_options: ["useState for the array; branch on length === 0 before mapping rows with a stable key","let notes = [] and mutate it directly on every update","always render the mapped rows, even when the array is empty"],
     mc_correct_option: "useState for the array; branch on length === 0 before mapping rows with a stable key",
     mc_anchor: "useState for the array; branch on length",
-    why_this_matters: `Follow-up is a second list: what we said, on which channel — still list+form. A plain array in a variable will not make React redraw, and a list that renders as literally nothing when empty looks broken — useState gives the screen something to watch, and branching on length before mapping is what keeps a brand-new list from looking like a bug.`,
+    why_this_matters: `A clear empty state prevents users from wondering whether comments failed to load.`,
     answer_keywords: ["useState","notes","setNotes","length","map","key"],
     seed_code: `import { useState } from "react";
 
@@ -230,21 +227,26 @@ export function ReplyDesk() {
   );
 }
 `,
-    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+    analog_example: `const [replies, setReplies] = useState<ReplyNote[]>([]);
+
+return (
+  <div>
+    {replies.length === 0 ? (
+      <p>No replies yet</p>
+    ) : (
+      replies.map((r) => (
+        <div key={r.id}>
+          <strong>{r.author}:</strong> {r.body}
+        </div>
+      ))
+    )}
+  </div>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `A plain variable and a piece of React state can hold the identical value yet behave completely differently — mutating a variable is invisible to React, while calling a state setter schedules a re-render. And an empty array is not a missing feature to handle later; it is one of exactly two branches every list render has from the very first render.`,
+      hook: `A clear empty state prevents users from wondering whether comments failed to load.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists notes and a form to add one:
 
@@ -282,23 +284,29 @@ export function ReplyDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `const [notes, setNotes] = useState<ReplyNote[]>([]);
-return notes.length === 0 ? <p>No replies yet.</p> : <ul>{notes.map((a) => <li key={a.id}>{a.leadId}</li>)}</ul>;`,
+      build: `1. Set up state: Use useState<ReplyNote[]>([]).
+2. Check for empty: Use replies.length === 0 to render the empty message.
+3. Render entries: Map through replies, passing key={r.id}.`,
     },
   },
   {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Wire controlled inputs so form fields live in React state
+    paal: `Connect the reply textarea to state so typed thoughts are saved on every key press.
 
-FORM — Replies
-  [ Lead id ]  [ Body ]  [ Channel ]   → Add note
+WHAT YOU'LL NEED
+- State hooks for author and body.
+- Value and onChange props wired on inputs.
 
-Your task: add one state value per field (leadId, body, channel), then wire each input's value and onChange to it.`,
-    hint: `useState("") per field; value={...} onChange sets that state.`,
-    example_code: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+Your task: Connect reply input fields to React state.`,
+    hint: `1. Initialize states: Call useState("") for author and body.
+2. Wire inputs: Connect value and onChange to each state variable.`,
+    example_code: `const [author, setAuthor] = useState("");
+const [body, setBody] = useState("");
+
+<input value={author} onChange={(e) => setAuthor(e.target.value)} />
+<textarea value={body} onChange={(e) => setBody(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Replies
   [ Lead id ]  [ Body ]  [ Channel ]   → Add note
@@ -308,7 +316,7 @@ A form field's text can live in the DOM itself (uncontrolled) or in React state 
     mc_options: ["value from state, onChange writes back to state","read the input only on submit via document.getElementById","store the DOM node in a global"],
     mc_correct_option: "value from state, onChange writes back to state",
     mc_anchor: "value from state, onChange writes back t",
-    why_this_matters: `Controlled inputs use value from state and onChange to write back, keeping the form and the submit payload in sync. Follow-up is a second list: what we said, on which channel — still list+form.`,
+    why_this_matters: `Controlled inputs ensure reply text is tracked cleanly as the user types.`,
     answer_keywords: ["useState","value=","onChange","leadId","body","channel"],
     seed_code: `import { useState } from "react";
 
@@ -372,13 +380,16 @@ export function ReplyDesk() {
   );
 }
 `,
-    analog_example: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+    analog_example: `const [author, setAuthor] = useState("");
+const [body, setBody] = useState("");
+
+<input value={author} onChange={(e) => setAuthor(e.target.value)} />
+<textarea value={body} onChange={(e) => setBody(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Controlled vs. uncontrolled is a real, ongoing choice in React forms, not just boilerplate — a controlled input makes React the single source of truth for what is on screen, so validation, clearing, and reading the value on submit are all just state reads, not DOM queries.`,
+      hook: `Controlled inputs ensure reply text is tracked cleanly as the user types.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists notes and a form to add one:
 
@@ -413,21 +424,34 @@ export function ReplyDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `useState("") per field; value={...} onChange sets that state.`,
+      build: `1. Initialize states: Call useState("") for author and body.
+2. Wire inputs: Connect value and onChange to each state variable.`,
     },
   },
   {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `On submit, preventDefault, append one item to the list, and clear the form
+    paal: `Prevent form submission refresh, append the note to the thread, and clear the text area.
 
-FORM — Replies
-  [ Lead id ]  [ Body ]  [ Channel ]   → Add note
+WHAT YOU'LL NEED
+- Form interceptor using e.preventDefault().
+- New reply object creation.
+- Spread update to state.
+- Form reset calls.
 
-Your task: on submit: call preventDefault, build a new ReplyNote from the field state, add it to notes without mutating the old array, then clear the fields.`,
-    hint: `e.preventDefault(); setNotes((prev) => [...prev, { id: String(Date.now()), leadId, body, channel }]); then clear fields.`,
-    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+Your task: Append the new reply note to state without a page refresh and reset the form.`,
+    hint: `1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, author, and body into an object.
+3. Append item: Use setReplies((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".`,
+    example_code: `function submitReply(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), author, body };
+  setReplies((prev) => [...prev, entry]);
+  setAuthor("");
+  setBody("");
+}`,
     think_prompt: `\`\`\`text
 FORM — Replies
   [ Lead id ]  [ Body ]  [ Channel ]   → Add note
@@ -438,7 +462,10 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `preventDefault stops navigation; copying the old list plus one new item, then clearing fields, matches the design mock behavior. Follow-up is a second list: what we said, on which channel — still list+form.`,
+    why_this_matters: `Replies appear instantly in the conversation thread without page reloads.
+
+
+================================================================================`,
     answer_keywords: ["preventDefault","setNotes","prev","leadId","body","channel"],
     seed_code: `import { useState } from "react";
 
@@ -545,12 +572,21 @@ export function ReplyDesk() {
   );
 }
 `,
-    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+    analog_example: `function submitReply(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), author, body };
+  setReplies((prev) => [...prev, entry]);
+  setAuthor("");
+  setBody("");
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Every controlled form in React follows the same submit shape — cancel the default, derive the new record, update state immutably, reset the inputs — regardless of what the record actually contains. Learning that shape once means every future "add to a list" form is the same four moves with different field names.`,
+      hook: `Replies appear instantly in the conversation thread without page reloads.
+
+
+================================================================================`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists notes and a form to add one:
 
@@ -605,7 +641,10 @@ export function ReplyDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `e.preventDefault(); setNotes((prev) => [...prev, { id: String(Date.now()), leadId, body, channel }]); then clear fields.`,
+      build: `1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, author, and body into an object.
+3. Append item: Use setReplies((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".`,
     },
   },
 ];

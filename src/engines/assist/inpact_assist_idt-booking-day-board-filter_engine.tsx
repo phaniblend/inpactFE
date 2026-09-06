@@ -24,34 +24,31 @@ export const NODES = [
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Model one list item as a type, then set up the component around it","Hold appointments in state and render only the matching rows — filtered, with an empty state","Wire controlled inputs so form fields live in React state","On submit, preventDefault, append one item to the list, and clear the form"],
+    items: ["Define the appointment blueprint (including the provider name) and set up the day-board screen layout.","View appointments through a provider filter lens, displaying only their patients or a \"No visits for this provider\" message.","Connect input text boxes to memory so newly entered appointment details are tracked live.","Intercept submission, add the new visit to memory, clear the form, and let the provider filter sort it."],
   },
   {
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model one list item as a type, then set up the component around it
+    paal: `Define the appointment blueprint (including the provider name) and set up the day-board screen layout.
 
-MOCK ROW — Day board
-  Provider: "Maya"
-  Service: "Cut"
-  Starts at: "10:00"
+WHAT YOU'LL NEED
+- id (text)
+- provider (text)
+- patient (text)
+- time (text)
 
-Every row also needs a unique \`id\` — not shown in the mock, but required to track, update, and key each item.
-
-Your task: write \`type Appointment\` with \`id\` plus provider, service, startsAt, then define and export DayBoard as a function component returning <div /> — every step from here on edits this same file.`,
-    hint: `type Appointment = { id: string; provider: string; service: string; startsAt: string; }
-
-export function DayBoard() {
-  return <div />;
-}`,
-    example_code: `export type Guest = {
+Your task: Create the blueprint for a provider-linked appointment and an empty wrapper component.`,
+    hint: `1. Declare the type: Swap ScheduleItem for your appointment type name.
+2. Add your properties: Follow "field: string;" line-by-line for all required data keys.
+3. Create the component: Match the function frame, replacing ScheduleBoard with your component name.`,
+    example_code: `export type ScheduleItem = {
   id: string;
-  name: string;
-  note: string;
+  category: string;
+  label: string;
 };
 
-export function GuestList() {
+export function ScheduleBoard() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -65,7 +62,7 @@ Every value with a shape needs one type to describe that shape before any compon
     mc_options: ["Define type Appointment (id + provider, service, startsAt), then export function DayBoard() returning <div />","Skip the type and write JSX directly against untyped objects","Wait until every backend endpoint exists before modeling the row or the component"],
     mc_correct_option: "Define type Appointment (id + provider, service, startsAt), then export function DayBoard() returning <div />",
     mc_anchor: "Define type Appointment (id + provider, ",
-    why_this_matters: `Operators scan one provider's day. Filtering a list without destroying the full dataset is a core frontend skill. If list rows and form fields do not share one shape, some rows end up missing a field, or the form saves a field the list can never display — a type names that shared shape once, so the compiler catches the mismatch before a user does. Naming and exporting the component next to it is what lets every later step, and a real pull request, attach real behavior to something that already exists.`,
+    why_this_matters: `Explicitly declaring the provider property in your type ensures that your filtering step won't suffer from missing keys.`,
     answer_keywords: ["export","type","Appointment","provider","service","startsAt","export","function","DayBoard","return"],
     seed_code: ``,
     starter_code: ``,
@@ -86,20 +83,20 @@ export function DayBoard() {
   return <div />;
 }
 `,
-    analog_example: `export type Guest = {
+    analog_example: `export type ScheduleItem = {
   id: string;
-  name: string;
-  note: string;
+  category: string;
+  label: string;
 };
 
-export function GuestList() {
+export function ScheduleBoard() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `One shared type is a single source of truth for what a record looks like — when the list, the form, and the API all reference it, a renamed or removed field breaks the build immediately instead of failing silently in production. Pairing that with the component's own shell in the same step is what turns this from "a type file" into a real, mergeable start on the actual screen.`,
+      hook: `Explicitly declaring the provider property in your type ensures that your filtering step won't suffer from missing keys.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists appointments and a form to add one:
 
@@ -123,38 +120,40 @@ export function DayBoard() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `type Appointment = { id: string; provider: string; service: string; startsAt: string; }
-
-export function DayBoard() {
-  return <div />;
-}`,
+      build: `1. Declare the type: Swap ScheduleItem for your appointment type name.
+2. Add your properties: Follow "field: string;" line-by-line for all required data keys.
+3. Create the component: Match the function frame, replacing ScheduleBoard with your component name.`,
     },
   },
   {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold appointments in state and render only the matching rows — filtered, with an empty state
+    paal: `View appointments through a provider filter lens, displaying only their patients or a "No visits for this provider" message.
 
-LIST (filtered) — Day board
-  Maya
-  Cut
+WHAT YOU'LL NEED
+- Array state holding appointments.
+- An active filter variable (e.g. selected provider).
+- A .filter() call producing a displayed subset.
+- A fallback note if the filtered subset is empty.
 
-EMPTY — "No appointments for this filter."
+Your task: Filter the appointment list by a selected provider and display only matches, or a note if none exist.`,
+    hint: `1. Maintain the full list: Store all appointments in main state using useState.
+2. Apply the filter: Create a derived variable with items.filter(...), checking if item.provider matches the target provider.
+3. Render conditionally: Check visibleItems.length === 0. If zero, render your empty message; otherwise, loop through visibleItems with .map().`,
+    example_code: `const [items, setItems] = useState<ScheduleItem[]>([]);
+const [filter, setFilter] = useState("Dr. Smith");
 
-Your task: hold appointments in state typed as Appointment[], render appointments.filter((a) => a.provider === "Maya") mapped to rows (key={item.id}), and show the empty message when that filtered result has zero items.`,
-    hint: `const [appointments, setAppointments] = useState<Appointment[]>([]);
-const visible = appointments.filter((a) => a.provider === "Maya");
-return visible.length === 0 ? <p>No appointments for this filter.</p> : <ul>{visible.map((a) => <li key={a.id}>{a.provider}</li>)}</ul>;`,
-    example_code: `const visible = guests.filter((g) => g.status === "active");
-return visible.length === 0 ? (
-  <p>No matches.</p>
-) : (
-  <ul>
-    {visible.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+const visibleItems = items.filter((item) => item.category === filter);
+
+return (
+  <div>
+    {visibleItems.length === 0 ? (
+      <p>No entries found</p>
+    ) : (
+      visibleItems.map((item) => <div key={item.id}>{item.label}</div>)
+    )}
+  </div>
 );`,
     think_prompt: `\`\`\`text
 LIST (filtered) — Day board
@@ -168,7 +167,7 @@ Filtering for display means computing a smaller array from the full one with .fi
     mc_options: ["keep the full list in state; filter before map; branch on the filtered length for the empty message","delete non-matching rows from state permanently","hide the whole list whenever any filter is active"],
     mc_correct_option: "keep the full list in state; filter before map; branch on the filtered length for the empty message",
     mc_anchor: "keep the full list in state; filter befo",
-    why_this_matters: `Operators scan one provider's day. Filtering a list without destroying the full dataset is a core frontend skill. Filtering in render lets users scan what matters without deleting other rows from state, and the empty case still needs its own message — an empty filtered view should not look like a broken screen.`,
+    why_this_matters: `Deriving a filtered list on the fly keeps your original master list completely safe while showing users only what they asked to see.`,
     answer_keywords: ["useState","appointments","filter","map","length"],
     seed_code: `import { useState } from "react";
 
@@ -234,21 +233,25 @@ export function DayBoard() {
   );
 }
 `,
-    analog_example: `const visible = guests.filter((g) => g.status === "active");
-return visible.length === 0 ? (
-  <p>No matches.</p>
-) : (
-  <ul>
-    {visible.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+    analog_example: `const [items, setItems] = useState<ScheduleItem[]>([]);
+const [filter, setFilter] = useState("Dr. Smith");
+
+const visibleItems = items.filter((item) => item.category === filter);
+
+return (
+  <div>
+    {visibleItems.length === 0 ? (
+      <p>No entries found</p>
+    ) : (
+      visibleItems.map((item) => <div key={item.id}>{item.label}</div>)
+    )}
+  </div>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `.filter() followed by .map() is a pipeline, not a special React trick: narrow the array down to what should render, then turn what's left into rows. Checking the narrowed array's length — not the original's — is what keeps the empty state honest about the current view instead of the whole dataset.`,
+      hook: `Deriving a filtered list on the fly keeps your original master list completely safe while showing users only what they asked to see.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists appointments and a form to add one:
 
@@ -288,24 +291,32 @@ export function DayBoard() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `const [appointments, setAppointments] = useState<Appointment[]>([]);
-const visible = appointments.filter((a) => a.provider === "Maya");
-return visible.length === 0 ? <p>No appointments for this filter.</p> : <ul>{visible.map((a) => <li key={a.id}>{a.provider}</li>)}</ul>;`,
+      build: `1. Maintain the full list: Store all appointments in main state using useState.
+2. Apply the filter: Create a derived variable with items.filter(...), checking if item.provider matches the target provider.
+3. Render conditionally: Check visibleItems.length === 0. If zero, render your empty message; otherwise, loop through visibleItems with .map().`,
     },
   },
   {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Wire controlled inputs so form fields live in React state
+    paal: `Connect input text boxes to memory so newly entered appointment details are tracked live.
 
-FORM — Day board
-  [ Provider ]  [ Service ]  [ Starts at ]   → Add
+WHAT YOU'LL NEED
+- State variables for provider, patient, and time.
+- Matching input boxes with value and onChange wired.
 
-Your task: add one state value per field (provider, service, startsAt), then wire each input's value and onChange to it.`,
-    hint: `useState("") per field; value={...} onChange sets that state.`,
-    example_code: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+Your task: Track what the user types into appointment fields in real time using component state.`,
+    hint: `1. Initialize fields: Declare useState("") for each input needed.
+2. Link value: Set the input's value prop to the state variable.
+3. Link onChange: Update the corresponding state variable using e.target.value.`,
+    example_code: `const [label, setLabel] = useState("");
+
+<input
+  value={label}
+  onChange={(e) => setLabel(e.target.value)}
+  placeholder="Label"
+/>;`,
     think_prompt: `\`\`\`text
 FORM — Day board
   [ Provider ]  [ Service ]  [ Starts at ]   → Add
@@ -315,7 +326,7 @@ A form field's text can live in the DOM itself (uncontrolled) or in React state 
     mc_options: ["value from state, onChange writes back to state","read the input only on submit via document.getElementById","store the DOM node in a global"],
     mc_correct_option: "value from state, onChange writes back to state",
     mc_anchor: "value from state, onChange writes back t",
-    why_this_matters: `Controlled inputs use value from state and onChange to write back, keeping the form and the submit payload in sync. Operators scan one provider's day. Filtering a list without destroying the full dataset is a core frontend skill.`,
+    why_this_matters: `Synchronizing user inputs with state allows you to inspect, modify, and package data before saving.`,
     answer_keywords: ["useState","value=","onChange","provider","service","startsAt"],
     seed_code: `import { useState } from "react";
 
@@ -379,13 +390,18 @@ export function DayBoard() {
   );
 }
 `,
-    analog_example: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+    analog_example: `const [label, setLabel] = useState("");
+
+<input
+  value={label}
+  onChange={(e) => setLabel(e.target.value)}
+  placeholder="Label"
+/>;`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Controlled vs. uncontrolled is a real, ongoing choice in React forms, not just boilerplate — a controlled input makes React the single source of truth for what is on screen, so validation, clearing, and reading the value on submit are all just state reads, not DOM queries.`,
+      hook: `Synchronizing user inputs with state allows you to inspect, modify, and package data before saving.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists appointments and a form to add one:
 
@@ -421,21 +437,34 @@ export function DayBoard() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `useState("") per field; value={...} onChange sets that state.`,
+      build: `1. Initialize fields: Declare useState("") for each input needed.
+2. Link value: Set the input's value prop to the state variable.
+3. Link onChange: Update the corresponding state variable using e.target.value.`,
     },
   },
   {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `On submit, preventDefault, append one item to the list, and clear the form
+    paal: `Intercept submission, add the new visit to memory, clear the form, and let the provider filter sort it.
 
-FORM — Day board
-  [ Provider ]  [ Service ]  [ Starts at ]   → Add
+WHAT YOU'LL NEED
+- Form submission interceptor.
+- Creation of an item matching your Step 1 blueprint.
+- Spread update appending the item to state.
+- Field reset calls.
 
-Your task: on submit: call preventDefault, build a new Appointment from the field state, add it to appointments without mutating the old array, then clear the fields.`,
-    hint: `e.preventDefault(); setAppointments((prev) => [...prev, { id: String(Date.now()), provider, service, startsAt }]); then clear fields.`,
-    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+Your task: Add the new appointment to the master list without a page refresh and reset the input form.`,
+    hint: `1. Halt refresh: Call e.preventDefault() at the top of your handler.
+2. Construct item: Build an object containing an id and your form state values.
+3. Update state safely: Append using setItems((prev) => [...prev, next]).
+4. Reset inputs: Clear the input state variables by setting them back to "".`,
+    example_code: `function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  const next = { id: String(Date.now()), category: currentCategory, label };
+  setItems((prev) => [...prev, next]);
+  setLabel("");
+}`,
     think_prompt: `\`\`\`text
 FORM — Day board
   [ Provider ]  [ Service ]  [ Starts at ]   → Add
@@ -446,7 +475,10 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `preventDefault stops navigation; copying the old list plus one new item, then clearing fields, matches the design mock behavior. Operators scan one provider's day. Filtering a list without destroying the full dataset is a core frontend skill.`,
+    why_this_matters: `Appending to state keeps the master list updated, and your filter from Step 2 will immediately determine if the new item appears on the current board.
+
+
+================================================================================`,
     answer_keywords: ["preventDefault","setAppointments","prev","provider","service","startsAt"],
     seed_code: `import { useState } from "react";
 
@@ -553,12 +585,20 @@ export function DayBoard() {
   );
 }
 `,
-    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+    analog_example: `function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  const next = { id: String(Date.now()), category: currentCategory, label };
+  setItems((prev) => [...prev, next]);
+  setLabel("");
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Every controlled form in React follows the same submit shape — cancel the default, derive the new record, update state immutably, reset the inputs — regardless of what the record actually contains. Learning that shape once means every future "add to a list" form is the same four moves with different field names.`,
+      hook: `Appending to state keeps the master list updated, and your filter from Step 2 will immediately determine if the new item appears on the current board.
+
+
+================================================================================`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists appointments and a form to add one:
 
@@ -614,7 +654,10 @@ export function DayBoard() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `e.preventDefault(); setAppointments((prev) => [...prev, { id: String(Date.now()), provider, service, startsAt }]); then clear fields.`,
+      build: `1. Halt refresh: Call e.preventDefault() at the top of your handler.
+2. Construct item: Build an object containing an id and your form state values.
+3. Update state safely: Append using setItems((prev) => [...prev, next]).
+4. Reset inputs: Clear the input state variables by setting them back to "".`,
     },
   },
 ];

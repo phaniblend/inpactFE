@@ -24,34 +24,29 @@ export const NODES = [
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Model one list item as a type, then set up the component around it","Hold reminders in state and render only the matching rows — filtered, with an empty state","Wire controlled inputs so form fields live in React state","On submit, preventDefault, append one item to the list, and clear the form"],
+    items: ["Model a reminder item with delivery timestamps and assemble the active board container.","Filter reminders to display only those whose scheduled time is due right now, showing \"All caught up\" if clear.","Connect reminder fields to state so typed messages and times stay synced.","Stop page reload on submit, append the reminder to state, clear the form, and let the due filter sort it."],
   },
   {
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model one list item as a type, then set up the component around it
+    paal: `Model a reminder item with delivery timestamps and assemble the active board container.
 
-MOCK ROW — Due now
-  Client: "Alex"
-  Channel: "sms"
-  Status: "due"
+WHAT YOU'LL NEED
+- id (text)
+- recipient (text)
+- status (text)
 
-Every row also needs a unique \`id\` — not shown in the mock, but required to track, update, and key each item.
-
-Your task: write \`type ScheduledReminder\` with \`id\` plus client, channel, status, then define and export DueBoard as a function component returning <div /> — every step from here on edits this same file.`,
-    hint: `type ScheduledReminder = { id: string; client: string; channel: string; status: string; }
-
-export function DueBoard() {
-  return <div />;
-}`,
-    example_code: `export type Guest = {
+Your task: Define the shape of a reminder with its status tag, and build the board shell.`,
+    hint: `1. Blueprint declaration: Rename FilterableReminder to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.`,
+    example_code: `export type FilterableReminder = {
   id: string;
-  name: string;
-  note: string;
+  recipient: string;
+  status: string;
 };
 
-export function GuestList() {
+export function DueBoard() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -65,7 +60,7 @@ Every value with a shape needs one type to describe that shape before any compon
     mc_options: ["Define type ScheduledReminder (id + client, channel, status), then export function DueBoard() returning <div />","Skip the type and write JSX directly against untyped objects","Wait until every backend endpoint exists before modeling the row or the component"],
     mc_correct_option: "Define type ScheduledReminder (id + client, channel, status), then export function DueBoard() returning <div />",
     mc_anchor: "Define type ScheduledReminder (id + clie",
-    why_this_matters: `Owners open a due board first. Filter for display; keep the full schedule in state. If list rows and form fields do not share one shape, some rows end up missing a field, or the form saves a field the list can never display — a type names that shared shape once, so the compiler catches the mismatch before a user does. Naming and exporting the component next to it is what lets every later step, and a real pull request, attach real behavior to something that already exists.`,
+    why_this_matters: `Defining the status field in the blueprint ensures clean filtering in later steps.`,
     answer_keywords: ["export","type","ScheduledReminder","client","channel","status","export","function","DueBoard","return"],
     seed_code: ``,
     starter_code: ``,
@@ -86,20 +81,20 @@ export function DueBoard() {
   return <div />;
 }
 `,
-    analog_example: `export type Guest = {
+    analog_example: `export type FilterableReminder = {
   id: string;
-  name: string;
-  note: string;
+  recipient: string;
+  status: string;
 };
 
-export function GuestList() {
+export function DueBoard() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `One shared type is a single source of truth for what a record looks like — when the list, the form, and the API all reference it, a renamed or removed field breaks the build immediately instead of failing silently in production. Pairing that with the component's own shell in the same step is what turns this from "a type file" into a real, mergeable start on the actual screen.`,
+      hook: `Defining the status field in the blueprint ensures clean filtering in later steps.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists reminders and a form to add one:
 
@@ -123,38 +118,41 @@ export function DueBoard() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `type ScheduledReminder = { id: string; client: string; channel: string; status: string; }
-
-export function DueBoard() {
-  return <div />;
-}`,
+      build: `1. Blueprint declaration: Rename FilterableReminder to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.`,
     },
   },
   {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold reminders in state and render only the matching rows — filtered, with an empty state
+    paal: `Filter reminders to display only those whose scheduled time is due right now, showing "All caught up" if clear.
 
-LIST (filtered) — Due now
-  Alex
-  sms
+WHAT YOU'LL NEED
+- State array holding all reminders.
+- .filter() call selecting reminders where status === 'due'.
+- Conditional empty check.
 
-EMPTY — "Nothing due."
+Your task: Filter reminders to show only those marked "due", displaying a message if all are sent.`,
+    hint: `1. Master list: Keep all records in allReminders state.
+2. Filter logic: Create dueReminders using .filter(r => r.status === "due").
+3. Conditional render: Check dueReminders.length === 0 to render the fallback message or the list rows.`,
+    example_code: `const [allReminders, setAllReminders] = useState<FilterableReminder[]>([]);
 
-Your task: hold reminders in state typed as ScheduledReminder[], render reminders.filter((a) => a.status === "due") mapped to rows (key={item.id}), and show the empty message when that filtered result has zero items.`,
-    hint: `const [reminders, setReminders] = useState<ScheduledReminder[]>([]);
-const visible = reminders.filter((a) => a.status === "due");
-return visible.length === 0 ? <p>Nothing due.</p> : <ul>{visible.map((a) => <li key={a.id}>{a.client}</li>)}</ul>;`,
-    example_code: `const visible = guests.filter((g) => g.status === "active");
-return visible.length === 0 ? (
-  <p>No matches.</p>
-) : (
-  <ul>
-    {visible.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+const dueReminders = allReminders.filter((r) => r.status === "due");
+
+return (
+  <div>
+    {dueReminders.length === 0 ? (
+      <p>All reminders are sent</p>
+    ) : (
+      dueReminders.map((r) => (
+        <div key={r.id}>
+          Send reminder to: {r.recipient}
+        </div>
+      ))
+    )}
+  </div>
 );`,
     think_prompt: `\`\`\`text
 LIST (filtered) — Due now
@@ -168,7 +166,7 @@ Filtering for display means computing a smaller array from the full one with .fi
     mc_options: ["keep the full list in state; filter before map; branch on the filtered length for the empty message","delete non-matching rows from state permanently","hide the whole list whenever any filter is active"],
     mc_correct_option: "keep the full list in state; filter before map; branch on the filtered length for the empty message",
     mc_anchor: "keep the full list in state; filter befo",
-    why_this_matters: `Owners open a due board first. Filter for display; keep the full schedule in state. Filtering in render lets users scan what matters without deleting other rows from state, and the empty case still needs its own message — an empty filtered view should not look like a broken screen.`,
+    why_this_matters: `Filtering isolates urgent tasks without modifying the master schedule.`,
     answer_keywords: ["useState","reminders","filter","map","length"],
     seed_code: `import { useState } from "react";
 
@@ -234,21 +232,28 @@ export function DueBoard() {
   );
 }
 `,
-    analog_example: `const visible = guests.filter((g) => g.status === "active");
-return visible.length === 0 ? (
-  <p>No matches.</p>
-) : (
-  <ul>
-    {visible.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+    analog_example: `const [allReminders, setAllReminders] = useState<FilterableReminder[]>([]);
+
+const dueReminders = allReminders.filter((r) => r.status === "due");
+
+return (
+  <div>
+    {dueReminders.length === 0 ? (
+      <p>All reminders are sent</p>
+    ) : (
+      dueReminders.map((r) => (
+        <div key={r.id}>
+          Send reminder to: {r.recipient}
+        </div>
+      ))
+    )}
+  </div>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `.filter() followed by .map() is a pipeline, not a special React trick: narrow the array down to what should render, then turn what's left into rows. Checking the narrowed array's length — not the original's — is what keeps the empty state honest about the current view instead of the whole dataset.`,
+      hook: `Filtering isolates urgent tasks without modifying the master schedule.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists reminders and a form to add one:
 
@@ -288,24 +293,28 @@ export function DueBoard() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `const [reminders, setReminders] = useState<ScheduledReminder[]>([]);
-const visible = reminders.filter((a) => a.status === "due");
-return visible.length === 0 ? <p>Nothing due.</p> : <ul>{visible.map((a) => <li key={a.id}>{a.client}</li>)}</ul>;`,
+      build: `1. Master list: Keep all records in allReminders state.
+2. Filter logic: Create dueReminders using .filter(r => r.status === "due").
+3. Conditional render: Check dueReminders.length === 0 to render the fallback message or the list rows.`,
     },
   },
   {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Wire controlled inputs so form fields live in React state
+    paal: `Connect reminder fields to state so typed messages and times stay synced.
 
-FORM — Due now
-  [ Client ]  [ Channel ]  [ Status ]   → Schedule
+WHAT YOU'LL NEED
+- State hooks for recipient and status inputs.
+- Value and onChange props wired on inputs.
 
-Your task: add one state value per field (client, channel, status), then wire each input's value and onChange to it.`,
-    hint: `useState("") per field; value={...} onChange sets that state.`,
-    example_code: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+Your task: Connect reminder input fields to React state.`,
+    hint: `1. Initialize states: Call useState("") for your form inputs.
+2. Wire inputs: Connect value and onChange to each state variable.`,
+    example_code: `const [recipient, setRecipient] = useState("");
+const [status, setStatus] = useState("due");
+
+<input value={recipient} onChange={(e) => setRecipient(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Due now
   [ Client ]  [ Channel ]  [ Status ]   → Schedule
@@ -315,7 +324,7 @@ A form field's text can live in the DOM itself (uncontrolled) or in React state 
     mc_options: ["value from state, onChange writes back to state","read the input only on submit via document.getElementById","store the DOM node in a global"],
     mc_correct_option: "value from state, onChange writes back to state",
     mc_anchor: "value from state, onChange writes back t",
-    why_this_matters: `Controlled inputs use value from state and onChange to write back, keeping the form and the submit payload in sync. Owners open a due board first. Filter for display; keep the full schedule in state.`,
+    why_this_matters: `Controlled inputs ensure clean data capture when scheduling reminders.`,
     answer_keywords: ["useState","value=","onChange","client","channel","status"],
     seed_code: `import { useState } from "react";
 
@@ -379,13 +388,15 @@ export function DueBoard() {
   );
 }
 `,
-    analog_example: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+    analog_example: `const [recipient, setRecipient] = useState("");
+const [status, setStatus] = useState("due");
+
+<input value={recipient} onChange={(e) => setRecipient(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Controlled vs. uncontrolled is a real, ongoing choice in React forms, not just boilerplate — a controlled input makes React the single source of truth for what is on screen, so validation, clearing, and reading the value on submit are all just state reads, not DOM queries.`,
+      hook: `Controlled inputs ensure clean data capture when scheduling reminders.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists reminders and a form to add one:
 
@@ -421,21 +432,33 @@ export function DueBoard() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `useState("") per field; value={...} onChange sets that state.`,
+      build: `1. Initialize states: Call useState("") for your form inputs.
+2. Wire inputs: Connect value and onChange to each state variable.`,
     },
   },
   {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `On submit, preventDefault, append one item to the list, and clear the form
+    paal: `Stop page reload on submit, append the reminder to state, clear the form, and let the due filter sort it.
 
-FORM — Due now
-  [ Client ]  [ Channel ]  [ Status ]   → Schedule
+WHAT YOU'LL NEED
+- Form interceptor using e.preventDefault().
+- Object assembly matching blueprint.
+- Spread update to state.
+- Form reset calls.
 
-Your task: on submit: call preventDefault, build a new ScheduledReminder from the field state, add it to reminders without mutating the old array, then clear the fields.`,
-    hint: `e.preventDefault(); setReminders((prev) => [...prev, { id: String(Date.now()), client, channel, status }]); then clear fields.`,
-    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+Your task: Append the new reminder to state without reloading the page and reset the inputs.`,
+    hint: `1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, recipient, and status into an object.
+3. Append item: Use setAllReminders((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".`,
+    example_code: `function handleAdd(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), recipient, status };
+  setAllReminders((prev) => [...prev, entry]);
+  setRecipient("");
+}`,
     think_prompt: `\`\`\`text
 FORM — Due now
   [ Client ]  [ Channel ]  [ Status ]   → Schedule
@@ -446,7 +469,10 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `preventDefault stops navigation; copying the old list plus one new item, then clearing fields, matches the design mock behavior. Owners open a due board first. Filter for display; keep the full schedule in state.`,
+    why_this_matters: `The new reminder is added to the master list, and your filter automatically displays it if it is marked due.
+
+
+================================================================================`,
     answer_keywords: ["preventDefault","setReminders","prev","client","channel","status"],
     seed_code: `import { useState } from "react";
 
@@ -553,12 +579,20 @@ export function DueBoard() {
   );
 }
 `,
-    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+    analog_example: `function handleAdd(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), recipient, status };
+  setAllReminders((prev) => [...prev, entry]);
+  setRecipient("");
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Every controlled form in React follows the same submit shape — cancel the default, derive the new record, update state immutably, reset the inputs — regardless of what the record actually contains. Learning that shape once means every future "add to a list" form is the same four moves with different field names.`,
+      hook: `The new reminder is added to the master list, and your filter automatically displays it if it is marked due.
+
+
+================================================================================`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists reminders and a form to add one:
 
@@ -614,7 +648,10 @@ export function DueBoard() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `e.preventDefault(); setReminders((prev) => [...prev, { id: String(Date.now()), client, channel, status }]); then clear fields.`,
+      build: `1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, recipient, and status into an object.
+3. Append item: Use setAllReminders((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".`,
     },
   },
 ];

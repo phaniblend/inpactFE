@@ -1,0 +1,5814 @@
+================================================================================
+TASK: Appointment list + book form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Create the blueprint for a single appointment and set up an empty screen frame to hold the view.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* patient (text)
+* time (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type Guest = {
+  id: string;
+  name: string;
+  note: string;
+};
+
+export function GuestList() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Mirror the declaration: Look at "export type Guest = {". Replace Guest with your task's blueprint name.
+2. Fill the lines: In the example, every detail follows "name: string;". Add your fields one by one using that exact shape (property name, colon, string, semicolon).
+3. Close the blueprint: End with "};" just like the pattern.
+4. Mirror the component frame: Look at "export function GuestList() { ... }". Replace GuestList with your component name, keeping the return structure intact.
+
+WHY THIS HELPS YOU
+Writing a type creates an official checklist. Your editor uses it to autocomplete names and underline typos in red before you even run your project.
+
+
+--- STEP 2 ---
+STEP:
+Hold appointments in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Give the app a memory slot for your appointments collection and show either the booked rows or a friendly empty note.
+
+WHAT YOUR LOGIC NEEDS
+* An array state holding items typed with your blueprint.
+* A condition checking if the list length is 0.
+* A fallback message when empty, or a loop drawing each row.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [items, setItems] = useState<Guest[]>([]);
+
+return (
+  <div>
+    {items.length === 0 ? (
+      <p>No guests yet</p>
+    ) : (
+      items.map((item) => <div key={item.id}>{item.name}</div>)
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up memory: Replace Guest in useState<Guest[]>([]) with your task's item type.
+2. Check for empty: Check if your array's length equals 0 using a ternary operator (? :).
+3. Render the fallback: Put your polite "no records" text inside the first branch.
+4. Render the list: In the second branch, use .map() to loop through each item, ensuring you pass the unique id into the key attribute.
+
+WHY THIS HELPS YOU
+Checking for an empty list guarantees your user never stares at a broken, blank page when no records exist.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect your form's text boxes directly to memory so every typed keystroke is saved immediately.
+
+WHAT YOUR LOGIC NEEDS
+* State variables for each field the user types.
+* An input with value pointing to state.
+* An onChange handler feeding event text into the setter.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [name, setName] = useState("");
+
+<input
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  placeholder="Enter name"
+/>;
+
+HOW TO MAP THE PATTERN
+1. Create field memory: For every text input, create a pair using useState("").
+2. Bind the screen: In your <input />, point value to that state variable.
+3. Listen for typing: Write onChange={(e) => setYourField(e.target.value)} to forward the typed text into memory.
+
+WHY THIS HELPS YOU
+When inputs are tied to state, React always knows what the user typed, making validation and saving predictable.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Save the newly typed item into your collection on submit without refreshing the browser, then reset the text boxes.
+
+WHAT YOUR LOGIC NEEDS
+* An onSubmit function intercepting form submission.
+* A call to stop the default browser reload.
+* An update adding the new record to your existing list.
+* Resets setting form state variables back to empty strings.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  const newItem = { id: String(Date.now()), name };
+  setItems((prev) => [...prev, newItem]);
+  setName("");
+}
+
+HOW TO MAP THE PATTERN
+1. Stop browser reload: Put e.preventDefault() as the very first line inside your submission handler.
+2. Assemble the record: Create an object containing a unique id and the values from your input state.
+3. Append without mutating: Use the spread operator ([...prev, newItem]) inside your list setter to add the new entry safely.
+4. Clean the slate: Call your input state setters with empty strings "" so the form clears.
+
+WHY THIS HELPS YOU
+Stopping page reload prevents the entire browser from blinking, creating an instant and seamless app experience.
+
+
+================================================================================
+TASK: Appointments API with slot conflicts
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Create a memory drawer on the server to hold records and a function that stamps unique IDs.
+
+WHAT YOUR LOGIC NEEDS
+* A module-level array variable acting as the database.
+* An ID generator function returning a unique text string.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let records: Guest[] = [];
+let nextId = 1;
+
+function generateId(): string {
+  return String(nextId++);
+}
+
+HOW TO MAP THE PATTERN
+1. Define the storage drawer: Declare a let variable initialized to an empty array, typed with your record shape.
+2. Track counters: Declare a counter number variable outside the functions so it persists.
+3. Build the generator: Write a helper function that returns the incremented counter turned into a string.
+
+WHY THIS HELPS YOU
+A centralized storage list and unique ID generator ensure that new records never overwrite or collide with existing records.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Act as a bouncer that rejects incomplete submissions before they touch your memory drawer.
+
+WHAT YOUR LOGIC NEEDS
+* An inspection of incoming request fields.
+* A return of error status 400 if any required field is missing or empty.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!body.name || !body.time) {
+  return res.status(400).json({ error: "Name and time are required" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect the incoming data: Check body properties using the NOT operator (!).
+2. Group the checks: Combine missing-property checks using OR (||).
+3. Send early rejection: Inside the condition block, immediately return status 400 with an informative error message.
+
+WHY THIS HELPS YOU
+Validating data at the door ensures incomplete or malformed records never corrupt your internal storage.
+
+
+--- STEP 3 ---
+STEP:
+Detect overlapping records so two bookings cannot claim the same slot.
+
+ASSIST GUIDE:
+YOUR GOAL
+Scan existing bookings to verify that the requested time slot or key is not already taken.
+
+WHAT YOUR LOGIC NEEDS
+* A search through the existing records array.
+* A comparison between existing values and the incoming request value.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const hasConflict = records.some(
+  (record) => record.date === body.date && record.slot === body.slot
+);
+if (hasConflict) {
+  return res.status(409).json({ error: "Slot already booked" });
+}
+
+HOW TO MAP THE PATTERN
+1. Scan the drawer: Use .some() on your records array to check if any existing element meets your conflict rule.
+2. Match conflict fields: Inside the callback, return true if the stored identifying keys match the incoming body keys.
+3. Reject collisions: If .some() returns true, halt execution immediately with status 409 (Conflict).
+
+WHY THIS HELPS YOU
+Checking for overlaps stops race conditions and guarantees that appointments never get double-booked.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create with 400/409 errors.
+
+ASSIST GUIDE:
+YOUR GOAL
+Expose a route to read all stored items and a route to save new ones using your validation and conflict checks.
+
+WHAT YOUR LOGIC NEEDS
+* A GET handler returning the records array with status 200.
+* A POST handler running Step 2 checks (400), Step 3 checks (409), pushing valid data, and returning status 201.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function handleGet(res: Response) {
+  return res.status(200).json(records);
+}
+
+export function handlePost(req: Request, res: Response) {
+  // run validation -> return 400 if invalid
+  // run conflict check -> return 409 if conflict
+  const record = { id: generateId(), ...req.body };
+  records.push(record);
+  return res.status(201).json(record);
+}
+
+HOW TO MAP THE PATTERN
+1. Deliver the records: In the GET handler, return status 200 containing your in-memory array.
+2. Run safety guards: In the POST handler, place your missing-field check (400) and overlap check (409) at the top.
+3. Stamp and save: Create the new record object using your ID helper, push it into the storage array, and reply with status 201.
+
+WHY THIS HELPS YOU
+Separating read and write doorways makes your API predictable, standard, and easy for frontend components to consume.
+
+
+================================================================================
+TASK: Day board: filter appointments by provider
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Create the blueprint for a provider-linked appointment and an empty wrapper component.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* provider (text)
+* patient (text)
+* time (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type ScheduleItem = {
+  id: string;
+  category: string;
+  label: string;
+};
+
+export function ScheduleBoard() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Declare the type: Swap ScheduleItem for your appointment type name.
+2. Add your properties: Follow "field: string;" line-by-line for all required data keys.
+3. Create the component: Match the function frame, replacing ScheduleBoard with your component name.
+
+WHY THIS HELPS YOU
+Explicitly declaring the provider property in your type ensures that your filtering step won't suffer from missing keys.
+
+
+--- STEP 2 ---
+STEP:
+Hold appointments in state and render only the matching rows — filtered, with an empty state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Filter the appointment list by a selected provider and display only matches, or a note if none exist.
+
+WHAT YOUR LOGIC NEEDS
+* Array state holding appointments.
+* An active filter variable (e.g. selected provider).
+* A .filter() call producing a displayed subset.
+* A fallback note if the filtered subset is empty.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [items, setItems] = useState<ScheduleItem[]>([]);
+const [filter, setFilter] = useState("Dr. Smith");
+
+const visibleItems = items.filter((item) => item.category === filter);
+
+return (
+  <div>
+    {visibleItems.length === 0 ? (
+      <p>No entries found</p>
+    ) : (
+      visibleItems.map((item) => <div key={item.id}>{item.label}</div>)
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Maintain the full list: Store all appointments in main state using useState.
+2. Apply the filter: Create a derived variable with items.filter(...), checking if item.provider matches the target provider.
+3. Render conditionally: Check visibleItems.length === 0. If zero, render your empty message; otherwise, loop through visibleItems with .map().
+
+WHY THIS HELPS YOU
+Deriving a filtered list on the fly keeps your original master list completely safe while showing users only what they asked to see.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Track what the user types into appointment fields in real time using component state.
+
+WHAT YOUR LOGIC NEEDS
+* State variables for provider, patient, and time.
+* Matching input boxes with value and onChange wired.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [label, setLabel] = useState("");
+
+<input
+  value={label}
+  onChange={(e) => setLabel(e.target.value)}
+  placeholder="Label"
+/>;
+
+HOW TO MAP THE PATTERN
+1. Initialize fields: Declare useState("") for each input needed.
+2. Link value: Set the input's value prop to the state variable.
+3. Link onChange: Update the corresponding state variable using e.target.value.
+
+WHY THIS HELPS YOU
+Synchronizing user inputs with state allows you to inspect, modify, and package data before saving.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Add the new appointment to the master list without a page refresh and reset the input form.
+
+WHAT YOUR LOGIC NEEDS
+* Form submission interceptor.
+* Creation of an item matching your Step 1 blueprint.
+* Spread update appending the item to state.
+* Field reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  const next = { id: String(Date.now()), category: currentCategory, label };
+  setItems((prev) => [...prev, next]);
+  setLabel("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() at the top of your handler.
+2. Construct item: Build an object containing an id and your form state values.
+3. Update state safely: Append using setItems((prev) => [...prev, next]).
+4. Reset inputs: Clear the input state variables by setting them back to "".
+
+WHY THIS HELPS YOU
+Appending to state keeps the master list updated, and your filter from Step 2 will immediately determine if the new item appears on the current board.
+
+
+================================================================================
+TASK: Deposit list + take-deposit form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a deposit record and create the component container.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* client (text)
+* amount (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type Payment = {
+  id: string;
+  payer: string;
+  total: string;
+};
+
+export function PaymentTracker() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Replace names: Change Payment to your deposit type name and PaymentTracker to your component name.
+2. Populate fields: Write each field on its own line followed by ": string;".
+3. Return container: Keep the "return <div />;" shell in your component.
+
+WHY THIS HELPS YOU
+Having an explicit shape for deposits ensures every transaction record has the required bookkeeping fields.
+
+
+--- STEP 2 ---
+STEP:
+Hold deposits in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store deposits in state and display them as rows, showing a message when there are no deposits.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding deposits.
+* Empty-state conditional render.
+* Array mapping rendering transaction rows.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [deposits, setDeposits] = useState<Payment[]>([]);
+
+return (
+  <div>
+    {deposits.length === 0 ? (
+      <p>No deposits recorded</p>
+    ) : (
+      deposits.map((d) => (
+        <div key={d.id}>
+          {d.payer}: ${d.total}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Declare list state: Initialize useState with an empty array typed with your deposit type.
+2. Conditional check: Use deposits.length === 0 to branch the display.
+3. Render contents: Map over deposits, passing key={d.id} and rendering the client and amount.
+
+WHY THIS HELPS YOU
+Clear visual feedback when the ledger is empty prevents users from wondering if the application failed to load.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Bind the client name and deposit amount inputs to React state.
+
+WHAT YOUR LOGIC NEEDS
+* Separate state hooks for client and amount.
+* Inputs bound via value and onChange.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [payer, setPayer] = useState("");
+const [total, setTotal] = useState("");
+
+<input value={payer} onChange={(e) => setPayer(e.target.value)} />
+<input value={total} onChange={(e) => setTotal(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Create a useState("") for client and one for amount.
+2. Attach props: Assign each state variable to its input's value attribute.
+3. Handle updates: Update the corresponding state inside onChange using e.target.value.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure numbers and strings are sanitized and accessible when the user clicks save.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Record the new deposit to the list and clear the input boxes without reloading the page.
+
+WHAT YOUR LOGIC NEEDS
+* e.preventDefault() to stop page reload.
+* A new deposit object with a unique id.
+* State update appending the new object.
+* State cleanup resetting fields.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function onSave(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), payer, total };
+  setDeposits((prev) => [...prev, entry]);
+  setPayer("");
+  setTotal("");
+}
+
+HOW TO MAP THE PATTERN
+1. Stop browser action: Put e.preventDefault() first.
+2. Build record: Create an object with an ID and your state fields.
+3. Update list: Append using setDeposits((prev) => [...prev, entry]).
+4. Reset fields: Set both input states back to "".
+
+WHY THIS HELPS YOU
+Immediate visual feedback gives users confidence that their deposit was recorded accurately.
+
+
+================================================================================
+TASK: Deposits API with held/applied status
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Create server-side storage for deposits and an ID generator function.
+
+WHAT YOUR LOGIC NEEDS
+* An in-memory array holding deposit objects.
+* A function returning unique ID strings.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let store: DepositRecord[] = [];
+let count = 1;
+
+function makeId(): string {
+  return `dep-${count++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. Storage array: Initialize a let variable to an empty array typed with your deposit interface.
+2. Counter: Initialize a let count variable to track numbers.
+3. Generator: Return an incremental ID string from your helper function.
+
+WHY THIS HELPS YOU
+Maintaining an in-memory store allows your API to save and query records during local development without complex databases.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Reject invalid deposit requests with status 400 if required info is missing.
+
+WHAT YOUR LOGIC NEEDS
+* Checks for missing client or amount fields.
+* Early return with status 400 and error text.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.client || !req.body.amount) {
+  return res.status(400).json({ error: "Missing required deposit details" });
+}
+
+HOW TO MAP THE PATTERN
+1. Verify body content: Inspect req.body for missing properties.
+2. Trigger check: If any required property is falsy, enter the error block.
+3. Return 400: Send res.status(400).json(...) to halt the request.
+
+WHY THIS HELPS YOU
+Strict validation prevents blank or corrupt financial entries from ever entering the system.
+
+
+--- STEP 3 ---
+STEP:
+Derive a status from stored data instead of trusting the request body.
+
+ASSIST GUIDE:
+YOUR GOAL
+Calculate whether the deposit should be marked "held" or "applied" on the server rather than trusting the user.
+
+WHAT YOUR LOGIC NEEDS
+* Business logic inspecting payment values or account flags.
+* Determination of status string based on internal conditions.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const status = Number(req.body.amount) > 5000 ? "held" : "applied";
+
+HOW TO MAP THE PATTERN
+1. Evaluate business rules: Check the condition (e.g. amount thresholds or account balance).
+2. Set the status: Use a ternary expression or if statement to set status to either "held" or "applied".
+3. Ignore user payload status: Never read status directly from req.body.
+
+WHY THIS HELPS YOU
+Deriving status on the server prevents clients from maliciously marking unverified deposits as completed or applied.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create, attaching the derived status.
+
+ASSIST GUIDE:
+YOUR GOAL
+Provide endpoints to view deposits and create new ones with the calculated status attached.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning all stored deposits.
+* POST endpoint running validation, calculating status, appending to store, and returning 201.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getDeposits(res: Response) {
+  return res.status(200).json(store);
+}
+
+export function createDeposit(req: Request, res: Response) {
+  // Step 2 validation check
+  // Step 3 derive status logic
+  const record = { id: makeId(), ...req.body, status };
+  store.push(record);
+  return res.status(201).json(record);
+}
+
+HOW TO MAP THE PATTERN
+1. GET route: Send status 200 with the storage array.
+2. Run checks: In POST, validate inputs and calculate the server-derived status.
+3. Save record: Assemble the final record with id and derived status, push to store, and respond with 201.
+
+WHY THIS HELPS YOU
+The client receives back the exact saved record along with the server-verified status.
+
+
+================================================================================
+TASK: Coverage API with open/filled status
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Create server-side storage for shift coverage requests and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding coverage items.
+* An incremental ID generation helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let coverageEntries: CoverageItem[] = [];
+let idCounter = 1;
+
+function nextCoverageId(): string {
+  return `cov-${idCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. Initialize store: Create an empty array typed with your coverage blueprint.
+2. Initialize ID tracker: Create an integer counter variable.
+3. ID generator: Write a helper returning formatted ID strings.
+
+WHY THIS HELPS YOU
+Unique identifiers make sure individual coverage tickets can be claimed or updated independently.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Verify that incoming coverage requests specify shift date and department, returning 400 if missing.
+
+WHAT YOUR LOGIC NEEDS
+* Check for shift date and department on req.body.
+* 400 status response for incomplete requests.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.shiftDate || !req.body.role) {
+  return res.status(400).json({ error: "Shift date and role are mandatory" });
+}
+
+HOW TO MAP THE PATTERN
+1. Validate fields: Check req.body properties using !body.property.
+2. Halt on failure: Return res.status(400).json(...) if any check fails.
+
+WHY THIS HELPS YOU
+Ensuring every request has date and role data prevents unassignable shifts from cluttering schedules.
+
+
+--- STEP 3 ---
+STEP:
+Derive a status from stored data instead of trusting the request body.
+
+ASSIST GUIDE:
+YOUR GOAL
+Determine on the server whether coverage is "open" or "filled" based on worker assignment.
+
+WHAT YOUR LOGIC NEEDS
+* Server check verifying if an employee ID or assignee is attached.
+* Assignment of "filled" if present, "open" if absent.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const status = req.body.assignedWorkerId ? "filled" : "open";
+
+HOW TO MAP THE PATTERN
+1. Check assignment: Look at whether an assignee was provided.
+2. Derive label: If an assignee exists, assign "filled"; otherwise, assign "open".
+
+WHY THIS HELPS YOU
+The status reflects true system state rather than unchecked client claims.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create, attaching the derived status.
+
+ASSIST GUIDE:
+YOUR GOAL
+Build the GET list endpoint and POST creation endpoint with the calculated status.
+
+WHAT YOUR LOGIC NEEDS
+* GET returning all coverage records.
+* POST validating fields, stamping status, saving, and returning 201.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getCoverage(res: Response) {
+  return res.status(200).json(coverageEntries);
+}
+
+export function addCoverage(req: Request, res: Response) {
+  // Step 2 validation check
+  // Step 3 derived status
+  const item = { id: nextCoverageId(), ...req.body, status };
+  coverageEntries.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Return list: Return status 200 with coverageEntries in the GET handler.
+2. Execute workflow: Run validation and status derivation inside the POST handler.
+3. Store and respond: Append the item to coverageEntries and return status 201 with the created object.
+
+WHY THIS HELPS YOU
+Consistently returning the newly created object with its derived status gives the client instant confirmation.
+
+
+================================================================================
+TASK: Open coverage list + request form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a coverage request and create the outer component.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* shift (text)
+* role (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type CoverageSlot = {
+  id: string;
+  shift: string;
+  role: string;
+};
+
+export function CoverageManager() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Type declaration: Replace CoverageSlot with your type name.
+2. Add fields: Define shift and role as string fields.
+3. Component shell: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+A defined shape guarantees your list component knows exactly what information every shift card will display.
+
+
+--- STEP 2 ---
+STEP:
+Hold requests in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store coverage requests in state and display them, showing an empty state note if none exist.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding coverage items.
+* Conditional check for empty list.
+* Map loop rendering shift details.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [slots, setSlots] = useState<CoverageSlot[]>([]);
+
+return (
+  <div>
+    {slots.length === 0 ? (
+      <p>No open coverage requests</p>
+    ) : (
+      slots.map((s) => (
+        <div key={s.id}>
+          {s.shift} - {s.role}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. State hook: Declare useState<CoverageSlot[]>([]).
+2. Check length: Render a fallback message if slots.length === 0.
+3. Render rows: Loop over slots with .map(), displaying shift info with a key attribute.
+
+WHY THIS HELPS YOU
+Users can immediately see whether all shifts are staffed or if openings remain.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Bind shift time and role input fields to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State variables for shift and role inputs.
+* Value and onChange props wired on each field.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [shift, setShift] = useState("");
+const [role, setRole] = useState("");
+
+<input value={shift} onChange={(e) => setShift(e.target.value)} />
+<input value={role} onChange={(e) => setRole(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Declare states: Call useState("") for shift and role.
+2. Connect inputs: Set value={shift} and value={role}.
+3. Update on keystroke: Set onChange handlers to update state with e.target.value.
+
+WHY THIS HELPS YOU
+React tracks every change live, making form submission straightforward and bug-free.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Add the new coverage request to your list without refreshing the page and reset the inputs.
+
+WHAT YOUR LOGIC NEEDS
+* e.preventDefault() call.
+* New object creation with unique ID.
+* Spread update to state.
+* State setters called with empty strings.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function submitSlot(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), shift, role };
+  setSlots((prev) => [...prev, entry]);
+  setShift("");
+  setRole("");
+}
+
+HOW TO MAP THE PATTERN
+1. Intercept submit: Place e.preventDefault() at the start.
+2. Build item: Package id, shift, and role into an object.
+3. Append: Update state using setSlots((prev) => [...prev, entry]).
+4. Clear inputs: Reset both input states to "".
+
+WHY THIS HELPS YOU
+The schedule updates immediately on screen without jarring browser reloads.
+
+
+================================================================================
+TASK: Inventory master table
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one inventory item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Create the blueprint for an inventory item (SKU, title, stock, cost) and initialize the table component.
+
+WHAT YOUR BLUEPRINT NEEDS
+* sku (text)
+* name (text)
+* quantity (number or text)
+* unitPrice (number or text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type StockItem = {
+  sku: string;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+};
+
+export function InventoryTable() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Create type: Define your inventory type with sku, name, quantity, and unitPrice.
+2. Set types: Use string for text and number for counts/costs.
+3. Build container: Set up the component function shell.
+
+WHY THIS HELPS YOU
+A precise blueprint ensures that table columns correctly map to valid database properties.
+
+
+--- STEP 2 ---
+STEP:
+Store the list in React state with useState.
+
+ASSIST GUIDE:
+YOUR GOAL
+Create a state container in your component to hold the list of inventory items.
+
+WHAT YOUR LOGIC NEEDS
+* useState typed with an array of your inventory blueprint.
+* Initial value set to an empty array.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [inventory, setInventory] = useState<StockItem[]>([]);
+
+HOW TO MAP THE PATTERN
+1. Declare state: Call useState with your item type wrapped in array brackets: <StockItem[]>.
+2. Initialize empty: Pass [] as the initial state so the page can mount safely before data loads.
+
+WHY THIS HELPS YOU
+Initializing with an empty array prevents "cannot read property of undefined" errors while fetching data.
+
+
+--- STEP 3 ---
+STEP:
+Fetch real inventory data from the Mini ERP API when the component mounts.
+
+ASSIST GUIDE:
+YOUR GOAL
+Load live inventory data from the server the moment the component displays.
+
+WHAT YOUR LOGIC NEEDS
+* A useEffect hook running on mount (empty dependency array []).
+* A fetch call targeting the inventory API endpoint.
+* A state update saving the received data.
+
+LOOK AT THIS PATTERN (ANALOGY)
+useEffect(() => {
+  fetch("/api/inventory")
+    .then((res) => res.json())
+    .then((data) => setInventory(data));
+}, []);
+
+HOW TO MAP THE PATTERN
+1. Hook setup: Wrap the request in useEffect with [] as the second argument.
+2. Make the call: Fetch from your ERP inventory endpoint.
+3. Store result: Convert response to json and pass the payload into your state setter.
+
+WHY THIS HELPS YOU
+Running fetch inside useEffect ensures data is fetched once when the page loads rather than on every render.
+
+
+--- STEP 4 ---
+STEP:
+Define TanStack Table columns and instantiate the table.
+
+ASSIST GUIDE:
+YOUR GOAL
+Configure the table's columns and initialize the TanStack Table instance.
+
+WHAT YOUR LOGIC NEEDS
+* Column definitions mapping headers to property keys.
+* useReactTable hook connecting data and columns.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const columns = [
+  { accessorKey: "sku", header: "SKU" },
+  { accessorKey: "name", header: "Product" },
+  { accessorKey: "quantity", header: "In Stock" },
+];
+
+const table = useReactTable({
+  data: inventory,
+  columns,
+  getCoreRowModel: getCoreRowModel(),
+});
+
+HOW TO MAP THE PATTERN
+1. Define columns: Create an array where each object has accessorKey matching an item property and header for the column title.
+2. Initialize table: Call useReactTable, passing your inventory state as data and your columns array.
+3. Add core model: Supply getCoreRowModel: getCoreRowModel().
+
+WHY THIS HELPS YOU
+TanStack Table decouples table logic from rendering, making sorting and pagination easier to implement later.
+
+
+--- STEP 5 ---
+STEP:
+Render the table's header and rows, with loading and empty states.
+
+ASSIST GUIDE:
+YOUR GOAL
+Render the HTML table using the TanStack instance, showing loading or empty indicators when appropriate.
+
+WHAT YOUR LOGIC NEEDS
+* Conditional loading indicator while fetching.
+* Table rendering header groups and row models.
+* Empty message if data array is empty.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (inventory.length === 0) return <p>No inventory items found.</p>;
+
+return (
+  <table>
+    <thead>
+      {table.getHeaderGroups().map((headerGroup) => (
+        <tr key={headerGroup.id}>
+          {headerGroup.headers.map((header) => (
+            <th key={header.id}>
+              {flexRender(header.column.columnDef.header, header.getContext())}
+            </th>
+          ))}
+        </tr>
+      ))}
+    </thead>
+    <tbody>
+      {table.getRowModel().rows.map((row) => (
+        <tr key={row.id}>
+          {row.getVisibleCells().map((cell) => (
+            <td key={cell.id}>
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+);
+
+HOW TO MAP THE PATTERN
+1. Empty check: Check if data is empty before rendering the table.
+2. Render thead: Map table.getHeaderGroups() to <tr> and headers to <th> using flexRender.
+3. Render tbody: Map table.getRowModel().rows to <tr> and visible cells to <td> using flexRender.
+
+WHY THIS HELPS YOU
+Using flexRender properly delegates cell content formatting to TanStack Table.
+
+
+================================================================================
+TASK: Purchase order form & receive modal
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model the vendor, item option, and order-line shapes, then set up the component around them.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define types for vendors, catalog items, and order lines, then assemble the component frame.
+
+WHAT YOUR BLUEPRINT NEEDS
+* Vendor type (id, name)
+* ItemOption type (id, name, cost)
+* OrderLine type (itemId, quantity, unitCost)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type Vendor = { id: string; name: string };
+export type Product = { id: string; title: string; cost: number };
+export type LineEntry = { productId: string; qty: number };
+
+export function PurchaseOrderManager() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Define entities: Write type declarations for vendors, catalog items, and order line entries.
+2. Map fields: Ensure IDs and names are strings, and quantities and costs are numbers.
+3. Component frame: Build the empty parent component.
+
+WHY THIS HELPS YOU
+Purchase orders combine multiple records; modeling all three types upfront prevents data mismatches between catalogs and line items.
+
+
+--- STEP 2 ---
+STEP:
+Store vendors, items, and the in-progress order lines in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Set up state hooks for available vendors, catalog items, and active order lines.
+
+WHAT YOUR LOGIC NEEDS
+* State for vendor list.
+* State for product items.
+* State for current order lines.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [vendors, setVendors] = useState<Vendor[]>([]);
+const [products, setProducts] = useState<Product[]>([]);
+const [orderLines, setOrderLines] = useState<LineEntry[]>([]);
+
+HOW TO MAP THE PATTERN
+1. Vendors state: Initialize with an empty array of Vendor.
+2. Products state: Initialize with an empty array of ItemOption.
+3. Lines state: Initialize with an empty array of OrderLine.
+
+WHY THIS HELPS YOU
+Isolating catalogs from the in-progress order ensures draft edits do not alter base vendor or product information.
+
+
+--- STEP 3 ---
+STEP:
+Fetch real vendors and items from the Mini ERP API when the component mounts.
+
+ASSIST GUIDE:
+YOUR GOAL
+Load live vendor and catalog lists from the API on mount.
+
+WHAT YOUR LOGIC NEEDS
+* useEffect with [] dependency array.
+* Promise.all or dual fetch calls requesting vendors and items.
+
+LOOK AT THIS PATTERN (ANALOGY)
+useEffect(() => {
+  Promise.all([
+    fetch("/api/vendors").then((r) => r.json()),
+    fetch("/api/items").then((r) => r.json()),
+  ]).then(([vendorData, itemData]) => {
+    setVendors(vendorData);
+    setProducts(itemData);
+  });
+}, []);
+
+HOW TO MAP THE PATTERN
+1. Use useEffect: Trigger requests on initial mount with [].
+2. Load concurrently: Use Promise.all to fetch vendors and products in parallel.
+3. Populate state: Update both state variables with their respective responses.
+
+WHY THIS HELPS YOU
+Loading both catalogs in parallel speeds up page readiness.
+
+
+--- STEP 4 ---
+STEP:
+Create a real purchase order with POST /api/po.
+
+ASSIST GUIDE:
+YOUR GOAL
+Submit the constructed purchase order lines and selected vendor to the server via POST.
+
+WHAT YOUR LOGIC NEEDS
+* Submission handler triggering fetch with method POST.
+* JSON payload containing vendorId and order lines.
+
+LOOK AT THIS PATTERN (ANALOGY)
+async function submitOrder(vendorId: string) {
+  const res = await fetch("/api/po", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ vendorId, lines: orderLines }),
+  });
+  const newPo = await res.json();
+  return newPo;
+}
+
+HOW TO MAP THE PATTERN
+1. Setup request: Call fetch targeting "/api/po" with method "POST".
+2. Set headers: Include "Content-Type": "application/json".
+3. Serialize body: Stringify an object containing the vendor ID and orderLines state.
+
+WHY THIS HELPS YOU
+Communicating via structured JSON ensures the ERP receives the purchase order formatted exactly as required.
+
+
+--- STEP 5 ---
+STEP:
+Receive the purchase order for real with POST /api/po/:id/receive and reflect the updated stock and cost.
+
+ASSIST GUIDE:
+YOUR GOAL
+Confirm receipt of goods by calling the receive endpoint and updating screen data.
+
+WHAT YOUR LOGIC NEEDS
+* Function taking the purchase order ID.
+* POST request to /api/po/:id/receive.
+* Refresh or state update reflecting newly received stock levels.
+
+LOOK AT THIS PATTERN (ANALOGY)
+async function receivePo(poId: string) {
+  const res = await fetch(`/api/po/${poId}/receive`, { method: "POST" });
+  if (res.ok) {
+    // refresh catalog or trigger inventory reload
+  }
+}
+
+HOW TO MAP THE PATTERN
+1. Construct URL: Inject the target PO's ID into the endpoint URL.
+2. Trigger POST: Send the receive command to the backend.
+3. Handle success: On a successful response, update local state or re-fetch items to display updated warehouse counts.
+
+WHY THIS HELPS YOU
+Closing the loop on the PO updates inventory numbers without requiring a full browser refresh.
+
+
+================================================================================
+TASK: Financial reporting dashboard
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model the trial balance and income statement shapes, then set up the component around them.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define blueprints for trial balance records and income statement summaries, then build the dashboard shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* TrialBalanceLine type (account, debit, credit)
+* IncomeStatement type (revenue, expenses, netIncome)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type BalanceLine = { account: string; debit: number; credit: number };
+export type Statement = { revenue: number; expenses: number; netIncome: number };
+
+export function FinancialDashboard() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Balance blueprint: Create a type with account name and numeric debit/credit fields.
+2. Statement blueprint: Create a type with numeric revenue, expenses, and netIncome fields.
+3. Shell component: Initialize the container returning <div />.
+
+WHY THIS HELPS YOU
+Strict numeric types prevent formatting bugs when computing financial totals.
+
+
+--- STEP 2 ---
+STEP:
+Store both reports in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Create state hooks to hold the trial balance list and income statement data.
+
+WHAT YOUR LOGIC NEEDS
+* State for the trial balance array.
+* State for the income statement object (or null initially).
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [balanceSheet, setBalanceSheet] = useState<BalanceLine[]>([]);
+const [statement, setStatement] = useState<Statement | null>(null);
+
+HOW TO MAP THE PATTERN
+1. Array state: Initialize balance lines with useState<TrialBalanceLine[]>([]).
+2. Object state: Initialize statement summary with useState<IncomeStatement | null>(null).
+
+WHY THIS HELPS YOU
+Using null for uninitialized objects lets you render clean loading indicators until data arrives.
+
+
+--- STEP 3 ---
+STEP:
+Fetch the real trial balance and income statement from the Mini ERP API when the component mounts.
+
+ASSIST GUIDE:
+YOUR GOAL
+Fetch financial statements from the server on page mount.
+
+WHAT YOUR LOGIC NEEDS
+* useEffect with [] dependency.
+* Parallel fetch calls for trial balance and income statement.
+
+LOOK AT THIS PATTERN (ANALOGY)
+useEffect(() => {
+  Promise.all([
+    fetch("/api/reports/trial-balance").then((r) => r.json()),
+    fetch("/api/reports/income-statement").then((r) => r.json()),
+  ]).then(([balanceData, statementData]) => {
+    setBalanceSheet(balanceData);
+    setStatement(statementData);
+  });
+}, []);
+
+HOW TO MAP THE PATTERN
+1. Mount hook: Set up useEffect with [].
+2. Fetch endpoints: Target your reporting endpoints using Promise.all.
+3. Store responses: Save results into your respective state setters.
+
+WHY THIS HELPS YOU
+Loading financial data together avoids layout shifting while reports render.
+
+
+--- STEP 4 ---
+STEP:
+Render the trial balance as a real table, including whether it's balanced.
+
+ASSIST GUIDE:
+YOUR GOAL
+Render the trial balance rows in a table and display an indicator showing whether debits equal credits.
+
+WHAT YOUR LOGIC NEEDS
+* Calculations summing debits and credits.
+* Equality check determining balance status.
+* Table rendering account lines.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const totalDebit = balanceSheet.reduce((sum, row) => sum + row.debit, 0);
+const totalCredit = balanceSheet.reduce((sum, row) => sum + row.credit, 0);
+const isBalanced = totalDebit === totalCredit;
+
+return (
+  <div>
+    <div>Status: {isBalanced ? "Balanced" : "Out of Balance"}</div>
+    <table>
+      {balanceSheet.map((r, i) => (
+        <tr key={i}>
+          <td>{r.account}</td>
+          <td>{r.debit}</td>
+          <td>{r.credit}</td>
+        </tr>
+      ))}
+    </table>
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Calculate totals: Use .reduce() to sum debit and credit columns.
+2. Check balance: Compare totals (totalDebit === totalCredit).
+3. Display badge: Render "Balanced" or "Out of Balance" based on the comparison.
+4. Render rows: Map through lines to output table rows.
+
+WHY THIS HELPS YOU
+A clear balanced indicator provides instant verification of accounting integrity.
+
+
+--- STEP 5 ---
+STEP:
+Render the income statement's revenue, expense, and net income.
+
+ASSIST GUIDE:
+YOUR GOAL
+Display income statement summary metrics on screen.
+
+WHAT YOUR LOGIC NEEDS
+* Null-check guard while statement data loads.
+* Card display presenting revenue, expenses, and calculated net income.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!statement) return <p>Loading statement...</p>;
+
+return (
+  <div>
+    <h3>Income Statement</h3>
+    <p>Revenue: ${statement.revenue}</p>
+    <p>Expenses: ${statement.expenses}</p>
+    <p>Net Income: ${statement.netIncome}</p>
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Guard render: Return a loading message if your statement state is null.
+2. Render metrics: Display revenue, expense, and netIncome values clearly inside cards or paragraphs.
+
+WHY THIS HELPS YOU
+Presenting high-level totals alongside detailed ledgers provides both summary and detailed views.
+
+
+================================================================================
+TASK: Sales order pipeline view
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model the customer, item option, and order-line shapes, then set up the component around them.
+
+ASSIST GUIDE:
+YOUR GOAL
+Create blueprints for customer info, catalog items, and sales order lines, then set up the pipeline component.
+
+WHAT YOUR BLUEPRINT NEEDS
+* Customer type (id, name)
+* ItemOption type (id, name, availableStock)
+* OrderLine type (itemId, quantity)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type Client = { id: string; name: string };
+export type CatalogItem = { id: string; title: string; availableStock: number };
+export type SaleLine = { itemId: string; quantity: number };
+
+export function SalesPipeline() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Define shapes: Create types for clients, catalog inventory items, and line entries.
+2. Specify fields: Ensure availableStock and quantity use the number type.
+3. Component shell: Declare your parent SalesPipeline component.
+
+WHY THIS HELPS YOU
+Modeling available stock directly in the item type allows frontend components to warn users before overselling.
+
+
+--- STEP 2 ---
+STEP:
+Store customers, items, the in-progress order lines, and any error in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Create state hooks to hold customer lists, inventory stock, active order lines, and error alerts.
+
+WHAT YOUR LOGIC NEEDS
+* State for customers list.
+* State for available items.
+* State for in-progress order lines.
+* State for error message strings.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [clients, setClients] = useState<Client[]>([]);
+const [items, setItems] = useState<CatalogItem[]>([]);
+const [lines, setLines] = useState<SaleLine[]>([]);
+const [error, setError] = useState<string | null>(null);
+
+HOW TO MAP THE PATTERN
+1. Catalogs: Initialize clients and items as empty arrays.
+2. Lines: Initialize lines as an empty array of SaleLine.
+3. Errors: Initialize error with null to hold server or validation messages.
+
+WHY THIS HELPS YOU
+Dedicated error state allows the UI to surface rejection reasons without breaking the rest of the view.
+
+
+--- STEP 3 ---
+STEP:
+Fetch real customers and items from the Mini ERP API when the component mounts.
+
+ASSIST GUIDE:
+YOUR GOAL
+Fetch customer records and catalog availability on page mount.
+
+WHAT YOUR LOGIC NEEDS
+* useEffect with [] dependency array.
+* Parallel fetch calls for customers and inventory.
+
+LOOK AT THIS PATTERN (ANALOGY)
+useEffect(() => {
+  Promise.all([
+    fetch("/api/customers").then((r) => r.json()),
+    fetch("/api/items").then((r) => r.json()),
+  ]).then(([customerData, itemData]) => {
+    setClients(customerData);
+    setItems(itemData);
+  });
+}, []);
+
+HOW TO MAP THE PATTERN
+1. Mount trigger: Set up useEffect with an empty dependency array.
+2. Fetch in parallel: Use Promise.all to query /api/customers and /api/items.
+3. Populate state: Store the incoming data using setClients and setItems.
+
+WHY THIS HELPS YOU
+Populating both lists upfront enables smooth selection in dropdown menus.
+
+
+--- STEP 4 ---
+STEP:
+Create a real sales order with POST /api/so, surfacing a real oversell error if it's blocked.
+
+ASSIST GUIDE:
+YOUR GOAL
+Send the completed sales order to the server and display an error if items exceed available stock.
+
+WHAT YOUR LOGIC NEEDS
+* POST request sending customerId and lines.
+* Status check handling 400/409 errors by setting the error state.
+
+LOOK AT THIS PATTERN (ANALOGY)
+async function submitSalesOrder(customerId: string) {
+  setError(null);
+  const res = await fetch("/api/so", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ customerId, lines }),
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    setError(data.error || "Order failed");
+    return;
+  }
+  // proceed on success
+}
+
+HOW TO MAP THE PATTERN
+1. Reset errors: Clear previous error state before sending.
+2. Make POST call: Fetch "/api/so" with serialized order data.
+3. Handle errors: If !res.ok, parse the JSON error and assign it to your error state variable.
+
+WHY THIS HELPS YOU
+Explicit error handling surfaces oversell warnings directly to the user.
+
+
+--- STEP 5 ---
+STEP:
+Fulfill the sales order for real with POST /api/so/:id/fulfill and reflect its status change.
+
+ASSIST GUIDE:
+YOUR GOAL
+Trigger fulfillment for a sales order and update its status tag on screen.
+
+WHAT YOUR LOGIC NEEDS
+* POST call targeting /api/so/:id/fulfill.
+* State update marking the order as fulfilled.
+
+LOOK AT THIS PATTERN (ANALOGY)
+async function fulfillOrder(orderId: string) {
+  const res = await fetch(`/api/so/${orderId}/fulfill`, { method: "POST" });
+  if (res.ok) {
+    // update order status in state to "Fulfilled"
+  }
+}
+
+HOW TO MAP THE PATTERN
+1. Endpoint call: Send a POST request to the parameterized fulfillment endpoint.
+2. Confirm success: Check if res.ok is true.
+3. Update state: Update local state to reflect the "Fulfilled" status.
+
+WHY THIS HELPS YOU
+Updating status immediately upon API success gives instant visual feedback that the order was completed.
+
+
+================================================================================
+TASK: Invoice list + create form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Create the blueprint for an invoice and construct the outer component.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* client (text)
+* amount (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type Bill = {
+  id: string;
+  recipient: string;
+  total: string;
+};
+
+export function InvoiceTracker() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename Bill to Invoice and InvoiceTracker to your component name.
+2. Define fields: Add id, client, and amount with string types.
+3. Return shell: Return an empty <div /> from your component.
+
+WHY THIS HELPS YOU
+Defining the invoice shape upfront ensures all billing entries have matching property names.
+
+
+--- STEP 2 ---
+STEP:
+Hold invoices in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store invoices in state and display each entry, showing a placeholder if none exist.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding invoices.
+* Conditional check for empty list.
+* List rendering displaying invoice rows.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [invoices, setInvoices] = useState<Bill[]>([]);
+
+return (
+  <div>
+    {invoices.length === 0 ? (
+      <p>No invoices created yet</p>
+    ) : (
+      invoices.map((inv) => (
+        <div key={inv.id}>
+          {inv.recipient} - ${inv.total}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up state: Use useState<Invoice[]>([]).
+2. Check for empty: Use invoices.length === 0 to render an empty-state message.
+3. Map rows: Render each invoice with a unique key={inv.id}.
+
+WHY THIS HELPS YOU
+A dedicated empty state prevents confusion when starting with a fresh account.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect client and invoice amount inputs to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for client and amount.
+* Controlled input props (value and onChange).
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [recipient, setRecipient] = useState("");
+const [total, setTotal] = useState("");
+
+<input value={recipient} onChange={(e) => setRecipient(e.target.value)} />
+<input value={total} onChange={(e) => setTotal(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize fields: Declare useState("") for client and amount.
+2. Bind values: Set value to the corresponding state variable.
+3. Handle changes: Use onChange to update state with e.target.value.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure user values are preserved and ready for submission.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Add the new invoice to your list without a page refresh and reset the form inputs.
+
+WHAT YOUR LOGIC NEEDS
+* e.preventDefault() call.
+* New invoice object creation.
+* State update appending the invoice.
+* Setters clearing input states.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function addInvoice(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), recipient, total };
+  setInvoices((prev) => [...prev, entry]);
+  setRecipient("");
+  setTotal("");
+}
+
+HOW TO MAP THE PATTERN
+1. Block reload: Put e.preventDefault() at the top of the function.
+2. Build item: Package id, client, and amount into a new object.
+3. Append item: Use setInvoices((prev) => [...prev, entry]).
+4. Clear form: Reset input states back to empty strings.
+
+WHY THIS HELPS YOU
+The invoice list updates immediately in place, providing a smooth user experience.
+
+
+================================================================================
+TASK: Invoices API with overdue status
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Create server-side storage for invoices and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding invoice records.
+* An incremental ID generator helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let invoiceStore: InvoiceRecord[] = [];
+let invIdCounter = 1;
+
+function generateInvoiceId(): string {
+  return `inv-${invIdCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. In-memory store: Declare a let variable initialized to an empty array.
+2. ID counter: Initialize a numeric counter variable.
+3. Generator: Return an incremental ID string.
+
+WHY THIS HELPS YOU
+Storing records in an array allows API testing without configuring external databases.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Verify incoming invoices include client name and due date, rejecting with 400 if missing.
+
+WHAT YOUR LOGIC NEEDS
+* Checks for required body fields.
+* 400 status response for incomplete requests.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.client || !req.body.dueDate) {
+  return res.status(400).json({ error: "Client and due date are required" });
+}
+
+HOW TO MAP THE PATTERN
+1. Check body: Evaluate required properties using !req.body.property.
+2. Reject invalid: Return res.status(400).json(...) if any check fails.
+
+WHY THIS HELPS YOU
+Validating inputs ensures bad data is rejected before reaching your storage array.
+
+
+--- STEP 3 ---
+STEP:
+Derive a status from stored data instead of trusting the request body.
+
+ASSIST GUIDE:
+YOUR GOAL
+Calculate whether the invoice is "current" or "overdue" by comparing its due date against the current date.
+
+WHAT YOUR LOGIC NEEDS
+* Date comparison logic comparing dueDate against Date.now().
+* Status assignment based on the comparison.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const isLate = new Date(req.body.dueDate).getTime() < Date.now();
+const status = isLate ? "overdue" : "current";
+
+HOW TO MAP THE PATTERN
+1. Compare timestamps: Parse dueDate and compare against the current timestamp.
+2. Set status: Assign "overdue" if past due; otherwise, assign "current".
+
+WHY THIS HELPS YOU
+Calculating status on the server prevents clients from falsifying payment statuses.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create, attaching the derived status.
+
+ASSIST GUIDE:
+YOUR GOAL
+Expose a GET endpoint to return invoices and a POST endpoint to create invoices with the calculated status.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning the storage array.
+* POST endpoint running validation, calculating status, appending to store, and returning 201.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getInvoices(res: Response) {
+  return res.status(200).json(invoiceStore);
+}
+
+export function createInvoice(req: Request, res: Response) {
+  // Step 2 validation check
+  // Step 3 derive overdue status
+  const item = { id: generateInvoiceId(), ...req.body, status };
+  invoiceStore.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Read route: Return status 200 with the storage array.
+2. Write route: Run validation and status derivation, save the item, and return 201 with the created record.
+
+WHY THIS HELPS YOU
+The client receives the finalized invoice with the calculated status included.
+
+
+================================================================================
+TASK: Overdue board: filter invoices by status label
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of an invoice including its status tag, and build the board component.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* client (text)
+* amount (text)
+* status (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type FilterableInvoice = {
+  id: string;
+  client: string;
+  amount: string;
+  status: string;
+};
+
+export function OverdueBoard() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Define your invoice type including a status property.
+2. Shell component: Create your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Adding the status field to the type ensures safe filtering in later steps.
+
+
+--- STEP 2 ---
+STEP:
+Hold invoices in state and render only the matching rows — filtered, with an empty state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Filter stored invoices to show only overdue items, displaying a message if none are overdue.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding all invoices.
+* .filter() call selecting items where status === 'overdue'.
+* Conditional check displaying an empty message if no items match.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [allInvoices, setAllInvoices] = useState<FilterableInvoice[]>([]);
+
+const overdueInvoices = allInvoices.filter((inv) => inv.status === "overdue");
+
+return (
+  <div>
+    {overdueInvoices.length === 0 ? (
+      <p>No overdue invoices found</p>
+    ) : (
+      overdueInvoices.map((inv) => (
+        <div key={inv.id}>
+          {inv.client} owes ${inv.amount}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Master list: Keep all records in allInvoices state.
+2. Filter logic: Create overdueInvoices using .filter(inv => inv.status === "overdue").
+3. Conditional render: Check overdueInvoices.length === 0 to render either the message or the list rows.
+
+WHY THIS HELPS YOU
+Filtering leaves the master list untouched while displaying only the items requiring immediate attention.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Track invoice form inputs in React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for client, amount, and status.
+* Value and onChange props wired to inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [client, setClient] = useState("");
+const [amount, setAmount] = useState("");
+const [status, setStatus] = useState("current");
+
+<input value={client} onChange={(e) => setClient(e.target.value)} />
+<input value={amount} onChange={(e) => setAmount(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for your form inputs.
+2. Bind inputs: Link value and onChange to your state variables.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when creating records.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new invoice to your master state and clear inputs without refreshing the page.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* Object assembly matching your blueprint.
+* Spread update to master state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function handleAdd(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), client, amount, status };
+  setAllInvoices((prev) => [...prev, entry]);
+  setClient("");
+  setAmount("");
+}
+
+HOW TO MAP THE PATTERN
+1. Stop reload: Call e.preventDefault() first.
+2. Assemble record: Create an object with an ID and your form state values.
+3. Update state: Append using setAllInvoices((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+The new invoice is added to the master list, and your filter automatically displays it if it is marked overdue.
+
+
+================================================================================
+TASK: Reminders API — one pending nudge per invoice per channel
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Set up server storage for reminder records and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding reminder records.
+* An incremental ID generator helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let reminders: ReminderRecord[] = [];
+let remIdCounter = 1;
+
+function getNextReminderId(): string {
+  return `rem-${remIdCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. In-memory store: Declare an empty array typed with your reminder shape.
+2. ID helper: Return an incremented string ID from your helper function.
+
+WHY THIS HELPS YOU
+In-memory storage allows rapid testing of API endpoints without database overhead.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Reject reminder requests missing invoice ID, channel, or message with status 400.
+
+WHAT YOUR LOGIC NEEDS
+* Checks verifying required body properties.
+* 400 response for incomplete data.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.invoiceId || !req.body.channel) {
+  return res.status(400).json({ error: "Invoice ID and channel are required" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect fields: Evaluate required properties using !req.body.property.
+2. Reject missing: Send status 400 with an informative error message.
+
+WHY THIS HELPS YOU
+Validation prevents incomplete reminder entries from being scheduled.
+
+
+--- STEP 3 ---
+STEP:
+Detect overlapping records so two bookings cannot claim the same slot.
+
+ASSIST GUIDE:
+YOUR GOAL
+Scan existing reminders to ensure a pending reminder does not already exist for this invoice on this channel.
+
+WHAT YOUR LOGIC NEEDS
+* An array search checking for matching invoiceId and channel.
+* 409 conflict response if a duplicate is found.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const exists = reminders.some(
+  (r) =>
+    r.invoiceId === req.body.invoiceId &&
+    r.channel === req.body.channel &&
+    r.status === "pending"
+);
+if (exists) {
+  return res.status(409).json({ error: "Pending reminder already exists on this channel" });
+}
+
+HOW TO MAP THE PATTERN
+1. Scan store: Use .some() on your reminders array.
+2. Match criteria: Check if invoiceId, channel, and status === 'pending' all match.
+3. Reject conflicts: If found, halt execution with status 409.
+
+WHY THIS HELPS YOU
+Checking for duplicates prevents spamming clients with multiple reminders on the same channel.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create with 400/409 errors.
+
+ASSIST GUIDE:
+YOUR GOAL
+Build endpoints to fetch all reminders and save new reminders with validation checks in place.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning stored reminders.
+* POST endpoint applying 400 validation and 409 conflict checks before saving.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getReminders(res: Response) {
+  return res.status(200).json(reminders);
+}
+
+export function createReminder(req: Request, res: Response) {
+  // Step 2 validation check (400)
+  // Step 3 duplicate check (409)
+  const item = { id: getNextReminderId(), ...req.body, status: "pending" };
+  reminders.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Return store: Send status 200 with the reminders array in GET.
+2. Protect POST: Run validation and duplicate checks before pushing the record.
+3. Save record: Assign a unique ID, append the record to the array, and return status 201.
+
+WHY THIS HELPS YOU
+Clear error codes (400 for bad data, 409 for conflicts) make API behavior predictable.
+
+
+================================================================================
+TASK: Reminder log list + schedule form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the reminder blueprint and create the container component.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* target (text)
+* time (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type ReminderLog = {
+  id: string;
+  target: string;
+  time: string;
+};
+
+export function ReminderTracker() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename ReminderLog to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+A clear type definition ensures that reminder logs have consistent fields across the app.
+
+
+--- STEP 2 ---
+STEP:
+Hold reminders in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store reminder logs in state and display them, showing a placeholder message when empty.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding reminder items.
+* Conditional empty-state render.
+* Map loop rendering reminder rows.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [logs, setLogs] = useState<ReminderLog[]>([]);
+
+return (
+  <div>
+    {logs.length === 0 ? (
+      <p>No reminders logged</p>
+    ) : (
+      logs.map((l) => (
+        <div key={l.id}>
+          {l.target} at {l.time}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up state: Use useState<ReminderLog[]>([]).
+2. Check for empty: Use logs.length === 0 to branch the render.
+3. Render entries: Map through logs, passing key={l.id} and rendering properties.
+
+WHY THIS HELPS YOU
+Clear empty-state messaging confirms the system is working even when there are no records.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect reminder form inputs to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for target and time inputs.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [target, setTarget] = useState("");
+const [time, setTime] = useState("");
+
+<input value={target} onChange={(e) => setTarget(e.target.value)} />
+<input value={time} onChange={(e) => setTime(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for each input.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure form data is tracked cleanly before submission.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new reminder to the list without reloading the page and clear the form inputs.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* Object assembly with a unique ID.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function addReminder(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), target, time };
+  setLogs((prev) => [...prev, entry]);
+  setTarget("");
+  setTime("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, target, and time into a new object.
+3. Append item: Use setLogs((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+The reminder log updates instantly without jarring browser reloads.
+
+
+================================================================================
+TASK: Lead inbox list + capture form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a sales lead and create the component shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* name (text)
+* email (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type Lead = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+export function LeadInbox() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename Lead to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Modeling lead records ensures consistent contact fields across the app.
+
+
+--- STEP 2 ---
+STEP:
+Hold leads in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store leads in state and display them, showing a placeholder if the inbox is empty.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding leads.
+* Conditional empty check.
+* Map loop rendering lead cards.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [leads, setLeads] = useState<Lead[]>([]);
+
+return (
+  <div>
+    {leads.length === 0 ? (
+      <p>No leads in inbox</p>
+    ) : (
+      leads.map((lead) => (
+        <div key={lead.id}>
+          {lead.name} ({lead.email})
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up state: Use useState<Lead[]>([]).
+2. Check for empty: Use leads.length === 0 to render the empty message.
+3. Render entries: Map through leads, passing key={lead.id}.
+
+WHY THIS HELPS YOU
+A clear empty state prevents users from wondering whether leads failed to load.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect lead capture inputs to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for name and email.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [name, setName] = useState("");
+const [email, setEmail] = useState("");
+
+<input value={name} onChange={(e) => setName(e.target.value)} />
+<input value={email} onChange={(e) => setEmail(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for name and email.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when recording new leads.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new lead to your inbox without refreshing the page and reset the form.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* New lead object creation.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function captureLead(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), name, email };
+  setLeads((prev) => [...prev, entry]);
+  setName("");
+  setEmail("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, name, and email into an object.
+3. Append item: Use setLeads((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+New leads appear in the list instantly, keeping your sales workflow responsive.
+
+
+================================================================================
+TASK: Notes API — block duplicate notes per lead
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Set up server storage for notes and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding note records.
+* An incremental ID generator helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let notesStore: NoteRecord[] = [];
+let noteIdCounter = 1;
+
+function generateNoteId(): string {
+  return `note-${noteIdCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. In-memory store: Declare an empty array typed with your note interface.
+2. ID helper: Return an incremental ID string from your helper function.
+
+WHY THIS HELPS YOU
+In-memory storage allows quick API testing without database setup.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Reject note submissions that lack a lead ID or note text with status 400.
+
+WHAT YOUR LOGIC NEEDS
+* Checks verifying required body properties.
+* 400 status response for incomplete requests.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.leadId || !req.body.text) {
+  return res.status(400).json({ error: "Lead ID and text content are required" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect fields: Evaluate required properties using !req.body.property.
+2. Reject missing: Send status 400 if any required field is falsy.
+
+WHY THIS HELPS YOU
+Validating inputs ensures empty or unlinked notes never enter storage.
+
+
+--- STEP 3 ---
+STEP:
+Detect overlapping records so two bookings cannot claim the same slot.
+
+ASSIST GUIDE:
+YOUR GOAL
+Scan existing notes to ensure an identical note has not already been logged for this lead.
+
+WHAT YOUR LOGIC NEEDS
+* An array search checking for matching leadId and text.
+* 409 conflict response if a duplicate is found.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const isDuplicate = notesStore.some(
+  (n) => n.leadId === req.body.leadId && n.text === req.body.text
+);
+if (isDuplicate) {
+  return res.status(409).json({ error: "Duplicate note detected for this lead" });
+}
+
+HOW TO MAP THE PATTERN
+1. Scan store: Use .some() on your notes array.
+2. Match criteria: Compare leadId and text properties.
+3. Reject duplicates: If found, halt execution with status 409.
+
+WHY THIS HELPS YOU
+Preventing duplicate notes keeps customer interaction logs clean and uncluttered.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create with 400/409 errors.
+
+ASSIST GUIDE:
+YOUR GOAL
+Build endpoints to return notes and create new ones with validation and duplicate checks.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning stored notes.
+* POST endpoint applying 400 validation and 409 duplicate checks before saving.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getNotes(res: Response) {
+  return res.status(200).json(notesStore);
+}
+
+export function createNote(req: Request, res: Response) {
+  // Step 2 validation check (400)
+  // Step 3 duplicate check (409)
+  const item = { id: generateNoteId(), ...req.body };
+  notesStore.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Return store: Send status 200 with the notes array in GET.
+2. Protect POST: Run validation and duplicate checks before pushing the record.
+3. Save record: Assign a unique ID, push the item to storage, and return status 201.
+
+WHY THIS HELPS YOU
+Consistent error codes (400 for bad data, 409 for duplicates) make the API easy to consume.
+
+
+================================================================================
+TASK: Reply notes list + add-note form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a reply note and create the component shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* author (text)
+* body (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type ReplyNote = {
+  id: string;
+  author: string;
+  body: string;
+};
+
+export function ReplySection() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename ReplyNote to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Defining the reply shape ensures conversation messages share a consistent data structure.
+
+
+--- STEP 2 ---
+STEP:
+Hold notes in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store reply notes in state and display them, showing a placeholder if no replies exist.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding reply notes.
+* Conditional empty check.
+* Map loop rendering notes.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [replies, setReplies] = useState<ReplyNote[]>([]);
+
+return (
+  <div>
+    {replies.length === 0 ? (
+      <p>No replies yet</p>
+    ) : (
+      replies.map((r) => (
+        <div key={r.id}>
+          <strong>{r.author}:</strong> {r.body}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up state: Use useState<ReplyNote[]>([]).
+2. Check for empty: Use replies.length === 0 to render the empty message.
+3. Render entries: Map through replies, passing key={r.id}.
+
+WHY THIS HELPS YOU
+A clear empty state prevents users from wondering whether comments failed to load.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect reply input fields to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for author and body.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [author, setAuthor] = useState("");
+const [body, setBody] = useState("");
+
+<input value={author} onChange={(e) => setAuthor(e.target.value)} />
+<textarea value={body} onChange={(e) => setBody(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for author and body.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure reply text is tracked cleanly as the user types.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new reply note to state without a page refresh and reset the form.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* New reply object creation.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function submitReply(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), author, body };
+  setReplies((prev) => [...prev, entry]);
+  setAuthor("");
+  setBody("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, author, and body into an object.
+3. Append item: Use setReplies((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+Replies appear instantly in the conversation thread without page reloads.
+
+
+================================================================================
+TASK: Leads API with fresh/stale status
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Set up server storage for leads and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding lead records.
+* An incremental ID generator helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let leadsArchive: StoredLead[] = [];
+let leadCounter = 1;
+
+function makeLeadId(): string {
+  return `lead-${leadCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. In-memory store: Declare an empty array typed with your lead shape.
+2. ID helper: Return an incremental ID string from your helper function.
+
+WHY THIS HELPS YOU
+An in-memory array allows rapid prototyping and testing of API logic.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Reject lead submissions lacking a name or contact details with status 400.
+
+WHAT YOUR LOGIC NEEDS
+* Checks verifying required body properties.
+* 400 status response for incomplete requests.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.name || !req.body.contact) {
+  return res.status(400).json({ error: "Name and contact info are required" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect fields: Evaluate required properties using !req.body.property.
+2. Reject missing: Send status 400 if any required field is falsy.
+
+WHY THIS HELPS YOU
+Validation prevents uncontactable leads from entering the database.
+
+
+--- STEP 3 ---
+STEP:
+Derive a status from stored data instead of trusting the request body.
+
+ASSIST GUIDE:
+YOUR GOAL
+Calculate whether a lead is "fresh" or "stale" based on interaction timestamps on the server.
+
+WHAT YOUR LOGIC NEEDS
+* Timestamp comparison evaluating elapsed time.
+* Assignment of "fresh" or "stale" based on that check.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const sevenDays = 7 * 24 * 60 * 60 * 1000;
+const isStale = Date.now() - new Date(req.body.lastContact).getTime() > sevenDays;
+const status = isStale ? "stale" : "fresh";
+
+HOW TO MAP THE PATTERN
+1. Compare dates: Calculate elapsed time since lastContact.
+2. Set status: Assign "stale" if threshold is exceeded; otherwise, assign "fresh".
+
+WHY THIS HELPS YOU
+Server-calculated statuses guarantee consistency based on verifiable timestamps.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create, attaching the derived status.
+
+ASSIST GUIDE:
+YOUR GOAL
+Build endpoints to fetch leads and create new leads with the calculated status.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning stored leads.
+* POST endpoint validating data, computing status, saving, and returning 201.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getLeads(res: Response) {
+  return res.status(200).json(leadsArchive);
+}
+
+export function createLead(req: Request, res: Response) {
+  // Step 2 validation check
+  // Step 3 derive fresh/stale status
+  const item = { id: makeLeadId(), ...req.body, status };
+  leadsArchive.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Return store: Send status 200 with the leads array in GET.
+2. Protect POST: Run validation and status derivation before pushing the record.
+3. Save record: Assign a unique ID, push the item to storage, and return status 201.
+
+WHY THIS HELPS YOU
+The client receives back the saved lead along with its server-calculated freshness tag.
+
+
+================================================================================
+TASK: Stale board: filter leads that need a nudge
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a lead including its status tag, and build the board component.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* name (text)
+* status (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type FilterableLead = {
+  id: string;
+  name: string;
+  status: string;
+};
+
+export function StaleBoard() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename FilterableLead to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Defining the status field in the blueprint ensures clean filtering in later steps.
+
+
+--- STEP 2 ---
+STEP:
+Hold leads in state and render only the matching rows — filtered, with an empty state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Filter stored leads to show only stale entries, displaying a message if none are stale.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding all leads.
+* .filter() call selecting leads where status === 'stale'.
+* Conditional empty check.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [allLeads, setAllLeads] = useState<FilterableLead[]>([]);
+
+const staleLeads = allLeads.filter((lead) => lead.status === "stale");
+
+return (
+  <div>
+    {staleLeads.length === 0 ? (
+      <p>No stale leads found</p>
+    ) : (
+      staleLeads.map((lead) => (
+        <div key={lead.id}>
+          {lead.name} needs attention
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Master list: Keep all records in allLeads state.
+2. Filter logic: Create staleLeads using .filter(l => l.status === "stale").
+3. Conditional render: Check staleLeads.length === 0 to render the fallback message or the list rows.
+
+WHY THIS HELPS YOU
+Filtering isolates high-priority items without mutating the main list.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect lead capture inputs to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for name and status.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [name, setName] = useState("");
+const [status, setStatus] = useState("stale");
+
+<input value={name} onChange={(e) => setName(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for your form inputs.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when recording new leads.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new lead to state without reloading the page and reset the inputs.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* Object assembly matching blueprint.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function handleAdd(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), name, status };
+  setAllLeads((prev) => [...prev, entry]);
+  setName("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, name, and status into an object.
+3. Append item: Use setAllLeads((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+The new lead is added to the master list, and your filter automatically displays it if it is marked stale.
+
+
+================================================================================
+TASK: Open-shift board: filter unfilled coverage
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a coverage request with its status tag, and build the board shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* role (text)
+* status (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type ShiftItem = {
+  id: string;
+  role: string;
+  status: string;
+};
+
+export function OpenShiftBoard() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename ShiftItem to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Defining the status field in the blueprint ensures clean filtering in later steps.
+
+
+--- STEP 2 ---
+STEP:
+Hold requests in state and render only the matching rows — filtered, with an empty state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Filter shifts to show only unfilled openings, displaying a message if all shifts are covered.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding all shifts.
+* .filter() call selecting shifts where status === 'unfilled'.
+* Conditional empty check.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [allShifts, setAllShifts] = useState<ShiftItem[]>([]);
+
+const openShifts = allShifts.filter((shift) => shift.status === "unfilled");
+
+return (
+  <div>
+    {openShifts.length === 0 ? (
+      <p>All shifts are covered</p>
+    ) : (
+      openShifts.map((shift) => (
+        <div key={shift.id}>
+          {shift.role} - Open
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Master list: Keep all records in allShifts state.
+2. Filter logic: Create openShifts using .filter(s => s.status === "unfilled").
+3. Conditional render: Check openShifts.length === 0 to render the fallback message or the list rows.
+
+WHY THIS HELPS YOU
+Filtering isolates open shifts without mutating the master schedule.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect shift creation input fields to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for role and status inputs.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [role, setRole] = useState("");
+const [status, setStatus] = useState("unfilled");
+
+<input value={role} onChange={(e) => setRole(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for your form inputs.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when recording new shifts.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new shift to state without reloading the page and reset the inputs.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* Object assembly matching blueprint.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function handleAdd(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), role, status };
+  setAllShifts((prev) => [...prev, entry]);
+  setRole("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, role, and status into an object.
+3. Append item: Use setAllShifts((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+The new shift is added to the master list, and your filter automatically displays it if it is marked unfilled.
+
+
+================================================================================
+TASK: Package punch-card list + sell form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a punch card package and create the component shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* client (text)
+* punches (number or text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type PackageCard = {
+  id: string;
+  client: string;
+  punches: number;
+};
+
+export function PackageTracker() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename PackageCard to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Modeling punch card packages upfront ensures consistent balance tracking across the app.
+
+
+--- STEP 2 ---
+STEP:
+Hold packages in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store punch cards in state and display them, showing a placeholder if none exist.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding package cards.
+* Conditional empty check.
+* Map loop rendering packages.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [packages, setPackages] = useState<PackageCard[]>([]);
+
+return (
+  <div>
+    {packages.length === 0 ? (
+      <p>No active packages</p>
+    ) : (
+      packages.map((pkg) => (
+        <div key={pkg.id}>
+          {pkg.client}: {pkg.punches} punches remaining
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up state: Use useState<PackageCard[]>([]).
+2. Check for empty: Use packages.length === 0 to render the empty message.
+3. Render entries: Map through packages, passing key={pkg.id}.
+
+WHY THIS HELPS YOU
+A clear empty state prevents users from wondering whether packages failed to load.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect package creation input fields to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for client and punch count inputs.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [client, setClient] = useState("");
+const [punches, setPunches] = useState("10");
+
+<input value={client} onChange={(e) => setClient(e.target.value)} />
+<input value={punches} onChange={(e) => setPunches(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for client and punches.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when issuing new packages.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new package to state without a page refresh and reset the form.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* Object assembly matching blueprint.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function sellPackage(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), client, punches: Number(punches) };
+  setPackages((prev) => [...prev, entry]);
+  setClient("");
+  setPunches("10");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, client, and punches into an object.
+3. Append item: Use setPackages((prev) => [...prev, entry]).
+4. Clear form: Reset input states to their default values.
+
+WHY THIS HELPS YOU
+The new package appears in the list instantly, keeping customer checkouts smooth.
+
+
+================================================================================
+TASK: Low-balance board: filter packages almost empty
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a package card with remaining punches, and build the board shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* client (text)
+* remaining (number)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type PunchBalance = {
+  id: string;
+  client: string;
+  remaining: number;
+};
+
+export function LowBalanceBoard() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename PunchBalance to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Defining the balance field in the blueprint ensures clean filtering in later steps.
+
+
+--- STEP 2 ---
+STEP:
+Hold packages in state and render only the matching rows — filtered, with an empty state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Filter packages to show only those with low balances (e.g. 2 or fewer punches remaining).
+
+WHAT YOUR LOGIC NEEDS
+* State array holding all packages.
+* .filter() call selecting packages where remaining <= 2.
+* Conditional empty check.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [allPackages, setAllPackages] = useState<PunchBalance[]>([]);
+
+const lowBalances = allPackages.filter((pkg) => pkg.remaining <= 2);
+
+return (
+  <div>
+    {lowBalances.length === 0 ? (
+      <p>All package balances are healthy</p>
+    ) : (
+      lowBalances.map((pkg) => (
+        <div key={pkg.id}>
+          {pkg.client} has only {pkg.remaining} left!
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Master list: Keep all records in allPackages state.
+2. Filter logic: Create lowBalances using .filter(p => p.remaining <= 2).
+3. Conditional render: Check lowBalances.length === 0 to render the fallback message or the list rows.
+
+WHY THIS HELPS YOU
+Filtering highlights accounts nearing expiration without modifying master records.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect package update inputs to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for client and remaining punches.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [client, setClient] = useState("");
+const [remaining, setRemaining] = useState("1");
+
+<input value={client} onChange={(e) => setClient(e.target.value)} />
+<input value={remaining} onChange={(e) => setRemaining(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for your form inputs.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when recording new packages.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new package to state without reloading the page and reset the inputs.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* Object assembly matching blueprint.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function handleAdd(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), client, remaining: Number(remaining) };
+  setAllPackages((prev) => [...prev, entry]);
+  setClient("");
+  setRemaining("1");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, client, and remaining into an object.
+3. Append item: Use setAllPackages((prev) => [...prev, entry]).
+4. Clear form: Reset input states to their default values.
+
+WHY THIS HELPS YOU
+The new package is added to the master list, and your filter automatically displays it if its balance is low.
+
+
+================================================================================
+TASK: Packages API with remaining / empty status
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Set up server storage for package passes and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding package records.
+* An incremental ID generator helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let packageStore: PackageRecord[] = [];
+let pkgIdCounter = 1;
+
+function generatePackageId(): string {
+  return `pkg-${pkgIdCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. In-memory store: Declare an empty array typed with your package shape.
+2. ID helper: Return an incremental ID string from your helper function.
+
+WHY THIS HELPS YOU
+In-memory storage allows quick API testing without database setup.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Reject package requests lacking client name or initial punch count with status 400.
+
+WHAT YOUR LOGIC NEEDS
+* Checks verifying required body properties.
+* 400 status response for incomplete requests.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.client || req.body.initialPunches === undefined) {
+  return res.status(400).json({ error: "Client and punch count are required" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect fields: Evaluate required properties using !req.body.property.
+2. Reject missing: Send status 400 if any required field is falsy or undefined.
+
+WHY THIS HELPS YOU
+Validation prevents packages with missing or undefined balances from being created.
+
+
+--- STEP 3 ---
+STEP:
+Derive a status from stored data instead of trusting the request body.
+
+ASSIST GUIDE:
+YOUR GOAL
+Calculate whether a package is "remaining" or "empty" based on its punch count on the server.
+
+WHAT YOUR LOGIC NEEDS
+* Numeric comparison checking if remaining punches are greater than zero.
+* Assignment of "remaining" or "empty" based on that check.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const status = Number(req.body.remainingPunches) > 0 ? "remaining" : "empty";
+
+HOW TO MAP THE PATTERN
+1. Evaluate punch count: Check if remaining punches exceed 0.
+2. Set status: Assign "remaining" if positive; otherwise, assign "empty".
+
+WHY THIS HELPS YOU
+Server-calculated statuses guarantee consistency based on verifiable balances.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create, attaching the derived status.
+
+ASSIST GUIDE:
+YOUR GOAL
+Build endpoints to fetch packages and create new packages with the calculated status.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning stored packages.
+* POST endpoint validating data, computing status, saving, and returning 201.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getPackages(res: Response) {
+  return res.status(200).json(packageStore);
+}
+
+export function createPackage(req: Request, res: Response) {
+  // Step 2 validation check
+  // Step 3 derive status
+  const item = { id: generatePackageId(), ...req.body, status };
+  packageStore.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Return store: Send status 200 with the packages array in GET.
+2. Protect POST: Run validation and status derivation before pushing the record.
+3. Save record: Assign a unique ID, push the item to storage, and return status 201.
+
+WHY THIS HELPS YOU
+The client receives back the saved package along with its server-calculated status tag.
+
+
+================================================================================
+TASK: Punch log list + redeem form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a punch redemption log and create the component shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* packageId (text)
+* timestamp (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type Redemption = {
+  id: string;
+  packageId: string;
+  timestamp: string;
+};
+
+export function PunchLog() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename Redemption to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Defining the redemption shape ensures all punch logs share a consistent data structure.
+
+
+--- STEP 2 ---
+STEP:
+Hold punches in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store redemptions in state and display them, showing a placeholder if the log is empty.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding redemptions.
+* Conditional empty check.
+* Map loop rendering redemption rows.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [punches, setPunches] = useState<Redemption[]>([]);
+
+return (
+  <div>
+    {punches.length === 0 ? (
+      <p>No punches redeemed</p>
+    ) : (
+      punches.map((p) => (
+        <div key={p.id}>
+          Redeemed for {p.packageId} at {p.timestamp}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up state: Use useState<Redemption[]>([]).
+2. Check for empty: Use punches.length === 0 to render the empty message.
+3. Render entries: Map through punches, passing key={p.id}.
+
+WHY THIS HELPS YOU
+A clear empty state prevents users from wondering whether redemptions failed to load.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect punch redemption input fields to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hook for package ID.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [packageId, setPackageId] = useState("");
+
+<input value={packageId} onChange={(e) => setPackageId(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for packageId.
+2. Wire inputs: Connect value and onChange to the state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when redeeming punches.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new redemption to state without a page refresh and reset the form.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* New redemption object creation.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function handleRedeem(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = {
+    id: String(Date.now()),
+    packageId,
+    timestamp: new Date().toLocaleTimeString(),
+  };
+  setPunches((prev) => [...prev, entry]);
+  setPackageId("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, packageId, and timestamp into an object.
+3. Append item: Use setPunches((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+Redemptions appear instantly in the log without page reloads.
+
+
+================================================================================
+TASK: Punches API — reject redeem when empty
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Set up server storage for punch logs and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding redemption records.
+* An incremental ID generator helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let redemptions: RedemptionRecord[] = [];
+let redIdCounter = 1;
+
+function generateRedemptionId(): string {
+  return `red-${redIdCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. In-memory store: Declare an empty array typed with your redemption interface.
+2. ID helper: Return an incremental ID string from your helper function.
+
+WHY THIS HELPS YOU
+In-memory storage allows quick API testing without database setup.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Reject redemption requests missing packageId with status 400.
+
+WHAT YOUR LOGIC NEEDS
+* Checks verifying required body properties.
+* 400 status response for incomplete requests.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.packageId) {
+  return res.status(400).json({ error: "Package ID is mandatory" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect fields: Evaluate required properties using !req.body.property.
+2. Reject missing: Send status 400 if packageId is missing.
+
+WHY THIS HELPS YOU
+Validation prevents orphaned redemptions from entering the system.
+
+
+--- STEP 3 ---
+STEP:
+Detect overlapping records so two bookings cannot claim the same slot.
+
+ASSIST GUIDE:
+YOUR GOAL
+Check the package balance and reject the redemption with status 409 if no punches remain.
+
+WHAT YOUR LOGIC NEEDS
+* Lookup checking remaining balance for the requested package.
+* 409 conflict response if remaining balance is zero.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const balance = getPackageBalance(req.body.packageId);
+if (balance <= 0) {
+  return res.status(409).json({ error: "Package has zero punches remaining" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect balance: Look up the current balance for packageId.
+2. Block empty redemptions: If balance is <= 0, halt execution with status 409.
+
+WHY THIS HELPS YOU
+Checking balances on the server prevents clients from redeeming punches on expired or empty packages.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create with 400/409 errors.
+
+ASSIST GUIDE:
+YOUR GOAL
+Build endpoints to return redemption logs and redeem punches with validation and balance checks.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning stored redemptions.
+* POST endpoint applying 400 validation and 409 balance checks before saving.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getRedemptions(res: Response) {
+  return res.status(200).json(redemptions);
+}
+
+export function redeemPunch(req: Request, res: Response) {
+  // Step 2 validation check (400)
+  // Step 3 zero-balance check (409)
+  const item = { id: generateRedemptionId(), ...req.body };
+  redemptions.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Return store: Send status 200 with the redemptions array in GET.
+2. Protect POST: Run validation and balance checks before pushing the record.
+3. Save record: Assign a unique ID, push the item to storage, and return status 201.
+
+WHY THIS HELPS YOU
+Consistent error codes (400 for bad data, 409 for depleted balance) make API behavior predictable.
+
+
+================================================================================
+TASK: Accepted board: filter quotes by status
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a quote including its status tag, and build the board shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* client (text)
+* total (text)
+* status (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type Quote = {
+  id: string;
+  client: string;
+  total: string;
+  status: string;
+};
+
+export function AcceptedBoard() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename Quote to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Defining the status field in the blueprint ensures clean filtering in later steps.
+
+
+--- STEP 2 ---
+STEP:
+Hold quotes in state and render only the matching rows — filtered, with an empty state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Filter stored quotes to show only accepted items, displaying a message if none are accepted.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding all quotes.
+* .filter() call selecting quotes where status === 'accepted'.
+* Conditional empty check.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [allQuotes, setAllQuotes] = useState<Quote[]>([]);
+
+const acceptedQuotes = allQuotes.filter((q) => q.status === "accepted");
+
+return (
+  <div>
+    {acceptedQuotes.length === 0 ? (
+      <p>No accepted quotes yet</p>
+    ) : (
+      acceptedQuotes.map((q) => (
+        <div key={q.id}>
+          {q.client} - ${q.total} (Accepted)
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Master list: Keep all records in allQuotes state.
+2. Filter logic: Create acceptedQuotes using .filter(q => q.status === "accepted").
+3. Conditional render: Check acceptedQuotes.length === 0 to render the fallback message or the list rows.
+
+WHY THIS HELPS YOU
+Filtering isolates approved deals without modifying the master quote list.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect quote creation input fields to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for client, total, and status.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [client, setClient] = useState("");
+const [total, setTotal] = useState("");
+const [status, setStatus] = useState("accepted");
+
+<input value={client} onChange={(e) => setClient(e.target.value)} />
+<input value={total} onChange={(e) => setTotal(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for your form inputs.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when recording new quotes.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new quote to state without reloading the page and reset the inputs.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* Object assembly matching blueprint.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function handleAdd(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), client, total, status };
+  setAllQuotes((prev) => [...prev, entry]);
+  setClient("");
+  setTotal("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, client, total, and status into an object.
+3. Append item: Use setAllQuotes((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+The new quote is added to the master list, and your filter automatically displays it if it is marked accepted.
+
+
+================================================================================
+TASK: Quotes API with open/expired/accepted status
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Set up server storage for estimates and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding quote records.
+* An incremental ID generator helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let quoteStore: QuoteRecord[] = [];
+let quoteIdCounter = 1;
+
+function makeQuoteId(): string {
+  return `q-${quoteIdCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. In-memory store: Declare an empty array typed with your quote shape.
+2. ID helper: Return an incremental ID string from your helper function.
+
+WHY THIS HELPS YOU
+In-memory storage allows quick API testing without database setup.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Reject quote requests lacking client name, total, or expiration date with status 400.
+
+WHAT YOUR LOGIC NEEDS
+* Checks verifying required body properties.
+* 400 status response for incomplete requests.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.client || !req.body.total || !req.body.expiresAt) {
+  return res.status(400).json({ error: "Missing required quote information" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect fields: Evaluate required properties using !req.body.property.
+2. Reject missing: Send status 400 if any required field is falsy.
+
+WHY THIS HELPS YOU
+Validation prevents unpriced or incomplete estimates from being recorded.
+
+
+--- STEP 3 ---
+STEP:
+Derive a status from stored data instead of trusting the request body.
+
+ASSIST GUIDE:
+YOUR GOAL
+Calculate quote status ("accepted", "expired", or "open") on the server.
+
+WHAT YOUR LOGIC NEEDS
+* Evaluation checking acceptance flags and expiration dates.
+* Assignment of "accepted", "expired", or "open" based on those checks.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let status = "open";
+if (req.body.isAccepted) {
+  status = "accepted";
+} else if (new Date(req.body.expiresAt).getTime() < Date.now()) {
+  status = "expired";
+}
+
+HOW TO MAP THE PATTERN
+1. Check acceptance: If user confirmed approval, assign "accepted".
+2. Check date: If expiration date is in the past, assign "expired".
+3. Default: Otherwise, assign "open".
+
+WHY THIS HELPS YOU
+Server-calculated statuses guarantee consistency based on verifiable business rules.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create, attaching the derived status.
+
+ASSIST GUIDE:
+YOUR GOAL
+Build endpoints to fetch quotes and create new quotes with the calculated status.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning stored quotes.
+* POST endpoint validating data, computing status, saving, and returning 201.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getQuotes(res: Response) {
+  return res.status(200).json(quoteStore);
+}
+
+export function createQuote(req: Request, res: Response) {
+  // Step 2 validation check
+  // Step 3 derive status
+  const item = { id: makeQuoteId(), ...req.body, status };
+  quoteStore.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Return store: Send status 200 with the quotes array in GET.
+2. Protect POST: Run validation and status derivation before pushing the record.
+3. Save record: Assign a unique ID, push the item to storage, and return status 201.
+
+WHY THIS HELPS YOU
+The client receives back the saved quote along with its server-calculated status tag.
+
+
+================================================================================
+TASK: Quote line-items list + add-line form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a quote line item and create the component shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* label (text)
+* price (number or text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type LineItem = {
+  id: string;
+  label: string;
+  price: string;
+};
+
+export function LineItemsTable() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename LineItem to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Defining the line item shape ensures that itemized rows share consistent property names.
+
+
+--- STEP 2 ---
+STEP:
+Hold lines in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store line items in state and display them, showing a placeholder if no items exist.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding line items.
+* Conditional empty check.
+* Map loop rendering line items.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [lines, setLines] = useState<LineItem[]>([]);
+
+return (
+  <div>
+    {lines.length === 0 ? (
+      <p>No line items added</p>
+    ) : (
+      lines.map((item) => (
+        <div key={item.id}>
+          {item.label}: ${item.price}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up state: Use useState<LineItem[]>([]).
+2. Check for empty: Use lines.length === 0 to render the empty message.
+3. Render entries: Map through lines, passing key={item.id}.
+
+WHY THIS HELPS YOU
+A clear empty state prevents users from wondering whether line items failed to load.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect line item input fields to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for label and price inputs.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [label, setLabel] = useState("");
+const [price, setPrice] = useState("");
+
+<input value={label} onChange={(e) => setLabel(e.target.value)} />
+<input value={price} onChange={(e) => setPrice(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for label and price.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when adding new line items.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new line item to state without a page refresh and reset the form.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* Object assembly matching blueprint.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function addLine(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), label, price };
+  setLines((prev) => [...prev, entry]);
+  setLabel("");
+  setPrice("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, label, and price into an object.
+3. Append item: Use setLines((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+The new line item appears in the list instantly, keeping estimate creation responsive.
+
+
+================================================================================
+TASK: Quote lines API — no duplicate label on a quote
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Set up server storage for quote line items and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding line records.
+* An incremental ID generator helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let quoteLines: QuoteLineRecord[] = [];
+let lineIdCounter = 1;
+
+function generateLineId(): string {
+  return `line-${lineIdCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. In-memory store: Declare an empty array typed with your line item interface.
+2. ID helper: Return an incremental ID string from your helper function.
+
+WHY THIS HELPS YOU
+In-memory storage allows quick API testing without database setup.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Reject line item requests missing quoteId, label, or price with status 400.
+
+WHAT YOUR LOGIC NEEDS
+* Checks verifying required body properties.
+* 400 status response for incomplete requests.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.quoteId || !req.body.label || !req.body.price) {
+  return res.status(400).json({ error: "Quote ID, label, and price are required" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect fields: Evaluate required properties using !req.body.property.
+2. Reject missing: Send status 400 if any required field is falsy.
+
+WHY THIS HELPS YOU
+Validation prevents incomplete or unlinked line items from entering storage.
+
+
+--- STEP 3 ---
+STEP:
+Detect overlapping records so two bookings cannot claim the same slot.
+
+ASSIST GUIDE:
+YOUR GOAL
+Scan existing quote lines and reject with status 409 if a line with the same label already exists on this quote.
+
+WHAT YOUR LOGIC NEEDS
+* An array search checking for matching quoteId and label.
+* 409 conflict response if a duplicate is found.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const exists = quoteLines.some(
+  (l) => l.quoteId === req.body.quoteId && l.label.toLowerCase() === req.body.label.toLowerCase()
+);
+if (exists) {
+  return res.status(409).json({ error: "A line with this label already exists on this quote" });
+}
+
+HOW TO MAP THE PATTERN
+1. Scan store: Use .some() on your quoteLines array.
+2. Match criteria: Compare quoteId and normalized label values.
+3. Reject duplicates: If found, halt execution with status 409.
+
+WHY THIS HELPS YOU
+Preventing duplicate line items avoids billing confusion on customer estimates.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create with 400/409 errors.
+
+ASSIST GUIDE:
+YOUR GOAL
+Build endpoints to return line items and add new lines with validation and duplicate checks.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning stored line items.
+* POST endpoint applying 400 validation and 409 duplicate checks before saving.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getLines(res: Response) {
+  return res.status(200).json(quoteLines);
+}
+
+export function createLine(req: Request, res: Response) {
+  // Step 2 validation check (400)
+  // Step 3 duplicate label check (409)
+  const item = { id: generateLineId(), ...req.body };
+  quoteLines.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Return store: Send status 200 with the quoteLines array in GET.
+2. Protect POST: Run validation and duplicate checks before pushing the record.
+3. Save record: Assign a unique ID, push the item to storage, and return status 201.
+
+WHY THIS HELPS YOU
+Consistent error codes (400 for bad data, 409 for duplicates) make API behavior predictable.
+
+
+================================================================================
+TASK: Quote list + create-estimate form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of an estimate and create the component shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* client (text)
+* estimate (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type Estimate = {
+  id: string;
+  client: string;
+  estimate: string;
+};
+
+export function EstimateList() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename Estimate to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Modeling estimate records ensures consistent summary fields across the app.
+
+
+--- STEP 2 ---
+STEP:
+Hold quotes in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store estimates in state and display them, showing a placeholder if none exist.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding estimates.
+* Conditional empty check.
+* Map loop rendering estimate rows.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [estimates, setEstimates] = useState<Estimate[]>([]);
+
+return (
+  <div>
+    {estimates.length === 0 ? (
+      <p>No estimates recorded</p>
+    ) : (
+      estimates.map((est) => (
+        <div key={est.id}>
+          {est.client}: ${est.estimate}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up state: Use useState<Estimate[]>([]).
+2. Check for empty: Use estimates.length === 0 to render the empty message.
+3. Render entries: Map through estimates, passing key={est.id}.
+
+WHY THIS HELPS YOU
+A clear empty state prevents users from wondering whether estimates failed to load.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect estimate input fields to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for client and estimate inputs.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [client, setClient] = useState("");
+const [estimate, setEstimate] = useState("");
+
+<input value={client} onChange={(e) => setClient(e.target.value)} />
+<input value={estimate} onChange={(e) => setEstimate(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for client and estimate.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when creating new estimates.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new estimate to state without a page refresh and reset the form.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* New estimate object creation.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function handleCreate(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), client, estimate };
+  setEstimates((prev) => [...prev, entry]);
+  setClient("");
+  setEstimate("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, client, and estimate into an object.
+3. Append item: Use setEstimates((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+Estimates appear instantly in the list without page reloads.
+
+
+================================================================================
+TASK: Reminders API with due/sent status
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Set up server storage for reminders and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding reminder records.
+* An incremental ID generator helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let scheduleStore: ScheduledReminder[] = [];
+let scheduleIdCounter = 1;
+
+function makeScheduleId(): string {
+  return `sched-${scheduleIdCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. In-memory store: Declare an empty array typed with your scheduled reminder shape.
+2. ID helper: Return an incremental ID string from your helper function.
+
+WHY THIS HELPS YOU
+In-memory storage allows quick API testing without database setup.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Reject reminder requests lacking target recipient or send time with status 400.
+
+WHAT YOUR LOGIC NEEDS
+* Checks verifying required body properties.
+* 400 status response for incomplete requests.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.recipient || !req.body.sendTime) {
+  return res.status(400).json({ error: "Recipient and send time are required" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect fields: Evaluate required properties using !req.body.property.
+2. Reject missing: Send status 400 if any required field is falsy.
+
+WHY THIS HELPS YOU
+Validation prevents reminders with missing delivery details from entering storage.
+
+
+--- STEP 3 ---
+STEP:
+Derive a status from stored data instead of trusting the request body.
+
+ASSIST GUIDE:
+YOUR GOAL
+Calculate whether a reminder is "due" or "sent" based on scheduled timestamps on the server.
+
+WHAT YOUR LOGIC NEEDS
+* Timestamp comparison evaluating whether sendTime is past.
+* Assignment of "due" or "sent" based on that check.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const hasPassed = new Date(req.body.sendTime).getTime() <= Date.now();
+const status = hasPassed ? "due" : "sent";
+
+HOW TO MAP THE PATTERN
+1. Compare timestamps: Check if sendTime is before or equal to Date.now().
+2. Set status: Assign "due" if past/ready; otherwise, assign "sent" (or pending).
+
+WHY THIS HELPS YOU
+Server-calculated statuses guarantee consistency based on verifiable timestamps.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create, attaching the derived status.
+
+ASSIST GUIDE:
+YOUR GOAL
+Build endpoints to fetch reminders and schedule new reminders with the calculated status.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning stored reminders.
+* POST endpoint validating data, computing status, saving, and returning 201.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getSchedule(res: Response) {
+  return res.status(200).json(scheduleStore);
+}
+
+export function createScheduleItem(req: Request, res: Response) {
+  // Step 2 validation check
+  // Step 3 derive status
+  const item = { id: makeScheduleId(), ...req.body, status };
+  scheduleStore.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Return store: Send status 200 with the scheduleStore array in GET.
+2. Protect POST: Run validation and status derivation before pushing the record.
+3. Save record: Assign a unique ID, push the item to storage, and return status 201.
+
+WHY THIS HELPS YOU
+The client receives back the scheduled reminder along with its server-calculated status tag.
+
+
+================================================================================
+TASK: Due board: filter reminders that should send now
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a reminder with its status tag, and build the board shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* recipient (text)
+* status (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type FilterableReminder = {
+  id: string;
+  recipient: string;
+  status: string;
+};
+
+export function DueBoard() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename FilterableReminder to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Defining the status field in the blueprint ensures clean filtering in later steps.
+
+
+--- STEP 2 ---
+STEP:
+Hold reminders in state and render only the matching rows — filtered, with an empty state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Filter reminders to show only those marked "due", displaying a message if all are sent.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding all reminders.
+* .filter() call selecting reminders where status === 'due'.
+* Conditional empty check.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [allReminders, setAllReminders] = useState<FilterableReminder[]>([]);
+
+const dueReminders = allReminders.filter((r) => r.status === "due");
+
+return (
+  <div>
+    {dueReminders.length === 0 ? (
+      <p>All reminders are sent</p>
+    ) : (
+      dueReminders.map((r) => (
+        <div key={r.id}>
+          Send reminder to: {r.recipient}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Master list: Keep all records in allReminders state.
+2. Filter logic: Create dueReminders using .filter(r => r.status === "due").
+3. Conditional render: Check dueReminders.length === 0 to render the fallback message or the list rows.
+
+WHY THIS HELPS YOU
+Filtering isolates urgent tasks without modifying the master schedule.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect reminder input fields to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for recipient and status inputs.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [recipient, setRecipient] = useState("");
+const [status, setStatus] = useState("due");
+
+<input value={recipient} onChange={(e) => setRecipient(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for your form inputs.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when scheduling reminders.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new reminder to state without reloading the page and reset the inputs.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* Object assembly matching blueprint.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function handleAdd(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), recipient, status };
+  setAllReminders((prev) => [...prev, entry]);
+  setRecipient("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, recipient, and status into an object.
+3. Append item: Use setAllReminders((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+The new reminder is added to the master list, and your filter automatically displays it if it is marked due.
+
+
+================================================================================
+TASK: Reminder schedule list + create form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a scheduled reminder and create the component shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* title (text)
+* scheduledFor (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type ScheduledItem = {
+  id: string;
+  title: string;
+  scheduledFor: string;
+};
+
+export function ScheduleManager() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename ScheduledItem to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Defining the scheduled item shape ensures consistent timing fields across the app.
+
+
+--- STEP 2 ---
+STEP:
+Hold reminders in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store scheduled reminders in state and display them, showing a placeholder if none exist.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding scheduled reminders.
+* Conditional empty check.
+* Map loop rendering reminder rows.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [items, setItems] = useState<ScheduledItem[]>([]);
+
+return (
+  <div>
+    {items.length === 0 ? (
+      <p>No reminders scheduled</p>
+    ) : (
+      items.map((item) => (
+        <div key={item.id}>
+          {item.title} on {item.scheduledFor}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up state: Use useState<ScheduledItem[]>([]).
+2. Check for empty: Use items.length === 0 to render the empty message.
+3. Render entries: Map through items, passing key={item.id}.
+
+WHY THIS HELPS YOU
+A clear empty state prevents users from wondering whether scheduled items failed to load.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect reminder schedule inputs to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for title and scheduledFor inputs.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [title, setTitle] = useState("");
+const [scheduledFor, setScheduledFor] = useState("");
+
+<input value={title} onChange={(e) => setTitle(e.target.value)} />
+<input value={scheduledFor} onChange={(e) => setScheduledFor(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for title and scheduledFor.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when scheduling new reminders.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new scheduled reminder to state without a page refresh and reset the form.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* New scheduled item object creation.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function createSchedule(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), title, scheduledFor };
+  setItems((prev) => [...prev, entry]);
+  setTitle("");
+  setScheduledFor("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, title, and scheduledFor into an object.
+3. Append item: Use setItems((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+The new reminder appears in the schedule instantly without page reloads.
+
+
+================================================================================
+TASK: Reminder templates list + save-template form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a reminder template and create the component shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* name (text)
+* template (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type ReminderTemplate = {
+  id: string;
+  name: string;
+  template: string;
+};
+
+export function TemplateManager() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename ReminderTemplate to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Defining the template shape ensures reusable message formats share consistent properties.
+
+
+--- STEP 2 ---
+STEP:
+Hold templates in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store templates in state and display them, showing a placeholder if none exist.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding template items.
+* Conditional empty check.
+* Map loop rendering template cards.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [templates, setTemplates] = useState<ReminderTemplate[]>([]);
+
+return (
+  <div>
+    {templates.length === 0 ? (
+      <p>No templates saved</p>
+    ) : (
+      templates.map((t) => (
+        <div key={t.id}>
+          <strong>{t.name}:</strong> {t.template}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up state: Use useState<ReminderTemplate[]>([]).
+2. Check for empty: Use templates.length === 0 to render the empty message.
+3. Render entries: Map through templates, passing key={t.id}.
+
+WHY THIS HELPS YOU
+A clear empty state prevents users from wondering whether saved templates failed to load.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect template creation inputs to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for name and template text inputs.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [name, setName] = useState("");
+const [template, setTemplate] = useState("");
+
+<input value={name} onChange={(e) => setName(e.target.value)} />
+<textarea value={template} onChange={(e) => setTemplate(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for name and template.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when writing new templates.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new template to state without a page refresh and reset the form.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* New template object creation.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function saveTemplate(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), name, template };
+  setTemplates((prev) => [...prev, entry]);
+  setName("");
+  setTemplate("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, name, and template into an object.
+3. Append item: Use setTemplates((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+Templates appear instantly in the gallery without page reloads.
+
+
+================================================================================
+TASK: Templates API — unique name per channel
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Set up server storage for message templates and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding template records.
+* An incremental ID generator helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let templateStore: TemplateRecord[] = [];
+let tplIdCounter = 1;
+
+function generateTemplateId(): string {
+  return `tpl-${tplIdCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. In-memory store: Declare an empty array typed with your template interface.
+2. ID helper: Return an incremental ID string from your helper function.
+
+WHY THIS HELPS YOU
+In-memory storage allows quick API testing without database setup.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Reject template requests missing name, channel, or body with status 400.
+
+WHAT YOUR LOGIC NEEDS
+* Checks verifying required body properties.
+* 400 status response for incomplete requests.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.name || !req.body.channel || !req.body.body) {
+  return res.status(400).json({ error: "Name, channel, and body are required" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect fields: Evaluate required properties using !req.body.property.
+2. Reject missing: Send status 400 if any required field is falsy.
+
+WHY THIS HELPS YOU
+Validation prevents blank or malformed templates from entering storage.
+
+
+--- STEP 3 ---
+STEP:
+Detect overlapping records so two bookings cannot claim the same slot.
+
+ASSIST GUIDE:
+YOUR GOAL
+Scan existing templates and reject with status 409 if a template with the same name already exists on this channel.
+
+WHAT YOUR LOGIC NEEDS
+* An array search checking for matching channel and name.
+* 409 conflict response if a duplicate is found.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const exists = templateStore.some(
+  (t) =>
+    t.channel === req.body.channel &&
+    t.name.toLowerCase() === req.body.name.toLowerCase()
+);
+if (exists) {
+  return res.status(409).json({ error: "A template with this name already exists on this channel" });
+}
+
+HOW TO MAP THE PATTERN
+1. Scan store: Use .some() on your templateStore array.
+2. Match criteria: Compare channel and normalized name values.
+3. Reject duplicates: If found, halt execution with status 409.
+
+WHY THIS HELPS YOU
+Preventing duplicate template names avoids ambiguity when selecting templates.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create with 400/409 errors.
+
+ASSIST GUIDE:
+YOUR GOAL
+Build endpoints to return templates and create new ones with validation and duplicate checks.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning stored templates.
+* POST endpoint applying 400 validation and 409 duplicate checks before saving.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getTemplates(res: Response) {
+  return res.status(200).json(templateStore);
+}
+
+export function createTemplate(req: Request, res: Response) {
+  // Step 2 validation check (400)
+  // Step 3 duplicate name check (409)
+  const item = { id: generateTemplateId(), ...req.body };
+  templateStore.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Return store: Send status 200 with the templateStore array in GET.
+2. Protect POST: Run validation and duplicate checks before pushing the record.
+3. Save record: Assign a unique ID, push the item to storage, and return status 201.
+
+WHY THIS HELPS YOU
+Consistent error codes (400 for bad data, 409 for duplicates) make API behavior predictable.
+
+
+================================================================================
+TASK: Review inbox list + log-review form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a review and create the component shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* reviewer (text)
+* comment (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type Review = {
+  id: string;
+  reviewer: string;
+  comment: string;
+};
+
+export function ReviewInbox() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename Review to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Modeling review records ensures consistent feedback fields across the app.
+
+
+--- STEP 2 ---
+STEP:
+Hold reviews in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store reviews in state and display them, showing a placeholder if the inbox is empty.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding reviews.
+* Conditional empty check.
+* Map loop rendering review entries.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [reviews, setReviews] = useState<Review[]>([]);
+
+return (
+  <div>
+    {reviews.length === 0 ? (
+      <p>No customer reviews logged</p>
+    ) : (
+      reviews.map((rev) => (
+        <div key={rev.id}>
+          <strong>{rev.reviewer}:</strong> {rev.comment}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up state: Use useState<Review[]>([]).
+2. Check for empty: Use reviews.length === 0 to render the empty message.
+3. Render entries: Map through reviews, passing key={rev.id}.
+
+WHY THIS HELPS YOU
+A clear empty state prevents users from wondering whether reviews failed to load.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect review logging inputs to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for reviewer and comment inputs.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [reviewer, setReviewer] = useState("");
+const [comment, setComment] = useState("");
+
+<input value={reviewer} onChange={(e) => setReviewer(e.target.value)} />
+<textarea value={comment} onChange={(e) => setComment(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for reviewer and comment.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when recording new reviews.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new review to state without a page refresh and reset the form.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* New review object creation.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function logReview(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), reviewer, comment };
+  setReviews((prev) => [...prev, entry]);
+  setReviewer("");
+  setComment("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, reviewer, and comment into an object.
+3. Append item: Use setReviews((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+Reviews appear instantly in the inbox without page reloads.
+
+
+================================================================================
+TASK: Reviews API with needs-reply status
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Set up server storage for customer reviews and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding review records.
+* An incremental ID generator helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let feedbackStore: FeedbackRecord[] = [];
+let fbIdCounter = 1;
+
+function generateFeedbackId(): string {
+  return `fb-${fbIdCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. In-memory store: Declare an empty array typed with your feedback shape.
+2. ID helper: Return an incremental ID string from your helper function.
+
+WHY THIS HELPS YOU
+In-memory storage allows quick API testing without database setup.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Reject reviews lacking customer name or rating with status 400.
+
+WHAT YOUR LOGIC NEEDS
+* Checks verifying required body properties.
+* 400 status response for incomplete requests.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.reviewer || !req.body.rating) {
+  return res.status(400).json({ error: "Reviewer and rating are required" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect fields: Evaluate required properties using !req.body.property.
+2. Reject missing: Send status 400 if any required field is falsy.
+
+WHY THIS HELPS YOU
+Validation prevents empty or unrated reviews from entering storage.
+
+
+--- STEP 3 ---
+STEP:
+Derive a status from stored data instead of trusting the request body.
+
+ASSIST GUIDE:
+YOUR GOAL
+Determine whether a review is "replied" or "needs-reply" based on attached response data on the server.
+
+WHAT YOUR LOGIC NEEDS
+* Check verifying if a reply text or flag exists.
+* Assignment of "replied" or "needs-reply" based on that check.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const status = req.body.replyText ? "replied" : "needs-reply";
+
+HOW TO MAP THE PATTERN
+1. Inspect replies: Check if reply text or an answer is provided.
+2. Set status: Assign "replied" if present; otherwise, assign "needs-reply".
+
+WHY THIS HELPS YOU
+Server-calculated statuses guarantee consistency based on verifiable reply data.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create, attaching the derived status.
+
+ASSIST GUIDE:
+YOUR GOAL
+Build endpoints to fetch reviews and log new reviews with the calculated status.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning stored reviews.
+* POST endpoint validating data, computing status, saving, and returning 201.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getFeedback(res: Response) {
+  return res.status(200).json(feedbackStore);
+}
+
+export function logFeedback(req: Request, res: Response) {
+  // Step 2 validation check
+  // Step 3 derive status
+  const item = { id: generateFeedbackId(), ...req.body, status };
+  feedbackStore.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Return store: Send status 200 with the feedbackStore array in GET.
+2. Protect POST: Run validation and status derivation before pushing the record.
+3. Save record: Assign a unique ID, push the item to storage, and return status 201.
+
+WHY THIS HELPS YOU
+The client receives back the logged review along with its server-calculated status tag.
+
+
+================================================================================
+TASK: Replies API — one reply per review channel
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Set up server storage for review replies and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding reply records.
+* An incremental ID generator helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let replyStore: ReplyRecord[] = [];
+let repIdCounter = 1;
+
+function generateReplyId(): string {
+  return `rep-${repIdCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. In-memory store: Declare an empty array typed with your reply interface.
+2. ID helper: Return an incremental ID string from your helper function.
+
+WHY THIS HELPS YOU
+In-memory storage allows quick API testing without database setup.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Reject reply submissions missing reviewId, channel, or message with status 400.
+
+WHAT YOUR LOGIC NEEDS
+* Checks verifying required body properties.
+* 400 status response for incomplete requests.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.reviewId || !req.body.channel || !req.body.message) {
+  return res.status(400).json({ error: "Review ID, channel, and message are required" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect fields: Evaluate required properties using !req.body.property.
+2. Reject missing: Send status 400 if any required field is falsy.
+
+WHY THIS HELPS YOU
+Validation prevents incomplete or unlinked replies from entering storage.
+
+
+--- STEP 3 ---
+STEP:
+Detect overlapping records so two bookings cannot claim the same slot.
+
+ASSIST GUIDE:
+YOUR GOAL
+Scan existing replies and reject with status 409 if this review already has a reply on this channel.
+
+WHAT YOUR LOGIC NEEDS
+* An array search checking for matching reviewId and channel.
+* 409 conflict response if a duplicate is found.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const exists = replyStore.some(
+  (r) => r.reviewId === req.body.reviewId && r.channel === req.body.channel
+);
+if (exists) {
+  return res.status(409).json({ error: "A reply has already been posted to this review on this channel" });
+}
+
+HOW TO MAP THE PATTERN
+1. Scan store: Use .some() on your replyStore array.
+2. Match criteria: Compare reviewId and channel properties.
+3. Reject duplicates: If found, halt execution with status 409.
+
+WHY THIS HELPS YOU
+Preventing duplicate replies avoids confusing customers with multiple conflicting responses.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create with 400/409 errors.
+
+ASSIST GUIDE:
+YOUR GOAL
+Build endpoints to return replies and post new replies with validation and duplicate checks.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning stored replies.
+* POST endpoint applying 400 validation and 409 duplicate checks before saving.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getReplies(res: Response) {
+  return res.status(200).json(replyStore);
+}
+
+export function postReply(req: Request, res: Response) {
+  // Step 2 validation check (400)
+  // Step 3 duplicate check (409)
+  const item = { id: generateReplyId(), ...req.body };
+  replyStore.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Return store: Send status 200 with the replyStore array in GET.
+2. Protect POST: Run validation and duplicate checks before pushing the record.
+3. Save record: Assign a unique ID, push the item to storage, and return status 201.
+
+WHY THIS HELPS YOU
+Consistent error codes (400 for bad data, 409 for duplicates) make API behavior predictable.
+
+
+================================================================================
+TASK: Review replies list + write-reply form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a review reply and create the component shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* reviewId (text)
+* response (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type ReplyItem = {
+  id: string;
+  reviewId: string;
+  response: string;
+};
+
+export function RepliesManager() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename ReplyItem to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Defining the reply shape ensures all published responses share consistent properties.
+
+
+--- STEP 2 ---
+STEP:
+Hold replies in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store replies in state and display them, showing a placeholder if no replies exist.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding reply items.
+* Conditional empty check.
+* Map loop rendering reply entries.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [replies, setReplies] = useState<ReplyItem[]>([]);
+
+return (
+  <div>
+    {replies.length === 0 ? (
+      <p>No replies sent</p>
+    ) : (
+      replies.map((rep) => (
+        <div key={rep.id}>
+          Reply to #{rep.reviewId}: {rep.response}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up state: Use useState<ReplyItem[]>([]).
+2. Check for empty: Use replies.length === 0 to render the empty message.
+3. Render entries: Map through replies, passing key={rep.id}.
+
+WHY THIS HELPS YOU
+A clear empty state prevents users from wondering whether sent replies failed to load.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect reply authoring inputs to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for reviewId and response inputs.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [reviewId, setReviewId] = useState("");
+const [response, setResponse] = useState("");
+
+<input value={reviewId} onChange={(e) => setReviewId(e.target.value)} />
+<textarea value={response} onChange={(e) => setResponse(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for reviewId and response.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when composing replies.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new reply to state without a page refresh and reset the form.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* New reply object creation.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function sendReply(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), reviewId, response };
+  setReplies((prev) => [...prev, entry]);
+  setReviewId("");
+  setResponse("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, reviewId, and response into an object.
+3. Append item: Use setReplies((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+Replies appear instantly in the sent list without page reloads.
+
+
+================================================================================
+TASK: Unanswered board: filter reviews needing a reply
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a review with its status tag, and build the board shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* reviewer (text)
+* status (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type FilterableFeedback = {
+  id: string;
+  reviewer: string;
+  status: string;
+};
+
+export function UnansweredBoard() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename FilterableFeedback to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Defining the status field in the blueprint ensures clean filtering in later steps.
+
+
+--- STEP 2 ---
+STEP:
+Hold reviews in state and render only the matching rows — filtered, with an empty state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Filter reviews to show only those needing a reply, displaying a message if all are answered.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding all reviews.
+* .filter() call selecting reviews where status === 'needs-reply'.
+* Conditional empty check.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [allReviews, setAllReviews] = useState<FilterableFeedback[]>([]);
+
+const pendingReviews = allReviews.filter((r) => r.status === "needs-reply");
+
+return (
+  <div>
+    {pendingReviews.length === 0 ? (
+      <p>All reviews answered!</p>
+    ) : (
+      pendingReviews.map((r) => (
+        <div key={r.id}>
+          Review from {r.reviewer} needs a reply
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Master list: Keep all records in allReviews state.
+2. Filter logic: Create pendingReviews using .filter(r => r.status === "needs-reply").
+3. Conditional render: Check pendingReviews.length === 0 to render the fallback message or the list rows.
+
+WHY THIS HELPS YOU
+Filtering isolates unanswered reviews without modifying the master feedback list.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect review logging inputs to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for reviewer and status inputs.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [reviewer, setReviewer] = useState("");
+const [status, setStatus] = useState("needs-reply");
+
+<input value={reviewer} onChange={(e) => setReviewer(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for your form inputs.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when recording new reviews.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new review to state without reloading the page and reset the inputs.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* Object assembly matching blueprint.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function handleAdd(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), reviewer, status };
+  setAllReviews((prev) => [...prev, entry]);
+  setReviewer("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, reviewer, and status into an object.
+3. Append item: Use setAllReviews((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+The new review is added to the master list, and your filter automatically displays it if it is marked needs-reply.
+
+
+================================================================================
+TASK: Shift board list + publish form
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Model one list item as a type, then set up the component around it.
+
+ASSIST GUIDE:
+YOUR GOAL
+Define the shape of a scheduled shift and create the component shell.
+
+WHAT YOUR BLUEPRINT NEEDS
+* id (text)
+* worker (text)
+* shiftTime (text)
+
+LOOK AT THIS PATTERN (ANALOGY)
+export type WorkShift = {
+  id: string;
+  worker: string;
+  shiftTime: string;
+};
+
+export function ShiftPlanner() {
+  return <div />;
+}
+
+HOW TO MAP THE PATTERN
+1. Blueprint declaration: Rename WorkShift to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.
+
+WHY THIS HELPS YOU
+Modeling shift records ensures consistent schedule fields across the app.
+
+
+--- STEP 2 ---
+STEP:
+Hold shifts in state and render it — rows when present, a message when empty.
+
+ASSIST GUIDE:
+YOUR GOAL
+Store shifts in state and display them, showing a placeholder if the schedule is empty.
+
+WHAT YOUR LOGIC NEEDS
+* State array holding shifts.
+* Conditional empty check.
+* Map loop rendering shift entries.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [shifts, setShifts] = useState<WorkShift[]>([]);
+
+return (
+  <div>
+    {shifts.length === 0 ? (
+      <p>No shifts scheduled</p>
+    ) : (
+      shifts.map((s) => (
+        <div key={s.id}>
+          {s.worker} working {s.shiftTime}
+        </div>
+      ))
+    )}
+  </div>
+);
+
+HOW TO MAP THE PATTERN
+1. Set up state: Use useState<WorkShift[]>([]).
+2. Check for empty: Use shifts.length === 0 to render the empty message.
+3. Render entries: Map through shifts, passing key={s.id}.
+
+WHY THIS HELPS YOU
+A clear empty state prevents users from wondering whether shifts failed to load.
+
+
+--- STEP 3 ---
+STEP:
+Wire controlled inputs so form fields live in React state.
+
+ASSIST GUIDE:
+YOUR GOAL
+Connect shift publishing inputs to React state.
+
+WHAT YOUR LOGIC NEEDS
+* State hooks for worker and shiftTime inputs.
+* Value and onChange props wired on inputs.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const [worker, setWorker] = useState("");
+const [shiftTime, setShiftTime] = useState("");
+
+<input value={worker} onChange={(e) => setWorker(e.target.value)} />
+<input value={shiftTime} onChange={(e) => setShiftTime(e.target.value)} />
+
+HOW TO MAP THE PATTERN
+1. Initialize states: Call useState("") for worker and shiftTime.
+2. Wire inputs: Connect value and onChange to each state variable.
+
+WHY THIS HELPS YOU
+Controlled inputs ensure clean data capture when scheduling new shifts.
+
+
+--- STEP 4 ---
+STEP:
+On submit, preventDefault, append one item to the list, and clear the form.
+
+ASSIST GUIDE:
+YOUR GOAL
+Append the new shift to state without a page refresh and reset the form.
+
+WHAT YOUR LOGIC NEEDS
+* Form interceptor using e.preventDefault().
+* New shift object creation.
+* Spread update to state.
+* Form reset calls.
+
+LOOK AT THIS PATTERN (ANALOGY)
+function publishShift(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), worker, shiftTime };
+  setShifts((prev) => [...prev, entry]);
+  setWorker("");
+  setShiftTime("");
+}
+
+HOW TO MAP THE PATTERN
+1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, worker, and shiftTime into an object.
+3. Append item: Use setShifts((prev) => [...prev, entry]).
+4. Clear form: Reset input states to "".
+
+WHY THIS HELPS YOU
+Published shifts appear on the board instantly without page reloads.
+
+
+================================================================================
+TASK: Shifts API with worker overlap conflicts
+================================================================================
+
+--- STEP 1 ---
+STEP:
+Keep an in-memory store and a helper that creates unique ids.
+
+ASSIST GUIDE:
+YOUR GOAL
+Set up server storage for worker shifts and an ID generator.
+
+WHAT YOUR LOGIC NEEDS
+* An array holding shift records.
+* An incremental ID generator helper.
+
+LOOK AT THIS PATTERN (ANALOGY)
+let roster: ShiftRecord[] = [];
+let shiftIdCounter = 1;
+
+function generateShiftId(): string {
+  return `shift-${shiftIdCounter++}`;
+}
+
+HOW TO MAP THE PATTERN
+1. In-memory store: Declare an empty array typed with your shift interface.
+2. ID helper: Return an incremental ID string from your helper function.
+
+WHY THIS HELPS YOU
+In-memory storage allows quick API testing without database setup.
+
+
+--- STEP 2 ---
+STEP:
+Validate required fields before creating a record.
+
+ASSIST GUIDE:
+YOUR GOAL
+Reject shift requests missing worker ID, start time, or end time with status 400.
+
+WHAT YOUR LOGIC NEEDS
+* Checks verifying required body properties.
+* 400 status response for incomplete requests.
+
+LOOK AT THIS PATTERN (ANALOGY)
+if (!req.body.workerId || !req.body.startTime || !req.body.endTime) {
+  return res.status(400).json({ error: "Worker ID, start time, and end time are required" });
+}
+
+HOW TO MAP THE PATTERN
+1. Inspect fields: Evaluate required properties using !req.body.property.
+2. Reject missing: Send status 400 if any required field is falsy.
+
+WHY THIS HELPS YOU
+Validation prevents incomplete shift records from entering the roster.
+
+
+--- STEP 3 ---
+STEP:
+Detect overlapping records so two bookings cannot claim the same slot.
+
+ASSIST GUIDE:
+YOUR GOAL
+Scan existing shifts and reject with status 409 if this worker is already scheduled during that time.
+
+WHAT YOUR LOGIC NEEDS
+* An array search checking for matching workerId and overlapping time windows.
+* 409 conflict response if an overlap is found.
+
+LOOK AT THIS PATTERN (ANALOGY)
+const hasConflict = roster.some(
+  (s) =>
+    s.workerId === req.body.workerId &&
+    !(req.body.endTime <= s.startTime || req.body.startTime >= s.endTime)
+);
+if (hasConflict) {
+  return res.status(409).json({ error: "Worker already scheduled during this shift window" });
+}
+
+HOW TO MAP THE PATTERN
+1. Scan store: Use .some() on your roster array.
+2. Match criteria: Check if workerId matches and time windows overlap.
+3. Reject conflicts: If found, halt execution with status 409.
+
+WHY THIS HELPS YOU
+Preventing scheduling overlaps stops workers from being double-booked.
+
+
+--- STEP 4 ---
+STEP:
+Implement GET to list records and POST to create with 400/409 errors.
+
+ASSIST GUIDE:
+YOUR GOAL
+Build endpoints to return shifts and create new shifts with validation and overlap checks.
+
+WHAT YOUR LOGIC NEEDS
+* GET endpoint returning stored shifts.
+* POST endpoint applying 400 validation and 409 overlap checks before saving.
+
+LOOK AT THIS PATTERN (ANALOGY)
+export function getShifts(res: Response) {
+  return res.status(200).json(roster);
+}
+
+export function assignShift(req: Request, res: Response) {
+  // Step 2 validation check (400)
+  // Step 3 worker overlap check (409)
+  const item = { id: generateShiftId(), ...req.body };
+  roster.push(item);
+  return res.status(201).json(item);
+}
+
+HOW TO MAP THE PATTERN
+1. Return store: Send status 200 with the roster array in GET.
+2. Protect POST: Run validation and overlap checks before pushing the record.
+3. Save record: Assign a unique ID, push the item to storage, and return status 201.
+
+WHY THIS HELPS YOU
+Consistent error codes (400 for bad data, 409 for conflicts) make API behavior predictable.

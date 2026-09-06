@@ -1,0 +1,313 @@
+### Complete 40-Task Catalog (Rewritten for Beginners)
+
+#### 1. Appointment list + book form
+
+* **Step 1:** Create an appointment blueprint (name, time) and set up the outer container component.
+* **Step 2:** Store appointments in app memory; show rows if booked, or a "No appointments scheduled today" note if empty.
+* **Step 3:** Connect the booking input boxes directly to memory so names and times are tracked as you type.
+* **Step 4:** Stop the form from refreshing the page on click, append the new appointment to the list, and wipe the inputs clean.
+
+#### 2. Appointments API with slot conflicts
+
+* **Step 1:** Create an in-memory storage drawer and an ID generator to give each booking a unique receipt number.
+* **Step 2:** Check incoming requests for missing patient names or times, rejecting incomplete data with an error (400).
+* **Step 3:** Scan existing appointments to confirm no other booking already occupies that exact time slot.
+* **Step 4:** Provide a GET doorway to read bookings and a POST doorway that blocks overlapping times with a conflict error (409).
+
+#### 3. Day board: filter appointments by provider
+
+* **Step 1:** Define the appointment blueprint (including the provider name) and set up the day-board screen layout.
+* **Step 2:** View appointments through a provider filter lens, displaying only their patients or a "No visits for this provider" message.
+* **Step 3:** Connect input text boxes to memory so newly entered appointment details are tracked live.
+* **Step 4:** Intercept submission, add the new visit to memory, clear the form, and let the provider filter sort it.
+
+#### 4. Deposit list + take-deposit form
+
+* **Step 1:** Design a blueprint for a deposit record (customer, amount) and build the shell container.
+* **Step 2:** Hold deposits in memory; show a transaction row for each payment, or an "All deposits clear" message when empty.
+* **Step 3:** Wire payment amount and customer fields to memory so keystrokes register in real time.
+* **Step 4:** Block the default page reload, drop the new deposit into the ledger, and clear the input boxes.
+
+#### 5. Deposits API with held/applied status
+
+* **Step 1:** Set up an in-memory ledger and an ID helper to stamp each payment with a distinct ID.
+* **Step 2:** Validate that incoming deposits include an amount greater than zero and a valid customer reference.
+* **Step 3:** Let the server determine whether the deposit is "held" or "applied" based on balance rules rather than client input.
+* **Step 4:** Set up a GET route to list deposits and a POST route that attaches the server-verified status on save.
+
+#### 6. Coverage API with open/filled status
+
+* **Step 1:** Set up a shift-coverage memory drawer and an ID generator for unique coverage tickets.
+* **Step 2:** Check that coverage requests include a shift date, role, and department before proceeding.
+* **Step 3:** Have the server assign "open" if no worker is attached or "filled" once an employee is assigned.
+* **Step 4:** Build endpoints to fetch all coverage tickets (GET) and register new requests with their calculated status (POST).
+
+#### 7. Open coverage list + request form
+
+* **Step 1:** Create an item blueprint for shift requests and assemble the display container.
+* **Step 2:** Keep shift requests in memory; render each open slot as a row, or show "All shifts fully staffed" if empty.
+* **Step 3:** Connect input boxes to state so requested roles and shift hours are tracked character-by-character.
+* **Step 4:** Prevent form submission refresh, append the shift request to the list, and empty the inputs.
+
+#### 8. Inventory master table
+
+* **Step 1:** Create an item blueprint describing an inventory product (SKU, name, stock count, cost).
+* **Step 2:** Set up a storage container in state to hold the incoming catalog.
+* **Step 3:** Fetch the real inventory catalog from the API when the component first appears on screen.
+* **Step 4:** Configure the spreadsheet columns using TanStack Table to map headers to data fields.
+* **Step 5:** Draw table headers and data rows, displaying a loading message while fetching and an empty state if no stock exists.
+
+#### 9. Purchase order form & receive modal
+
+* **Step 1:** Define blueprints for vendors, items, and line items, then create the purchase order screen layout.
+* **Step 2:** Set up memory storage for available vendors, item options, and the items currently added to the order.
+* **Step 3:** Fetch active vendors and item catalogs from the server on initial load.
+* **Step 4:** Submit the completed order to the server using a POST call, creating an official pending purchase order.
+* **Step 5:** Send a receive confirmation call to the server to mark items arrived and immediately reflect updated warehouse counts.
+
+#### 10. Financial reporting dashboard
+
+* **Step 1:** Create data blueprints for trial balance lines and income statement summaries, setting up the dashboard grid.
+* **Step 2:** Set up state slots to hold the trial balance entries and income statement figures.
+* **Step 3:** Request the official trial balance and income statement reports from the API when the dashboard mounts.
+* **Step 4:** Render the trial balance table with a visual badge confirming that debits equal credits.
+* **Step 5:** Display the income statement cards showing total revenue, total costs, and final net profit.
+
+#### 11. Sales order pipeline view
+
+* **Step 1:** Model customer info, item details, and order rows, assembling the pipeline view shell.
+* **Step 2:** Store customer lists, inventory options, current order lines, and any order warnings in state.
+* **Step 3:** Fetch real customers and current warehouse item quantities from the server on load.
+* **Step 4:** Post the sales order to the server, catching and showing a friendly alert if requested quantities exceed current stock.
+* **Step 5:** Call the fulfillment endpoint on the server and update the order's status pill to "Fulfilled" right on screen.
+
+#### 12. Invoice list + create form
+
+* **Step 1:** Outline an invoice blueprint (invoice number, client, total) and build the page shell.
+* **Step 2:** Store invoices in memory; render an itemized row for each bill, or a "No invoices issued" screen if empty.
+* **Step 3:** Connect text inputs to memory so recipient and billing numbers are saved with every keystroke.
+* **Step 4:** Prevent default submission refresh, push the fresh invoice into the list, and wipe the inputs clean.
+
+#### 13. Invoices API with overdue status
+
+* **Step 1:** Create an in-memory invoice store and an ID generator for unique billing numbers.
+* **Step 2:** Validate that new invoice entries contain a positive balance and a valid customer ID.
+* **Step 3:** Have the server compare the due date against the current date to determine if it is "current" or "overdue".
+* **Step 4:** Implement a GET route to list invoices and a POST route that stamps the computed overdue status before saving.
+
+#### 14. Overdue board: filter invoices by status label
+
+* **Step 1:** Model an invoice item with a status tag and prepare the overdue board layout.
+* **Step 2:** Filter invoices in memory to display only overdue rows, showing an "All accounts current" banner if none exist.
+* **Step 3:** Connect input boxes to state so new billing data is tracked cleanly.
+* **Step 4:** Intercept form submit, append the invoice to the main list, reset the form, and let the overdue filter manage display.
+
+#### 15. Reminders API — one pending nudge per invoice per channel
+
+* **Step 1:** Set up memory storage for notification logs and an ID generator for reminder tokens.
+* **Step 2:** Reject reminder requests that omit the invoice ID, destination address, or contact channel (400).
+* **Step 3:** Inspect stored reminders to verify no pending nudge already exists for that specific invoice on that same channel.
+* **Step 4:** Build GET to list reminders and POST to create nudges, sending a 409 conflict if a duplicate reminder is already queued.
+
+#### 16. Reminder log list + schedule form
+
+* **Step 1:** Build a blueprint for scheduled notifications (recipient, message, send time) and set up the outer container.
+* **Step 2:** Store reminders in memory; display each scheduled row, or show "No pending reminders in queue" when empty.
+* **Step 3:** Wire the message and date inputs to state to track typed content in real time.
+* **Step 4:** Stop page reload on submit, drop the reminder into the queue, and clear the input boxes.
+
+#### 17. Lead inbox list + capture form
+
+* **Step 1:** Define the shape of a sales lead (name, email, company) and build the inbox frame.
+* **Step 2:** Hold leads in state; render each contact card, or display "Inbox zero — no new leads" when empty.
+* **Step 3:** Connect form fields to state so potential client details are captured live as you type.
+* **Step 4:** Stop the submit button from reloading the page, stack the lead into your inbox, and reset the form fields.
+
+#### 18. Notes API — block duplicate notes per lead
+
+* **Step 1:** Set up a note storage drawer in memory and an ID generator for unique note references.
+* **Step 2:** Require that all note submissions contain both a lead ID and non-empty note content (400).
+* **Step 3:** Search existing notes to ensure this exact message hasn't already been logged for this lead.
+* **Step 4:** Expose a GET endpoint to view notes and a POST endpoint that returns 409 if a matching note already exists.
+
+#### 19. Reply notes list + add-note form
+
+* **Step 1:** Outline the blueprint for a customer reply note and build the container component.
+* **Step 2:** Store notes in memory; display the conversation thread row by row, or a "No replies logged yet" note if empty.
+* **Step 3:** Connect the reply textarea to state so typed thoughts are saved on every key press.
+* **Step 4:** Prevent form submission refresh, append the note to the thread, and clear the text area.
+
+#### 20. Leads API with fresh/stale status
+
+* **Step 1:** Create an in-memory customer drawer and an ID generator to assign unique lead tracking tags.
+* **Step 2:** Validate that submitted leads contain valid contact info before accepting them.
+* **Step 3:** Let the server evaluate the lead's last interaction date to classify it as "fresh" or "stale".
+* **Step 4:** Expose GET to list leads and POST to save new leads with their server-assigned freshness status.
+
+#### 21. Stale board: filter leads that need a nudge
+
+* **Step 1:** Model a lead entry with contact timestamps and build the outreach board container.
+* **Step 2:** Filter the list to surface only stale leads that need attention, displaying "Great job! No stale leads" when clear.
+* **Step 3:** Connect input boxes to state to capture lead outreach details smoothly.
+* **Step 4:** Prevent page refresh on submit, append the lead to state, clear the form, and let the stale filter categorize it.
+
+#### 22. Open-shift board: filter unfilled coverage
+
+* **Step 1:** Create a shift blueprint with staffing status and assemble the board frame.
+* **Step 2:** Filter shifts to isolate unfilled openings, displaying a "Schedule fully covered" notice if all slots are staffed.
+* **Step 3:** Link shift date and role fields to state so live typing is tracked without loss.
+* **Step 4:** Intercept submission, save the open shift to memory, reset the form, and let the unfilled filter render it.
+
+#### 23. Package punch-card list + sell form
+
+* **Step 1:** Create a blueprint for service packages (client, total sessions, price) and construct the component shell.
+* **Step 2:** Store sold packages in memory; list every active card, or render "No packages sold yet" if empty.
+* **Step 3:** Wire client name and session count inputs to state for live synchronization.
+* **Step 4:** Stop page reload on click, append the new package card to the list, and empty the input fields.
+
+#### 24. Low-balance board: filter packages almost empty
+
+* **Step 1:** Define the punch-card blueprint (including remaining punch count) and build the alert board shell.
+* **Step 2:** Filter packages to show only those with 1 or 2 punches left, showing "All client balances healthy" if empty.
+* **Step 3:** Link package form inputs to state so edits are tracked in real time.
+* **Step 4:** Prevent submit reload, append the package to state, clear the inputs, and let the low-balance filter display it.
+
+#### 25. Packages API with remaining / empty status
+
+* **Step 1:** Build an in-memory card archive and an ID generator for unique pass codes.
+* **Step 2:** Verify that new package requests specify a valid customer and a positive starting punch total.
+* **Step 3:** Compute the status on the server—labeling it "remaining" if punches are available, or "empty" if zero.
+* **Step 4:** Expose GET to fetch packages and POST to create packages with the server-derived status included.
+
+#### 26. Punch log list + redeem form
+
+* **Step 1:** Model a punch redemption entry (package ID, date, attendant) and set up the log layout.
+* **Step 2:** Maintain punch redemptions in state; show each logged punch, or an "Empty log — no punches redeemed" note.
+* **Step 3:** Connect redemption input boxes to state so session selections are tracked cleanly.
+* **Step 4:** Prevent default form reload, append the redemption event to the log, and reset the form fields.
+
+#### 27. Punches API — reject redeem when empty
+
+* **Step 1:** Establish memory storage for redemptions and an ID tool for generating transaction tags.
+* **Step 2:** Ensure incoming punch requests include a valid package ID and user confirmation (400).
+* **Step 3:** Check the customer's balance to confirm they still have punches left to redeem.
+* **Step 4:** Expose GET for redemption history and POST to redeem a punch, returning a 409 conflict error if zero punches remain.
+
+#### 28. Accepted board: filter quotes by status
+
+* **Step 1:** Define a quote blueprint with client name, price, and status, setting up the board frame.
+* **Step 2:** Filter quotes in memory to display only those marked "accepted", showing "No accepted quotes yet" when empty.
+* **Step 3:** Wire the quote creation inputs to state so field values update with every keystroke.
+* **Step 4:** Stop page reload on submit, store the new quote in memory, clear the form, and let the status filter place it.
+
+#### 29. Quotes API with open/expired/accepted status
+
+* **Step 1:** Set up memory storage for estimates and an ID generator for unique quote numbers.
+* **Step 2:** Validate that incoming quote payloads include customer details, item totals, and expiration dates.
+* **Step 3:** Calculate status on the server based on customer action and current date ("open", "expired", or "accepted").
+* **Step 4:** Provide a GET endpoint to list quotes and a POST endpoint that attaches the calculated status before saving.
+
+#### 30. Quote line-items list + add-line form
+
+* **Step 1:** Create a blueprint for an individual line item (description, quantity, price) and build the table frame.
+* **Step 2:** Store line items in state; render an itemized row for each entry, or a "No items added to estimate" message.
+* **Step 3:** Connect item description and price inputs to state to capture values as the user types.
+* **Step 4:** Intercept submit, add the new item line to the running quote, and clear the inputs.
+
+#### 31. Quote lines API — no duplicate label on a quote
+
+* **Step 1:** Create an in-memory line-item store and an ID generator to stamp unique line IDs.
+* **Step 2:** Require that line-item submissions include an estimate ID, item name, and price (400).
+* **Step 3:** Check existing line items on that quote to ensure the same item name is not entered twice.
+* **Step 4:** Expose GET to list lines and POST to create new lines, returning a 409 error if that item label is already present.
+
+#### 32. Quote list + create-estimate form
+
+* **Step 1:** Define a quote blueprint (client, project name, total estimate) and set up the outer display container.
+* **Step 2:** Keep quotes in state; display each estimate row, or show "No estimates created yet" when empty.
+* **Step 3:** Connect client and estimate inputs directly to state for real-time tracking.
+* **Step 4:** Prevent form submission reload, append the new estimate to the list, and wipe the inputs clean.
+
+#### 33. Reminders API with due/sent status
+
+* **Step 1:** Set up a reminder memory drawer and an ID generator for tracking notification receipts.
+* **Step 2:** Ensure incoming requests include a target recipient and scheduled dispatch timestamp.
+* **Step 3:** Have the server verify whether the dispatch time has passed to classify the record as "due" or "sent".
+* **Step 4:** Expose GET to retrieve reminders and POST to record reminders with their calculated dispatch status.
+
+#### 34. Due board: filter reminders that should send now
+
+* **Step 1:** Model a reminder item with delivery timestamps and assemble the active board container.
+* **Step 2:** Filter reminders to display only those whose scheduled time is due right now, showing "All caught up" if clear.
+* **Step 3:** Connect reminder fields to state so typed messages and times stay synced.
+* **Step 4:** Stop page reload on submit, append the reminder to state, clear the form, and let the due filter sort it.
+
+#### 35. Reminder schedule list + create form
+
+* **Step 1:** Outline a schedule blueprint (event title, notify time) and construct the component shell.
+* **Step 2:** Store scheduled reminders in state; show an event row for each entry, or a "No events scheduled" fallback.
+* **Step 3:** Connect the title and date picker inputs to state to track user choices live.
+* **Step 4:** Prevent default submit refresh, append the event to the schedule list, and reset the inputs.
+
+#### 36. Reminder templates list + save-template form
+
+* **Step 1:** Model a template blueprint (template name, subject, body text) and build the template gallery shell.
+* **Step 2:** Hold templates in memory; render each reusable template card, or show "No saved templates found" when empty.
+* **Step 3:** Wire template name and message textareas to state so drafting happens in real time.
+* **Step 4:** Intercept submission, save the new template to the gallery, and clear the inputs.
+
+#### 37. Templates API — unique name per channel
+
+* **Step 1:** Establish memory storage for message templates and an ID helper for unique template keys.
+* **Step 2:** Reject template submissions that lack a name, channel type, or message body (400).
+* **Step 3:** Inspect stored templates to guarantee no template shares the exact same name on that channel.
+* **Step 4:** Expose GET for template retrieval and POST for saving, returning 409 if a duplicate name is detected.
+
+#### 38. Review inbox list + log-review form
+
+* **Step 1:** Create a customer review blueprint (reviewer, star rating, feedback text) and build the inbox view.
+* **Step 2:** Store reviews in memory; display each review card, or show a "No customer reviews yet" message when empty.
+* **Step 3:** Wire star rating and review comment fields to state for real-time tracking.
+* **Step 4:** Block default page reload, drop the review into the inbox, and clear the form fields.
+
+#### 39. Reviews API with needs-reply status
+
+* **Step 1:** Set up memory storage for client feedback and an ID generator for unique review records.
+* **Step 2:** Validate that submitted reviews include a customer name, rating, and feedback comment.
+* **Step 3:** Check whether an official reply is attached; if missing, have the server tag it as "needs-reply".
+* **Step 4:** Provide GET to view feedback and POST to log reviews with their calculated status attached.
+
+#### 40. Replies API — one reply per review channel
+
+* **Step 1:** Establish an in-memory replies drawer and an ID tool to generate unique response IDs.
+* **Step 2:** Check that submitted replies contain a review ID, responder name, and message body (400).
+* **Step 3:** Scan existing replies to verify this review hasn't already received a response on this channel.
+* **Step 4:** Expose GET to list responses and POST to submit replies, returning a 409 conflict error if a response already exists.
+
+#### 41. Review replies list + write-reply form
+
+* **Step 1:** Create a reply blueprint (response text, author) and assemble the reply thread container.
+* **Step 2:** Hold replies in state; render each response in the thread, or show "No replies posted yet" if empty.
+* **Step 3:** Connect the reply input box to state to track responses as you write them.
+* **Step 4:** Prevent form submit refresh, append the response to the conversation, and clear the input area.
+
+#### 42. Unanswered board: filter reviews needing a reply
+
+* **Step 1:** Model a review item with a reply status and construct the urgent board view.
+* **Step 2:** Filter reviews to display only those needing a reply, showing "All reviews answered!" when the queue is clear.
+* **Step 3:** Connect input boxes to state to capture review logging details cleanly.
+* **Step 4:** Intercept submit, save the review to memory, clear the form, and let the unanswered filter place it on the board.
+
+#### 43. Shift board list + publish form
+
+* **Step 1:** Outline a shift blueprint (worker name, shift hours, role) and build the board container.
+* **Step 2:** Store shifts in state; display each scheduled shift row, or show a "No shifts published for this week" message.
+* **Step 3:** Connect worker name and time slot inputs to state to keep typing synchronized.
+* **Step 4:** Stop default submit reload, publish the shift into the active schedule, and clear the form fields.
+
+#### 44. Shifts API with worker overlap conflicts
+
+* **Step 1:** Set up an in-memory schedule store and an ID generator for unique shift slips.
+* **Step 2:** Validate that shift requests include a worker ID, start time, and end time (400).
+* **Step 3:** Check existing assignments to verify this worker isn't already scheduled for another shift during that exact window.
+* **Step 4:** Build GET to view published shifts and POST to create assignments, returning a 409 conflict if the worker is double-booked.

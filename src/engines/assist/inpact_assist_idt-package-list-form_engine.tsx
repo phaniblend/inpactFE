@@ -23,34 +23,29 @@ export const NODES = [
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Model one list item as a type, then set up the component around it","Hold packages in state and render it — rows when present, a message when empty","Wire controlled inputs so form fields live in React state","On submit, preventDefault, append one item to the list, and clear the form"],
+    items: ["Create a blueprint for service packages (client, total sessions, price) and construct the component shell.","Store sold packages in memory; list every active card, or render \"No packages sold yet\" if empty.","Wire client name and session count inputs to state for live synchronization.","Stop page reload on click, append the new package card to the list, and empty the input fields."],
   },
   {
     id: "step1",
     type: "question",
     phase: "Step 1 of 4",
-    paal: `Model one list item as a type, then set up the component around it
+    paal: `Create a blueprint for service packages (client, total sessions, price) and construct the component shell.
 
-MOCK ROW — Packages
-  Client: "Riley"
-  Service: "Cut"
-  Total punches: "5"
+WHAT YOU'LL NEED
+- id (text)
+- client (text)
+- punches (number or text)
 
-Every row also needs a unique \`id\` — not shown in the mock, but required to track, update, and key each item.
-
-Your task: write \`type ServicePackage\` with \`id\` plus client, service, totalPunches, then define and export PackageDesk as a function component returning <div /> — every step from here on edits this same file.`,
-    hint: `type ServicePackage = { id: string; client: string; service: string; totalPunches: string; }
-
-export function PackageDesk() {
-  return <div />;
-}`,
-    example_code: `export type Guest = {
+Your task: Define the shape of a punch card package and create the component shell.`,
+    hint: `1. Blueprint declaration: Rename PackageCard to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.`,
+    example_code: `export type PackageCard = {
   id: string;
-  name: string;
-  note: string;
+  client: string;
+  punches: number;
 };
 
-export function GuestList() {
+export function PackageTracker() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -64,7 +59,7 @@ Every value with a shape needs one type to describe that shape before any compon
     mc_options: ["Define type ServicePackage (id + client, service, totalPunches), then export function PackageDesk() returning <div />","Skip the type and write JSX directly against untyped objects","Wait until every backend endpoint exists before modeling the row or the component"],
     mc_correct_option: "Define type ServicePackage (id + client, service, totalPunches), then export function PackageDesk() returning <div />",
     mc_anchor: "Define type ServicePackage (id + client,",
-    why_this_matters: `Prepaid packages are cash up front. A punch-card list+form replaces the paper card that gets lost. If list rows and form fields do not share one shape, some rows end up missing a field, or the form saves a field the list can never display — a type names that shared shape once, so the compiler catches the mismatch before a user does. Naming and exporting the component next to it is what lets every later step, and a real pull request, attach real behavior to something that already exists.`,
+    why_this_matters: `Modeling punch card packages upfront ensures consistent balance tracking across the app.`,
     answer_keywords: ["export","type","ServicePackage","client","service","totalPunches","export","function","PackageDesk","return"],
     seed_code: ``,
     starter_code: ``,
@@ -85,20 +80,20 @@ export function PackageDesk() {
   return <div />;
 }
 `,
-    analog_example: `export type Guest = {
+    analog_example: `export type PackageCard = {
   id: string;
-  name: string;
-  note: string;
+  client: string;
+  punches: number;
 };
 
-export function GuestList() {
+export function PackageTracker() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `One shared type is a single source of truth for what a record looks like — when the list, the form, and the API all reference it, a renamed or removed field breaks the build immediately instead of failing silently in production. Pairing that with the component's own shell in the same step is what turns this from "a type file" into a real, mergeable start on the actual screen.`,
+      hook: `Modeling punch card packages upfront ensures consistent balance tracking across the app.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists packages and a form to add one:
 
@@ -121,37 +116,39 @@ export function PackageDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `type ServicePackage = { id: string; client: string; service: string; totalPunches: string; }
-
-export function PackageDesk() {
-  return <div />;
-}`,
+      build: `1. Blueprint declaration: Rename PackageCard to your type name and define required fields.
+2. Shell component: Declare your component returning an empty <div />.`,
     },
   },
   {
     id: "step2",
     type: "question",
     phase: "Step 2 of 4",
-    paal: `Hold packages in state and render it — rows when present, a message when empty
+    paal: `Store sold packages in memory; list every active card, or render "No packages sold yet" if empty.
 
-LIST — Packages
-  Riley
-  Cut
+WHAT YOU'LL NEED
+- State array holding package cards.
+- Conditional empty check.
+- Map loop rendering packages.
 
-EMPTY — "No packages sold yet."
+Your task: Store punch cards in state and display them, showing a placeholder if none exist.`,
+    hint: `1. Set up state: Use useState<PackageCard[]>([]).
+2. Check for empty: Use packages.length === 0 to render the empty message.
+3. Render entries: Map through packages, passing key={pkg.id}.`,
+    example_code: `const [packages, setPackages] = useState<PackageCard[]>([]);
 
-Your task: hold packages in state typed as ServicePackage[], starting empty, then render the empty message when packages.length === 0 and the mapped rows (key={item.id}) otherwise.`,
-    hint: `const [packages, setPackages] = useState<ServicePackage[]>([]);
-return packages.length === 0 ? <p>No packages sold yet.</p> : <ul>{packages.map((a) => <li key={a.id}>{a.client}</li>)}</ul>;`,
-    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+return (
+  <div>
+    {packages.length === 0 ? (
+      <p>No active packages</p>
+    ) : (
+      packages.map((pkg) => (
+        <div key={pkg.id}>
+          {pkg.client}: {pkg.punches} punches remaining
+        </div>
+      ))
+    )}
+  </div>
 );`,
     think_prompt: `\`\`\`text
 LIST — Packages
@@ -165,7 +162,7 @@ React only redraws a component when the value it reads changes through React's o
     mc_options: ["useState for the array; branch on length === 0 before mapping rows with a stable key","let packages = [] and mutate it directly on every update","always render the mapped rows, even when the array is empty"],
     mc_correct_option: "useState for the array; branch on length === 0 before mapping rows with a stable key",
     mc_anchor: "useState for the array; branch on length",
-    why_this_matters: `Prepaid packages are cash up front. A punch-card list+form replaces the paper card that gets lost. A plain array in a variable will not make React redraw, and a list that renders as literally nothing when empty looks broken — useState gives the screen something to watch, and branching on length before mapping is what keeps a brand-new list from looking like a bug.`,
+    why_this_matters: `A clear empty state prevents users from wondering whether packages failed to load.`,
     answer_keywords: ["useState","packages","setPackages","length","map","key"],
     seed_code: `import { useState } from "react";
 
@@ -230,21 +227,26 @@ export function PackageDesk() {
   );
 }
 `,
-    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
-return guests.length === 0 ? (
-  <p>No names yet.</p>
-) : (
-  <ul>
-    {guests.map((g) => (
-      <li key={g.id}>{g.name}</li>
-    ))}
-  </ul>
+    analog_example: `const [packages, setPackages] = useState<PackageCard[]>([]);
+
+return (
+  <div>
+    {packages.length === 0 ? (
+      <p>No active packages</p>
+    ) : (
+      packages.map((pkg) => (
+        <div key={pkg.id}>
+          {pkg.client}: {pkg.punches} punches remaining
+        </div>
+      ))
+    )}
+  </div>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `A plain variable and a piece of React state can hold the identical value yet behave completely differently — mutating a variable is invisible to React, while calling a state setter schedules a re-render. And an empty array is not a missing feature to handle later; it is one of exactly two branches every list render has from the very first render.`,
+      hook: `A clear empty state prevents users from wondering whether packages failed to load.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists packages and a form to add one:
 
@@ -282,23 +284,29 @@ export function PackageDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `const [packages, setPackages] = useState<ServicePackage[]>([]);
-return packages.length === 0 ? <p>No packages sold yet.</p> : <ul>{packages.map((a) => <li key={a.id}>{a.client}</li>)}</ul>;`,
+      build: `1. Set up state: Use useState<PackageCard[]>([]).
+2. Check for empty: Use packages.length === 0 to render the empty message.
+3. Render entries: Map through packages, passing key={pkg.id}.`,
     },
   },
   {
     id: "step3",
     type: "question",
     phase: "Step 3 of 4",
-    paal: `Wire controlled inputs so form fields live in React state
+    paal: `Wire client name and session count inputs to state for live synchronization.
 
-FORM — Packages
-  [ Client ]  [ Service ]  [ Total punches ]   → Sell package
+WHAT YOU'LL NEED
+- State hooks for client and punch count inputs.
+- Value and onChange props wired on inputs.
 
-Your task: add one state value per field (client, service, totalPunches), then wire each input's value and onChange to it.`,
-    hint: `useState("") per field; value={...} onChange sets that state.`,
-    example_code: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+Your task: Connect package creation input fields to React state.`,
+    hint: `1. Initialize states: Call useState("") for client and punches.
+2. Wire inputs: Connect value and onChange to each state variable.`,
+    example_code: `const [client, setClient] = useState("");
+const [punches, setPunches] = useState("10");
+
+<input value={client} onChange={(e) => setClient(e.target.value)} />
+<input value={punches} onChange={(e) => setPunches(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Packages
   [ Client ]  [ Service ]  [ Total punches ]   → Sell package
@@ -308,7 +316,7 @@ A form field's text can live in the DOM itself (uncontrolled) or in React state 
     mc_options: ["value from state, onChange writes back to state","read the input only on submit via document.getElementById","store the DOM node in a global"],
     mc_correct_option: "value from state, onChange writes back to state",
     mc_anchor: "value from state, onChange writes back t",
-    why_this_matters: `Controlled inputs use value from state and onChange to write back, keeping the form and the submit payload in sync. Prepaid packages are cash up front. A punch-card list+form replaces the paper card that gets lost.`,
+    why_this_matters: `Controlled inputs ensure clean data capture when issuing new packages.`,
     answer_keywords: ["useState","value=","onChange","client","service","totalPunches"],
     seed_code: `import { useState } from "react";
 
@@ -372,13 +380,16 @@ export function PackageDesk() {
   );
 }
 `,
-    analog_example: `const [name, setName] = useState("");
-<input value={name} onChange={(e) => setName(e.target.value)} />`,
+    analog_example: `const [client, setClient] = useState("");
+const [punches, setPunches] = useState("10");
+
+<input value={client} onChange={(e) => setClient(e.target.value)} />
+<input value={punches} onChange={(e) => setPunches(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Controlled vs. uncontrolled is a real, ongoing choice in React forms, not just boilerplate — a controlled input makes React the single source of truth for what is on screen, so validation, clearing, and reading the value on submit are all just state reads, not DOM queries.`,
+      hook: `Controlled inputs ensure clean data capture when issuing new packages.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists packages and a form to add one:
 
@@ -413,21 +424,34 @@ export function PackageDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `useState("") per field; value={...} onChange sets that state.`,
+      build: `1. Initialize states: Call useState("") for client and punches.
+2. Wire inputs: Connect value and onChange to each state variable.`,
     },
   },
   {
     id: "step4",
     type: "question",
     phase: "Step 4 of 4",
-    paal: `On submit, preventDefault, append one item to the list, and clear the form
+    paal: `Stop page reload on click, append the new package card to the list, and empty the input fields.
 
-FORM — Packages
-  [ Client ]  [ Service ]  [ Total punches ]   → Sell package
+WHAT YOU'LL NEED
+- Form interceptor using e.preventDefault().
+- Object assembly matching blueprint.
+- Spread update to state.
+- Form reset calls.
 
-Your task: on submit: call preventDefault, build a new ServicePackage from the field state, add it to packages without mutating the old array, then clear the fields.`,
-    hint: `e.preventDefault(); setPackages((prev) => [...prev, { id: String(Date.now()), client, service, totalPunches }]); then clear fields.`,
-    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+Your task: Append the new package to state without a page refresh and reset the form.`,
+    hint: `1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, client, and punches into an object.
+3. Append item: Use setPackages((prev) => [...prev, entry]).
+4. Clear form: Reset input states to their default values.`,
+    example_code: `function sellPackage(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), client, punches: Number(punches) };
+  setPackages((prev) => [...prev, entry]);
+  setClient("");
+  setPunches("10");
+}`,
     think_prompt: `\`\`\`text
 FORM — Packages
   [ Client ]  [ Service ]  [ Total punches ]   → Sell package
@@ -438,7 +462,10 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `preventDefault stops navigation; copying the old list plus one new item, then clearing fields, matches the design mock behavior. Prepaid packages are cash up front. A punch-card list+form replaces the paper card that gets lost.`,
+    why_this_matters: `The new package appears in the list instantly, keeping customer checkouts smooth.
+
+
+================================================================================`,
     answer_keywords: ["preventDefault","setPackages","prev","client","service","totalPunches"],
     seed_code: `import { useState } from "react";
 
@@ -545,12 +572,21 @@ export function PackageDesk() {
   );
 }
 `,
-    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
+    analog_example: `function sellPackage(e: React.FormEvent) {
+  e.preventDefault();
+  const entry = { id: String(Date.now()), client, punches: Number(punches) };
+  setPackages((prev) => [...prev, entry]);
+  setClient("");
+  setPunches("10");
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Every controlled form in React follows the same submit shape — cancel the default, derive the new record, update state immutably, reset the inputs — regardless of what the record actually contains. Learning that shape once means every future "add to a list" form is the same four moves with different field names.`,
+      hook: `The new package appears in the list instantly, keeping customer checkouts smooth.
+
+
+================================================================================`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists packages and a form to add one:
 
@@ -605,7 +641,10 @@ export function PackageDesk() {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `e.preventDefault(); setPackages((prev) => [...prev, { id: String(Date.now()), client, service, totalPunches }]); then clear fields.`,
+      build: `1. Halt refresh: Call e.preventDefault() first.
+2. Build item: Package id, client, and punches into an object.
+3. Append item: Use setPackages((prev) => [...prev, entry]).
+4. Clear form: Reset input states to their default values.`,
     },
   },
 ];
