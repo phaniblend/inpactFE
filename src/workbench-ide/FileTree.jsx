@@ -99,6 +99,27 @@ export default function FileTree({ fs, dir, activePath, dirtyPaths, onOpenFile, 
     reload();
   }, [reload, refreshToken]);
 
+  // Whenever the open file changes — including right after creating one — make sure every folder
+  // on its path is expanded, not just present in the tree data. Found live 2026-09-06: creating
+  // `src/components/LowPackageBoard.tsx` via the + button wrote the file and opened its tab
+  // correctly, but `src` stayed collapsed (a brand-new folder is never in `expanded` on its own),
+  // so the tree looked exactly like nothing had happened — a learner had no way to tell the file
+  // creation had actually worked.
+  useEffect(() => {
+    if (!activePath) return;
+    const segments = activePath.split("/").slice(0, -1); // drop the filename itself
+    if (segments.length === 0) return;
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      let cur = "";
+      for (const seg of segments) {
+        cur = cur ? `${cur}/${seg}` : seg;
+        next.add(cur);
+      }
+      return next;
+    });
+  }, [activePath]);
+
   function toggle(path) {
     setExpanded((prev) => {
       const next = new Set(prev);

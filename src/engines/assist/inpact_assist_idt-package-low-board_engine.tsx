@@ -73,7 +73,7 @@ Every value with a shape needs one type to describe that shape before any compon
     feedback_wrong: "Start with a type for one record, then the component shell that will use it — layout and APIs come after the data shape exists.",
     // Fix 2: shown pre-check (before CHECK MY CODE has run on this step) instead of the
     // generic fallback feedback text — a lightweight, non-answer-revealing conceptual hint.
-    pre_check_hint: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
+    pre_check_hint: `Create a new file at \`src/components/LowPackageBoard.tsx\` — it doesn't exist yet. A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     expected: `export type ServicePackage = {
   id: string;
   client: string;
