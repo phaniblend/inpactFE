@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { findModuleBySlug } from "../assist-me/AssistMeWorkspace.jsx";
 import { fetchLessonCodeValidation } from "../ai-lessons/clientLessonValidation.js";
 import StepAssistPopup from "./StepAssistPopup.jsx";
@@ -68,6 +68,12 @@ function saveDoneSet(moduleTag, set) {
  * a different row each time. Close returns to the compact row list; clicking a different row while
  * closed opens straight to that step.
  *
+ * The detail card floats (2026-09-07, user report: "cramp the step card in the corner again we
+ * need a spaced model.. and make it draggable") — squeezing the full What/How text into the ~300px
+ * sidebar column made it unreadable. It now renders as a fixed-position floating card, wide enough
+ * to breathe, that the learner can drag anywhere on screen by its header; the compact row list
+ * underneath stays visible the whole time so switching steps doesn't mean closing and reopening.
+ *
  * Done-state persists to localStorage per moduleTag (a real per-learner progress store is future
  * work, not this component's job).
  *
@@ -89,15 +95,62 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
   const [checking, setChecking] = useState(false);
   const [checkMessage, setCheckMessage] = useState("");
   const [justPassed, setJustPassed] = useState(() => new Set());
-  // null = compact row list; a number = that step's detail card is open.
+  // null = no detail card open; a number = that step's floating card is open.
   const [activeStep, setActiveStep] = useState(null);
+  // Floating card's screen position — null until first opened, then persists across Prev/Next and
+  // re-picking a different row, so the learner's chosen spot on screen doesn't reset every click.
+  const [cardPos, setCardPos] = useState(null);
+  const dragRef = useRef(null); // { startX, startY, originX, originY } while a drag is in progress
 
   useEffect(() => {
     setDone(moduleTag ? loadDoneSet(moduleTag) : new Set());
     setCheckMessage("");
     setJustPassed(new Set());
     setActiveStep(null);
+    setCardPos(null);
   }, [moduleTag]);
+
+  function defaultCardPos() {
+    if (typeof window === "undefined") return { x: 80, y: 100 };
+    return { x: Math.max(24, window.innerWidth - 540), y: 110 };
+  }
+
+  function openStep(i) {
+    setActiveStep(i);
+    setCardPos((prev) => prev || defaultCardPos());
+  }
+
+  function handleDragPointerMove(e) {
+    const d = dragRef.current;
+    if (!d) return;
+    const nextX = d.originX + (e.clientX - d.startX);
+    const nextY = d.originY + (e.clientY - d.startY);
+    setCardPos({
+      x: Math.min(Math.max(nextX, -200), window.innerWidth - 80),
+      y: Math.min(Math.max(nextY, 0), window.innerHeight - 60),
+    });
+  }
+
+  function handleDragPointerUp() {
+    dragRef.current = null;
+    window.removeEventListener("pointermove", handleDragPointerMove);
+    window.removeEventListener("pointerup", handleDragPointerUp);
+  }
+
+  function handleDragPointerDown(e) {
+    e.preventDefault();
+    const origin = cardPos || defaultCardPos();
+    dragRef.current = { startX: e.clientX, startY: e.clientY, originX: origin.x, originY: origin.y };
+    window.addEventListener("pointermove", handleDragPointerMove);
+    window.addEventListener("pointerup", handleDragPointerUp);
+  }
+
+  useEffect(() => {
+    return () => {
+      window.removeEventListener("pointermove", handleDragPointerMove);
+      window.removeEventListener("pointerup", handleDragPointerUp);
+    };
+  }, []);
 
   function toggleDone(id) {
     setDone((prev) => {
@@ -176,15 +229,46 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
         {checkMessage && <span className="tsp-check-msg">{checkMessage}</span>}
       </div>
 
-      {activeNode ? (
-        <div className="tsp-card">
+      <div className="tsp-list">
+        {steps.map((node, i) => {
+          const isDone = done.has(node.id);
+          const justPassedNow = justPassed.has(node.id);
+          const isActive = i === activeStep;
+          return (
+            <div
+              key={node.id}
+              className={`tsp-row${isDone ? " tsp-row-done" : ""}${justPassedNow ? " tsp-row-just-passed" : ""}${isActive ? " tsp-row-active" : ""}`}
+              onClick={() => openStep(i)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  openStep(i);
+                }
+              }}
+            >
+              <label className="tsp-check" onClick={(e) => e.stopPropagation()}>
+                <input type="checkbox" checked={isDone} onChange={() => toggleDone(node.id)} />
+              </label>
+              <span className="tsp-row-num">Step {i + 1}</span>
+              <span className="tsp-row-arrow">›</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {activeNode && cardPos ? (
+        <div className="tsp-card-float" style={{ left: cardPos.x, top: cardPos.y }}>
           <div className="tsp-card-head">
             <button type="button" className="tsp-card-close" onClick={() => setActiveStep(null)} aria-label="Close step">
               ✕ Close
             </button>
-            <span className="tsp-card-count">
-              Step {activeStep + 1} of {steps.length}
-            </span>
+            {/* Drag handle — deliberately separate from the Close button so a press on Close never
+                gets mistaken for a drag start. */}
+            <div className="tsp-card-drag" onPointerDown={handleDragPointerDown} title="Drag to move">
+              ⠿ Step {activeStep + 1} of {steps.length}
+            </div>
           </div>
           <label className="tsp-card-check">
             <input type="checkbox" checked={done.has(activeNode.id)} onChange={() => toggleDone(activeNode.id)} />
@@ -226,35 +310,7 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
             </button>
           </div>
         </div>
-      ) : (
-        <div className="tsp-list">
-          {steps.map((node, i) => {
-            const isDone = done.has(node.id);
-            const justPassedNow = justPassed.has(node.id);
-            return (
-              <div
-                key={node.id}
-                className={`tsp-row${isDone ? " tsp-row-done" : ""}${justPassedNow ? " tsp-row-just-passed" : ""}`}
-                onClick={() => setActiveStep(i)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setActiveStep(i);
-                  }
-                }}
-              >
-                <label className="tsp-check" onClick={(e) => e.stopPropagation()}>
-                  <input type="checkbox" checked={isDone} onChange={() => toggleDone(node.id)} />
-                </label>
-                <span className="tsp-row-num">Step {i + 1}</span>
-                <span className="tsp-row-arrow">›</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      ) : null}
 
       {assistNode && <StepAssistPopup moduleTag={moduleTag} node={assistNode} onClose={() => setAssistNode(null)} />}
     </div>
