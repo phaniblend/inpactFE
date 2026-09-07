@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { findModuleBySlug } from "../assist-me/AssistMeWorkspace.jsx";
 import { fetchLessonCodeValidation } from "../ai-lessons/clientLessonValidation.js";
+import { fetchFeedbackAnnotate } from "../ai-lessons/clientFeedbackAnnotate.js";
 import StepAssistPopup from "./StepAssistPopup.jsx";
-import { formatFeedbackText } from "./formatFeedbackText.jsx";
+import { formatFeedbackText, renderAnnotatedCode } from "./formatFeedbackText.jsx";
 import "./TaskStepsPanel.css";
 
 function doneStorageKey(moduleTag) {
@@ -114,6 +115,16 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
   // through steps in order shouldn't get feedback, right or wrong, about steps they haven't
   // looked at yet).
   const [visitedSteps, setVisitedSteps] = useState(() => new Set());
+  // Context for "Annotate my code" (2026-09-07, user request — the same feature the toy-editor
+  // lesson engine already has: map the written feedback onto the learner's actual code as inline
+  // coaching comments, so "Finanials is wrong" becomes visible AT the line it's wrong on, not just
+  // described in prose). Only set when the check card is showing a real per-step result — null for
+  // generic messages ("already done", "open a step first", network errors) that have no single
+  // step/code pairing to annotate against.
+  const [checkContext, setCheckContext] = useState(null); // { node, code, language, feedback } | null
+  const [annotating, setAnnotating] = useState(false);
+  const [annotateError, setAnnotateError] = useState("");
+  const [annotatedCode, setAnnotatedCode] = useState(null);
 
   useEffect(() => {
     setDone(moduleTag ? loadDoneSet(moduleTag) : new Set());
@@ -123,6 +134,10 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
     setCardPos(null);
     setCheckCardPos(null);
     setVisitedSteps(new Set());
+    setCheckContext(null);
+    setAnnotating(false);
+    setAnnotateError("");
+    setAnnotatedCode(null);
   }, [moduleTag]);
 
   // Covers both openStep (row click) and Prev/Next — both just change activeStep, so one effect
@@ -230,6 +245,35 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
 
   function closeCheckCard() {
     setCheckMessage("");
+    setCheckContext(null);
+    setAnnotating(false);
+    setAnnotateError("");
+    setAnnotatedCode(null);
+  }
+
+  async function annotateCode() {
+    if (!checkContext || annotating) return;
+    setAnnotating(true);
+    setAnnotateError("");
+    try {
+      const data = await fetchFeedbackAnnotate({
+        instruction: checkContext.node.paal || checkContext.node.instruction || "",
+        feedback: checkContext.feedback,
+        hint: checkContext.node.pre_check_hint || checkContext.node.hint || "",
+        userCode: checkContext.code,
+        language: checkContext.language,
+      });
+      const code = String(data?.annotatedCode ?? "").trim();
+      if (!code) {
+        setAnnotateError("Couldn't map the feedback onto your code. Try again, or re-read the feedback above.");
+        return;
+      }
+      setAnnotatedCode(code);
+    } catch (err) {
+      setAnnotateError(err?.message || "Couldn't annotate your code. Please try again.");
+    } finally {
+      setAnnotating(false);
+    }
   }
 
   async function checkAllSteps() {
@@ -237,6 +281,7 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
     const pending = steps.filter((s) => !done.has(s.id) && visitedSteps.has(s.id));
     if (pending.length === 0) {
       const allDone = steps.every((s) => done.has(s.id));
+      setCheckContext(null);
       showCheckMessage(
         allDone
           ? "Every step is already checked off. 🎉"
@@ -253,6 +298,7 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
       );
       if (settled.every((s) => s.status === "rejected")) {
         const reason = settled[0]?.reason;
+        setCheckContext(null);
         showCheckMessage(`Couldn't check your code: ${reason?.message || "please try again."}`);
         return;
       }
@@ -269,6 +315,7 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
         });
         setJustPassed(new Set(newlyDone));
         setTimeout(() => setJustPassed(new Set()), 1600);
+        setCheckContext(null);
         showCheckMessage(`✅ ${newlyDone.length} step${newlyDone.length > 1 ? "s" : ""} confirmed complete.`);
       } else {
         // Surface *why*, not just "keep going" — every pending step genuinely got checked and
@@ -284,12 +331,17 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
         const chosen = withFeedback.find((r) => r.node.id === activeNodeId) || withFeedback[0];
         if (chosen) {
           const stepNum = steps.findIndex((s) => s.id === chosen.node.id) + 1;
+          setCheckContext({ node: chosen.node, code, language, feedback: chosen.result.feedback });
+          setAnnotatedCode(null);
+          setAnnotateError("");
           showCheckMessage(`Step ${stepNum}: ${chosen.result.feedback}`);
         } else {
+          setCheckContext(null);
           showCheckMessage("No new steps look complete yet — keep going.");
         }
       }
     } catch (err) {
+      setCheckContext(null);
       showCheckMessage(`Couldn't check your code: ${err?.message || "please try again."}`);
     } finally {
       setChecking(false);
@@ -403,7 +455,10 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
       ) : null}
 
       {checkMessage && checkCardPos ? (
-        <div className="tsp-card-float tsp-check-float" style={{ left: checkCardPos.x, top: checkCardPos.y }}>
+        <div
+          className={`tsp-card-float tsp-check-float${annotatedCode ? " tsp-check-float-wide" : ""}`}
+          style={{ left: checkCardPos.x, top: checkCardPos.y }}
+        >
           <div className="tsp-card-head">
             <button type="button" className="tsp-card-close" onClick={closeCheckCard} aria-label="Close check result">
               ✕ Close
@@ -413,6 +468,15 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
             </div>
           </div>
           <div className="tsp-check-float-body">{formatFeedbackText(checkMessage)}</div>
+          {checkContext ? (
+            <>
+              <button type="button" className="tsp-assist-btn tsp-annotate-btn" onClick={annotateCode} disabled={annotating}>
+                {annotating ? "Annotating…" : "🔍 Annotate my code"}
+              </button>
+              {annotateError ? <div className="tsp-annotate-error">{annotateError}</div> : null}
+              {annotatedCode ? renderAnnotatedCode(annotatedCode) : null}
+            </>
+          ) : null}
         </div>
       ) : null}
 

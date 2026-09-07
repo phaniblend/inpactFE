@@ -67,6 +67,67 @@
   line-height: 1.6;
 }
 
+/* Wider once annotated code is showing — a code block needs real room, unlike the plain-text
+   feedback message the card starts with. Compound selector so this reliably beats
+   .tsp-card-float's own width rule regardless of source order. */
+.tsp-card-float.tsp-check-float-wide {
+  width: min(680px, calc(100vw - 48px));
+}
+
+.tsp-annotate-btn {
+  margin-top: 4px;
+}
+
+.tsp-annotate-error {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #b91c1c;
+}
+
+/* "Annotate my code" output — the learner's code with coaching comments inserted on their own
+   lines, rendered with real line numbers so a mistake reads as "line 9", not just a description
+   (user report, 2026-09-07: "i know finanials is wrong but where? ... no ckuse"). */
+.tsp-annotated-code {
+  margin-top: 10px;
+  background: #0f172a;
+  border-radius: 8px;
+  padding: 8px 0;
+  font-family: ui-monospace, monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  overflow-x: auto;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.tsp-annotated-line {
+  display: flex;
+  padding: 0 12px;
+  white-space: pre;
+}
+
+.tsp-annotated-lineno {
+  flex-shrink: 0;
+  width: 30px;
+  text-align: right;
+  margin-right: 12px;
+  color: #64748b;
+  user-select: none;
+}
+
+.tsp-annotated-linecode {
+  color: #e2e8f0;
+}
+
+.tsp-annotated-line-note {
+  background: rgba(8, 145, 178, 0.18);
+}
+
+.tsp-annotated-line-note .tsp-annotated-linecode {
+  color: #67e8f9;
+  font-style: italic;
+}
+
 .tsp-feedback-p {
   margin: 0 0 10px;
 }
