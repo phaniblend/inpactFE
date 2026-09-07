@@ -92,10 +92,36 @@
   margin-left: auto;
 }
 
+/* Per-folder "New file here" (2026-09-07, user report: typing a full path by hand created a
+   sibling `src` folder instead of landing inside the existing one). margin-left: auto pushes this
+   (and the delete button right after it) to the row's far right. */
+.ft-newhere-btn {
+  flex-shrink: 0;
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: #0891b2;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+.ft-row:hover .ft-newhere-btn {
+  opacity: 1;
+}
+
+.ft-newhere-btn:hover {
+  background: #ecfeff;
+}
+
 /* Delete (2026-09-07, user report: no way at all to remove a junk file/folder created by
    mistyping a path). Kept dimly visible by default rather than hidden-until-hover — the whole
    point was that this was undiscoverable before. margin-left: auto pushes it to the row's far
-   right whether or not a dirty-dot precedes it. */
+   right whether or not a dirty-dot/new-file-here button precedes it. */
 .ft-delete-btn {
   flex-shrink: 0;
   margin-left: auto;

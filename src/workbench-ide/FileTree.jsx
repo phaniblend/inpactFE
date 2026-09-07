@@ -45,7 +45,51 @@ function DeleteButton({ label, onDelete }) {
   );
 }
 
-function TreeNode({ node, depth, activePath, dirtyPaths, onOpenFile, onDeletePath, expanded, onToggle }) {
+/** Per-folder "+" (2026-09-07, user report: typing a full path by hand created a sibling `src`
+ * folder instead of landing inside the existing one — a learner shouldn't have to get a path
+ * exactly right by typing it blind). Opens the scoped new-file input for that folder specifically;
+ * the input only ever needs a name/relative-subpath from there, not the whole project-root path. */
+function NewFileButton({ label, onClick }) {
+  return (
+    <button type="button" className="ft-newhere-btn" title={`New file in ${label}`} aria-label={`New file in ${label}`} onClick={onClick}>
+      +
+    </button>
+  );
+}
+
+function NewFileInputRow({ depth, value, onChange, onSubmit, onCancel, placeholder }) {
+  return (
+    <div className="ft-new-row" style={{ paddingLeft: 10 + depth * 14 }}>
+      <input
+        autoFocus
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") onSubmit();
+          if (e.key === "Escape") onCancel();
+        }}
+        placeholder={placeholder}
+      />
+    </div>
+  );
+}
+
+function TreeNode({
+  node,
+  depth,
+  activePath,
+  dirtyPaths,
+  onOpenFile,
+  onDeletePath,
+  expanded,
+  onToggle,
+  newFileParent,
+  newFileName,
+  onNewFileNameChange,
+  onStartNewFile,
+  onSubmitNewFile,
+  onCancelNewFile,
+}) {
   if (node.type === "file") {
     const isDirty = dirtyPaths.has(node.path);
     return (
@@ -72,22 +116,48 @@ function TreeNode({ node, depth, activePath, dirtyPaths, onOpenFile, onDeletePat
           {isOpen ? "📂" : "📁"}
         </span>
         <span className="ft-name">{node.name}</span>
+        <NewFileButton
+          label={`${node.path}/`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onStartNewFile(node.path);
+          }}
+        />
         <DeleteButton label={`${node.path}/`} onDelete={() => onDeletePath(node.path)} />
       </div>
-      {isOpen &&
-        node.children.map((child) => (
-          <TreeNode
-            key={child.path}
-            node={child}
-            depth={depth + 1}
-            activePath={activePath}
-            dirtyPaths={dirtyPaths}
-            onOpenFile={onOpenFile}
-            onDeletePath={onDeletePath}
-            expanded={expanded}
-            onToggle={onToggle}
-          />
-        ))}
+      {isOpen && (
+        <>
+          {newFileParent === node.path && (
+            <NewFileInputRow
+              depth={depth + 1}
+              value={newFileName}
+              onChange={onNewFileNameChange}
+              onSubmit={onSubmitNewFile}
+              onCancel={onCancelNewFile}
+              placeholder="NewFile.tsx"
+            />
+          )}
+          {node.children.map((child) => (
+            <TreeNode
+              key={child.path}
+              node={child}
+              depth={depth + 1}
+              activePath={activePath}
+              dirtyPaths={dirtyPaths}
+              onOpenFile={onOpenFile}
+              onDeletePath={onDeletePath}
+              expanded={expanded}
+              onToggle={onToggle}
+              newFileParent={newFileParent}
+              newFileName={newFileName}
+              onNewFileNameChange={onNewFileNameChange}
+              onStartNewFile={onStartNewFile}
+              onSubmitNewFile={onSubmitNewFile}
+              onCancelNewFile={onCancelNewFile}
+            />
+          ))}
+        </>
+      )}
     </div>
   );
 }
@@ -102,7 +172,7 @@ function TreeNode({ node, depth, activePath, dirtyPaths, onOpenFile, onDeletePat
  *   activePath     — currently-open file, for highlighting
  *   dirtyPaths     — Set<string> of paths with unsaved changes, for the dot indicator
  *   onOpenFile     — (path) => void
- *   onCreateFile   — (path) => void — learner-typed relative path, e.g. "src/NewThing.tsx"
+ *   onCreateFile   — (path) => void — full relative path from the project root, e.g. "src/NewThing.tsx"
  *   onDeletePath   — (path) => void — a file's own path, or a whole folder's path (recursive)
  *   refreshToken   — bump this after a commit/checkout to force a re-read of the tree
  */
@@ -110,7 +180,11 @@ export default function FileTree({ fs, dir, activePath, dirtyPaths, onOpenFile, 
   const [tree, setTree] = useState(null);
   const [expanded, setExpanded] = useState(() => new Set());
   const [error, setError] = useState("");
-  const [newFileOpen, setNewFileOpen] = useState(false);
+  // null = closed; "" = creating at the project root; a folder path = creating scoped to that
+  // folder (2026-09-07, user report: typing "src/App.tsx" by hand created a sibling `src` folder
+  // instead of landing in the existing one — a learner shouldn't have to get a path right by
+  // typing it blind. The scoped input only ever needs the name/subpath from that folder down).
+  const [newFileParent, setNewFileParent] = useState(null);
   const [newFileName, setNewFileName] = useState("");
 
   const reload = useCallback(async () => {
@@ -157,35 +231,48 @@ export default function FileTree({ fs, dir, activePath, dirtyPaths, onOpenFile, 
     });
   }
 
-  function submitNewFile() {
-    const name = newFileName.trim().replace(/^\/+/, "");
-    if (!name) return;
-    onCreateFile(name);
+  function startNewFileAt(folderPath) {
+    setExpanded((prev) => (prev.has(folderPath) ? prev : new Set(prev).add(folderPath)));
+    setNewFileParent(folderPath);
     setNewFileName("");
-    setNewFileOpen(false);
+  }
+
+  function cancelNewFile() {
+    setNewFileParent(null);
+    setNewFileName("");
+  }
+
+  function submitNewFile() {
+    const typed = newFileName.trim().replace(/^\/+/, "");
+    if (!typed) return;
+    const full = newFileParent ? `${newFileParent}/${typed}` : typed;
+    onCreateFile(full);
+    setNewFileName("");
+    setNewFileParent(null);
   }
 
   return (
     <div className="ft-root">
       <div className="ft-header">
         <span>FILES</span>
-        <button type="button" className="ft-new-btn" onClick={() => setNewFileOpen((v) => !v)} title="New file">
+        <button
+          type="button"
+          className="ft-new-btn"
+          onClick={() => (newFileParent === "" ? cancelNewFile() : startNewFileAt(""))}
+          title="New file at project root"
+        >
           +
         </button>
       </div>
-      {newFileOpen && (
-        <div className="ft-new-row">
-          <input
-            autoFocus
-            value={newFileName}
-            onChange={(e) => setNewFileName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") submitNewFile();
-              if (e.key === "Escape") setNewFileOpen(false);
-            }}
-            placeholder="src/NewFile.tsx"
-          />
-        </div>
+      {newFileParent === "" && (
+        <NewFileInputRow
+          depth={0}
+          value={newFileName}
+          onChange={setNewFileName}
+          onSubmit={submitNewFile}
+          onCancel={cancelNewFile}
+          placeholder="src/NewFile.tsx"
+        />
       )}
       {error ? (
         <div className="ft-error">{error}</div>
@@ -205,6 +292,12 @@ export default function FileTree({ fs, dir, activePath, dirtyPaths, onOpenFile, 
             onDeletePath={onDeletePath}
             expanded={expanded}
             onToggle={toggle}
+            newFileParent={newFileParent}
+            newFileName={newFileName}
+            onNewFileNameChange={setNewFileName}
+            onStartNewFile={startNewFileAt}
+            onSubmitNewFile={submitNewFile}
+            onCancelNewFile={cancelNewFile}
           />
         ))
       )}
