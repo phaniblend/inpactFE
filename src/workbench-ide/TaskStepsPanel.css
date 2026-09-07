@@ -67,6 +67,43 @@
   line-height: 1.6;
 }
 
+.tsp-feedback-p {
+  margin: 0 0 10px;
+}
+
+.tsp-feedback-p:last-child {
+  margin-bottom: 0;
+}
+
+.tsp-feedback-p code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.92em;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: #0f172a;
+}
+
+/* The actual fix, not just a mention of it — a standalone code block reads as "do this", not
+   "here's a code-ish phrase in a sentence" (user report, 2026-09-07: the fix line was "lost in
+   the bulk"). */
+.tsp-feedback-code {
+  margin: 0 0 10px;
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  font-family: ui-monospace, monospace;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.tsp-feedback-code:last-child {
+  margin-bottom: 0;
+}
+
 @keyframes tsp-pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45);

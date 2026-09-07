@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { findModuleBySlug } from "../assist-me/AssistMeWorkspace.jsx";
 import { fetchLessonCodeValidation } from "../ai-lessons/clientLessonValidation.js";
 import StepAssistPopup from "./StepAssistPopup.jsx";
+import { formatFeedbackText } from "./formatFeedbackText.jsx";
 import "./TaskStepsPanel.css";
 
 function doneStorageKey(moduleTag) {
@@ -389,7 +390,7 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
               ⠿ Check my code
             </div>
           </div>
-          <div className="tsp-check-float-body">{checkMessage}</div>
+          <div className="tsp-check-float-body">{formatFeedbackText(checkMessage)}</div>
         </div>
       ) : null}
 
