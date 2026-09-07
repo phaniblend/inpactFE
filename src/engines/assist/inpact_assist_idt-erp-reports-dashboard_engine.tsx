@@ -59,7 +59,7 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 26",
-    paal: `Create the component file at src/components/InventoryTable.tsx, define type Item, and export the shell.
+    paal: `Create the component file at src/components/InventoryTable.tsx, define type Item, and export the InventoryTable component.
 
 Create src/components/InventoryTable.tsx, declare the Item type matching what the real API actually returns, and export an empty InventoryTable component.
 
