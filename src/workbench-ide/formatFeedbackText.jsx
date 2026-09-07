@@ -43,6 +43,14 @@ export function renderAnnotatedCode(code, keyPrefix = "ann") {
   );
 }
 
+/** A paragraph is a bullet list when every one of its lines starts with "- " — a lump of
+ * instructions read as one thing to parse, not a set of separate, checkable actions (user report,
+ * 2026-09-07: "can we give instructions more formatted, bulleted may be instead of a lump of
+ * text"). Each bullet still gets backtick spans converted to inline <code>. */
+function isBulletParagraph(lines) {
+  return lines.length > 0 && lines.every((l) => /^-\s+/.test(l.trim()));
+}
+
 export function formatFeedbackText(text, keyPrefix = "fb") {
   if (!text) return null;
   const paragraphs = String(text)
@@ -56,6 +64,16 @@ export function formatFeedbackText(text, keyPrefix = "fb") {
         <pre key={`${keyPrefix}-${i}`} className="tsp-feedback-code">
           {fenced[1]}
         </pre>
+      );
+    }
+    const lines = p.split("\n").map((l) => l.trim());
+    if (isBulletParagraph(lines)) {
+      return (
+        <ul key={`${keyPrefix}-${i}`} className="tsp-feedback-list">
+          {lines.map((l, j) => (
+            <li key={`${keyPrefix}-${i}-${j}`}>{withInlineCode(l.replace(/^-\s+/, ""), `${keyPrefix}-${i}-${j}`)}</li>
+          ))}
+        </ul>
       );
     }
     return (

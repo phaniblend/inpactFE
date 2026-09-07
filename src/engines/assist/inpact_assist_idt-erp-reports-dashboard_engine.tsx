@@ -289,7 +289,12 @@ export function FinancialMetrics() {
     feedback_correct: "Correct — the component now has somewhere honest to hold real data.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Add just the useState declaration, defaulted to zero-strings — no fetch yet.",
-    pre_check_hint: `Don't forget the import — useState comes from "react". The Financials type already exists from Step 2 — this step only adds state that uses it. useState needs a starting value even before real data exists — real zero-strings, not undefined, keep the first render honest.`,
+    pre_check_hint: `The Financials type already exists from Step 2 — this step only adds state that uses it.
+
+- Import: \`import { useState } from "react";\`
+- Declare: \`const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" });\`
+
+useState needs a starting value even before real data exists — real zero-strings, not undefined, keep the first render honest.`,
     expected: `import { useState } from "react";
 
 export type Financials = {
@@ -392,7 +397,13 @@ export function FinancialMetrics() {
     feedback_correct: "Correct — real data now flows into state on mount.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "The fetch has to run inside useEffect([]), passing the parsed response straight to setFinancials.",
-    pre_check_hint: `Add useEffect to the existing React import first. fetch() returns a Promise; the real response only exists inside .then(). A useEffect with an empty array makes that run exactly once, right when the component first appears.`,
+    pre_check_hint: `Add useEffect to your existing React import first.
+
+- Import: \`import { useState, useEffect } from "react";\`
+- Fetch: \`fetch("/api/reports/income-statement")\`
+- Store the result: \`.then((res) => res.json()).then(setFinancials)\`, inside \`useEffect(() => { ... }, [])\`
+
+fetch() returns a Promise — the real response only exists inside .then(). A useEffect with an empty array makes that run exactly once, right when the component first appears.`,
     expected: `import { useState, useEffect } from "react";
 
 export type Financials = {
@@ -663,7 +674,13 @@ export default function App() {
     feedback_correct: "Correct — the first shared list exists now.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Just the items array for now — purchaseOrders and salesOrders come in the next two steps.",
-    pre_check_hint: `The file already exists from Step 7. Give App.tsx its own useState import (a new file doesn't inherit FinancialMetrics.tsx's), then declare just the items array, starting empty — the other two arrays come in the next two steps.`,
+    pre_check_hint: `The file already exists from Step 7 — App.tsx needs its own useState import, separate from FinancialMetrics.tsx's.
+
+- Import useState: \`import { useState } from "react";\`
+- Import the type: \`import { type Item } from "./components/InventoryTable";\`
+- Declare: \`const [items, setItems] = useState<Item[]>([]);\`
+
+purchaseOrders and salesOrders come in the next two steps.`,
     expected: `import { useState } from "react";
 import { type Item } from "./components/InventoryTable";
 
@@ -743,7 +760,12 @@ export default function App() {
     feedback_correct: "Correct — two of the three shared lists exist now.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Just add the purchaseOrders array this step — salesOrders comes next.",
-    pre_check_hint: `items is already declared from Step 8. Add purchaseOrders the same way, starting empty — salesOrders comes in the next step.`,
+    pre_check_hint: `items is already declared from Step 8 — add purchaseOrders the same way, in the same file.
+
+- Import the type: \`import { type PurchaseOrder } from "./components/ProcurementPanel";\`
+- Declare: \`const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);\`
+
+salesOrders comes in the next step.`,
     expected: `import { useState } from "react";
 import { type Item } from "./components/InventoryTable";
 import { type PurchaseOrder } from "./components/ProcurementPanel";
@@ -831,7 +853,12 @@ export default function App() {
     feedback_correct: "Correct — all three shared lists exist now.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Just add the salesOrders array this step — no fetching yet.",
-    pre_check_hint: `items and purchaseOrders are already declared from Steps 8 and 9. Add salesOrders the same way, starting empty — the fetch that fills all three comes in the next step.`,
+    pre_check_hint: `items and purchaseOrders are already declared from Steps 8 and 9 — add salesOrders the same way, in the same file.
+
+- Import the type: \`import { type SalesOrder } from "./components/SalesFulfillmentBoard";\`
+- Declare: \`const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);\`
+
+The fetch that fills all three comes in the next step.`,
     expected: `import { useState } from "react";
 import { type Item } from "./components/InventoryTable";
 import { type PurchaseOrder } from "./components/ProcurementPanel";
@@ -931,7 +958,13 @@ export default function App() {
     feedback_correct: "Correct — one function, three real fetches, three updates.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Use Promise.all over the three fetches, then call each setter with its matching result.",
-    pre_check_hint: `Promise.all lets three independent fetches run at once instead of one after another — the array it resolves to is in the same order you passed the fetches in.`,
+    pre_check_hint: `Promise.all lets three independent fetches run at once instead of one after another — the array it resolves to is in the same order you passed the fetches in.
+
+- Declare: \`const loadData = async () => { ... };\`
+- Fetch together: \`const [i, po, so] = await Promise.all([fetch("/api/items").then(r => r.json()), fetch("/api/po").then(r => r.json()), fetch("/api/so").then(r => r.json())]);\`
+- Update state: \`setItems(i); setPurchaseOrders(po); setSalesOrders(so);\`
+
+Don't call loadData() anywhere yet — that's the next step.`,
     expected: `import { useState } from "react";
 import { type Item } from "./components/InventoryTable";
 import { type PurchaseOrder } from "./components/ProcurementPanel";

@@ -266,6 +266,27 @@
   margin-bottom: 14px;
 }
 
+/* Reuses .tsp-feedback-p/.tsp-feedback-list/.tsp-feedback-code from formatFeedbackText.jsx (2026-
+   09-07, user request: "give instructions more formatted, bulleted... instead of a lump of text")
+   — the same renderer already built for Check my code's feedback, so a step's "How" text can now
+   be written as real bullets/inline-code/fenced-code instead of one dense paragraph. */
+.tsp-how-body {
+  margin-top: 6px;
+}
+
+.tsp-how-body .tsp-feedback-list {
+  margin: 0 0 8px;
+  padding-left: 18px;
+}
+
+.tsp-how-body .tsp-feedback-list li {
+  margin-bottom: 6px;
+}
+
+.tsp-how-body .tsp-feedback-p:first-child {
+  margin-top: 0;
+}
+
 .tsp-assist-btn {
   padding: 5px 10px;
   font-size: 11px;

@@ -504,7 +504,8 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
               code. Fall back to `hint` only when a module has no pre_check_hint at all. */}
           {activeNode.pre_check_hint || activeNode.hint ? (
             <div className="tsp-how">
-              <span className="tsp-tag">How</span> {activeNode.pre_check_hint || activeNode.hint}
+              <span className="tsp-tag">How</span>
+              <div className="tsp-how-body">{formatFeedbackText(activeNode.pre_check_hint || activeNode.hint, "how")}</div>
             </div>
           ) : null}
           <button type="button" className="tsp-assist-btn" onClick={() => setAssistNode(activeNode)}>
