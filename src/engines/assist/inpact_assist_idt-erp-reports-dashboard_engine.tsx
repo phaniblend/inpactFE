@@ -6,6 +6,13 @@ const MENTAL_MODEL = `Assemble the whole MiniERP dashboard around one shared sou
   State    →  App.tsx owns items, purchaseOrders, salesOrders — nobody else fetches independently
   Load     →  one loadData() call, fired on mount and after every receive/fulfill
   Assemble →  FinancialMetrics + InventoryTable + ProcurementPanel + SalesFulfillmentBoard, wired together
+
+PREREQUISITE — this task imports from three OTHER tasks, not from anything built here:
+  InventoryTable.tsx (the Item type)        →  built in task idt-erp-inventory-table
+  ProcurementPanel.tsx (the PurchaseOrder type)  →  built in task idt-erp-po-form
+  SalesFulfillmentBoard.tsx (the SalesOrder type) →  built in task idt-erp-so-pipeline
+If those three aren't done yet, Step 8 onward will try to import from files that don't
+exist. Get those three finished first — this task assembles them, it doesn't build them.
 `;
 
 export const NODES = [
@@ -17,7 +24,7 @@ export const NODES = [
       tag: "idt-erp-reports-dashboard",
       title: "Financial metrics + dashboard assembly",
       body: MENTAL_MODEL,
-      usecase: "Every other MiniERP screen already exists as its own component — this task is what makes them a single, live, self-updating dashboard.",
+      usecase: "This task assembles three OTHER MiniERP components — InventoryTable, ProcurementPanel, SalesFulfillmentBoard — into one live dashboard. It assumes those three tasks are already done: this task is what makes them a single, self-updating whole, not what builds them.",
       designMock: {"kind":"list-and-form","screenTitle":"MiniERP Command Center","caption":"This is the screen you are building — real financial cards on top, real inventory/procurement/sales panels below, all sharing one live data source.","listCaption":"CARDS — real figures from the ledger","emptyCaption":"EMPTY — before the first fetch resolves","emptyMessage":"Loading…","rows":[{"title":"Revenue","subtitle":"$125.00","meta":""},{"title":"Net Income","subtitle":"$85.00","meta":""}],"fields":[{"label":"Status","options":["All"]}],"formMode":"filter","submitLabel":"Refresh"},
     },
   },
@@ -291,8 +298,8 @@ export function FinancialMetrics() {
     feedback_wrong: "Add just the useState declaration, defaulted to zero-strings — no fetch yet.",
     pre_check_hint: `The Financials type already exists from Step 2 — this step only adds state that uses it.
 
-- Import: \`import { useState } from "react";\`
-- Declare: \`const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" });\`
+- Import the useState hook from React.
+- Create a state variable for financials, typed with Financials, defaulting to zero-strings for every field.
 
 useState needs a starting value even before real data exists — real zero-strings, not undefined, keep the first render honest.`,
     expected: `import { useState } from "react";
@@ -399,9 +406,9 @@ export function FinancialMetrics() {
     feedback_wrong: "The fetch has to run inside useEffect([]), passing the parsed response straight to setFinancials.",
     pre_check_hint: `Add useEffect to your existing React import first.
 
-- Import: \`import { useState, useEffect } from "react";\`
-- Fetch: \`fetch("/api/reports/income-statement")\`
-- Store the result: \`.then((res) => res.json()).then(setFinancials)\`, inside \`useEffect(() => { ... }, [])\`
+- Import the useEffect hook alongside useState.
+- Inside a useEffect that runs once, on mount, fetch the real income-statement endpoint.
+- Pass the parsed response straight into your state setter.
 
 fetch() returns a Promise — the real response only exists inside .then(). A useEffect with an empty array makes that run exactly once, right when the component first appears.`,
     expected: `import { useState, useEffect } from "react";
@@ -637,6 +644,8 @@ Your task: create the file at src/App.tsx. That's the whole requirement — the 
 
 You already created App.tsx in Step 7. This is the first of three shared state arrays every panel on the dashboard will read from — one array, one step at a time.
 
+Reminder: this step imports the Item type from InventoryTable.tsx — built in a separate task, idt-erp-inventory-table. If that task isn't done yet, this import has nothing to point at.
+
 WHAT YOUR LOGIC NEEDS
 - Import useState: import { useState } from "react"; — App.tsx is a new file, it doesn't inherit FinancialMetrics.tsx's import.
 - Import the Item type from InventoryTable.
@@ -674,11 +683,11 @@ export default function App() {
     feedback_correct: "Correct — the first shared list exists now.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Just the items array for now — purchaseOrders and salesOrders come in the next two steps.",
-    pre_check_hint: `The file already exists from Step 7 — App.tsx needs its own useState import, separate from FinancialMetrics.tsx's.
+    pre_check_hint: `The file already exists from Step 7 — App.tsx needs its own useState import, separate from FinancialMetrics.tsx's. The Item type comes from a separate task (idt-erp-inventory-table) — if that one isn't done yet, this import has nothing to point at.
 
-- Import useState: \`import { useState } from "react";\`
-- Import the type: \`import { type Item } from "./components/InventoryTable";\`
-- Declare: \`const [items, setItems] = useState<Item[]>([]);\`
+- Import the useState hook from React.
+- Import the Item type from the InventoryTable component.
+- Create a state variable for items, typed as an array of Item, starting empty.
 
 purchaseOrders and salesOrders come in the next two steps.`,
     expected: `import { useState } from "react";
@@ -714,6 +723,8 @@ export default function BlogAdminApp() {
     paal: `Declare the \`purchaseOrders\` state array in App.tsx.
 
 The items array already exists from Step 8. Add the second of the three shared arrays the same way, right alongside it.
+
+Reminder: this step imports the PurchaseOrder type from ProcurementPanel.tsx — built in a separate task, idt-erp-po-form. If that task isn't done yet, this import has nothing to point at.
 
 WHAT YOUR LOGIC NEEDS
 - Import the PurchaseOrder type from ProcurementPanel.
@@ -760,10 +771,10 @@ export default function App() {
     feedback_correct: "Correct — two of the three shared lists exist now.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Just add the purchaseOrders array this step — salesOrders comes next.",
-    pre_check_hint: `items is already declared from Step 8 — add purchaseOrders the same way, in the same file.
+    pre_check_hint: `items is already declared from Step 8 — add purchaseOrders the same way, in the same file. The PurchaseOrder type comes from a separate task (idt-erp-po-form) — if that one isn't done yet, this import has nothing to point at.
 
-- Import the type: \`import { type PurchaseOrder } from "./components/ProcurementPanel";\`
-- Declare: \`const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);\`
+- Import the PurchaseOrder type from the ProcurementPanel component.
+- Create a state variable for purchaseOrders, typed as an array of PurchaseOrder, starting empty.
 
 salesOrders comes in the next step.`,
     expected: `import { useState } from "react";
@@ -802,6 +813,8 @@ export default function BlogAdminApp() {
     paal: `Declare the \`salesOrders\` state array in App.tsx.
 
 items and purchaseOrders already exist from Steps 8 and 9. This is the third and last of the shared arrays.
+
+Reminder: this step imports the SalesOrder type from SalesFulfillmentBoard.tsx — built in a separate task, idt-erp-so-pipeline. If that task isn't done yet, this import has nothing to point at.
 
 WHAT YOUR LOGIC NEEDS
 - Import the SalesOrder type from SalesFulfillmentBoard.
@@ -853,10 +866,10 @@ export default function App() {
     feedback_correct: "Correct — all three shared lists exist now.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Just add the salesOrders array this step — no fetching yet.",
-    pre_check_hint: `items and purchaseOrders are already declared from Steps 8 and 9 — add salesOrders the same way, in the same file.
+    pre_check_hint: `items and purchaseOrders are already declared from Steps 8 and 9 — add salesOrders the same way, in the same file. The SalesOrder type comes from a separate task (idt-erp-so-pipeline) — if that one isn't done yet, this import has nothing to point at.
 
-- Import the type: \`import { type SalesOrder } from "./components/SalesFulfillmentBoard";\`
-- Declare: \`const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);\`
+- Import the SalesOrder type from the SalesFulfillmentBoard component.
+- Create a state variable for salesOrders, typed as an array of SalesOrder, starting empty.
 
 The fetch that fills all three comes in the next step.`,
     expected: `import { useState } from "react";
@@ -958,11 +971,11 @@ export default function App() {
     feedback_correct: "Correct — one function, three real fetches, three updates.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Use Promise.all over the three fetches, then call each setter with its matching result.",
-    pre_check_hint: `Promise.all lets three independent fetches run at once instead of one after another — the array it resolves to is in the same order you passed the fetches in.
+    pre_check_hint: `Promise.all lets three independent fetches run at once instead of one after another — the results come back in the same order you passed the fetches in.
 
-- Declare: \`const loadData = async () => { ... };\`
-- Fetch together: \`const [i, po, so] = await Promise.all([fetch("/api/items").then(r => r.json()), fetch("/api/po").then(r => r.json()), fetch("/api/so").then(r => r.json())]);\`
-- Update state: \`setItems(i); setPurchaseOrders(po); setSalesOrders(so);\`
+- Declare an async function called loadData.
+- Inside it, use Promise.all to fetch all three real endpoints (items, purchase orders, sales orders) at the same time.
+- Pass each result to its matching state setter.
 
 Don't call loadData() anywhere yet — that's the next step.`,
     expected: `import { useState } from "react";
