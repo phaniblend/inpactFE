@@ -42,6 +42,24 @@ async function ensureDir(fs, dir) {
   }
 }
 
+/** rm -rf a single path — file or directory, recursing into children first. Missing path is a
+ * silent no-op (matches rm -f semantics; nothing left to delete isn't an error here). */
+async function rmrf(fs, path) {
+  let stat;
+  try {
+    stat = await fs.promises.stat(path);
+  } catch {
+    return;
+  }
+  if (stat.isDirectory()) {
+    const entries = await fs.promises.readdir(path);
+    for (const entry of entries) await rmrf(fs, `${path}/${entry}`);
+    await fs.promises.rmdir(path);
+  } else {
+    await fs.promises.unlink(path);
+  }
+}
+
 /** Clones once; a second call against an already-cloned dir is a cheap no-op. */
 export async function ensureCloned({ fs, dir, projectPath, onProgress }) {
   if (await pathExists(fs, `${dir}/.git`)) return { cloned: false };
@@ -95,6 +113,15 @@ export async function writeFile(fs, dir, filepath, content) {
   await fs.promises.writeFile(full, content, "utf8");
 }
 
+/** Deletes a single file or directory (recursively) from the working tree — e.g. junk created by
+ * mistyping a path into "New file" (user report, 2026-09-07: pasting a URL into that field created
+ * an `https:` folder no one could get rid of). Does NOT touch git history — an already-committed
+ * file just shows as "deleted" in the Git panel's changed-files list until the learner commits, same
+ * as any other real delete. */
+export async function deletePath(fs, dir, filepath) {
+  await rmrf(fs, `${dir}/${filepath}`);
+}
+
 /** Stages every changed file (including deletes) and commits; returns null if nothing changed. */
 export async function commitAll({ fs, dir, message, author }) {
   const changed = await listChangedFiles({ fs, dir });
@@ -141,20 +168,5 @@ export async function readAllFiles(fs, dir) {
 
 /** Safety valve — deletes the local clone entirely so the next "Start developing" re-clones fresh. */
 export async function deleteLocalClone(fs, dir) {
-  async function rmrf(path) {
-    let stat;
-    try {
-      stat = await fs.promises.stat(path);
-    } catch {
-      return;
-    }
-    if (stat.isDirectory()) {
-      const entries = await fs.promises.readdir(path);
-      for (const entry of entries) await rmrf(`${path}/${entry}`);
-      await fs.promises.rmdir(path);
-    } else {
-      await fs.promises.unlink(path);
-    }
-  }
-  await rmrf(dir);
+  await rmrf(fs, dir);
 }

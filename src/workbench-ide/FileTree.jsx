@@ -21,7 +21,31 @@ async function readDirRecursive(fs, dir, base = "") {
   return nodes;
 }
 
-function TreeNode({ node, depth, activePath, dirtyPaths, onOpenFile, expanded, onToggle }) {
+/** Shared by both row types — a hover-revealed delete button, deliberately its own element (not
+ * baked into the row's own onClick) so a click on it never also opens the file or toggles the
+ * folder. Confirms first: this is a real recursive delete for a folder, and undoing a mistake here
+ * means retyping the file, not an undo stack (user report, 2026-09-07: no way at all to remove a
+ * junk file/folder created by mistyping a path — this closes that gap). */
+function DeleteButton({ label, onDelete }) {
+  return (
+    <button
+      type="button"
+      className="ft-delete-btn"
+      title={`Delete ${label}`}
+      aria-label={`Delete ${label}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (window.confirm(`Delete "${label}"? This can't be undone here — you'd have to recreate it.`)) {
+          onDelete();
+        }
+      }}
+    >
+      🗑
+    </button>
+  );
+}
+
+function TreeNode({ node, depth, activePath, dirtyPaths, onOpenFile, onDeletePath, expanded, onToggle }) {
   if (node.type === "file") {
     const isDirty = dirtyPaths.has(node.path);
     return (
@@ -36,6 +60,7 @@ function TreeNode({ node, depth, activePath, dirtyPaths, onOpenFile, expanded, o
         </span>
         <span className="ft-name">{node.name}</span>
         {isDirty && <span className="ft-dirty-dot" aria-hidden />}
+        <DeleteButton label={node.path} onDelete={() => onDeletePath(node.path)} />
       </div>
     );
   }
@@ -47,6 +72,7 @@ function TreeNode({ node, depth, activePath, dirtyPaths, onOpenFile, expanded, o
           {isOpen ? "📂" : "📁"}
         </span>
         <span className="ft-name">{node.name}</span>
+        <DeleteButton label={`${node.path}/`} onDelete={() => onDeletePath(node.path)} />
       </div>
       {isOpen &&
         node.children.map((child) => (
@@ -57,6 +83,7 @@ function TreeNode({ node, depth, activePath, dirtyPaths, onOpenFile, expanded, o
             activePath={activePath}
             dirtyPaths={dirtyPaths}
             onOpenFile={onOpenFile}
+            onDeletePath={onDeletePath}
             expanded={expanded}
             onToggle={onToggle}
           />
@@ -76,9 +103,10 @@ function TreeNode({ node, depth, activePath, dirtyPaths, onOpenFile, expanded, o
  *   dirtyPaths     — Set<string> of paths with unsaved changes, for the dot indicator
  *   onOpenFile     — (path) => void
  *   onCreateFile   — (path) => void — learner-typed relative path, e.g. "src/NewThing.tsx"
+ *   onDeletePath   — (path) => void — a file's own path, or a whole folder's path (recursive)
  *   refreshToken   — bump this after a commit/checkout to force a re-read of the tree
  */
-export default function FileTree({ fs, dir, activePath, dirtyPaths, onOpenFile, onCreateFile, refreshToken }) {
+export default function FileTree({ fs, dir, activePath, dirtyPaths, onOpenFile, onCreateFile, onDeletePath, refreshToken }) {
   const [tree, setTree] = useState(null);
   const [expanded, setExpanded] = useState(() => new Set());
   const [error, setError] = useState("");
@@ -174,6 +202,7 @@ export default function FileTree({ fs, dir, activePath, dirtyPaths, onOpenFile, 
             activePath={activePath}
             dirtyPaths={dirtyPaths}
             onOpenFile={onOpenFile}
+            onDeletePath={onDeletePath}
             expanded={expanded}
             onToggle={toggle}
           />

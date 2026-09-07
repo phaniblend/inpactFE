@@ -59,8 +59,6 @@
   padding: 4px 10px 4px 0;
   cursor: pointer;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .ft-row:hover {
@@ -79,6 +77,8 @@
 }
 
 .ft-name {
+  flex: 1;
+  min-width: 0; /* lets the name truncate instead of pushing the delete button off-row */
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -90,6 +90,33 @@
   background: #f59e0b;
   flex-shrink: 0;
   margin-left: auto;
+}
+
+/* Delete (2026-09-07, user report: no way at all to remove a junk file/folder created by
+   mistyping a path). Kept dimly visible by default rather than hidden-until-hover — the whole
+   point was that this was undiscoverable before. margin-left: auto pushes it to the row's far
+   right whether or not a dirty-dot precedes it. */
+.ft-delete-btn {
+  flex-shrink: 0;
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 11px;
+  line-height: 1;
+  padding: 3px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+.ft-row:hover .ft-delete-btn {
+  opacity: 1;
+}
+
+.ft-delete-btn:hover {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 .ft-error {

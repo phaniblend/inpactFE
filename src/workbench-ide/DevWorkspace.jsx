@@ -8,6 +8,7 @@ import {
   listChangedFiles,
   readFile,
   writeFile,
+  deletePath,
   commitAll,
   pushBranch,
   deleteLocalClone,
@@ -231,6 +232,39 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
     [fs, dir, openFile, refreshStatus]
   );
 
+  // Delete a file or a whole folder (user report, 2026-09-07: mistyping a URL into "New file"
+  // created an `https:` junk folder with no way to remove it — the tree only ever had a way to
+  // add). `path` may be a directory, so any open tab under it (not just an exact match) needs to
+  // close too, or the editor would keep showing content for a file that no longer exists on disk.
+  const deleteEntry = useCallback(
+    async (path) => {
+      try {
+        await deletePath(fs, dir, path);
+        const underPath = (p) => p === path || p.startsWith(`${path}/`);
+        setOpenFiles((prev) => {
+          const next = prev.filter((p) => !underPath(p));
+          setActivePath((prevActive) => (prevActive && underPath(prevActive) ? next[next.length - 1] || null : prevActive));
+          return next;
+        });
+        setContents((prev) => {
+          const next = { ...prev };
+          for (const p of Object.keys(next)) if (underPath(p)) delete next[p];
+          return next;
+        });
+        setSavedContents((prev) => {
+          const next = { ...prev };
+          for (const p of Object.keys(next)) if (underPath(p)) delete next[p];
+          return next;
+        });
+        setRefreshToken((t) => t + 1);
+        await refreshStatus();
+      } catch (err) {
+        console.error("[dev-workspace] delete failed:", path, err.message);
+      }
+    },
+    [fs, dir, refreshStatus]
+  );
+
   // Shared by commitPush, getCheckPayload, and the live preview — all three need whatever's on
   // disk to actually match the latest keystrokes, not whatever the 400ms debounce (see
   // changeContent) hasn't flushed yet. Found live 2026-09-03 testing the real end-to-end flow:
@@ -372,6 +406,7 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
           dirtyPaths={dirtyPaths}
           onOpenFile={openFile}
           onCreateFile={createFile}
+          onDeletePath={deleteEntry}
           refreshToken={refreshToken}
         />
         <WorkspaceEditor
