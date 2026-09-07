@@ -33,7 +33,9 @@ export const NODES = [
       "Fetch the real income statement on mount and store it in state.",
       "Render the three financial cards from state.",
       "Create the file at src/App.tsx.",
-      "Declare the three shared state arrays in App.tsx.",
+      "Declare the items state array in App.tsx.",
+      "Declare the purchaseOrders state array in App.tsx.",
+      "Declare the salesOrders state array in App.tsx.",
       "Write loadData(), fetching items, purchase orders, and sales orders in parallel.",
       "Call loadData() once, when the dashboard first mounts.",
       "Render FinancialMetrics and InventoryTable — neither needs any props.",
@@ -43,7 +45,7 @@ export const NODES = [
   {
     id: "step1",
     type: "question",
-    phase: "Step 1 of 12",
+    phase: "Step 1 of 14",
     paal: `Create the file at \`src/components/FinancialMetrics.tsx\`.
 
 Nothing can go inside a file that doesn't exist yet — this is the very first, purely mechanical step: get the file created at the right path. This step only checks that the file exists; whatever you've written into it since (even finished work from later steps) is completely fine and expected — checking this step never requires the file to be empty.
@@ -91,7 +93,7 @@ Your task: create the file at src/components/FinancialMetrics.tsx. That's the wh
   {
     id: "step2",
     type: "question",
-    phase: "Step 2 of 12",
+    phase: "Step 2 of 14",
     paal: `Define the Financials type.
 
 You already created the file in Step 1. Now write a TypeScript type naming every field the real income-statement endpoint sends back.
@@ -157,7 +159,7 @@ Your task: in the file from Step 1, write \`type Financials\` with those three f
   {
     id: "step3",
     type: "question",
-    phase: "Step 3 of 12",
+    phase: "Step 3 of 14",
     paal: `Export the empty FinancialMetrics component shell.
 
 Add the component itself — no data, no fetch, just a function that returns something on screen.
@@ -230,7 +232,7 @@ export function FinancialMetrics() {
   {
     id: "step4",
     type: "question",
-    phase: "Step 4 of 12",
+    phase: "Step 4 of 14",
     paal: `Add state to hold the fetched financials, defaulting to real zeros.
 
 The Financials type already exists — you defined it in Step 2. This step just uses it: give the component somewhere to hold the financials once they arrive, defaulting to real zero-strings, not nothing.
@@ -322,7 +324,7 @@ export function EarningsCard() {
   {
     id: "step5",
     type: "question",
-    phase: "Step 5 of 12",
+    phase: "Step 5 of 14",
     paal: `Fetch the real income statement on mount and store it in state.
 
 Fetch the real endpoint exactly once, when the component first appears, and hand the response straight to your state setter.
@@ -443,7 +445,7 @@ export function EarningsCard() {
   {
     id: "step6",
     type: "question",
-    phase: "Step 6 of 12",
+    phase: "Step 6 of 14",
     paal: `Render the three financial cards from state.
 
 Draw the three cards — Revenue, COGS, Net Income — reading their values straight from state.
@@ -571,7 +573,7 @@ export function FinancialMetrics() {
   {
     id: "step7",
     type: "question",
-    phase: "Step 7 of 12",
+    phase: "Step 7 of 14",
     paal: `Create the file at \`src/App.tsx\`.
 
 This step edits a different file from everything so far — before declaring any state, the file itself has to exist. This step only checks that the file exists; whatever you write into it afterward (this step or later ones) is completely fine.
@@ -619,21 +621,174 @@ Your task: create the file at src/App.tsx. That's the whole requirement — the 
   {
     id: "step8",
     type: "question",
-    phase: "Step 8 of 12",
-    paal: `Declare the three shared state arrays in App.tsx.
+    phase: "Step 8 of 14",
+    paal: `Declare the \`items\` state array in App.tsx.
 
-You already created the file in Step 7. Now declare the three state arrays every other panel on the dashboard will read from.
+You already created App.tsx in Step 7. This is the first of three shared state arrays every panel on the dashboard will read from — one array, one step at a time.
 
 WHAT YOUR LOGIC NEEDS
-- Import useState: import { useState } from "react"; — this is a new file, so it needs its own import, separate from FinancialMetrics.tsx's.
-- Import the three types from their own components: Item, PurchaseOrder, SalesOrder.
-- Three useState arrays: items, purchaseOrders, salesOrders — all starting empty.
+- Import useState: import { useState } from "react"; — App.tsx is a new file, it doesn't inherit FinancialMetrics.tsx's import.
+- Import the Item type from InventoryTable.
+- One useState array: items, defaulting to an empty array — type Item[].
 
-Your task: in App.tsx (from Step 7), import useState and the three types, then declare items/purchaseOrders/salesOrders as three separate useState<[]>([]) arrays. No fetching yet — that's the next step.`,
+Your task: in App.tsx (from Step 7), import useState and the Item type, then declare items as a useState<Item[]>([]) array. purchaseOrders and salesOrders come in the next two steps.`,
     hint: `1. The file already exists from Step 7 — just open it.
-2. Import useState: import { useState } from "react"; — App.tsx is a new file, it doesn't inherit FinancialMetrics.tsx's import.
-3. Import types from their own components: Item from InventoryTable, PurchaseOrder from ProcurementPanel, SalesOrder from SalesFulfillmentBoard.
-4. Three states: const [items, setItems] = useState<Item[]>([]); (same shape for purchaseOrders and salesOrders).`,
+2. Import useState: import { useState } from "react";
+3. Import the type: import { type Item } from "./components/InventoryTable";
+4. Declare: const [items, setItems] = useState<Item[]>([]);`,
+    example_code: `import { useState } from "react";
+
+export default function BlogAdminApp() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  return <main />;
+}`,
+    think_prompt: `Every child panel on this dashboard needs to read from the SAME live data — that means one shared owner, not three separate copies. What's the first of those three shared lists, and what should it start as?`,
+    mc_options: [
+      "const [items, setItems] = useState<Item[]>([]) in App.tsx",
+      "let each child component declare its own local items array",
+      "one big useState holding all three lists nested in one object",
+    ],
+    mc_correct_option: "const [items, setItems] = useState<Item[]>([]) in App.tsx",
+    mc_anchor: "const [items, setItems] = useState<Item[]>([]) in App",
+    why_this_matters: `Declaring this list once, in the parent, is what makes it possible for every panel to see the same real inventory data.`,
+    answer_keywords: ["items", "useState", "Item"],
+    seed_code: ``,
+    starter_code: `import { useState } from "react";
+
+export default function App() {
+  // items state goes here
+  return <main />;
+}
+`,
+    feedback_correct: "Correct — the first shared list exists now.",
+    feedback_partial: "Close — check the hint and try again.",
+    feedback_wrong: "Just the items array for now — purchaseOrders and salesOrders come in the next two steps.",
+    pre_check_hint: `The file already exists from Step 7. Give App.tsx its own useState import (a new file doesn't inherit FinancialMetrics.tsx's), then declare just the items array, starting empty — the other two arrays come in the next two steps.`,
+    expected: `import { useState } from "react";
+import { type Item } from "./components/InventoryTable";
+
+export default function App() {
+  const [items, setItems] = useState<Item[]>([]);
+  return <main />;
+}
+`,
+    analog_example: `import { useState } from "react";
+
+export default function BlogAdminApp() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  return <main />;
+}`,
+    deepDiveLabel: "Why this step matters",
+    deepDive: {
+      hook: `Declaring this list once, in the parent, is what makes it possible for every panel to see the same real inventory data.`,
+      pain: "Letting each child component own its own copy means an action in one panel never shows up in another.",
+      mentalModel: MENTAL_MODEL,
+      discover: `const [items, setItems] = useState<Item[]>([]);`,
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      watchOut: "Do not add purchaseOrders or salesOrders yet — this step is just the items array.",
+      dryRun: "Declare the same shared-state pattern for a different real list.",
+      build: `useState<Item[]>([]) declared as items in App.tsx.`,
+    },
+  },
+  {
+    id: "step9",
+    type: "question",
+    phase: "Step 9 of 14",
+    paal: `Declare the \`purchaseOrders\` state array in App.tsx.
+
+The items array already exists from Step 8. Add the second of the three shared arrays the same way, right alongside it.
+
+WHAT YOUR LOGIC NEEDS
+- Import the PurchaseOrder type from ProcurementPanel.
+- One useState array: purchaseOrders, defaulting to an empty array — type PurchaseOrder[].
+
+Your task: import the PurchaseOrder type, then declare purchaseOrders as a useState<PurchaseOrder[]>([]) array, alongside items. salesOrders comes in the next step.`,
+    hint: `1. items is already declared from Step 8 — just add to the same file.
+2. Import the type: import { type PurchaseOrder } from "./components/ProcurementPanel";
+3. Declare: const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);`,
+    example_code: `import { useState } from "react";
+
+export default function BlogAdminApp() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  return <main />;
+}`,
+    think_prompt: `The pattern is identical to the last step — just a different type, for a different real endpoint's list. What changes, and what stays exactly the same?`,
+    mc_options: [
+      "const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]) in App.tsx",
+      "reuse the items state to hold purchase orders too",
+      "declare purchaseOrders inside ProcurementPanel instead of App.tsx",
+    ],
+    mc_correct_option: "const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]) in App.tsx",
+    mc_anchor: "const [purchaseOrders, setPurchaseOrders] = useState<Pur",
+    why_this_matters: `Declaring purchaseOrders here too keeps every shared list in the same one place, not scattered across whichever component happens to need it first.`,
+    answer_keywords: ["purchaseOrders", "useState", "PurchaseOrder"],
+    seed_code: `import { useState } from "react";
+import { type Item } from "./components/InventoryTable";
+
+export default function App() {
+  const [items, setItems] = useState<Item[]>([]);
+  return <main />;
+}
+`,
+    starter_code: `import { useState } from "react";
+import { type Item } from "./components/InventoryTable";
+
+export default function App() {
+  const [items, setItems] = useState<Item[]>([]);
+  // purchaseOrders state goes here
+  return <main />;
+}
+`,
+    feedback_correct: "Correct — two of the three shared lists exist now.",
+    feedback_partial: "Close — check the hint and try again.",
+    feedback_wrong: "Just add the purchaseOrders array this step — salesOrders comes next.",
+    pre_check_hint: `items is already declared from Step 8. Add purchaseOrders the same way, starting empty — salesOrders comes in the next step.`,
+    expected: `import { useState } from "react";
+import { type Item } from "./components/InventoryTable";
+import { type PurchaseOrder } from "./components/ProcurementPanel";
+
+export default function App() {
+  const [items, setItems] = useState<Item[]>([]);
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
+  return <main />;
+}
+`,
+    analog_example: `import { useState } from "react";
+
+export default function BlogAdminApp() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  return <main />;
+}`,
+    deepDiveLabel: "Why this step matters",
+    deepDive: {
+      hook: `Declaring purchaseOrders here too keeps every shared list in the same one place, not scattered across whichever component happens to need it first.`,
+      pain: "Letting each child component own its own copy means an action in one panel never shows up in another.",
+      mentalModel: MENTAL_MODEL,
+      discover: `const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);`,
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      watchOut: "Do not add salesOrders yet — this step is just the purchaseOrders array.",
+      dryRun: "Declare the same shared-state pattern for a different real list.",
+      build: `useState<PurchaseOrder[]>([]) declared as purchaseOrders in App.tsx.`,
+    },
+  },
+  {
+    id: "step10",
+    type: "question",
+    phase: "Step 10 of 14",
+    paal: `Declare the \`salesOrders\` state array in App.tsx.
+
+items and purchaseOrders already exist from Steps 8 and 9. This is the third and last of the shared arrays.
+
+WHAT YOUR LOGIC NEEDS
+- Import the SalesOrder type from SalesFulfillmentBoard.
+- One useState array: salesOrders, defaulting to an empty array — type SalesOrder[].
+
+Your task: import the SalesOrder type, then declare salesOrders as a useState<SalesOrder[]>([]) array, alongside items and purchaseOrders. No fetching yet — that's the next step.`,
+    hint: `1. items and purchaseOrders are already declared from Steps 8 and 9 — just add to the same file.
+2. Import the type: import { type SalesOrder } from "./components/SalesFulfillmentBoard";
+3. Declare: const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);`,
     example_code: `import { useState } from "react";
 
 export default function BlogAdminApp() {
@@ -642,31 +797,41 @@ export default function BlogAdminApp() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   return <main />;
 }`,
-    think_prompt: `Every child panel on this dashboard needs to read from the SAME live data — that means one shared owner, not three separate copies. Where does that shared data need to live, and what should it start as?`,
+    think_prompt: `Same pattern a third time. What's the last of the three shared lists, and what should it start as?`,
     mc_options: [
-      "three separate useState<[]>([]) arrays in App.tsx: items, purchaseOrders, salesOrders",
-      "one big useState holding all three lists nested in one object",
-      "let each child component declare its own copy of these three arrays",
+      "const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]) in App.tsx",
+      "reuse purchaseOrders to hold sales orders too",
+      "declare salesOrders inside SalesFulfillmentBoard instead of App.tsx",
     ],
-    mc_correct_option: "three separate useState<[]>([]) arrays in App.tsx: items, purchaseOrders, salesOrders",
-    mc_anchor: "three separate useState<[]>([]) arrays i",
-    why_this_matters: `Declaring these three lists once, in the parent, is what makes it possible for every panel to see the same real data.`,
-    answer_keywords: ["items", "purchaseOrders", "salesOrders", "useState"],
-    seed_code: ``,
-    starter_code: `import { useState } from "react";
+    mc_correct_option: "const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]) in App.tsx",
+    mc_anchor: "const [salesOrders, setSalesOrders] = useState<SalesOr",
+    why_this_matters: `All three lists now live in one shared place — every panel that reads or updates them sees the same real data.`,
+    answer_keywords: ["salesOrders", "useState", "SalesOrder"],
+    seed_code: `import { useState } from "react";
 import { type Item } from "./components/InventoryTable";
 import { type PurchaseOrder } from "./components/ProcurementPanel";
-import { type SalesOrder } from "./components/SalesFulfillmentBoard";
 
 export default function App() {
-  // three state arrays go here
+  const [items, setItems] = useState<Item[]>([]);
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
   return <main />;
 }
 `,
-    feedback_correct: "Correct — one shared home for all three lists.",
+    starter_code: `import { useState } from "react";
+import { type Item } from "./components/InventoryTable";
+import { type PurchaseOrder } from "./components/ProcurementPanel";
+
+export default function App() {
+  const [items, setItems] = useState<Item[]>([]);
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
+  // salesOrders state goes here
+  return <main />;
+}
+`,
+    feedback_correct: "Correct — all three shared lists exist now.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Just the three empty state arrays for now — no fetching yet.",
-    pre_check_hint: `The file already exists from Step 7. Give App.tsx its own useState import (a new file doesn't inherit FinancialMetrics.tsx's), then declare three separate useState hooks, each starting as an empty array — the fetch that fills them comes in the next step.`,
+    feedback_wrong: "Just add the salesOrders array this step — no fetching yet.",
+    pre_check_hint: `items and purchaseOrders are already declared from Steps 8 and 9. Add salesOrders the same way, starting empty — the fetch that fills all three comes in the next step.`,
     expected: `import { useState } from "react";
 import { type Item } from "./components/InventoryTable";
 import { type PurchaseOrder } from "./components/ProcurementPanel";
@@ -689,22 +854,20 @@ export default function BlogAdminApp() {
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      hook: `Declaring these three lists once, in the parent, is what makes it possible for every panel to see the same real data.`,
+      hook: `All three lists now live in one shared place — every panel that reads or updates them sees the same real data.`,
       pain: "Letting each child component own its own copy means an action in one panel never shows up in another.",
       mentalModel: MENTAL_MODEL,
-      discover: `const [items, setItems] = useState<Item[]>([]);
-const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
-const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);`,
+      discover: `const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
-      watchOut: "Do not add a fetch yet — this step is just the three empty state declarations.",
-      dryRun: "Declare the same shared-state pattern for a different set of three related resources.",
-      build: `Three useState<[]>([]) declarations: items, purchaseOrders, salesOrders.`,
+      watchOut: "Do not add a fetch yet — this step is just the salesOrders array.",
+      dryRun: "Declare the same shared-state pattern for a different real list.",
+      build: `useState<SalesOrder[]>([]) declared as salesOrders in App.tsx.`,
     },
   },
   {
-    id: "step9",
+    id: "step11",
     type: "question",
-    phase: "Step 9 of 12",
+    phase: "Step 11 of 14",
     paal: `Write loadData(), fetching items, purchase orders, and sales orders in parallel.
 
 Add one function that fetches all three real endpoints at once and updates all three state setters.
@@ -821,9 +984,9 @@ export default function App() {
     },
   },
   {
-    id: "step10",
+    id: "step12",
     type: "question",
-    phase: "Step 10 of 12",
+    phase: "Step 12 of 14",
     paal: `Call loadData() once, when the dashboard first mounts.
 
 Run the function you just wrote exactly once, right when the page first appears.
@@ -965,9 +1128,9 @@ export default function BlogAdminApp() {
     },
   },
   {
-    id: "step11",
+    id: "step13",
     type: "question",
-    phase: "Step 11 of 12",
+    phase: "Step 13 of 14",
     paal: `Render FinancialMetrics and InventoryTable — neither needs any props.
 
 Import both components and place them inside <main>. Both fetch their own data independently, so neither needs anything passed in.
@@ -1122,9 +1285,9 @@ return (
     },
   },
   {
-    id: "step12",
+    id: "step14",
     type: "question",
-    phase: "Step 12 of 12",
+    phase: "Step 14 of 14",
     paal: `Render ProcurementPanel and SalesFulfillmentBoard, wired to shared state and loadData.
 
 Finish the dashboard: these two panels DO need real props — the shared order lists, and loadData itself as the refresh callback.
@@ -1305,6 +1468,8 @@ const sideItems = [
   { label: "Step 10", id: "step10" },
   { label: "Step 11", id: "step11" },
   { label: "Step 12", id: "step12" },
+  { label: "Step 13", id: "step13" },
+  { label: "Step 14", id: "step14" },
 ];
 
 export default createINPACTEngine({
