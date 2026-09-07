@@ -234,10 +234,14 @@ export default function CodeEditor({
         padding: { top: 12, bottom: 12 },
         bracketPairColorization: { enabled: true },
         // guides.bracketPairs: true draws a filled vertical column down the whole height of every
-        // bracket scope in view — reads as an ugly grey rectangle, not a thin guide line (user
-        // report, 2026-09-07). bracketPairColorization above already colors the bracket characters
-        // themselves, so matching is still visible without the block.
-        guides: { bracketPairs: false },
+        // bracket scope in view, and highlightActiveIndentation (on by default even with
+        // bracketPairs off) fills the CURRENT indentation column with a background tint the same
+        // way — both read as ugly grey rectangles, not thin guide lines (user report, 2026-09-07,
+        // recurred after only turning off bracketPairs — highlightActiveIndentation is the separate
+        // setting actually responsible for the still-visible blocks). bracketPairColorization above
+        // already colors the bracket characters themselves, so matching is still visible without
+        // either kind of block.
+        guides: { bracketPairs: false, highlightActiveIndentation: false },
       }}
     />
   );
