@@ -43,7 +43,16 @@ function jsonForScript(value) {
  */
 export function buildPreviewDocument(fileMap, entryPath) {
   if (!entryPath) {
-    return simpleMessageHtml("No entry point found — expected one of: " + ENTRY_CANDIDATES.join(", "));
+    // Plain "No entry point found — expected one of: ..." read as a dead-end error even when it's
+    // completely expected (user report, 2026-09-07: "preview is still not working", asked mid-task
+    // before the step that creates this file existed yet) — say what it needs AND that not having
+    // it yet is normal, not something broken.
+    return simpleMessageHtml(
+      "Preview can't start yet — it needs a file that actually mounts your app onto the page " +
+        "(one of: " + ENTRY_CANDIDATES.join(", ") + "), and none of those exist in this project yet.\n\n" +
+        "If your task hasn't asked you to create one, that's normal — it's usually one of the very " +
+        "last steps, once every piece is built. Come back to Preview once that step is done."
+    );
   }
 
   const fileMapJson = jsonForScript(fileMap);
