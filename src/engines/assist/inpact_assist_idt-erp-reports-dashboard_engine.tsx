@@ -120,7 +120,7 @@ WHAT YOUR CODE NEEDS
 Your task: export function FinancialMetrics() { return <div />; } below the type from the previous step.`,
     hint: `1. Export a function: export function FinancialMetrics() { ... }
 2. Return the shell: return <div />;`,
-    example_code: `export function RevenueCards() {
+    example_code: `export function EarningsCard() {
   return <div />;
 }`,
     think_prompt: `Every component starts as an empty shell before it holds or renders anything real — that's true whether it will eventually fetch one object or a whole array. What's the minimum a component needs to exist?`,
@@ -161,7 +161,7 @@ export function FinancialMetrics() {
   return <div />;
 }
 `,
-    analog_example: `export function RevenueCards() {
+    analog_example: `export function EarningsCard() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -184,16 +184,21 @@ export function FinancialMetrics() {
     phase: "Step 3 of 10",
     paal: `Add state to hold the fetched financials, defaulting to real zeros.
 
-Give the component somewhere to hold the financials once they arrive — defaulting to real zero-strings, not nothing.
+The Financials type already exists — you defined it in Step 1. This step just uses it: give the component somewhere to hold the financials once they arrive, defaulting to real zero-strings, not nothing.
 
 WHAT YOUR LOGIC NEEDS
+- The Financials type from Step 1 — nothing new to define here.
 - useState<Financials>, defaulting to { revenue: "0.00", cogs: "0.00", netIncome: "0.00" }.
 
-Your task: add const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" }); inside the component. No fetch yet.`,
-    hint: `1. Import useState: import { useState } from "react";
-2. Declare state: const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" });
-3. Place it inside FinancialMetrics(), before the return.`,
-    example_code: `const [earnings, setEarnings] = useState<DriverEarnings>({ fares: "0.00", expenses: "0.00", takeHome: "0.00" });`,
+Your task: add const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" }); inside the component, right after FinancialMetrics() opens. No fetch yet.`,
+    hint: `1. The Financials type is already there from Step 1 — nothing new to define.
+2. Import useState: import { useState } from "react";
+3. Declare state: const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" });
+4. Place it inside FinancialMetrics(), before the return.`,
+    example_code: `export function EarningsCard() {
+  const [earnings, setEarnings] = useState<DriverEarnings>({ fares: "0.00", expenses: "0.00", takeHome: "0.00" });
+  return <div />;
+}`,
     think_prompt: `Right after the component mounts, the real fetch hasn't resolved yet. What should the cards show in that brief moment — nothing, or an honest starting value?`,
     mc_options: [
       "default state to real zero-strings, e.g. { revenue: \"0.00\", cogs: \"0.00\", netIncome: \"0.00\" }",
@@ -230,7 +235,7 @@ export function FinancialMetrics() {
     feedback_correct: "Correct — the component now has somewhere honest to hold real data.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Add just the useState declaration, defaulted to zero-strings — no fetch yet.",
-    pre_check_hint: `useState needs a starting value even before real data exists — real zero-strings, not undefined, keep the first render honest.`,
+    pre_check_hint: `The Financials type already exists from Step 1 — this step only adds state that uses it. useState needs a starting value even before real data exists — real zero-strings, not undefined, keep the first render honest.`,
     expected: `import { useState } from "react";
 
 export type Financials = {
@@ -244,7 +249,10 @@ export function FinancialMetrics() {
   return <div />;
 }
 `,
-    analog_example: `const [earnings, setEarnings] = useState<DriverEarnings>({ fares: "0.00", expenses: "0.00", takeHome: "0.00" });`,
+    analog_example: `export function EarningsCard() {
+  const [earnings, setEarnings] = useState<DriverEarnings>({ fares: "0.00", expenses: "0.00", takeHome: "0.00" });
+  return <div />;
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       hook: `Defaulting to real zero-strings means the cards render sensibly from the very first frame, instead of flashing "$undefined" for a moment.`,
@@ -274,11 +282,17 @@ Your task: wrap a fetch to /api/reports/income-statement in useEffect(() => {...
     hint: `1. Import useEffect: import { useState, useEffect } from "react";
 2. Add the effect: useEffect(() => { ... }, []);
 3. Fetch and store: fetch("/api/reports/income-statement").then((res) => res.json()).then(setFinancials);`,
-    example_code: `useEffect(() => {
-  fetch("/api/driver/earnings")
-    .then((res) => res.json())
-    .then(setEarnings);
-}, []);`,
+    example_code: `export function EarningsCard() {
+  const [earnings, setEarnings] = useState<DriverEarnings>({ fares: "0.00", expenses: "0.00", takeHome: "0.00" });
+
+  useEffect(() => {
+    fetch("/api/driver/earnings")
+      .then((res) => res.json())
+      .then(setEarnings);
+  }, []);
+
+  return <div />;
+}`,
     think_prompt: `A useEffect with an empty dependency array runs exactly once, right after the component's first render. fetch() itself returns a Promise — the real response only exists inside .then(). What single line turns that response into new state?`,
     mc_options: [
       "fetch(\"/api/reports/income-statement\").then((res) => res.json()).then(setFinancials)",
@@ -340,11 +354,17 @@ export function FinancialMetrics() {
   return <div />;
 }
 `,
-    analog_example: `useEffect(() => {
-  fetch("/api/driver/earnings")
-    .then((res) => res.json())
-    .then(setEarnings);
-}, []);`,
+    analog_example: `export function EarningsCard() {
+  const [earnings, setEarnings] = useState<DriverEarnings>({ fares: "0.00", expenses: "0.00", takeHome: "0.00" });
+
+  useEffect(() => {
+    fetch("/api/driver/earnings")
+      .then((res) => res.json())
+      .then(setEarnings);
+  }, []);
+
+  return <div />;
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       hook: `Real-time financial cards, fetched straight from the ledger, are what let a business owner trust the number on screen without waiting for a manual month-end close.`,
@@ -504,9 +524,12 @@ Your task: in App.tsx, declare items/purchaseOrders/salesOrders as three separat
     hint: `1. Create/open the file: src/App.tsx.
 2. Import types from their own components: Item from InventoryTable, PurchaseOrder from ProcurementPanel, SalesOrder from SalesFulfillmentBoard.
 3. Three states: const [items, setItems] = useState<Item[]>([]); (same shape for purchaseOrders and salesOrders).`,
-    example_code: `const [posts, setPosts] = useState<Post[]>([]);
-const [comments, setComments] = useState<Comment[]>([]);
-const [subscribers, setSubscribers] = useState<Subscriber[]>([]);`,
+    example_code: `export default function BlogAdminApp() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  return <main />;
+}`,
     think_prompt: `Every child panel on this dashboard needs to read from the SAME live data — that means one shared owner, not three separate copies. Where does that shared data need to live, and what should it start as?`,
     mc_options: [
       "three separate useState<[]>([]) arrays in App.tsx: items, purchaseOrders, salesOrders",
@@ -544,9 +567,12 @@ export default function App() {
   return <main />;
 }
 `,
-    analog_example: `const [posts, setPosts] = useState<Post[]>([]);
-const [comments, setComments] = useState<Comment[]>([]);
-const [subscribers, setSubscribers] = useState<Subscriber[]>([]);`,
+    analog_example: `export default function BlogAdminApp() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  return <main />;
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       hook: `Declaring these three lists once, in the parent, is what makes it possible for every panel to see the same real data.`,
@@ -695,9 +721,15 @@ Your task: add useEffect(() => { loadData(); }, []); right after loadData is def
     hint: `1. Import useEffect: import { useState, useEffect } from "react";
 2. Add the effect: useEffect(() => { loadData(); }, []);
 3. Place it directly after the loadData function.`,
-    example_code: `useEffect(() => {
-  loadBlogData();
-}, []);`,
+    example_code: `export default function BlogAdminApp() {
+  // ...loadBlogData is already defined above this...
+
+  useEffect(() => {
+    loadBlogData();
+  }, []);
+
+  return <main />;
+}`,
     think_prompt: `Defining a function doesn't run it — something has to actually call it. What runs exactly once, right when a component first appears?`,
     mc_options: [
       "useEffect(() => { loadData(); }, [])",
@@ -790,9 +822,15 @@ export default function App() {
   return <main />;
 }
 `,
-    analog_example: `useEffect(() => {
-  loadBlogData();
-}, []);`,
+    analog_example: `export default function BlogAdminApp() {
+  // ...loadBlogData is already defined above this...
+
+  useEffect(() => {
+    loadBlogData();
+  }, []);
+
+  return <main />;
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       hook: `This is what makes the dashboard show real data the instant it loads, instead of three empty panels waiting for a manual trigger.`,
