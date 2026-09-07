@@ -18,10 +18,105 @@
       href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    <title>pall-inpact</title>
+
+    <!-- SEO shell (2026-09-06): Inpact is a client-rendered SPA — LandingPage.jsx already carries the
+         real <h1> ("The Architecture of Thought") and section copy for a JS-executing visitor, but a
+         plain scraper (MaxReach's offline scan included) only ever sees this static shell, which had
+         no title/description/canonical/social tags and an empty #root. Fixed here with real copy
+         describing what Inpact actually is (a live-product task platform, paid in real experience —
+         never "like a real project" or a tutorial site) rather than any placeholder/keyword-stuffed
+         text. The <noscript> block below is the thin-content fix: genuine static content a non-JS
+         crawler or reader actually sees, matching what the JS app renders — not hidden cloaking
+         content. -->
+    <title>Inpact — The Architecture of Thought</title>
+    <meta
+      name="description"
+      content="Inpact matches developers to real cohorts and live product tasks — genuine shipped work in React and TypeScript, earning real experience, not tutorials."
+    />
+    <link rel="canonical" href="https://inpact.live/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Inpact" />
+    <meta property="og:url" content="https://inpact.live/" />
+    <meta property="og:title" content="Inpact — The Architecture of Thought" />
+    <meta
+      property="og:description"
+      content="Inpact matches developers to real cohorts and live product tasks — genuine shipped work in React and TypeScript, earning real experience, not tutorials."
+    />
+    <!-- og:image intentionally omitted: no real 1200x630 social-preview asset exists yet. Add one
+         (a real product/UI screenshot, not a placeholder) and an og:image tag together, don't ship
+         a broken or unrepresentative image reference in the meantime. -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Inpact — The Architecture of Thought" />
+    <meta
+      name="twitter:description"
+      content="Inpact matches developers to real cohorts and live product tasks — genuine shipped work in React and TypeScript, earning real experience, not tutorials."
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "Inpact",
+            "url": "https://inpact.live/",
+            "logo": "https://inpact.live/favicon.svg"
+          },
+          {
+            "@type": "WebSite",
+            "name": "Inpact",
+            "url": "https://inpact.live/",
+            "description": "Inpact matches developers to real cohorts and live product tasks — genuine shipped work in React and TypeScript, earning real experience, not tutorials."
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <main style="max-width: 720px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; line-height: 1.6; color: #0f172a;">
+        <h1>Inpact — The Architecture of Thought</h1>
+        <p>
+          Inpact is a live product platform where developers learn by shipping real, working
+          features — not tutorials, not simulations. Every task on Inpact is a genuine piece of a
+          real product: a live cohort-matching pipeline, an inventory and purchasing system, a
+          shift-coverage board, a package-tracking desk, and more. When a developer completes a
+          task, real users depend on the result.
+        </p>
+        <h2>How it works</h2>
+        <p>
+          Developers apply and get matched into a cohort based on their trade and current skill
+          level — React, TypeScript, JavaScript fundamentals, and beyond. Each matched task comes
+          with a guided set of independent steps, each with an on-demand Assist guide that teaches
+          the underlying pattern without handing over the finished answer. Developers write the
+          real code themselves, in a real workbench, against a real backend.
+        </p>
+        <p>
+          Guided tasks touch the patterns real teams use daily: building UI components in React,
+          writing typed data models in TypeScript, wiring forms and filtered list views, and
+          composing multi-step dashboards from smaller pieces. Each task is scoped to one clear,
+          independent goal, so a developer always knows what "done" looks like before they start.
+        </p>
+        <h2>Real work, real experience</h2>
+        <p>
+          Compensation on Inpact is real-world experience, not cash. Every shipped task becomes a
+          genuine, verifiable line in a developer's own portfolio: real product, real acceptance
+          criteria, real code review. It's the fastest path from "I know the syntax" to "I've
+          shipped."
+        </p>
+        <p>
+          Inpact currently runs cohorts across the React and TypeScript ecosystem, with tasks
+          spanning full front-end builds, form and list UI patterns, dashboards, and small
+          full-stack products with their own APIs. New product tracks are added as the platform
+          grows. Inpact is an early-stage platform built by developers, for developers, working
+          toward becoming the standard way junior and mid-level engineers build a body of real,
+          shippable work before their first job — or their next one.
+        </p>
+        <p>Enable JavaScript to apply to a cohort, browse the live task queue, and use the workbench.</p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
