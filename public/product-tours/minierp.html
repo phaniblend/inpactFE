@@ -777,6 +777,15 @@
     function jumpToChapter(idx) {
       executeFlowFrom(idx);
     }
+
+    // Arriving here already IS the "start" action — the viewer just clicked "Watch product tour"
+    // on the task page to get here, so asking them to click Start Tour again is a redundant second
+    // gate. Auto-play on load instead; a short delay lets the page settle and speechSynthesis's
+    // voice list populate before the first line is spoken. Chapter buttons and Pause still work
+    // normally once the tour is running, same as before.
+    window.addEventListener("load", () => {
+      setTimeout(() => togglePlayTour(), 500);
+    });
   </script>
 </body>
 </html>
