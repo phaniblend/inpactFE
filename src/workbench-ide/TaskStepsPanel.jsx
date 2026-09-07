@@ -60,6 +60,14 @@ function saveDoneSet(moduleTag, set) {
  * generated module (`paal`/`hint`/`why_this_matters`/`analog_example`/`deepDive`) — no content
  * regeneration needed, only this new renderer.
  *
+ * List + detail-card layout (rebuilt live 2026-09-06 from the original always-all-expanded stack):
+ * every step's full What/How text stacked one after another made the panel a long scroll of dense
+ * paragraphs, hard to scan for which step you're even on. Now the list only shows compact rows
+ * (checkbox + "Step N") — clicking one opens a single-step detail card with the full What/How and
+ * Assist me, plus Prev/Next so a learner can walk the whole sequence without closing and reopening
+ * a different row each time. Close returns to the compact row list; clicking a different row while
+ * closed opens straight to that step.
+ *
  * Done-state persists to localStorage per moduleTag (a real per-learner progress store is future
  * work, not this component's job).
  *
@@ -81,11 +89,14 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
   const [checking, setChecking] = useState(false);
   const [checkMessage, setCheckMessage] = useState("");
   const [justPassed, setJustPassed] = useState(() => new Set());
+  // null = compact row list; a number = that step's detail card is open.
+  const [activeStep, setActiveStep] = useState(null);
 
   useEffect(() => {
     setDone(moduleTag ? loadDoneSet(moduleTag) : new Set());
     setCheckMessage("");
     setJustPassed(new Set());
+    setActiveStep(null);
   }, [moduleTag]);
 
   function toggleDone(id) {
@@ -148,6 +159,8 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
     return <div className="tsp-empty">No guided lesson found for this task yet.</div>;
   }
 
+  const activeNode = activeStep === null ? null : steps[activeStep];
+
   return (
     <div className="tsp-root">
       <div className="tsp-header">
@@ -162,43 +175,87 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
         </button>
         {checkMessage && <span className="tsp-check-msg">{checkMessage}</span>}
       </div>
-      <div className="tsp-list">
-        {steps.map((node, i) => {
-          const isDone = done.has(node.id);
-          const justPassedNow = justPassed.has(node.id);
-          return (
-            <div
-              key={node.id}
-              className={`tsp-step${isDone ? " tsp-step-done" : ""}${justPassedNow ? " tsp-step-just-passed" : ""}`}
-            >
-              <label className="tsp-check">
-                <input type="checkbox" checked={isDone} onChange={() => toggleDone(node.id)} />
-              </label>
-              <div className="tsp-step-body">
-                <div className="tsp-step-num">Step {i + 1}</div>
-                <div className="tsp-what">
-                  <span className="tsp-tag">What</span> {whatFromPaal(node.paal)}
-                </div>
-                {/* `hint` is usually the literal code answer (or close to it) — showing that as
-                    "How" just restates "What" a second time, found live 2026-09-02 testing this.
-                    `pre_check_hint` (written for a different original purpose — guidance shown
-                    before the learner has attempted the step) is the field that's actually
-                    technique-level across every module checked: what to do conceptually, not the
-                    finished line of code. Fall back to `hint` only when a module has no
-                    pre_check_hint at all. */}
-                {node.pre_check_hint || node.hint ? (
-                  <div className="tsp-how">
-                    <span className="tsp-tag">How</span> {node.pre_check_hint || node.hint}
-                  </div>
-                ) : null}
-                <button type="button" className="tsp-assist-btn" onClick={() => setAssistNode(node)}>
-                  💡 Assist me
-                </button>
-              </div>
+
+      {activeNode ? (
+        <div className="tsp-card">
+          <div className="tsp-card-head">
+            <button type="button" className="tsp-card-close" onClick={() => setActiveStep(null)} aria-label="Close step">
+              ✕ Close
+            </button>
+            <span className="tsp-card-count">
+              Step {activeStep + 1} of {steps.length}
+            </span>
+          </div>
+          <label className="tsp-card-check">
+            <input type="checkbox" checked={done.has(activeNode.id)} onChange={() => toggleDone(activeNode.id)} />
+            <span>Mark done</span>
+          </label>
+          <div className="tsp-what">
+            <span className="tsp-tag">What</span> {whatFromPaal(activeNode.paal)}
+          </div>
+          {/* `hint` is usually the literal code answer (or close to it) — showing that as "How"
+              just restates "What" a second time, found live 2026-09-02 testing this.
+              `pre_check_hint` (written for a different original purpose — guidance shown before
+              the learner has attempted the step) is the field that's actually technique-level
+              across every module checked: what to do conceptually, not the finished line of
+              code. Fall back to `hint` only when a module has no pre_check_hint at all. */}
+          {activeNode.pre_check_hint || activeNode.hint ? (
+            <div className="tsp-how">
+              <span className="tsp-tag">How</span> {activeNode.pre_check_hint || activeNode.hint}
             </div>
-          );
-        })}
-      </div>
+          ) : null}
+          <button type="button" className="tsp-assist-btn" onClick={() => setAssistNode(activeNode)}>
+            💡 Assist me
+          </button>
+          <div className="tsp-card-nav">
+            <button
+              type="button"
+              className="tsp-nav-btn"
+              disabled={activeStep === 0}
+              onClick={() => setActiveStep((i) => Math.max(0, i - 1))}
+            >
+              ← Prev
+            </button>
+            <button
+              type="button"
+              className="tsp-nav-btn tsp-nav-btn-primary"
+              disabled={activeStep === steps.length - 1}
+              onClick={() => setActiveStep((i) => Math.min(steps.length - 1, i + 1))}
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="tsp-list">
+          {steps.map((node, i) => {
+            const isDone = done.has(node.id);
+            const justPassedNow = justPassed.has(node.id);
+            return (
+              <div
+                key={node.id}
+                className={`tsp-row${isDone ? " tsp-row-done" : ""}${justPassedNow ? " tsp-row-just-passed" : ""}`}
+                onClick={() => setActiveStep(i)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setActiveStep(i);
+                  }
+                }}
+              >
+                <label className="tsp-check" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={isDone} onChange={() => toggleDone(node.id)} />
+                </label>
+                <span className="tsp-row-num">Step {i + 1}</span>
+                <span className="tsp-row-arrow">›</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {assistNode && <StepAssistPopup moduleTag={moduleTag} node={assistNode} onClose={() => setAssistNode(null)} />}
     </div>
   );

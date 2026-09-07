@@ -55,11 +55,11 @@ Your task: create the file, then write \`type Financials\` with those three fiel
     hint: `1. Create the file: Add a new file at src/components/FinancialMetrics.tsx.
 2. Match the real shape: GET /api/reports/income-statement returns { revenue, cogs, netIncome } as strings like "125.00", not numbers.
 3. Write only the type — no component yet.`,
-    example_code: `// src/components/RevenueCards.tsx
-export type Financials = {
-  revenue: string;
-  cogs: string;
-  netIncome: string;
+    example_code: `// src/components/EarningsCard.tsx
+export type DriverEarnings = {
+  fares: string;
+  expenses: string;
+  takeHome: string;
 };`,
     think_prompt: `The real /api/reports/income-statement endpoint already formats every figure to 2 decimal places as a string — the type needs to reflect that exact shape, not a guess. What does the blueprint need to name?`,
     mc_options: [
@@ -83,10 +83,10 @@ export type Financials = {
   netIncome: string;
 };
 `,
-    analog_example: `export type Financials = {
-  revenue: string;
-  cogs: string;
-  netIncome: string;
+    analog_example: `export type DriverEarnings = {
+  fares: string;
+  expenses: string;
+  takeHome: string;
 };`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -193,7 +193,7 @@ Your task: add const [financials, setFinancials] = useState<Financials>({ revenu
     hint: `1. Import useState: import { useState } from "react";
 2. Declare state: const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" });
 3. Place it inside FinancialMetrics(), before the return.`,
-    example_code: `const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" });`,
+    example_code: `const [earnings, setEarnings] = useState<DriverEarnings>({ fares: "0.00", expenses: "0.00", takeHome: "0.00" });`,
     think_prompt: `Right after the component mounts, the real fetch hasn't resolved yet. What should the cards show in that brief moment — nothing, or an honest starting value?`,
     mc_options: [
       "default state to real zero-strings, e.g. { revenue: \"0.00\", cogs: \"0.00\", netIncome: \"0.00\" }",
@@ -244,7 +244,7 @@ export function FinancialMetrics() {
   return <div />;
 }
 `,
-    analog_example: `const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" });`,
+    analog_example: `const [earnings, setEarnings] = useState<DriverEarnings>({ fares: "0.00", expenses: "0.00", takeHome: "0.00" });`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       hook: `Defaulting to real zero-strings means the cards render sensibly from the very first frame, instead of flashing "$undefined" for a moment.`,
@@ -275,9 +275,9 @@ Your task: wrap a fetch to /api/reports/income-statement in useEffect(() => {...
 2. Add the effect: useEffect(() => { ... }, []);
 3. Fetch and store: fetch("/api/reports/income-statement").then((res) => res.json()).then(setFinancials);`,
     example_code: `useEffect(() => {
-  fetch("/api/reports/income-statement")
+  fetch("/api/driver/earnings")
     .then((res) => res.json())
-    .then(setFinancials);
+    .then(setEarnings);
 }, []);`,
     think_prompt: `A useEffect with an empty dependency array runs exactly once, right after the component's first render. fetch() itself returns a Promise — the real response only exists inside .then(). What single line turns that response into new state?`,
     mc_options: [
@@ -341,9 +341,9 @@ export function FinancialMetrics() {
 }
 `,
     analog_example: `useEffect(() => {
-  fetch("/api/reports/income-statement")
+  fetch("/api/driver/earnings")
     .then((res) => res.json())
-    .then(setFinancials);
+    .then(setEarnings);
 }, []);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -377,9 +377,9 @@ Your task: replace <div /> with a layout showing all three fields from financial
 2. One card per field: <div>Revenue: \${financials.revenue}</div>, and the same for cogs and netIncome.`,
     example_code: `return (
   <div className="grid grid-cols-3 gap-4">
-    <div className="p-4 bg-white rounded shadow">Revenue: \${financials.revenue}</div>
-    <div className="p-4 bg-white rounded shadow">COGS: \${financials.cogs}</div>
-    <div className="p-4 bg-white rounded shadow">Net Income: \${financials.netIncome}</div>
+    <div className="p-4 bg-white rounded shadow">Fares: \${earnings.fares}</div>
+    <div className="p-4 bg-white rounded shadow">Expenses: \${earnings.expenses}</div>
+    <div className="p-4 bg-white rounded shadow">Take Home: \${earnings.takeHome}</div>
   </div>
 );`,
     think_prompt: `This is the simplest possible render step — no conditionals, no loop, just reading three fields off one state object straight into JSX. What does each card need to show?`,
@@ -468,9 +468,9 @@ export function FinancialMetrics() {
 `,
     analog_example: `return (
   <div className="grid grid-cols-3 gap-4">
-    <div className="p-4 bg-white rounded shadow">Revenue: \${financials.revenue}</div>
-    <div className="p-4 bg-white rounded shadow">COGS: \${financials.cogs}</div>
-    <div className="p-4 bg-white rounded shadow">Net Income: \${financials.netIncome}</div>
+    <div className="p-4 bg-white rounded shadow">Fares: \${earnings.fares}</div>
+    <div className="p-4 bg-white rounded shadow">Expenses: \${earnings.expenses}</div>
+    <div className="p-4 bg-white rounded shadow">Take Home: \${earnings.takeHome}</div>
   </div>
 );`,
     deepDiveLabel: "Why this step matters",
@@ -504,9 +504,9 @@ Your task: in App.tsx, declare items/purchaseOrders/salesOrders as three separat
     hint: `1. Create/open the file: src/App.tsx.
 2. Import types from their own components: Item from InventoryTable, PurchaseOrder from ProcurementPanel, SalesOrder from SalesFulfillmentBoard.
 3. Three states: const [items, setItems] = useState<Item[]>([]); (same shape for purchaseOrders and salesOrders).`,
-    example_code: `const [items, setItems] = useState<Item[]>([]);
-const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
-const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);`,
+    example_code: `const [posts, setPosts] = useState<Post[]>([]);
+const [comments, setComments] = useState<Comment[]>([]);
+const [subscribers, setSubscribers] = useState<Subscriber[]>([]);`,
     think_prompt: `Every child panel on this dashboard needs to read from the SAME live data — that means one shared owner, not three separate copies. Where does that shared data need to live, and what should it start as?`,
     mc_options: [
       "three separate useState<[]>([]) arrays in App.tsx: items, purchaseOrders, salesOrders",
@@ -544,9 +544,9 @@ export default function App() {
   return <main />;
 }
 `,
-    analog_example: `const [items, setItems] = useState<Item[]>([]);
-const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
-const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);`,
+    analog_example: `const [posts, setPosts] = useState<Post[]>([]);
+const [comments, setComments] = useState<Comment[]>([]);
+const [subscribers, setSubscribers] = useState<Subscriber[]>([]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       hook: `Declaring these three lists once, in the parent, is what makes it possible for every panel to see the same real data.`,
@@ -578,15 +578,15 @@ Your task: write loadData as an async function using Promise.all over the three 
     hint: `1. Declare the function: const loadData = async () => { ... };
 2. Fetch in parallel: const [i, po, so] = await Promise.all([fetch("/api/items").then(r=>r.json()), fetch("/api/po").then(r=>r.json()), fetch("/api/so").then(r=>r.json())]);
 3. Update state: setItems(i); setPurchaseOrders(po); setSalesOrders(so);`,
-    example_code: `const loadData = async () => {
-  const [i, po, so] = await Promise.all([
-    fetch("/api/items").then((r) => r.json()),
-    fetch("/api/po").then((r) => r.json()),
-    fetch("/api/so").then((r) => r.json()),
+    example_code: `const loadBlogData = async () => {
+  const [p, c, s] = await Promise.all([
+    fetch("/api/posts").then((r) => r.json()),
+    fetch("/api/comments").then((r) => r.json()),
+    fetch("/api/subscribers").then((r) => r.json()),
   ]);
-  setItems(i);
-  setPurchaseOrders(po);
-  setSalesOrders(so);
+  setPosts(p);
+  setComments(c);
+  setSubscribers(s);
 };`,
     think_prompt: `Three independent fetches that don't depend on each other can run at the same time instead of one after another. What lets three separate fetch() calls run in parallel and hands back all three results together?`,
     mc_options: [
@@ -653,15 +653,15 @@ export default function App() {
   return <main />;
 }
 `,
-    analog_example: `const loadData = async () => {
-  const [i, po, so] = await Promise.all([
-    fetch("/api/items").then((r) => r.json()),
-    fetch("/api/po").then((r) => r.json()),
-    fetch("/api/so").then((r) => r.json()),
+    analog_example: `const loadBlogData = async () => {
+  const [p, c, s] = await Promise.all([
+    fetch("/api/posts").then((r) => r.json()),
+    fetch("/api/comments").then((r) => r.json()),
+    fetch("/api/subscribers").then((r) => r.json()),
   ]);
-  setItems(i);
-  setPurchaseOrders(po);
-  setSalesOrders(so);
+  setPosts(p);
+  setComments(c);
+  setSubscribers(s);
 };`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -696,7 +696,7 @@ Your task: add useEffect(() => { loadData(); }, []); right after loadData is def
 2. Add the effect: useEffect(() => { loadData(); }, []);
 3. Place it directly after the loadData function.`,
     example_code: `useEffect(() => {
-  loadData();
+  loadBlogData();
 }, []);`,
     think_prompt: `Defining a function doesn't run it — something has to actually call it. What runs exactly once, right when a component first appears?`,
     mc_options: [
@@ -791,7 +791,7 @@ export default function App() {
 }
 `,
     analog_example: `useEffect(() => {
-  loadData();
+  loadBlogData();
 }, []);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -822,13 +822,13 @@ WHAT YOUR LOGIC NEEDS
 Your task: import both components and render them, in that order, inside <main>. The procurement and sales panels come in the next step.`,
     hint: `1. Import: import { FinancialMetrics } from "./components/FinancialMetrics"; import { InventoryTable } from "./components/InventoryTable";
 2. Render: <main><FinancialMetrics /><InventoryTable /></main>`,
-    example_code: `import { FinancialMetrics } from "./components/FinancialMetrics";
-import { InventoryTable } from "./components/InventoryTable";
+    example_code: `import { BlogMetrics } from "./components/BlogMetrics";
+import { PostList } from "./components/PostList";
 
 return (
   <main>
-    <FinancialMetrics />
-    <InventoryTable />
+    <BlogMetrics />
+    <PostList />
   </main>
 );`,
     think_prompt: `FinancialMetrics and InventoryTable each already fetch their own real data inside themselves — App.tsx doesn't own either one's data. What do they need from the parent to render correctly?`,
@@ -940,13 +940,13 @@ export default function App() {
   );
 }
 `,
-    analog_example: `import { FinancialMetrics } from "./components/FinancialMetrics";
-import { InventoryTable } from "./components/InventoryTable";
+    analog_example: `import { BlogMetrics } from "./components/BlogMetrics";
+import { PostList } from "./components/PostList";
 
 return (
   <main>
-    <FinancialMetrics />
-    <InventoryTable />
+    <BlogMetrics />
+    <PostList />
   </main>
 );`,
     deepDiveLabel: "Why this step matters",
@@ -981,12 +981,12 @@ Your task: import both components and render them inside <main>, passing loadDat
     hint: `1. Import: import { ProcurementPanel } from "./components/ProcurementPanel"; import { SalesFulfillmentBoard } from "./components/SalesFulfillmentBoard";
 2. Render with props: <ProcurementPanel orders={purchaseOrders} onReceive={loadData} /> and <SalesFulfillmentBoard orders={salesOrders} onFulfill={loadData} />.
 3. Pass the function itself — loadData, not loadData() — so it runs only when the panel actually calls it.`,
-    example_code: `import { ProcurementPanel } from "./components/ProcurementPanel";
-import { SalesFulfillmentBoard } from "./components/SalesFulfillmentBoard";
+    example_code: `import { CommentModeration } from "./components/CommentModeration";
+import { SubscriberOutreach } from "./components/SubscriberOutreach";
 
 <div className="grid grid-cols-2 gap-6">
-  <ProcurementPanel orders={purchaseOrders} onReceive={loadData} />
-  <SalesFulfillmentBoard orders={salesOrders} onFulfill={loadData} />
+  <CommentModeration comments={comments} onApprove={loadBlogData} />
+  <SubscriberOutreach subscribers={subscribers} onWelcome={loadBlogData} />
 </div>`,
     think_prompt: `Passing loadData (no parentheses) means the panel decides exactly when to call it — right after a real successful receipt or fulfillment. What's the difference between handing over a function and handing over the result of calling it right now?`,
     mc_options: [
@@ -1111,12 +1111,12 @@ export default function App() {
   );
 }
 `,
-    analog_example: `import { ProcurementPanel } from "./components/ProcurementPanel";
-import { SalesFulfillmentBoard } from "./components/SalesFulfillmentBoard";
+    analog_example: `import { CommentModeration } from "./components/CommentModeration";
+import { SubscriberOutreach } from "./components/SubscriberOutreach";
 
 <div className="grid grid-cols-2 gap-6">
-  <ProcurementPanel orders={purchaseOrders} onReceive={loadData} />
-  <SalesFulfillmentBoard orders={salesOrders} onFulfill={loadData} />
+  <CommentModeration comments={comments} onApprove={loadBlogData} />
+  <SubscriberOutreach subscribers={subscribers} onWelcome={loadBlogData} />
 </div>`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
