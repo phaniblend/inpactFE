@@ -1,47 +1,22 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { AssistMeEmbedded } from "./AssistMeWorkspace.jsx";
 
+// Pokedex (and the whole prior SMB product catalog before it) was replaced 2026-09-03 by Mini
+// ERP — a real Fastify + Prisma + PostgreSQL backend (Procure-to-Pay, Order-to-Cash, double-entry
+// GL — already built, verified against its own spec's acceptance criteria, and running) with
+// purely-frontend learner tasks against it.
+//
+// 2026-09-07: this used to be four separate tasks, but idt-erp-reports-dashboard's own steps
+// imported types (Item/PurchaseOrder/SalesOrder) from files the other three tasks built — a
+// learner assigned only the dashboard task hit an import with nothing to point at (user report:
+// "its still asking me to import type from a file that was never created"). Merged all four into
+// one 26-step task under the same idt-erp-reports-dashboard tag, in dependency order (inventory ->
+// procurement -> sales -> financials -> App.tsx assembly), so the prerequisite steps and the
+// steps that depend on them now live in the same task. The three old per-component engine files
+// (inpact_assist_idt-erp-inventory-table/po-form/so-pipeline_engine.tsx) are left on disk, not
+// deleted — their content still exists inside the merged file — but are no longer listed here.
 const MODULES = [
-  { tag: "idt-booking-appointment-list-form", product: "BookingDepositDesk", trade: "Coding · FE", title: "Build the appointment calendar list and book form" },
-  { tag: "idt-booking-appointments-api", product: "BookingDepositDesk", trade: "Coding · BE", title: "Implement appointments API with slot conflict checks" },
-  { tag: "idt-booking-deposit-list-form", product: "BookingDepositDesk", trade: "Coding · FE", title: "Build deposit list and take-deposit form" },
-  { tag: "idt-booking-deposits-api", product: "BookingDepositDesk", trade: "Coding · BE", title: "Implement deposits API with held/applied status" },
-  { tag: "idt-booking-day-board-filter", product: "BookingDepositDesk", trade: "Coding · FE", title: "Build day board filtered by provider" },
-  { tag: "idt-invoice-list-form", product: "InvoiceFollowUpTracker", trade: "Coding · FE", title: "Build invoice list and create-invoice form" },
-  { tag: "idt-invoice-overdue-api", product: "InvoiceFollowUpTracker", trade: "Coding · BE", title: "Implement invoices API with overdue status" },
-  { tag: "idt-invoice-reminder-list-form", product: "InvoiceFollowUpTracker", trade: "Coding · FE", title: "Build reminder log list and schedule form" },
-  { tag: "idt-invoice-reminder-api", product: "InvoiceFollowUpTracker", trade: "Coding · BE", title: "Implement reminders API — one pending per invoice channel" },
-  { tag: "idt-invoice-overdue-board", product: "InvoiceFollowUpTracker", trade: "Coding · FE", title: "Build overdue board filtered by status" },
-  { tag: "idt-lead-list-form", product: "LeadFollowUpInbox", trade: "Coding · FE", title: "Build lead inbox list and capture form" },
-  { tag: "idt-lead-stale-api", product: "LeadFollowUpInbox", trade: "Coding · BE", title: "Implement leads API with fresh/stale status" },
-  { tag: "idt-lead-reply-list-form", product: "LeadFollowUpInbox", trade: "Coding · FE", title: "Build reply notes list and add-note form" },
-  { tag: "idt-lead-notes-api", product: "LeadFollowUpInbox", trade: "Coding · BE", title: "Implement lead-notes API blocking duplicate body spam" },
-  { tag: "idt-lead-stale-board", product: "LeadFollowUpInbox", trade: "Coding · FE", title: "Build stale-lead board filtered by status" },
-  { tag: "idt-shift-list-form", product: "ShiftCoverageBoard", trade: "Coding · FE", title: "Build shift board list and publish form" },
-  { tag: "idt-shift-overlap-api", product: "ShiftCoverageBoard", trade: "Coding · BE", title: "Implement shifts API with worker overlap conflicts" },
-  { tag: "idt-coverage-list-form", product: "ShiftCoverageBoard", trade: "Coding · FE", title: "Build open coverage list and request form" },
-  { tag: "idt-coverage-api", product: "ShiftCoverageBoard", trade: "Coding · BE", title: "Implement coverage API with open/filled status" },
-  { tag: "idt-open-shift-board", product: "ShiftCoverageBoard", trade: "Coding · FE", title: "Build open-shift board filtered to unfilled coverage" },
-  { tag: "idt-quote-list-form", product: "QuoteEstimateDesk", trade: "Coding · FE", title: "Build quote list and create-estimate form" },
-  { tag: "idt-quote-expiry-api", product: "QuoteEstimateDesk", trade: "Coding · BE", title: "Implement quotes API with open/expired/accepted status" },
-  { tag: "idt-quote-line-list-form", product: "QuoteEstimateDesk", trade: "Coding · FE", title: "Build quote line-items list and add-line form" },
-  { tag: "idt-quote-lines-api", product: "QuoteEstimateDesk", trade: "Coding · BE", title: "Implement quote-lines API blocking duplicate labels" },
-  { tag: "idt-quote-accepted-board", product: "QuoteEstimateDesk", trade: "Coding · FE", title: "Build accepted-quotes board filtered by status" },
-  { tag: "idt-review-list-form", product: "ReviewReplyInbox", trade: "Coding · FE", title: "Build review inbox list and log-review form" },
-  { tag: "idt-review-needs-reply-api", product: "ReviewReplyInbox", trade: "Coding · BE", title: "Implement reviews API with needs-reply status" },
-  { tag: "idt-review-reply-list-form", product: "ReviewReplyInbox", trade: "Coding · FE", title: "Build review replies list and write-reply form" },
-  { tag: "idt-review-replies-api", product: "ReviewReplyInbox", trade: "Coding · BE", title: "Implement review-replies API — one reply per channel" },
-  { tag: "idt-review-unanswered-board", product: "ReviewReplyInbox", trade: "Coding · FE", title: "Build unanswered-reviews board filtered by status" },
-  { tag: "idt-reminder-schedule-list-form", product: "ClientReminderHub", trade: "Coding · FE", title: "Build reminder schedule list and create form" },
-  { tag: "idt-reminder-due-api", product: "ClientReminderHub", trade: "Coding · BE", title: "Implement reminders API with due/sent status" },
-  { tag: "idt-reminder-template-list-form", product: "ClientReminderHub", trade: "Coding · FE", title: "Build reminder templates list and save-template form" },
-  { tag: "idt-reminder-templates-api", product: "ClientReminderHub", trade: "Coding · BE", title: "Implement reminder-templates API — unique name per channel" },
-  { tag: "idt-reminder-due-board", product: "ClientReminderHub", trade: "Coding · FE", title: "Build due-reminders board filtered by status" },
-  { tag: "idt-package-list-form", product: "PackagePunchCard", trade: "Coding · FE", title: "Build package punch-card list and sell form" },
-  { tag: "idt-package-remaining-api", product: "PackagePunchCard", trade: "Coding · BE", title: "Implement packages API with remaining/empty status" },
-  { tag: "idt-punch-log-list-form", product: "PackagePunchCard", trade: "Coding · FE", title: "Build punch log list and redeem form" },
-  { tag: "idt-punch-redeem-api", product: "PackagePunchCard", trade: "Coding · BE", title: "Implement punches API rejecting redeem when empty" },
-  { tag: "idt-package-low-board", product: "PackagePunchCard", trade: "Coding · FE", title: "Build low-balance packages board filtered by status" },
+  { tag: "idt-erp-reports-dashboard", product: "MiniERP", trade: "Coding · FE", title: "Build the MiniERP frontend: inventory, procurement, sales & financial dashboard" },
 ];
 
 export default function AssistPreview() {
