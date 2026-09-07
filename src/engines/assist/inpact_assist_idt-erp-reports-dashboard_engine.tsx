@@ -237,7 +237,13 @@ export function InventoryTable() {
     feedback_correct: "Correct — real data now flows into state on mount, with an honest loading state.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "fetch has to run inside useEffect([]), and its result only exists inside .then() — set loading false there too.",
-    pre_check_hint: `fetch() returns a Promise; the real response only exists inside .then() (or after an await). A useEffect with an empty array makes that chain run exactly once, right when the component first appears.`,
+    pre_check_hint: `fetch() returns a Promise; the real response only exists inside .then() (or after an await). A useEffect with an empty array makes that chain run exactly once, right when the component first appears.
+
+- Fetch from the real endpoint: \`/api/items\`.
+- Once that response resolves, hand it straight to your \`items\` state setter.
+- Then flip your loading flag to false, now that the real data has arrived.
+
+Until that response comes back, the loading flag stays true — that's what tells a catalog that's genuinely still loading apart from one that's genuinely empty.`,
     expected: `import { useState, useEffect } from "react";
 
 export type Item = {
