@@ -272,14 +272,14 @@ export function InventoryTable() {
   return loading ? <p>Loading…</p> : <div />;
 }
 `,
-    analog_example: `const [items, setItems] = useState<StockItem[]>([]);
+    analog_example: `const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 const [loading, setLoading] = useState(true);
 
 useEffect(() => {
-  fetch("/api/items")
+  fetch("/api/vehicles")
     .then((res) => res.json())
     .then((data) => {
-      setItems(data);
+      setVehicles(data);
       setLoading(false);
     });
 }, []);`,
