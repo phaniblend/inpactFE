@@ -107,11 +107,11 @@ export function StockCatalog() {
     feedback_wrong: "Match the type to what GET /api/items actually returns, then add the empty component shell.",
     pre_check_hint: `Every row in the inventory table describes the same kind of thing — an item — so before writing any table code, standardize what one item looks like as a type.
 
-- Give it an id: a required, unique identifier, so any single item can always be picked out from the rest.
-- Name the properties every item shares: sku, name, costPrice, sellingPrice, stockOnHand, and reorderPoint.
+- Give it an \`id\`: a required, unique identifier, so any single item can always be picked out from the rest.
+- Name the properties every item shares: \`sku\`, \`name\`, \`costPrice\`, \`sellingPrice\`, \`stockOnHand\`, and \`reorderPoint\`.
 - Match each property's kind to what the real API actually returns — the two prices and the two stock numbers are genuine numbers, and the rest are text.
 
-Once that shape has a name — Item — everything else in this task that touches an item (the table, the badge logic, even other files later on) can rely on the same contract instead of guessing at it.`,
+Once that shape has a name — \`Item\` — everything else in this task that touches an item (the table, the badge logic, even other files later on) can rely on the same contract instead of guessing at it.`,
     expected: `export type Item = {
   id: string;
   sku: string;
