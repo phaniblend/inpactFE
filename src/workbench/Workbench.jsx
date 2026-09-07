@@ -50,6 +50,16 @@ function parseAssistInfo(description) {
   return { status: "none" };
 }
 
+// Every product's real, running Fastify/Express backend + FE task set is a lot to picture from
+// spec text alone — a JS applicant landing on their first task in a brand-new product has no idea
+// what the finished thing even looks like. Per-product interactive tours (self-contained HTML,
+// see docs/product simulation guide.md for how to build new ones) fill that gap. Keyed by the
+// task's own Cohort: field, so adding a tour for a future product is one line here plus dropping
+// the file in public/product-tours/ — no other wiring needed. Only MiniERP has one so far.
+const PRODUCT_TOURS = {
+  MiniERP: { url: "/product-tours/minierp.html", label: "MiniERP" },
+};
+
 function parseTaskFields(description) {
   const desc = description || "";
   const field = (key) => new RegExp(`^${key}:\\s*(.+)$`, "m").exec(desc)?.[1]?.trim() || "";
@@ -60,6 +70,7 @@ function parseTaskFields(description) {
     techLevel: field("TechLevel"),
     codingFocus: field("CodingFocus"),
     techStack: field("TechStack"),
+    cohort: field("Cohort"),
     acceptance: field("AcceptanceCriteria")
       .split(";")
       .map((s) => s.trim())
@@ -388,6 +399,27 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
   const prose = humanDescription(task.description);
   const assist = parseAssistInfo(task.description);
   const waitingOnLesson = assist.status === "blocked";
+  // Nudge, not a gate: a JS applicant's first task in a product they've never seen shouldn't open
+  // straight into step-by-step instructions with no picture of what they're actually building
+  // toward. Dismissible per product (not per task) — once they've watched it, or said no thanks,
+  // it should stay out of their way on every other task in that same product.
+  const productTour = PRODUCT_TOURS[fields.cohort];
+  const [tourDismissed, setTourDismissed] = useState(() => {
+    if (!productTour) return false;
+    try {
+      return window.localStorage.getItem(`ipf-tour-dismissed:${fields.cohort}`) === "1";
+    } catch {
+      return false;
+    }
+  });
+  function dismissTour() {
+    setTourDismissed(true);
+    try {
+      window.localStorage.setItem(`ipf-tour-dismissed:${fields.cohort}`, "1");
+    } catch {
+      /* private-browsing/storage-blocked — just won't persist across reloads, not worth surfacing */
+    }
+  }
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   // null = choice screen ("continue here online" vs "use my local editor") not answered yet for
   // this open of the modal; "online" mounts the real in-browser editor; "local" shows the manual
@@ -529,6 +561,32 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
       )}
 
       <section className="workbench-task-panel">
+
+        {isJS && productTour && !tourDismissed && (
+          <div className="workbench-tour-nudge">
+            <div>
+              <strong>New to {productTour.label}?</strong>
+              <p>
+                Before you dive into steps, watch the 2-minute product tour — it shows what {productTour.label} actually
+                does and why, so the task below makes sense in context, not just in isolation.
+              </p>
+            </div>
+            <div className="workbench-tour-nudge-actions">
+              <a
+                href={productTour.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="workbench-tour-nudge-btn"
+                onClick={dismissTour}
+              >
+                ▶ Watch product tour
+              </a>
+              <button type="button" className="workbench-tour-nudge-skip" onClick={dismissTour}>
+                Skip
+              </button>
+            </div>
+          </div>
+        )}
 
         {(fields.epic || fields.story || fields.trade || fields.techStack) && (
           <div className="workbench-task-meta">

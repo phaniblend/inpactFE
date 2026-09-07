@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MiniERP Interactive Guided Tour with Chapter Navigation</title>
+  <style>
+    :root {
+      --bg: #070b14;
+      --card-bg: #0f172a;
+      --panel-border: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #3b82f6;
+      --emerald: #10b981;
+      --rose: #f43f5e;
+      --amber: #f59e0b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 16px; }
+
+    .stage {
+      width: 1040px;
+      height: 640px;
+      background: #090e1a;
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      height: 56px;
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+    .brand { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 10px; color: #fff; }
+    .brand svg { color: var(--accent); }
+    .pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--panel-border);
+      background: rgba(255, 255, 255, 0.04);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.5s ease;
+    }
+
+    .viewport {
+      flex: 1;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 2.2fr 1.2fr;
+      gap: 16px;
+      position: relative;
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .panel-header {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .kpi-row {
+      grid-column: span 2;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      height: 76px;
+    }
+    .kpi-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+    .kpi-val { font-size: 20px; font-weight: 700; margin-top: 2px; transition: color 0.4s ease; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 8px 10px; color: var(--text-muted); border-bottom: 1px solid var(--panel-border); font-size: 11px; }
+    td { padding: 10px; border-bottom: 1px solid rgba(30, 41, 59, 0.5); }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .badge-amber { background: rgba(245, 158, 11, 0.15); color: var(--amber); border: 1px solid var(--amber); }
+    .badge-emerald { background: rgba(16, 185, 129, 0.15); color: var(--emerald); border: 1px solid var(--emerald); }
+    .badge-blue { background: rgba(59, 130, 246, 0.15); color: var(--accent); border: 1px solid var(--accent); }
+
+    #actionCard {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transform: translateY(120px);
+      opacity: 0;
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 5;
+    }
+    #actionCard.open { transform: translateY(0); opacity: 1; }
+
+    .action-btn {
+      background: var(--emerald);
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transition: transform 0.2s ease;
+    }
+
+    .ledger-list { display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+    .ledger-entry {
+      background: rgba(7, 11, 20, 0.7);
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+      display: flex;
+      justify-content: space-between;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s ease;
+    }
+    .ledger-entry.show { opacity: 1; transform: translateY(0); }
+
+    #highlightBox {
+      position: absolute;
+      border: 2px solid #10b981;
+      background: rgba(16, 185, 129, 0.08);
+      border-radius: 8px;
+      pointer-events: none;
+      z-index: 40;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.35), inset 0 0 15px rgba(16, 185, 129, 0.15);
+      opacity: 0;
+      transform: scale(0.96);
+      transition: top 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+                  left 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+                  width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+                  height 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+                  opacity 0.4s ease,
+                  transform 0.4s ease,
+                  border-color 0.4s ease,
+                  box-shadow 0.4s ease;
+    }
+    #highlightBox.active { opacity: 1; transform: scale(1); }
+    #highlightBox.accent-blue {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.08);
+      box-shadow: 0 0 25px rgba(59, 130, 246, 0.35), inset 0 0 15px rgba(59, 130, 246, 0.15);
+    }
+    #highlightBox.accent-amber {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.08);
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.35), inset 0 0 15px rgba(245, 158, 11, 0.15);
+    }
+
+    #cursor {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 22px;
+      height: 22px;
+      pointer-events: none;
+      z-index: 99;
+      transform: translate(180px, 260px);
+      transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    #cursor svg { filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
+
+    /* Control Tray */
+    .tray {
+      width: 1040px;
+      margin-top: 14px;
+      background: #0f172a;
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 14px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tray-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .captions { font-size: 14px; color: #cbd5e1; flex: 1; min-height: 42px; line-height: 1.45; }
+    
+    .btn-group { display: flex; align-items: center; gap: 8px; }
+    .ctl-btn {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .ctl-btn:hover { background: #2563eb; }
+    .ctl-btn.secondary { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; }
+    .ctl-btn.secondary:hover { background: #334155; }
+    .ctl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Chapter Segmented Bar */
+    .chapter-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-top: 1px solid #1e293b;
+      padding-top: 10px;
+    }
+    .chapter-label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-right: 6px; }
+    .chapter-btn {
+      flex: 1;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 5px;
+      border: 1px solid #1e293b;
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .chapter-btn:hover { color: #fff; background: #1e293b; }
+    .chapter-btn.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: var(--accent);
+      color: #60a5fa;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stage" id="mainStage">
+    <div id="highlightBox"></div>
+
+    <div class="topbar">
+      <div class="brand">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"></path>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+        </svg>
+        MiniERP <span>Command Center</span>
+      </div>
+      <div class="pill" id="parityPill">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span id="parityText">TRIAL BALANCE: BALANCED (diff $0.00)</span>
+      </div>
+    </div>
+
+    <div class="viewport">
+      <div class="kpi-row" id="kpiDeck">
+        <div class="kpi-card" id="cardRev">
+          <span style="font-size:11px; color:var(--text-muted);">Real-Time Sales Revenue</span>
+          <span class="kpi-val" id="valRevenue" style="color:var(--emerald);">$0.00</span>
+        </div>
+        <div class="kpi-card" id="cardCogs">
+          <span style="font-size:11px; color:var(--text-muted);">Cost of Goods Sold (COGS)</span>
+          <span class="kpi-val" id="valCogs" style="color:var(--rose);">$0.00</span>
+        </div>
+        <div class="kpi-card" id="cardNet">
+          <span style="font-size:11px; color:var(--text-muted);">Net Operating Profit</span>
+          <span class="kpi-val" id="valNet" style="color:#fff;">$0.00</span>
+        </div>
+      </div>
+
+      <div class="panel" id="inventoryPanel">
+        <div class="panel-header">
+          <span>Live Inventory & Moving Average Valuation</span>
+          <span class="badge badge-blue">Warehouse Deck</span>
+        </div>
+
+        <table>
+          <thead>
+            <tr><th>SKU</th><th>Item Name</th><th>Avg Unit Cost</th><th>On Hand</th><th>Health Status</th></tr>
+          </thead>
+          <tbody>
+            <tr id="rowKb">
+              <td><strong>KB-MECH</strong></td>
+              <td>Mechanical Keyboard</td>
+              <td id="costKb">$42.00</td>
+              <td id="qtyKb" style="font-weight:700;">2</td>
+              <td><span class="badge badge-amber" id="badgeKb">LOW STOCK</span></td>
+            </tr>
+            <tr id="rowMs">
+              <td><strong>MS-ERGO</strong></td>
+              <td>Precision Mouse</td>
+              <td>$19.50</td>
+              <td>50</td>
+              <td><span class="badge badge-emerald">HEALTHY</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div id="actionCard">
+          <div>
+            <div id="actionTitle" style="font-weight:700; font-size:13px; color:#fff;">Draft PO-9042 Generated Automatically</div>
+            <div id="actionSubtitle" style="font-size:11px; color:#94a3b8; margin-top:2px;">Replenishing 20 units @ $40.00 from KeyTech Labs</div>
+          </div>
+          <button class="action-btn" id="actionBtn">CONFIRM & RECEIVE</button>
+        </div>
+      </div>
+
+      <div class="panel" id="ledgerPanel">
+        <div class="panel-header">
+          <span>General Ledger Journal Stream</span>
+          <span style="font-size:10px; color:var(--text-muted);">Immutable Double-Entry</span>
+        </div>
+        <div class="ledger-list" id="ledgerFeed">
+          <div class="ledger-entry show" id="seedLine" style="border-left-color: #64748b;">
+            <span>1000 Operating Cash</span>
+            <span>$50,000.00 DR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="cursor">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M3 3L10.07 19.97L12.58 12.58L19.97 10.07L3 3Z" fill="#3b82f6" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="tray">
+    <div class="tray-row">
+      <div class="captions" id="captionText">Select a chapter below or click "Start Tour" to begin.</div>
+      <div class="btn-group">
+        <button class="ctl-btn secondary" id="pauseBtn" onclick="togglePause()" disabled>
+          <span id="pauseIcon">⏸</span> <span id="pauseLabel">Pause</span>
+        </button>
+        <button class="ctl-btn" id="mainPlayBtn" onclick="togglePlayTour()">
+          <span id="playIcon">▶</span> <span id="playLabel">Start Tour</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Chapter Scrubbing / Replay Selector -->
+    <div class="chapter-bar">
+      <span class="chapter-label">Jump To:</span>
+      <button class="chapter-btn" id="chapBtn0" onclick="jumpToChapter(0)">1. Big Picture</button>
+      <button class="chapter-btn" id="chapBtn1" onclick="jumpToChapter(1)">2. Stock Alert</button>
+      <button class="chapter-btn" id="chapBtn2" onclick="jumpToChapter(2)">3. Auto-PO</button>
+      <button class="chapter-btn" id="chapBtn3" onclick="jumpToChapter(3)">4. Goods Receipt</button>
+      <button class="chapter-btn" id="chapBtn4" onclick="jumpToChapter(4)">5. Ledger Balance</button>
+      <button class="chapter-btn" id="chapBtn5" onclick="jumpToChapter(5)">6. Order Fulfillment</button>
+      <button class="chapter-btn" id="chapBtn6" onclick="jumpToChapter(6)">7. Real-Time P&L</button>
+    </div>
+  </div>
+
+  <script>
+    const synth = window.speechSynthesis;
+    let baseMaleVoice = null;
+    let currentSessionId = 0;
+    let activeUtterance = null;
+    let isRunning = false;
+    let isPaused = false;
+    let activeChapter = -1;
+
+    function loadVoices() {
+      const voices = synth.getVoices();
+      baseMaleVoice = voices.find(v => 
+        (v.name.includes('Natural') || v.name.includes('Guy') || v.name.includes('David') || v.name.includes('Male')) && 
+        v.lang.startsWith('en')
+      ) || voices.find(v => v.lang.startsWith('en'));
+    }
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = loadVoices;
+    }
+    loadVoices();
+
+    const stage = document.getElementById('mainStage');
+    const highlightBox = document.getElementById('highlightBox');
+    const cursor = document.getElementById('cursor');
+    const caption = document.getElementById('captionText');
+    const mainPlayBtn = document.getElementById('mainPlayBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const playLabel = document.getElementById('playLabel');
+    const playIcon = document.getElementById('playIcon');
+    const pauseLabel = document.getElementById('pauseLabel');
+    const pauseIcon = document.getElementById('pauseIcon');
+
+    function highlightElement(elOrId, styleClass = '', padding = 6) {
+      const el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
+      if (!el) return;
+      const stageRect = stage.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+
+      highlightBox.className = '';
+      if (styleClass) highlightBox.classList.add(styleClass);
+      highlightBox.style.top = `${elRect.top - stageRect.top - padding}px`;
+      highlightBox.style.left = `${elRect.left - stageRect.left - padding}px`;
+      highlightBox.style.width = `${elRect.width + (padding * 2)}px`;
+      highlightBox.style.height = `${elRect.height + (padding * 2)}px`;
+      highlightBox.classList.add('active');
+    }
+
+    function clearHighlight() {
+      highlightBox.classList.remove('active');
+    }
+
+    function moveCursorTo(x, y, duration = 1000) {
+      return new Promise(resolve => {
+        cursor.style.transition = `transform ${duration}ms cubic-bezier(0.25, 1, 0.5, 1)`;
+        cursor.style.transform = `translate(${x}px, ${y}px)`;
+        setTimeout(resolve, duration);
+      });
+    }
+
+    function speakText(text, sessionId) {
+      return new Promise((resolve, reject) => {
+        if (!synth) { resolve(); return; }
+        synth.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        if (baseMaleVoice) utter.voice = baseMaleVoice;
+        utter.pitch = 0.95;
+        utter.rate = 0.95;
+        activeUtterance = utter;
+
+        utter.onend = () => {
+          activeUtterance = null;
+          if (sessionId === currentSessionId) resolve();
+          else reject('CANCELED');
+        };
+        utter.onerror = (e) => {
+          activeUtterance = null;
+          if (sessionId === currentSessionId) resolve();
+          else reject('CANCELED');
+        };
+        synth.speak(utter);
+      });
+    }
+
+    function sleep(ms, sessionId) {
+      return new Promise((resolve, reject) => {
+        const interval = 50;
+        let elapsed = 0;
+        const timer = setInterval(() => {
+          if (sessionId !== currentSessionId) {
+            clearInterval(timer);
+            reject('CANCELED');
+            return;
+          }
+          if (!isPaused) {
+            elapsed += interval;
+            if (elapsed >= ms) {
+              clearInterval(timer);
+              resolve();
+            }
+          }
+        }, interval);
+      });
+    }
+
+    function resetSimulationState() {
+      synth.cancel();
+      isPaused = false;
+      pauseLabel.innerText = "Pause";
+      pauseIcon.innerText = "⏸";
+
+      document.getElementById('rowKb').style.background = 'transparent';
+      document.getElementById('qtyKb').innerText = '2';
+      document.getElementById('costKb').innerText = '$42.00';
+      const badge = document.getElementById('badgeKb');
+      badge.className = 'badge badge-amber';
+      badge.innerText = 'LOW STOCK';
+
+      const card = document.getElementById('actionCard');
+      card.classList.remove('open');
+      card.style.transform = 'translateY(120px)';
+
+      document.getElementById('valRevenue').innerText = '$0.00';
+      document.getElementById('valCogs').innerText = '$0.00';
+      document.getElementById('valNet').innerText = '$0.00';
+
+      const pill = document.getElementById('parityPill');
+      pill.style.background = 'rgba(255, 255, 255, 0.04)';
+      pill.style.borderColor = 'var(--panel-border)';
+
+      const feed = document.getElementById('ledgerFeed');
+      feed.innerHTML = `
+        <div class="ledger-entry show" id="seedLine" style="border-left-color: #64748b;">
+          <span>1000 Operating Cash</span>
+          <span>$50,000.00 DR</span>
+        </div>`;
+      clearHighlight();
+    }
+
+    function addLedgerLine(code, name, amount, type) {
+      const feed = document.getElementById('ledgerFeed');
+      const row = document.createElement('div');
+      row.className = 'ledger-entry';
+      row.innerHTML = `<span>${code} ${name}</span><span>${amount} ${type}</span>`;
+      feed.prepend(row);
+      setTimeout(() => row.classList.add('show'), 40);
+    }
+
+    function setChapterActive(idx) {
+      for (let i = 0; i <= 6; i++) {
+        const b = document.getElementById(`chapBtn${i}`);
+        if (b) b.classList.toggle('active', i === idx);
+      }
+    }
+
+    // CHAPTER DEFINITIONS
+    const chapters = [
+      {
+        title: "1. Big Picture",
+        caption: "Most businesses struggle because warehouse, sales, and accounting use separate apps. MiniERP unifies them into a single connected operational loop.",
+        narration: "Most businesses struggle because their warehouse, sales team, and accountants use separate apps. When stock sells, the books aren't updated until weeks later. MiniERP fixes this by treating every action as a single, connected chain of events.",
+        setup: () => resetSimulationState(),
+        run: async (sId) => {
+          highlightElement('inventoryPanel', 'accent-blue', 8);
+          await moveCursorTo(200, 260);
+          await speakText(chapters[0].narration, sId);
+          await sleep(500, sId);
+        }
+      },
+      {
+        title: "2. Stock Alert",
+        caption: "Look at row KB-MECH: stock on hand has dropped to 2 units, triggering an automated low-stock warning.",
+        narration: "Look at our mechanical keyboards highlighted here. We only have two left on the shelf, which is risky. In a manual shop, you wouldn't notice until a customer complained about a backorder.",
+        setup: () => {
+          resetSimulationState();
+        },
+        run: async (sId) => {
+          document.getElementById('rowKb').style.background = 'rgba(245, 158, 11, 0.15)';
+          highlightElement('rowKb', 'accent-amber', 4);
+          await moveCursorTo(420, 260);
+          await speakText(chapters[1].narration, sId);
+          await sleep(500, sId);
+        }
+      },
+      {
+        title: "3. Auto-PO",
+        caption: "A background worker spots the inventory deficit and automatically drafts replenishment Purchase Order 9042.",
+        narration: "MiniERP takes care of this proactively. A background worker noticed the shortage and drafted purchase order 9042 with our supplier, ready for the warehouse to review and approve.",
+        setup: () => {
+          resetSimulationState();
+          document.getElementById('rowKb').style.background = 'rgba(245, 158, 11, 0.15)';
+        },
+        run: async (sId) => {
+          const card = document.getElementById('actionCard');
+          card.classList.add('open');
+          await sleep(400, sId);
+          highlightElement('actionCard', '', 6);
+          await moveCursorTo(550, 480);
+          await speakText(chapters[2].narration, sId);
+          await sleep(500, sId);
+        }
+      },
+      {
+        title: "4. Goods Receipt",
+        caption: "Warehouse receives 20 units @ $40. The Moving Average Cost automatically recalculates to $40.18, and the row turns healthy.",
+        narration: "When the shipment arrives at the loading dock, the warehouse simply confirms receipt. We had two keyboards at forty-two dollars, and just got twenty more at forty dollars. The system recalculates our true average unit cost to forty dollars and eighteen cents.",
+        setup: () => {
+          resetSimulationState();
+          document.getElementById('actionCard').classList.add('open');
+        },
+        run: async (sId) => {
+          const card = document.getElementById('actionCard');
+          await moveCursorTo(610, 485);
+          highlightElement('rowKb', '', 4);
+
+          card.style.transform = 'scale(0.98)';
+          setTimeout(() => card.style.transform = 'none', 120);
+
+          document.getElementById('qtyKb').innerText = '22';
+          document.getElementById('costKb').innerText = '$40.18';
+          const badge = document.getElementById('badgeKb');
+          badge.className = 'badge badge-emerald';
+          badge.innerText = 'HEALTHY';
+          document.getElementById('rowKb').style.background = 'transparent';
+          card.classList.remove('open');
+
+          await speakText(chapters[3].narration, sId);
+          await sleep(500, sId);
+        }
+      },
+      {
+        title: "5. Ledger Balance",
+        caption: "Physical goods receipt immediately debits Inventory Assets ($800) and credits Accounts Payable ($800) in the ledger.",
+        narration: "Notice the ledger on the right. The moment those boxes were checked in, your balance sheet updated. Inventory assets increased by eight hundred dollars, and accounts payable recorded what we owe the vendor. No manual invoices to key in.",
+        setup: () => {
+          resetSimulationState();
+          document.getElementById('qtyKb').innerText = '22';
+          document.getElementById('costKb').innerText = '$40.18';
+          const badge = document.getElementById('badgeKb');
+          badge.className = 'badge badge-emerald';
+          badge.innerText = 'HEALTHY';
+        },
+        run: async (sId) => {
+          addLedgerLine('1200', 'Inventory Asset', '$800.00', 'DR');
+          addLedgerLine('2000', 'Accounts Payable', '$800.00', 'CR');
+          highlightElement('ledgerFeed', 'accent-blue', 8);
+          await moveCursorTo(820, 270);
+          await speakText(chapters[4].narration, sId);
+          await sleep(500, sId);
+        }
+      },
+      {
+        title: "6. Order Fulfillment",
+        caption: "A customer purchases 5 keyboards for $75 each. The system fulfills the order and posts a 4-line revenue and COGS recognition.",
+        narration: "Now, a customer buys five keyboards for seventy-five dollars each. The ledger posts a four-line balanced entry. Revenue and receivables capture the three-hundred and seventy-five dollar sale, while cost of goods sold and inventory reflect the two-hundred dollar asset depletion.",
+        setup: () => {
+          resetSimulationState();
+          document.getElementById('qtyKb').innerText = '22';
+          document.getElementById('costKb').innerText = '$40.18';
+          const badge = document.getElementById('badgeKb');
+          badge.className = 'badge badge-emerald';
+          badge.innerText = 'HEALTHY';
+          addLedgerLine('1200', 'Inventory Asset', '$800.00', 'DR');
+          addLedgerLine('2000', 'Accounts Payable', '$800.00', 'CR');
+        },
+        run: async (sId) => {
+          document.getElementById('qtyKb').innerText = '17';
+          addLedgerLine('1100', 'Accounts Receivable', '$375.00', 'DR');
+          addLedgerLine('4000', 'Sales Revenue', '$375.00', 'CR');
+          addLedgerLine('5000', 'Cost of Goods Sold', '$200.90', 'DR');
+          addLedgerLine('1200', 'Inventory Asset', '$200.90', 'CR');
+
+          document.getElementById('valRevenue').innerText = '$375.00';
+          document.getElementById('valCogs').innerText = '$200.90';
+          document.getElementById('valNet').innerText = '$174.10';
+
+          highlightElement('ledgerFeed', '', 8);
+          await moveCursorTo(820, 190);
+          await speakText(chapters[5].narration, sId);
+          await sleep(500, sId);
+        }
+      },
+      {
+        title: "7. Real-Time P&L",
+        caption: "Debits strictly equal credits. The Trial Balance is verified after every mutation, ending month-end closing chaos.",
+        narration: "Your executive cards at the top show your exact financial health instantly. Revenue minus cost of goods sold reveals a real-time net operating margin of one-hundred and seventy-four dollars. Because every transaction is verified on entry, your books are always closed, always accurate, and completely automated.",
+        setup: () => {
+          resetSimulationState();
+          document.getElementById('qtyKb').innerText = '17';
+          document.getElementById('costKb').innerText = '$40.18';
+          const badge = document.getElementById('badgeKb');
+          badge.className = 'badge badge-emerald';
+          badge.innerText = 'HEALTHY';
+          addLedgerLine('1200', 'Inventory Asset', '$800.00', 'DR');
+          addLedgerLine('2000', 'Accounts Payable', '$800.00', 'CR');
+          addLedgerLine('1100', 'Accounts Receivable', '$375.00', 'DR');
+          addLedgerLine('4000', 'Sales Revenue', '$375.00', 'CR');
+          addLedgerLine('5000', 'Cost of Goods Sold', '$200.90', 'DR');
+          addLedgerLine('1200', 'Inventory Asset', '$200.90', 'CR');
+          document.getElementById('valRevenue').innerText = '$375.00';
+          document.getElementById('valCogs').innerText = '$200.90';
+          document.getElementById('valNet').innerText = '$174.10';
+        },
+        run: async (sId) => {
+          highlightElement('kpiDeck', 'accent-blue', 6);
+          await moveCursorTo(520, 120);
+          await sleep(1200, sId);
+
+          highlightElement('parityPill', '', 4);
+          await moveCursorTo(890, 28);
+          const pill = document.getElementById('parityPill');
+          pill.style.background = 'rgba(16, 185, 129, 0.15)';
+          pill.style.borderColor = 'var(--emerald)';
+
+          await speakText(chapters[6].narration, sId);
+          clearHighlight();
+        }
+      }
+    ];
+
+    async function executeFlowFrom(index) {
+      const thisSession = ++currentSessionId;
+      isRunning = true;
+      pauseBtn.disabled = false;
+      playLabel.innerText = "Restart Tour";
+      playIcon.innerText = "↺";
+
+      for (let i = index; i < chapters.length; i++) {
+        if (thisSession !== currentSessionId) return;
+        activeChapter = i;
+        setChapterActive(i);
+        caption.innerText = chapters[i].caption;
+
+        try {
+          chapters[i].setup();
+          await chapters[i].run(thisSession);
+        } catch (e) {
+          if (e === 'CANCELED') return;
+        }
+      }
+
+      if (thisSession === currentSessionId) {
+        caption.innerText = "Tour complete. Choose any chapter to replay or restart.";
+        isRunning = false;
+        pauseBtn.disabled = true;
+        playLabel.innerText = "Start Tour";
+        playIcon.innerText = "▶";
+        setChapterActive(-1);
+      }
+    }
+
+    function togglePlayTour() {
+      executeFlowFrom(0);
+    }
+
+    function togglePause() {
+      if (!isRunning) return;
+      if (!isPaused) {
+        isPaused = true;
+        synth.pause();
+        pauseLabel.innerText = "Resume";
+        pauseIcon.innerText = "▶";
+      } else {
+        isPaused = false;
+        synth.resume();
+        pauseLabel.innerText = "Pause";
+        pauseIcon.innerText = "⏸";
+      }
+    }
+
+    function jumpToChapter(idx) {
+      executeFlowFrom(idx);
+    }
+  </script>
+</body>
+</html>
