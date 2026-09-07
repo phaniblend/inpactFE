@@ -399,26 +399,15 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
   const prose = humanDescription(task.description);
   const assist = parseAssistInfo(task.description);
   const waitingOnLesson = assist.status === "blocked";
-  // Nudge, not a gate: a JS applicant's first task in a product they've never seen shouldn't open
-  // straight into step-by-step instructions with no picture of what they're actually building
-  // toward. Dismissible per product (not per task) — once they've watched it, or said no thanks,
-  // it should stay out of their way on every other task in that same product.
+  // Nudge, not a one-time gate: stays available on every task in this product, not just a JS
+  // applicant's first visit — found live 2026-09-06, a persistent per-product localStorage
+  // dismissal made it vanish forever the moment it was watched or skipped once, even on a totally
+  // different task days later. "Skip" here only collapses it for this open task view (plain local
+  // state, remounts fresh every time a task is opened) — it never remembers across tasks or reloads.
   const productTour = PRODUCT_TOURS[fields.cohort];
-  const [tourDismissed, setTourDismissed] = useState(() => {
-    if (!productTour) return false;
-    try {
-      return window.localStorage.getItem(`ipf-tour-dismissed:${fields.cohort}`) === "1";
-    } catch {
-      return false;
-    }
-  });
+  const [tourDismissed, setTourDismissed] = useState(false);
   function dismissTour() {
     setTourDismissed(true);
-    try {
-      window.localStorage.setItem(`ipf-tour-dismissed:${fields.cohort}`, "1");
-    } catch {
-      /* private-browsing/storage-blocked — just won't persist across reloads, not worth surfacing */
-    }
   }
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   // null = choice screen ("continue here online" vs "use my local editor") not answered yet for
