@@ -64,6 +64,17 @@ function parseTaskFields(description) {
       .split(";")
       .map((s) => s.trim())
       .filter(Boolean),
+    // Distinct from `acceptance` above (which is really the engineering task description —
+    // AcceptanceCriteria's own bullets read like a spec, not something a non-technical person
+    // could verify by using the app). This is what a user can actually DO or SEE in the running
+    // UI once the task is done — found live 2026-09-06: a noob dev reading "AcceptanceCriteria"
+    // had no way to picture what the finished screen looks like from spec language alone.
+    // Optional field — absent on tasks that haven't been given this pass yet, in which case this
+    // section just doesn't render (see the acceptanceUi.length > 0 guard below).
+    acceptanceUi: field("AcceptanceUI")
+      .split(";")
+      .map((s) => s.trim())
+      .filter(Boolean),
   };
 }
 
@@ -572,9 +583,20 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
 
         {fields.acceptance.length > 0 && (
           <div className="workbench-task-ac">
-            <h3>Acceptance criteria</h3>
+            <h3>Task description</h3>
             <ul>
               {fields.acceptance.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {fields.acceptanceUi.length > 0 && (
+          <div className="workbench-task-ac">
+            <h3>Acceptance criteria</h3>
+            <ul>
+              {fields.acceptanceUi.map((line) => (
                 <li key={line}>{line}</li>
               ))}
             </ul>
