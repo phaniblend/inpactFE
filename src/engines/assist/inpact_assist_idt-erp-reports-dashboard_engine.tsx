@@ -236,15 +236,18 @@ export function FinancialMetrics() {
 The Financials type already exists — you defined it in Step 2. This step just uses it: give the component somewhere to hold the financials once they arrive, defaulting to real zero-strings, not nothing.
 
 WHAT YOUR LOGIC NEEDS
+- Import useState: import { useState } from "react";
 - The Financials type from Step 2 — nothing new to define here.
 - useState<Financials>, defaulting to { revenue: "0.00", cogs: "0.00", netIncome: "0.00" }.
 
-Your task: add const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" }); inside the component, right after FinancialMetrics() opens. No fetch yet.`,
-    hint: `1. The Financials type is already there from Step 2 — nothing new to define.
-2. Import useState: import { useState } from "react";
+Your task: import useState from "react", then add const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" }); inside the component, right after FinancialMetrics() opens. No fetch yet.`,
+    hint: `1. Import useState: import { useState } from "react";
+2. The Financials type is already there from Step 2 — nothing new to define.
 3. Declare state: const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" });
 4. Place it inside FinancialMetrics(), before the return.`,
-    example_code: `export function EarningsCard() {
+    example_code: `import { useState } from "react";
+
+export function EarningsCard() {
   const [earnings, setEarnings] = useState<DriverEarnings>({ fares: "0.00", expenses: "0.00", takeHome: "0.00" });
   return <div />;
 }`,
@@ -284,7 +287,7 @@ export function FinancialMetrics() {
     feedback_correct: "Correct — the component now has somewhere honest to hold real data.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Add just the useState declaration, defaulted to zero-strings — no fetch yet.",
-    pre_check_hint: `The Financials type already exists from Step 2 — this step only adds state that uses it. useState needs a starting value even before real data exists — real zero-strings, not undefined, keep the first render honest.`,
+    pre_check_hint: `Don't forget the import — useState comes from "react". The Financials type already exists from Step 2 — this step only adds state that uses it. useState needs a starting value even before real data exists — real zero-strings, not undefined, keep the first render honest.`,
     expected: `import { useState } from "react";
 
 export type Financials = {
@@ -298,7 +301,9 @@ export function FinancialMetrics() {
   return <div />;
 }
 `,
-    analog_example: `export function EarningsCard() {
+    analog_example: `import { useState } from "react";
+
+export function EarningsCard() {
   const [earnings, setEarnings] = useState<DriverEarnings>({ fares: "0.00", expenses: "0.00", takeHome: "0.00" });
   return <div />;
 }`,
@@ -323,15 +328,18 @@ export function FinancialMetrics() {
 Fetch the real endpoint exactly once, when the component first appears, and hand the response straight to your state setter.
 
 WHAT YOUR LOGIC NEEDS
+- Add useEffect to your React import: import { useState, useEffect } from "react";
 - useEffect with an empty dependency array ([]).
 - fetch("/api/reports/income-statement") inside it.
 - The parsed JSON body passed straight into setFinancials.
 
-Your task: wrap a fetch to /api/reports/income-statement in useEffect(() => {...}, []), calling setFinancials with the parsed response.`,
+Your task: add useEffect to your existing React import, then wrap a fetch to /api/reports/income-statement in useEffect(() => {...}, []), calling setFinancials with the parsed response.`,
     hint: `1. Import useEffect: import { useState, useEffect } from "react";
 2. Add the effect: useEffect(() => { ... }, []);
 3. Fetch and store: fetch("/api/reports/income-statement").then((res) => res.json()).then(setFinancials);`,
-    example_code: `export function EarningsCard() {
+    example_code: `import { useState, useEffect } from "react";
+
+export function EarningsCard() {
   const [earnings, setEarnings] = useState<DriverEarnings>({ fares: "0.00", expenses: "0.00", takeHome: "0.00" });
 
   useEffect(() => {
@@ -382,7 +390,7 @@ export function FinancialMetrics() {
     feedback_correct: "Correct — real data now flows into state on mount.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "The fetch has to run inside useEffect([]), passing the parsed response straight to setFinancials.",
-    pre_check_hint: `fetch() returns a Promise; the real response only exists inside .then(). A useEffect with an empty array makes that run exactly once, right when the component first appears.`,
+    pre_check_hint: `Add useEffect to the existing React import first. fetch() returns a Promise; the real response only exists inside .then(). A useEffect with an empty array makes that run exactly once, right when the component first appears.`,
     expected: `import { useState, useEffect } from "react";
 
 export type Financials = {
@@ -403,7 +411,9 @@ export function FinancialMetrics() {
   return <div />;
 }
 `,
-    analog_example: `export function EarningsCard() {
+    analog_example: `import { useState, useEffect } from "react";
+
+export function EarningsCard() {
   const [earnings, setEarnings] = useState<DriverEarnings>({ fares: "0.00", expenses: "0.00", takeHome: "0.00" });
 
   useEffect(() => {
@@ -567,13 +577,18 @@ export function FinancialMetrics() {
 This step edits a different file: \`src/App.tsx\` — create it if it doesn't already exist. Declare the three state arrays every other panel on the dashboard will read from.
 
 WHAT YOUR LOGIC NEEDS
+- Import useState: import { useState } from "react"; — this is a new file, so it needs its own import.
+- Import the three types from their own components: Item, PurchaseOrder, SalesOrder.
 - Three useState arrays: items, purchaseOrders, salesOrders — all starting empty.
 
-Your task: in App.tsx, declare items/purchaseOrders/salesOrders as three separate useState<[]>([]) arrays. No fetching yet — that's the next step.`,
+Your task: in App.tsx, import useState and the three types, then declare items/purchaseOrders/salesOrders as three separate useState<[]>([]) arrays. No fetching yet — that's the next step.`,
     hint: `1. Create/open the file: src/App.tsx.
-2. Import types from their own components: Item from InventoryTable, PurchaseOrder from ProcurementPanel, SalesOrder from SalesFulfillmentBoard.
-3. Three states: const [items, setItems] = useState<Item[]>([]); (same shape for purchaseOrders and salesOrders).`,
-    example_code: `export default function BlogAdminApp() {
+2. Import useState: import { useState } from "react"; — App.tsx is a new file, it doesn't inherit FinancialMetrics.tsx's import.
+3. Import types from their own components: Item from InventoryTable, PurchaseOrder from ProcurementPanel, SalesOrder from SalesFulfillmentBoard.
+4. Three states: const [items, setItems] = useState<Item[]>([]); (same shape for purchaseOrders and salesOrders).`,
+    example_code: `import { useState } from "react";
+
+export default function BlogAdminApp() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
@@ -603,7 +618,7 @@ export default function App() {
     feedback_correct: "Correct — one shared home for all three lists.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Just the three empty state arrays for now — no fetching yet.",
-    pre_check_hint: `This step edits a different file — create src/App.tsx if it doesn't exist yet. Then declare three separate useState hooks, each starting as an empty array — the fetch that fills them comes in the next step.`,
+    pre_check_hint: `This step edits a different file — create src/App.tsx if it doesn't exist yet, and give it its own useState import (a new file doesn't inherit FinancialMetrics.tsx's). Then declare three separate useState hooks, each starting as an empty array — the fetch that fills them comes in the next step.`,
     expected: `import { useState } from "react";
 import { type Item } from "./components/InventoryTable";
 import { type PurchaseOrder } from "./components/ProcurementPanel";
@@ -616,7 +631,9 @@ export default function App() {
   return <main />;
 }
 `,
-    analog_example: `export default function BlogAdminApp() {
+    analog_example: `import { useState } from "react";
+
+export default function BlogAdminApp() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
@@ -764,13 +781,16 @@ export default function App() {
 Run the function you just wrote exactly once, right when the page first appears.
 
 WHAT YOUR LOGIC NEEDS
+- Add useEffect to your React import: import { useState, useEffect } from "react";
 - useEffect with an empty dependency array ([]) calling loadData().
 
-Your task: add useEffect(() => { loadData(); }, []); right after loadData is defined.`,
+Your task: add useEffect to your existing React import, then add useEffect(() => { loadData(); }, []); right after loadData is defined.`,
     hint: `1. Import useEffect: import { useState, useEffect } from "react";
 2. Add the effect: useEffect(() => { loadData(); }, []);
 3. Place it directly after the loadData function.`,
-    example_code: `export default function BlogAdminApp() {
+    example_code: `import { useState, useEffect } from "react";
+
+export default function BlogAdminApp() {
   // ...loadBlogData is already defined above this...
 
   useEffect(() => {
@@ -842,7 +862,7 @@ export default function App() {
     feedback_correct: "Correct — the dashboard now loads real data the moment it appears.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Wrap the call in useEffect(() => { loadData(); }, []) — a bare call outside a hook runs on every render.",
-    pre_check_hint: `A useEffect with an empty dependency array is what runs something exactly once, right after the first render.`,
+    pre_check_hint: `Add useEffect to the existing React import in App.tsx first. A useEffect with an empty dependency array is what runs something exactly once, right after the first render.`,
     expected: `import { useState, useEffect } from "react";
 import { type Item } from "./components/InventoryTable";
 import { type PurchaseOrder } from "./components/ProcurementPanel";
@@ -871,7 +891,9 @@ export default function App() {
   return <main />;
 }
 `,
-    analog_example: `export default function BlogAdminApp() {
+    analog_example: `import { useState, useEffect } from "react";
+
+export default function BlogAdminApp() {
   // ...loadBlogData is already defined above this...
 
   useEffect(() => {

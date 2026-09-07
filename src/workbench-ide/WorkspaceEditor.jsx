@@ -102,6 +102,16 @@ function registerAutoCloseTag(editor, monaco) {
     const [fullMatch, tagName] = match;
     if (VOID_TAGS.has(tagName.toLowerCase()) || /\/\s*>$/.test(fullMatch)) return;
 
+    // A TypeScript generic (useState<Financials>, Array<T>, Promise<Foo>) matches this same
+    // shape — the docstring above assumed generics always carry extra characters, but a single
+    // bare identifier generic is indistinguishable from a JSX tag by the regex alone. The real
+    // signal: a JSX tag's `<` always starts a fresh expression (after whitespace, `(`, `return`,
+    // `=>`, `&&`, `?`, `:`, or line start) — a generic's `<` sits glued directly against the
+    // preceding identifier with no space. Bug found live 2026-09-07: typing
+    // useState<Financials> auto-inserted a stray </Financials> right after it.
+    const beforeMatch = textBeforeCursor.slice(0, textBeforeCursor.length - fullMatch.length);
+    if (/[A-Za-z0-9_$]$/.test(beforeMatch)) return;
+
     const restOfLine = lineText.slice(position.column - 1);
     if (restOfLine.startsWith(`</${tagName}>`)) return; // already closed — don't double up
 
@@ -192,8 +202,20 @@ export default function WorkspaceEditor({ openFiles, activePath, contents, dirty
             options={{
               ...MONACO_SHARED_OPTIONS,
               fontSize: 14,
-              fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace",
-              fontLigatures: true,
+              // 'JetBrains Mono'/'Fira Code'/'Cascadia Code' were never actually loaded anywhere in
+              // this app (no <link>, no @font-face) — they only worked if a visitor happened to have
+              // them installed locally. When Monaco can't truly measure the requested font, its
+              // decoration positioning (guides, highlights) drifts — the likely real cause behind
+              // three rounds of "grey rectangle" reports that survived turning off bracketPairs and
+              // highlightActiveIndentation individually. Menlo/Consolas/Courier New are always
+              // present without any loading step, so there's no measurement race to begin with.
+              fontFamily: "Menlo, Consolas, 'Courier New', monospace",
+              fontLigatures: false,
+              // Highlighting other occurrences of the word/tag under the cursor (e.g. both ends of
+              // a <div>...</div> pair) is exactly what rendered as the misplaced grey blocks (user
+              // report, 2026-09-07) — off entirely rather than guessed at feature-by-feature again.
+              occurrencesHighlight: "off",
+              selectionHighlight: false,
               lineNumbers: "on",
               minimap: { enabled: true },
               scrollBeyondLastLine: false,
