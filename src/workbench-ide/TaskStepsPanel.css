@@ -298,6 +298,33 @@
   flex-direction: column;
 }
 
+/* Bottom-right resize handle (2026-09-07, user request — "resize handles on all models especially
+   anotation"). A small diagonal-lines glyph via layered gradients, no image asset. */
+.tsp-resize-handle {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  touch-action: none;
+  background-image: repeating-linear-gradient(
+    135deg,
+    #94a3b8 0,
+    #94a3b8 1.5px,
+    transparent 1.5px,
+    transparent 5px
+  );
+  background-position: bottom right;
+  background-repeat: no-repeat;
+  background-size: 10px 10px;
+  opacity: 0.7;
+}
+
+.tsp-resize-handle:hover {
+  opacity: 1;
+}
+
 .tsp-card-head {
   display: flex;
   align-items: center;

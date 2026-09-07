@@ -140,6 +140,11 @@ export default function StepAssistPopup({ moduleTag, node, onClose }) {
   // step/check-result cards) since this is a heavier, read-then-ask panel worth focusing on.
   const [panelPos, setPanelPos] = useState(null);
   const dragRef = useRef(null);
+  // Resize handle (2026-09-07, user request — "resize handles on all models especially
+  // anotation"). null = default CSS size; once dragged, an explicit pixel size takes over.
+  const [panelSize, setPanelSize] = useState(null); // { width, height } | null
+  const panelElRef = useRef(null);
+  const resizeRef = useRef(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -175,10 +180,41 @@ export default function StepAssistPopup({ moduleTag, node, onClose }) {
     window.addEventListener("pointerup", handlePointerUp);
   }
 
+  function handleResizePointerMove(e) {
+    const d = resizeRef.current;
+    if (!d) return;
+    setPanelSize({
+      width: Math.max(320, Math.min(d.startW + (e.clientX - d.startX), window.innerWidth - 32)),
+      height: Math.max(260, Math.min(d.startH + (e.clientY - d.startY), window.innerHeight - 32)),
+    });
+  }
+
+  function handleResizePointerUp() {
+    resizeRef.current = null;
+    window.removeEventListener("pointermove", handleResizePointerMove);
+    window.removeEventListener("pointerup", handleResizePointerUp);
+  }
+
+  function handleResizePointerDown(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = panelElRef.current?.getBoundingClientRect();
+    resizeRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startW: panelSize?.width ?? rect?.width ?? 480,
+      startH: panelSize?.height ?? rect?.height ?? 500,
+    };
+    window.addEventListener("pointermove", handleResizePointerMove);
+    window.addEventListener("pointerup", handleResizePointerUp);
+  }
+
   useEffect(() => {
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointermove", handleResizePointerMove);
+      window.removeEventListener("pointerup", handleResizePointerUp);
     };
   }, []);
 
@@ -212,11 +248,24 @@ export default function StepAssistPopup({ moduleTag, node, onClose }) {
   return (
     <div className="sap-overlay" role="presentation" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div
+        ref={panelElRef}
         className="sap-panel"
         role="dialog"
         aria-modal="true"
         aria-label="Assist me"
-        style={panelPos ? { position: "fixed", left: panelPos.x, top: panelPos.y, margin: 0 } : undefined}
+        style={
+          panelPos
+            ? {
+                position: "fixed",
+                left: panelPos.x,
+                top: panelPos.y,
+                margin: 0,
+                ...(panelSize
+                  ? { width: panelSize.width, height: panelSize.height, maxWidth: "none", maxHeight: "none" }
+                  : {}),
+              }
+            : undefined
+        }
       >
         <div className="sap-header">
           {/* Drag handle — deliberately separate from the Close button so a press on Close never
@@ -299,6 +348,7 @@ export default function StepAssistPopup({ moduleTag, node, onClose }) {
             {loading ? "…" : "Ask"}
           </button>
         </div>
+        <div className="sap-resize-handle" onPointerDown={handleResizePointerDown} title="Drag to resize" />
       </div>
     </div>
   );

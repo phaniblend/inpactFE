@@ -103,12 +103,21 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
   // re-picking a different row, so the learner's chosen spot on screen doesn't reset every click.
   const [cardPos, setCardPos] = useState(null);
   const dragRef = useRef(null); // { startX, startY, originX, originY } while a drag is in progress
+  // Resize handles (2026-09-07, user request — "resize handles on all models especially
+  // anotation"). null = default CSS-driven size; once dragged, an explicit pixel size takes over
+  // and persists across Prev/Next / reopening, same as position does.
+  const [cardSize, setCardSize] = useState(null); // { width, height } | null
+  const cardElRef = useRef(null);
+  const resizeRef = useRef(null); // { startX, startY, startW, startH } while a resize is in progress
   // Check my code's result also floats — a real, specific reason ("Step 2: this step uses
   // useState()...") got clipped in a cramped inline sidebar strip (user report, 2026-09-07: "its
   // flagging extra feedback... hiding"). Same draggable/closeable floating-card pattern as the step
   // detail card, its own independent position so both can be open on screen at once.
   const [checkCardPos, setCheckCardPos] = useState(null);
   const checkDragRef = useRef(null);
+  const [checkCardSize, setCheckCardSize] = useState(null); // { width, height } | null
+  const checkCardElRef = useRef(null);
+  const checkResizeRef = useRef(null);
   // Steps the learner has actually opened this session (row click or Prev/Next) — "Check my code"
   // only validates these, not every unchecked step (user report, 2026-09-07: Steps 9/10 got
   // evaluated — and once, wrongly marked done — despite never being opened; a learner working
@@ -132,7 +141,9 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
     setJustPassed(new Set());
     setActiveStep(null);
     setCardPos(null);
+    setCardSize(null);
     setCheckCardPos(null);
+    setCheckCardSize(null);
     setVisitedSteps(new Set());
     setCheckContext(null);
     setAnnotating(false);
@@ -192,6 +203,35 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
     window.addEventListener("pointerup", handleDragPointerUp);
   }
 
+  function handleResizePointerMove(e) {
+    const d = resizeRef.current;
+    if (!d) return;
+    setCardSize({
+      width: Math.max(360, Math.min(d.startW + (e.clientX - d.startX), window.innerWidth - 32)),
+      height: Math.max(240, Math.min(d.startH + (e.clientY - d.startY), window.innerHeight - 32)),
+    });
+  }
+
+  function handleResizePointerUp() {
+    resizeRef.current = null;
+    window.removeEventListener("pointermove", handleResizePointerMove);
+    window.removeEventListener("pointerup", handleResizePointerUp);
+  }
+
+  function handleResizePointerDown(e) {
+    e.preventDefault();
+    e.stopPropagation(); // don't let the drag handle's own listener also fire
+    const rect = cardElRef.current?.getBoundingClientRect();
+    resizeRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startW: cardSize?.width ?? rect?.width ?? 460,
+      startH: cardSize?.height ?? rect?.height ?? 320,
+    };
+    window.addEventListener("pointermove", handleResizePointerMove);
+    window.addEventListener("pointerup", handleResizePointerUp);
+  }
+
   function handleCheckDragPointerMove(e) {
     const d = checkDragRef.current;
     if (!d) return;
@@ -217,10 +257,43 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
     window.addEventListener("pointerup", handleCheckDragPointerUp);
   }
 
+  function handleCheckResizePointerMove(e) {
+    const d = checkResizeRef.current;
+    if (!d) return;
+    setCheckCardSize({
+      width: Math.max(360, Math.min(d.startW + (e.clientX - d.startX), window.innerWidth - 32)),
+      height: Math.max(240, Math.min(d.startH + (e.clientY - d.startY), window.innerHeight - 32)),
+    });
+  }
+
+  function handleCheckResizePointerUp() {
+    checkResizeRef.current = null;
+    window.removeEventListener("pointermove", handleCheckResizePointerMove);
+    window.removeEventListener("pointerup", handleCheckResizePointerUp);
+  }
+
+  function handleCheckResizePointerDown(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = checkCardElRef.current?.getBoundingClientRect();
+    checkResizeRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startW: checkCardSize?.width ?? rect?.width ?? 460,
+      startH: checkCardSize?.height ?? rect?.height ?? 320,
+    };
+    window.addEventListener("pointermove", handleCheckResizePointerMove);
+    window.addEventListener("pointerup", handleCheckResizePointerUp);
+  }
+
   useEffect(() => {
     return () => {
       window.removeEventListener("pointermove", handleDragPointerMove);
       window.removeEventListener("pointerup", handleDragPointerUp);
+      window.removeEventListener("pointermove", handleResizePointerMove);
+      window.removeEventListener("pointerup", handleResizePointerUp);
+      window.removeEventListener("pointermove", handleCheckResizePointerMove);
+      window.removeEventListener("pointerup", handleCheckResizePointerUp);
       window.removeEventListener("pointermove", handleCheckDragPointerMove);
       window.removeEventListener("pointerup", handleCheckDragPointerUp);
     };
@@ -401,7 +474,11 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
       </div>
 
       {activeNode && cardPos ? (
-        <div className="tsp-card-float" style={{ left: cardPos.x, top: cardPos.y }}>
+        <div
+          ref={cardElRef}
+          className="tsp-card-float"
+          style={{ left: cardPos.x, top: cardPos.y, ...(cardSize ? { width: cardSize.width, height: cardSize.height } : {}) }}
+        >
           <div className="tsp-card-head">
             <button type="button" className="tsp-card-close" onClick={() => setActiveStep(null)} aria-label="Close step">
               ✕ Close
@@ -451,13 +528,19 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
               Next →
             </button>
           </div>
+          <div className="tsp-resize-handle" onPointerDown={handleResizePointerDown} title="Drag to resize" />
         </div>
       ) : null}
 
       {checkMessage && checkCardPos ? (
         <div
+          ref={checkCardElRef}
           className={`tsp-card-float tsp-check-float${annotatedCode ? " tsp-check-float-wide" : ""}`}
-          style={{ left: checkCardPos.x, top: checkCardPos.y }}
+          style={{
+            left: checkCardPos.x,
+            top: checkCardPos.y,
+            ...(checkCardSize ? { width: checkCardSize.width, height: checkCardSize.height } : {}),
+          }}
         >
           <div className="tsp-card-head">
             <button type="button" className="tsp-card-close" onClick={closeCheckCard} aria-label="Close check result">
@@ -477,6 +560,7 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
               {annotatedCode ? renderAnnotatedCode(annotatedCode) : null}
             </>
           ) : null}
+          <div className="tsp-resize-handle" onPointerDown={handleCheckResizePointerDown} title="Drag to resize" />
         </div>
       ) : null}
 
