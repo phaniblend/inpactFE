@@ -108,6 +108,12 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
   // detail card, its own independent position so both can be open on screen at once.
   const [checkCardPos, setCheckCardPos] = useState(null);
   const checkDragRef = useRef(null);
+  // Steps the learner has actually opened this session (row click or Prev/Next) — "Check my code"
+  // only validates these, not every unchecked step (user report, 2026-09-07: Steps 9/10 got
+  // evaluated — and once, wrongly marked done — despite never being opened; a learner working
+  // through steps in order shouldn't get feedback, right or wrong, about steps they haven't
+  // looked at yet).
+  const [visitedSteps, setVisitedSteps] = useState(() => new Set());
 
   useEffect(() => {
     setDone(moduleTag ? loadDoneSet(moduleTag) : new Set());
@@ -116,7 +122,18 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
     setActiveStep(null);
     setCardPos(null);
     setCheckCardPos(null);
+    setVisitedSteps(new Set());
   }, [moduleTag]);
+
+  // Covers both openStep (row click) and Prev/Next — both just change activeStep, so one effect
+  // marks whichever step becomes active as visited, instead of duplicating the same update at
+  // every place activeStep can change.
+  useEffect(() => {
+    if (activeStep === null) return;
+    const id = steps[activeStep]?.id;
+    if (!id) return;
+    setVisitedSteps((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
+  }, [activeStep, steps]);
 
   function defaultCardPos() {
     if (typeof window === "undefined") return { x: 80, y: 100 };
@@ -217,9 +234,14 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
 
   async function checkAllSteps() {
     if (checking || !getCheckPayload) return;
-    const pending = steps.filter((s) => !done.has(s.id));
+    const pending = steps.filter((s) => !done.has(s.id) && visitedSteps.has(s.id));
     if (pending.length === 0) {
-      showCheckMessage("Every step is already checked off. 🎉");
+      const allDone = steps.every((s) => done.has(s.id));
+      showCheckMessage(
+        allDone
+          ? "Every step is already checked off. 🎉"
+          : "Open a step first (or use Prev/Next) — Check my code only validates steps you've actually looked at."
+      );
       return;
     }
     setChecking(true);
