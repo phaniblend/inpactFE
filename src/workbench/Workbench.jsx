@@ -400,14 +400,18 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
   const assist = parseAssistInfo(task.description);
   const waitingOnLesson = assist.status === "blocked";
   // Nudge, not a one-time gate: stays available on every task in this product, not just a JS
-  // applicant's first visit — found live 2026-09-06, a persistent per-product localStorage
-  // dismissal made it vanish forever the moment it was watched or skipped once, even on a totally
-  // different task days later. "Skip" here only collapses it for this open task view (plain local
-  // state, remounts fresh every time a task is opened) — it never remembers across tasks or reloads.
+  // applicant's first visit. First tried a plain useState(false) here — found live 2026-09-06 that
+  // it still vanished after the first task, because Workbench never remounts this component when
+  // the user picks a different task in the same session (no full reload, no `key` on this view) —
+  // a bare boolean survived the switch exactly like the localStorage version it replaced. Keying
+  // the dismissal to this specific task.id instead means switching to ANY other task — even
+  // in-app, even a different task in the same product — shows the nudge fresh; "Skip" only ever
+  // silences the one task actually open right now.
   const productTour = PRODUCT_TOURS[fields.cohort];
-  const [tourDismissed, setTourDismissed] = useState(false);
+  const [tourDismissedTaskId, setTourDismissedTaskId] = useState(null);
+  const tourDismissed = tourDismissedTaskId === task.id;
   function dismissTour() {
-    setTourDismissed(true);
+    setTourDismissedTaskId(task.id);
   }
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   // null = choice screen ("continue here online" vs "use my local editor") not answered yet for
