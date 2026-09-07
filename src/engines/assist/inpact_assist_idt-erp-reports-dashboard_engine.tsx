@@ -26,7 +26,8 @@ export const NODES = [
     type: "objectives",
     phase: "Objectives",
     items: [
-      "Create FinancialMetrics.tsx and define what one income-statement response looks like.",
+      "Create the file at src/components/FinancialMetrics.tsx.",
+      "Define what one income-statement response looks like.",
       "Export the empty FinancialMetrics component shell.",
       "Add state to hold the fetched financials, defaulting to real zeros.",
       "Fetch the real income statement on mount and store it in state.",
@@ -41,22 +42,70 @@ export const NODES = [
   {
     id: "step1",
     type: "question",
-    phase: "Step 1 of 10",
-    paal: `Create the file at \`src/components/FinancialMetrics.tsx\`, then define the Financials type.
+    phase: "Step 1 of 11",
+    paal: `Create the file at \`src/components/FinancialMetrics.tsx\`.
 
-This file doesn't exist yet — create it first. Then write a TypeScript type naming every field the real income-statement endpoint sends back.
+Nothing can go inside a file that doesn't exist yet. Before any type or component code, create a new, empty file at that exact path.
+
+WHAT YOU NEED
+- A new file: src/components/FinancialMetrics.tsx.
+- Nothing inside it yet — the type comes in the next step.
+
+Your task: create the empty file at src/components/FinancialMetrics.tsx. Leave it empty — nothing to write inside it yet.`,
+    hint: `1. Use the + in FILES (or your file tree) to add a new file.
+2. Path: src/components/FinancialMetrics.tsx — must match exactly.
+3. Leave it empty for now — the type comes in the next step.`,
+    example_code: `// src/components/EarningsCard.tsx
+// (empty — just created)`,
+    think_prompt: `Nothing can be defined inside a file that doesn't exist yet. What's the very first, purely mechanical thing this task needs, before any TypeScript or React code at all?`,
+    mc_options: [
+      "Create the empty file at src/components/FinancialMetrics.tsx",
+      "Start by writing the Financials type directly in App.tsx",
+      "Skip creating the file — the editor creates it automatically the first time you save",
+    ],
+    mc_correct_option: "Create the empty file at src/components/FinancialMetrics.tsx",
+    mc_anchor: "Create the empty file at src/components",
+    why_this_matters: `Every later step in this task assumes this file already exists — skip this and the next step has nowhere to write the type.`,
+    answer_keywords: ["FinancialMetrics.tsx", "src/components", "create", "file"],
+    seed_code: ``,
+    starter_code: ``,
+    feedback_correct: "Correct — the file exists now, ready for the type in the next step.",
+    feedback_partial: "Close — check the hint and try again.",
+    feedback_wrong: "Just create the empty file at the exact path — nothing to write inside it yet.",
+    pre_check_hint: `This step is purely mechanical — there's no code to write yet, just the file itself, at the exact path the later steps expect.`,
+    expected: ``,
+    analog_example: `// src/components/EarningsCard.tsx
+// (empty — just created)`,
+    deepDiveLabel: "Why this step matters",
+    deepDive: {
+      hook: `Every later step in this task assumes this file already exists — skip this and the next step has nowhere to write the type.`,
+      pain: "Trying to define a type or component in a file that was never created just means your edits go nowhere.",
+      mentalModel: MENTAL_MODEL,
+      discover: `// src/components/FinancialMetrics.tsx (empty, just created)`,
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      watchOut: "Do not put any code in yet — this step is only the empty file.",
+      dryRun: "Create the same kind of empty starter file for a different real component.",
+      build: `Empty file at src/components/FinancialMetrics.tsx.`,
+    },
+  },
+  {
+    id: "step2",
+    type: "question",
+    phase: "Step 2 of 11",
+    paal: `Define the Financials type.
+
+You already created the file in Step 1. Now write a TypeScript type naming every field the real income-statement endpoint sends back.
 
 WHAT YOUR BLUEPRINT NEEDS
 - revenue (text — the API sends an already-formatted 2-decimal string, e.g. "125.00")
 - cogs (text)
 - netIncome (text)
 
-Your task: create the file, then write \`type Financials\` with those three fields. Nothing else yet — the component itself comes in the next step.`,
-    hint: `1. Create the file: Add a new file at src/components/FinancialMetrics.tsx.
+Your task: in the file from Step 1, write \`type Financials\` with those three fields. Nothing else yet — the component itself comes in the next step.`,
+    hint: `1. The file already exists from Step 1 — just open it.
 2. Match the real shape: GET /api/reports/income-statement returns { revenue, cogs, netIncome } as strings like "125.00", not numbers.
 3. Write only the type — no component yet.`,
-    example_code: `// src/components/EarningsCard.tsx
-export type DriverEarnings = {
+    example_code: `export type DriverEarnings = {
   fares: string;
   expenses: string;
   takeHome: string;
@@ -76,7 +125,7 @@ export type DriverEarnings = {
     feedback_correct: "Correct — the blueprint matches exactly what the real endpoint sends.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Just the type for now — three string fields, matching the real API's response.",
-    pre_check_hint: `Create the file first — it doesn't exist yet. Then the type itself just needs to match what the real endpoint actually sends: three already-formatted money strings, not numbers.`,
+    pre_check_hint: `The file already exists from Step 1. The type itself just needs to match what the real endpoint actually sends: three already-formatted money strings, not numbers.`,
     expected: `export type Financials = {
   revenue: string;
   cogs: string;
@@ -106,9 +155,9 @@ export type DriverEarnings = {
     },
   },
   {
-    id: "step2",
+    id: "step3",
     type: "question",
-    phase: "Step 2 of 10",
+    phase: "Step 3 of 11",
     paal: `Export the empty FinancialMetrics component shell.
 
 Add the component itself — no data, no fetch, just a function that returns something on screen.
@@ -179,19 +228,19 @@ export function FinancialMetrics() {
     },
   },
   {
-    id: "step3",
+    id: "step4",
     type: "question",
-    phase: "Step 3 of 10",
+    phase: "Step 4 of 11",
     paal: `Add state to hold the fetched financials, defaulting to real zeros.
 
-The Financials type already exists — you defined it in Step 1. This step just uses it: give the component somewhere to hold the financials once they arrive, defaulting to real zero-strings, not nothing.
+The Financials type already exists — you defined it in Step 2. This step just uses it: give the component somewhere to hold the financials once they arrive, defaulting to real zero-strings, not nothing.
 
 WHAT YOUR LOGIC NEEDS
-- The Financials type from Step 1 — nothing new to define here.
+- The Financials type from Step 2 — nothing new to define here.
 - useState<Financials>, defaulting to { revenue: "0.00", cogs: "0.00", netIncome: "0.00" }.
 
 Your task: add const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" }); inside the component, right after FinancialMetrics() opens. No fetch yet.`,
-    hint: `1. The Financials type is already there from Step 1 — nothing new to define.
+    hint: `1. The Financials type is already there from Step 2 — nothing new to define.
 2. Import useState: import { useState } from "react";
 3. Declare state: const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" });
 4. Place it inside FinancialMetrics(), before the return.`,
@@ -235,7 +284,7 @@ export function FinancialMetrics() {
     feedback_correct: "Correct — the component now has somewhere honest to hold real data.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Add just the useState declaration, defaulted to zero-strings — no fetch yet.",
-    pre_check_hint: `The Financials type already exists from Step 1 — this step only adds state that uses it. useState needs a starting value even before real data exists — real zero-strings, not undefined, keep the first render honest.`,
+    pre_check_hint: `The Financials type already exists from Step 2 — this step only adds state that uses it. useState needs a starting value even before real data exists — real zero-strings, not undefined, keep the first render honest.`,
     expected: `import { useState } from "react";
 
 export type Financials = {
@@ -266,9 +315,9 @@ export function FinancialMetrics() {
     },
   },
   {
-    id: "step4",
+    id: "step5",
     type: "question",
-    phase: "Step 4 of 10",
+    phase: "Step 5 of 11",
     paal: `Fetch the real income statement on mount and store it in state.
 
 Fetch the real endpoint exactly once, when the component first appears, and hand the response straight to your state setter.
@@ -382,9 +431,9 @@ export function FinancialMetrics() {
     },
   },
   {
-    id: "step5",
+    id: "step6",
     type: "question",
-    phase: "Step 5 of 10",
+    phase: "Step 6 of 11",
     paal: `Render the three financial cards from state.
 
 Draw the three cards — Revenue, COGS, Net Income — reading their values straight from state.
@@ -510,9 +559,9 @@ export function FinancialMetrics() {
     },
   },
   {
-    id: "step6",
+    id: "step7",
     type: "question",
-    phase: "Step 6 of 10",
+    phase: "Step 7 of 11",
     paal: `Open App.tsx and declare the three shared state arrays.
 
 This step edits a different file: \`src/App.tsx\` — create it if it doesn't already exist. Declare the three state arrays every other panel on the dashboard will read from.
@@ -588,9 +637,9 @@ const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);`,
     },
   },
   {
-    id: "step7",
+    id: "step8",
     type: "question",
-    phase: "Step 7 of 10",
+    phase: "Step 8 of 11",
     paal: `Write loadData(), fetching items, purchase orders, and sales orders in parallel.
 
 Add one function that fetches all three real endpoints at once and updates all three state setters.
@@ -707,9 +756,9 @@ export default function App() {
     },
   },
   {
-    id: "step8",
+    id: "step9",
     type: "question",
-    phase: "Step 8 of 10",
+    phase: "Step 9 of 11",
     paal: `Call loadData() once, when the dashboard first mounts.
 
 Run the function you just wrote exactly once, right when the page first appears.
@@ -846,9 +895,9 @@ export default function App() {
     },
   },
   {
-    id: "step9",
+    id: "step10",
     type: "question",
-    phase: "Step 9 of 10",
+    phase: "Step 10 of 11",
     paal: `Render FinancialMetrics and InventoryTable — neither needs any props.
 
 Import both components and place them inside <main>. Both fetch their own data independently, so neither needs anything passed in.
@@ -1003,9 +1052,9 @@ return (
     },
   },
   {
-    id: "step10",
+    id: "step11",
     type: "question",
-    phase: "Step 10 of 10",
+    phase: "Step 11 of 11",
     paal: `Render ProcurementPanel and SalesFulfillmentBoard, wired to shared state and loadData.
 
 Finish the dashboard: these two panels DO need real props — the shared order lists, and loadData itself as the refresh callback.
@@ -1184,6 +1233,7 @@ const sideItems = [
   { label: "Step 8", id: "step8" },
   { label: "Step 9", id: "step9" },
   { label: "Step 10", id: "step10" },
+  { label: "Step 11", id: "step11" },
 ];
 
 export default createINPACTEngine({
