@@ -413,6 +413,10 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
   function dismissTour() {
     setTourDismissedTaskId(task.id);
   }
+  // In-page modal (iframe), not a new tab — found live 2026-09-06: a new tab reads as leaving the
+  // task entirely; an overlay the JS applicant can close (✕ or clicking outside it) keeps them on
+  // the same page they're about to work in, same pattern as the existing "Try the mock" overlay.
+  const [tourOpen, setTourOpen] = useState(false);
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   // null = choice screen ("continue here online" vs "use my local editor") not answered yet for
   // this open of the modal; "online" mounts the real in-browser editor; "local" shows the manual
@@ -565,18 +569,50 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
               </p>
             </div>
             <div className="workbench-tour-nudge-actions">
-              <a
-                href={productTour.url}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
                 className="workbench-tour-nudge-btn"
-                onClick={dismissTour}
+                onClick={() => {
+                  setTourOpen(true);
+                  dismissTour();
+                }}
               >
                 ▶ Watch product tour
-              </a>
+              </button>
               <button type="button" className="workbench-tour-nudge-skip" onClick={dismissTour}>
                 Skip
               </button>
+            </div>
+          </div>
+        )}
+
+        {tourOpen && productTour && (
+          <div
+            className="workbench-mock-overlay"
+            role="presentation"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setTourOpen(false);
+            }}
+          >
+            <div
+              className="workbench-mock-modal workbench-tour-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-label={`${productTour.label} product tour`}
+            >
+              <div className="workbench-mock-modal-head">
+                <span>{productTour.label} product tour</span>
+                <button type="button" className="workbench-mock-close" onClick={() => setTourOpen(false)} aria-label="Close">
+                  ✕
+                </button>
+              </div>
+              <div className="workbench-mock-modal-body workbench-tour-modal-body">
+                <iframe
+                  src={productTour.url}
+                  title={`${productTour.label} product tour`}
+                  className="workbench-tour-iframe"
+                />
+              </div>
             </div>
           </div>
         )}

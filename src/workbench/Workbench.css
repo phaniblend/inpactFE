@@ -701,6 +701,27 @@
   color: #334155;
 }
 
+/* Product tour reuses .workbench-mock-overlay/.workbench-mock-modal/.workbench-mock-close as-is —
+   only the modal's size and body need to differ, since this holds a full self-contained tour page
+   (its own 1040x640 dark stage) in an iframe, not a compact form preview. */
+.workbench-tour-modal {
+  max-width: 1100px;
+  width: 96vw;
+}
+
+.workbench-tour-modal-body {
+  padding: 0;
+  overflow: hidden;
+  background: #070b14;
+}
+
+.workbench-tour-iframe {
+  display: block;
+  width: 100%;
+  height: min(80vh, 720px);
+  border: none;
+}
+
 .workbench-mock-bridge strong {
   color: #0f172a;
 }
