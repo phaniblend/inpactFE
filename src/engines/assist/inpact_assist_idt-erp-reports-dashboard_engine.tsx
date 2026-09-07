@@ -32,7 +32,8 @@ export const NODES = [
       "Add state to hold the fetched financials, defaulting to real zeros.",
       "Fetch the real income statement on mount and store it in state.",
       "Render the three financial cards from state.",
-      "Open App.tsx and declare the three shared state arrays.",
+      "Create the file at src/App.tsx.",
+      "Declare the three shared state arrays in App.tsx.",
       "Write loadData(), fetching items, purchase orders, and sales orders in parallel.",
       "Call loadData() once, when the dashboard first mounts.",
       "Render FinancialMetrics and InventoryTable — neither needs any props.",
@@ -42,7 +43,7 @@ export const NODES = [
   {
     id: "step1",
     type: "question",
-    phase: "Step 1 of 11",
+    phase: "Step 1 of 12",
     paal: `Create the file at \`src/components/FinancialMetrics.tsx\`.
 
 Nothing can go inside a file that doesn't exist yet — this is the very first, purely mechanical step: get the file created at the right path. This step only checks that the file exists; whatever you've written into it since (even finished work from later steps) is completely fine and expected — checking this step never requires the file to be empty.
@@ -90,7 +91,7 @@ Your task: create the file at src/components/FinancialMetrics.tsx. That's the wh
   {
     id: "step2",
     type: "question",
-    phase: "Step 2 of 11",
+    phase: "Step 2 of 12",
     paal: `Define the Financials type.
 
 You already created the file in Step 1. Now write a TypeScript type naming every field the real income-statement endpoint sends back.
@@ -156,7 +157,7 @@ Your task: in the file from Step 1, write \`type Financials\` with those three f
   {
     id: "step3",
     type: "question",
-    phase: "Step 3 of 11",
+    phase: "Step 3 of 12",
     paal: `Export the empty FinancialMetrics component shell.
 
 Add the component itself — no data, no fetch, just a function that returns something on screen.
@@ -229,7 +230,7 @@ export function FinancialMetrics() {
   {
     id: "step4",
     type: "question",
-    phase: "Step 4 of 11",
+    phase: "Step 4 of 12",
     paal: `Add state to hold the fetched financials, defaulting to real zeros.
 
 The Financials type already exists — you defined it in Step 2. This step just uses it: give the component somewhere to hold the financials once they arrive, defaulting to real zero-strings, not nothing.
@@ -321,7 +322,7 @@ export function EarningsCard() {
   {
     id: "step5",
     type: "question",
-    phase: "Step 5 of 11",
+    phase: "Step 5 of 12",
     paal: `Fetch the real income statement on mount and store it in state.
 
 Fetch the real endpoint exactly once, when the component first appears, and hand the response straight to your state setter.
@@ -442,7 +443,7 @@ export function EarningsCard() {
   {
     id: "step6",
     type: "question",
-    phase: "Step 6 of 11",
+    phase: "Step 6 of 12",
     paal: `Render the three financial cards from state.
 
 Draw the three cards — Revenue, COGS, Net Income — reading their values straight from state.
@@ -570,18 +571,66 @@ export function FinancialMetrics() {
   {
     id: "step7",
     type: "question",
-    phase: "Step 7 of 11",
-    paal: `Open App.tsx and declare the three shared state arrays.
+    phase: "Step 7 of 12",
+    paal: `Create the file at \`src/App.tsx\`.
 
-This step edits a different file: \`src/App.tsx\` — create it if it doesn't already exist. Declare the three state arrays every other panel on the dashboard will read from.
+This step edits a different file from everything so far — before declaring any state, the file itself has to exist. This step only checks that the file exists; whatever you write into it afterward (this step or later ones) is completely fine.
+
+WHAT YOU NEED
+- A file at exactly this path: src/App.tsx.
+
+Your task: create the file at src/App.tsx. That's the whole requirement — the state arrays and everything else come in the steps after this one.`,
+    hint: `1. Use the + in FILES (or your file tree) to add a new file.
+2. Path: src/App.tsx — must match exactly, at the project root (not inside src/components).
+3. This step only checks that the file exists — keep writing the rest as you work through later steps.`,
+    example_code: `// src/App.tsx
+// (just created)`,
+    think_prompt: `Nothing can be defined inside a file that doesn't exist yet. What's the very first, purely mechanical thing this step needs, before any state or imports at all?`,
+    mc_options: [
+      "Create the empty file at src/App.tsx",
+      "Start by declaring the state arrays directly in FinancialMetrics.tsx",
+      "Skip creating the file — the editor creates it automatically the first time you save",
+    ],
+    mc_correct_option: "Create the empty file at src/App.tsx",
+    mc_anchor: "Create the empty file at src/App.tsx",
+    why_this_matters: `Every later step in this task assumes this file already exists — skip this and the next step has nowhere to write the state arrays.`,
+    answer_keywords: [],
+    seed_code: ``,
+    starter_code: ``,
+    feedback_correct: "Correct — the file exists now, ready for the state arrays in the next step.",
+    feedback_partial: "Close — check the hint and try again.",
+    feedback_wrong: "Create the file at the exact path: src/App.tsx.",
+    pre_check_hint: `This step only checks that the file exists at the right path — nothing else. Whatever you've already written into it (this step or later ones) won't fail this check.`,
+    expected: ``,
+    analog_example: `// src/App.tsx
+// (just created)`,
+    deepDiveLabel: "Why this step matters",
+    deepDive: {
+      hook: `Every later step in this task assumes this file already exists — skip this and the next step has nowhere to write the state arrays.`,
+      pain: "Trying to declare state in a file that was never created just means your edits go nowhere.",
+      mentalModel: MENTAL_MODEL,
+      discover: `// src/App.tsx (just created)`,
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      watchOut: "This step only checks the file exists — it's fine if later-step code is already in it.",
+      dryRun: "Create the same kind of starter file for a different real component.",
+      build: `File created at src/App.tsx.`,
+    },
+  },
+  {
+    id: "step8",
+    type: "question",
+    phase: "Step 8 of 12",
+    paal: `Declare the three shared state arrays in App.tsx.
+
+You already created the file in Step 7. Now declare the three state arrays every other panel on the dashboard will read from.
 
 WHAT YOUR LOGIC NEEDS
-- Import useState: import { useState } from "react"; — this is a new file, so it needs its own import.
+- Import useState: import { useState } from "react"; — this is a new file, so it needs its own import, separate from FinancialMetrics.tsx's.
 - Import the three types from their own components: Item, PurchaseOrder, SalesOrder.
 - Three useState arrays: items, purchaseOrders, salesOrders — all starting empty.
 
-Your task: in App.tsx, import useState and the three types, then declare items/purchaseOrders/salesOrders as three separate useState<[]>([]) arrays. No fetching yet — that's the next step.`,
-    hint: `1. Create/open the file: src/App.tsx.
+Your task: in App.tsx (from Step 7), import useState and the three types, then declare items/purchaseOrders/salesOrders as three separate useState<[]>([]) arrays. No fetching yet — that's the next step.`,
+    hint: `1. The file already exists from Step 7 — just open it.
 2. Import useState: import { useState } from "react"; — App.tsx is a new file, it doesn't inherit FinancialMetrics.tsx's import.
 3. Import types from their own components: Item from InventoryTable, PurchaseOrder from ProcurementPanel, SalesOrder from SalesFulfillmentBoard.
 4. Three states: const [items, setItems] = useState<Item[]>([]); (same shape for purchaseOrders and salesOrders).`,
@@ -617,7 +666,7 @@ export default function App() {
     feedback_correct: "Correct — one shared home for all three lists.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Just the three empty state arrays for now — no fetching yet.",
-    pre_check_hint: `This step edits a different file — create src/App.tsx if it doesn't exist yet, and give it its own useState import (a new file doesn't inherit FinancialMetrics.tsx's). Then declare three separate useState hooks, each starting as an empty array — the fetch that fills them comes in the next step.`,
+    pre_check_hint: `The file already exists from Step 7. Give App.tsx its own useState import (a new file doesn't inherit FinancialMetrics.tsx's), then declare three separate useState hooks, each starting as an empty array — the fetch that fills them comes in the next step.`,
     expected: `import { useState } from "react";
 import { type Item } from "./components/InventoryTable";
 import { type PurchaseOrder } from "./components/ProcurementPanel";
@@ -653,9 +702,9 @@ const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);`,
     },
   },
   {
-    id: "step8",
+    id: "step9",
     type: "question",
-    phase: "Step 8 of 11",
+    phase: "Step 9 of 12",
     paal: `Write loadData(), fetching items, purchase orders, and sales orders in parallel.
 
 Add one function that fetches all three real endpoints at once and updates all three state setters.
@@ -772,9 +821,9 @@ export default function App() {
     },
   },
   {
-    id: "step9",
+    id: "step10",
     type: "question",
-    phase: "Step 9 of 11",
+    phase: "Step 10 of 12",
     paal: `Call loadData() once, when the dashboard first mounts.
 
 Run the function you just wrote exactly once, right when the page first appears.
@@ -916,9 +965,9 @@ export default function BlogAdminApp() {
     },
   },
   {
-    id: "step10",
+    id: "step11",
     type: "question",
-    phase: "Step 10 of 11",
+    phase: "Step 11 of 12",
     paal: `Render FinancialMetrics and InventoryTable — neither needs any props.
 
 Import both components and place them inside <main>. Both fetch their own data independently, so neither needs anything passed in.
@@ -1073,9 +1122,9 @@ return (
     },
   },
   {
-    id: "step11",
+    id: "step12",
     type: "question",
-    phase: "Step 11 of 11",
+    phase: "Step 12 of 12",
     paal: `Render ProcurementPanel and SalesFulfillmentBoard, wired to shared state and loadData.
 
 Finish the dashboard: these two panels DO need real props — the shared order lists, and loadData itself as the refresh callback.
@@ -1255,6 +1304,7 @@ const sideItems = [
   { label: "Step 9", id: "step9" },
   { label: "Step 10", id: "step10" },
   { label: "Step 11", id: "step11" },
+  { label: "Step 12", id: "step12" },
 ];
 
 export default createINPACTEngine({
