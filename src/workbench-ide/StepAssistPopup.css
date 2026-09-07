@@ -35,6 +35,16 @@
   color: #0f172a;
 }
 
+.sap-drag {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.sap-drag:active {
+  cursor: grabbing;
+}
+
 .sap-close {
   padding: 5px 10px;
   font-size: 12px;

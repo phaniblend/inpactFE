@@ -101,6 +101,12 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
   // re-picking a different row, so the learner's chosen spot on screen doesn't reset every click.
   const [cardPos, setCardPos] = useState(null);
   const dragRef = useRef(null); // { startX, startY, originX, originY } while a drag is in progress
+  // Check my code's result also floats — a real, specific reason ("Step 2: this step uses
+  // useState()...") got clipped in a cramped inline sidebar strip (user report, 2026-09-07: "its
+  // flagging extra feedback... hiding"). Same draggable/closeable floating-card pattern as the step
+  // detail card, its own independent position so both can be open on screen at once.
+  const [checkCardPos, setCheckCardPos] = useState(null);
+  const checkDragRef = useRef(null);
 
   useEffect(() => {
     setDone(moduleTag ? loadDoneSet(moduleTag) : new Set());
@@ -108,11 +114,19 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
     setJustPassed(new Set());
     setActiveStep(null);
     setCardPos(null);
+    setCheckCardPos(null);
   }, [moduleTag]);
 
   function defaultCardPos() {
     if (typeof window === "undefined") return { x: 80, y: 100 };
     return { x: Math.max(24, window.innerWidth - 540), y: 110 };
+  }
+
+  // Centered by default (a "toast" in the middle of the screen, per request), not anchored to a
+  // corner like the step card — the two are visually distinct floating windows.
+  function defaultCheckCardPos() {
+    if (typeof window === "undefined") return { x: 80, y: 100 };
+    return { x: Math.max(24, window.innerWidth / 2 - 230), y: Math.max(24, window.innerHeight / 2 - 140) };
   }
 
   function openStep(i) {
@@ -145,10 +159,37 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
     window.addEventListener("pointerup", handleDragPointerUp);
   }
 
+  function handleCheckDragPointerMove(e) {
+    const d = checkDragRef.current;
+    if (!d) return;
+    const nextX = d.originX + (e.clientX - d.startX);
+    const nextY = d.originY + (e.clientY - d.startY);
+    setCheckCardPos({
+      x: Math.min(Math.max(nextX, -200), window.innerWidth - 80),
+      y: Math.min(Math.max(nextY, 0), window.innerHeight - 60),
+    });
+  }
+
+  function handleCheckDragPointerUp() {
+    checkDragRef.current = null;
+    window.removeEventListener("pointermove", handleCheckDragPointerMove);
+    window.removeEventListener("pointerup", handleCheckDragPointerUp);
+  }
+
+  function handleCheckDragPointerDown(e) {
+    e.preventDefault();
+    const origin = checkCardPos || defaultCheckCardPos();
+    checkDragRef.current = { startX: e.clientX, startY: e.clientY, originX: origin.x, originY: origin.y };
+    window.addEventListener("pointermove", handleCheckDragPointerMove);
+    window.addEventListener("pointerup", handleCheckDragPointerUp);
+  }
+
   useEffect(() => {
     return () => {
       window.removeEventListener("pointermove", handleDragPointerMove);
       window.removeEventListener("pointerup", handleDragPointerUp);
+      window.removeEventListener("pointermove", handleCheckDragPointerMove);
+      window.removeEventListener("pointerup", handleCheckDragPointerUp);
     };
   }, []);
 
@@ -162,11 +203,22 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
     });
   }
 
+  // Opens the floating check-result card alongside setting its text — only if it isn't already
+  // positioned, so re-checking repeatedly doesn't keep re-centering a card the learner dragged.
+  function showCheckMessage(msg) {
+    setCheckMessage(msg);
+    setCheckCardPos((prev) => prev || defaultCheckCardPos());
+  }
+
+  function closeCheckCard() {
+    setCheckMessage("");
+  }
+
   async function checkAllSteps() {
     if (checking || !getCheckPayload) return;
     const pending = steps.filter((s) => !done.has(s.id));
     if (pending.length === 0) {
-      setCheckMessage("Every step is already checked off. 🎉");
+      showCheckMessage("Every step is already checked off. 🎉");
       return;
     }
     setChecking(true);
@@ -178,7 +230,7 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
       );
       if (settled.every((s) => s.status === "rejected")) {
         const reason = settled[0]?.reason;
-        setCheckMessage(`Couldn't check your code: ${reason?.message || "please try again."}`);
+        showCheckMessage(`Couldn't check your code: ${reason?.message || "please try again."}`);
         return;
       }
       const newlyDone = [];
@@ -194,7 +246,7 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
         });
         setJustPassed(new Set(newlyDone));
         setTimeout(() => setJustPassed(new Set()), 1600);
-        setCheckMessage(`✅ ${newlyDone.length} step${newlyDone.length > 1 ? "s" : ""} confirmed complete.`);
+        showCheckMessage(`✅ ${newlyDone.length} step${newlyDone.length > 1 ? "s" : ""} confirmed complete.`);
       } else {
         // Surface *why*, not just "keep going" — every pending step genuinely got checked and
         // usually has real, specific feedback (found live 2026-09-07: a real missing-import bug
@@ -209,13 +261,13 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
         const chosen = withFeedback.find((r) => r.node.id === activeNodeId) || withFeedback[0];
         if (chosen) {
           const stepNum = steps.findIndex((s) => s.id === chosen.node.id) + 1;
-          setCheckMessage(`Step ${stepNum}: ${chosen.result.feedback}`);
+          showCheckMessage(`Step ${stepNum}: ${chosen.result.feedback}`);
         } else {
-          setCheckMessage("No new steps look complete yet — keep going.");
+          showCheckMessage("No new steps look complete yet — keep going.");
         }
       }
     } catch (err) {
-      setCheckMessage(`Couldn't check your code: ${err?.message || "please try again."}`);
+      showCheckMessage(`Couldn't check your code: ${err?.message || "please try again."}`);
     } finally {
       setChecking(false);
     }
@@ -242,7 +294,6 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
         <button type="button" className="tsp-check-btn" onClick={checkAllSteps} disabled={checking || !getCheckPayload}>
           {checking ? "Checking…" : "✓ Check my code"}
         </button>
-        {checkMessage && <span className="tsp-check-msg">{checkMessage}</span>}
       </div>
 
       <div className="tsp-list">
@@ -325,6 +376,20 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
               Next →
             </button>
           </div>
+        </div>
+      ) : null}
+
+      {checkMessage && checkCardPos ? (
+        <div className="tsp-card-float tsp-check-float" style={{ left: checkCardPos.x, top: checkCardPos.y }}>
+          <div className="tsp-card-head">
+            <button type="button" className="tsp-card-close" onClick={closeCheckCard} aria-label="Close check result">
+              ✕ Close
+            </button>
+            <div className="tsp-card-drag" onPointerDown={handleCheckDragPointerDown} title="Drag to move">
+              ⠿ Check my code
+            </div>
+          </div>
+          <div className="tsp-check-float-body">{checkMessage}</div>
         </div>
       ) : null}
 

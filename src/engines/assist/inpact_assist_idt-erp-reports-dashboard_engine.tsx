@@ -45,16 +45,15 @@ export const NODES = [
     phase: "Step 1 of 11",
     paal: `Create the file at \`src/components/FinancialMetrics.tsx\`.
 
-Nothing can go inside a file that doesn't exist yet. Before any type or component code, create a new, empty file at that exact path.
+Nothing can go inside a file that doesn't exist yet — this is the very first, purely mechanical step: get the file created at the right path. This step only checks that the file exists; whatever you've written into it since (even finished work from later steps) is completely fine and expected — checking this step never requires the file to be empty.
 
 WHAT YOU NEED
-- A new file: src/components/FinancialMetrics.tsx.
-- Nothing inside it yet — the type comes in the next step.
+- A file at exactly this path: src/components/FinancialMetrics.tsx.
 
-Your task: create the empty file at src/components/FinancialMetrics.tsx. Leave it empty — nothing to write inside it yet.`,
+Your task: create the file at src/components/FinancialMetrics.tsx. That's the whole requirement — the type, component, and everything else come in the steps after this one.`,
     hint: `1. Use the + in FILES (or your file tree) to add a new file.
 2. Path: src/components/FinancialMetrics.tsx — must match exactly.
-3. Leave it empty for now — the type comes in the next step.`,
+3. This step only checks that the file exists — keep writing the rest as you work through later steps, it won't fail this check.`,
     example_code: `// src/components/EarningsCard.tsx
 // (empty — just created)`,
     think_prompt: `Nothing can be defined inside a file that doesn't exist yet. What's the very first, purely mechanical thing this task needs, before any TypeScript or React code at all?`,
@@ -66,13 +65,13 @@ Your task: create the empty file at src/components/FinancialMetrics.tsx. Leave i
     mc_correct_option: "Create the empty file at src/components/FinancialMetrics.tsx",
     mc_anchor: "Create the empty file at src/components",
     why_this_matters: `Every later step in this task assumes this file already exists — skip this and the next step has nowhere to write the type.`,
-    answer_keywords: ["FinancialMetrics.tsx", "src/components", "create", "file"],
+    answer_keywords: [],
     seed_code: ``,
     starter_code: ``,
-    feedback_correct: "Correct — the file exists now, ready for the type in the next step.",
+    feedback_correct: "Correct — the file exists, ready for the type in the next step.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Just create the empty file at the exact path — nothing to write inside it yet.",
-    pre_check_hint: `This step is purely mechanical — there's no code to write yet, just the file itself, at the exact path the later steps expect.`,
+    feedback_wrong: "Create the file at the exact path: src/components/FinancialMetrics.tsx.",
+    pre_check_hint: `This step only checks that the file exists at the right path — nothing else. If you've already written more into it (the type, the component, state, and so on from later steps), that's expected and won't fail this check.`,
     expected: ``,
     analog_example: `// src/components/EarningsCard.tsx
 // (empty — just created)`,
@@ -81,11 +80,11 @@ Your task: create the empty file at src/components/FinancialMetrics.tsx. Leave i
       hook: `Every later step in this task assumes this file already exists — skip this and the next step has nowhere to write the type.`,
       pain: "Trying to define a type or component in a file that was never created just means your edits go nowhere.",
       mentalModel: MENTAL_MODEL,
-      discover: `// src/components/FinancialMetrics.tsx (empty, just created)`,
+      discover: `// src/components/FinancialMetrics.tsx (just created)`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
-      watchOut: "Do not put any code in yet — this step is only the empty file.",
-      dryRun: "Create the same kind of empty starter file for a different real component.",
-      build: `Empty file at src/components/FinancialMetrics.tsx.`,
+      watchOut: "This step only checks the file exists — it's fine (expected, even) if later-step code is already in it.",
+      dryRun: "Create the same kind of starter file for a different real component.",
+      build: `File created at src/components/FinancialMetrics.tsx.`,
     },
   },
   {

@@ -133,10 +133,54 @@ export default function StepAssistPopup({ moduleTag, node, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const endRef = useRef(null);
+  // Draggable (2026-09-07, "make all the models draggable/closeable"): starts centered via the
+  // overlay's own flex-centering (panelPos null on first render, no inline style yet), then this
+  // effect fixes it at that same visual spot as soon as it mounts — no jump — so it can be dragged
+  // anywhere from there. Keeps the dimmed backdrop + click-outside-to-close (unlike the lighter
+  // step/check-result cards) since this is a heavier, read-then-ask panel worth focusing on.
+  const [panelPos, setPanelPos] = useState(null);
+  const dragRef = useRef(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [thread]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setPanelPos({ x: Math.max(24, window.innerWidth / 2 - 240), y: Math.max(24, window.innerHeight / 2 - 280) });
+  }, [node]);
+
+  function handlePointerMove(e) {
+    const d = dragRef.current;
+    if (!d) return;
+    const nextX = d.originX + (e.clientX - d.startX);
+    const nextY = d.originY + (e.clientY - d.startY);
+    setPanelPos({
+      x: Math.min(Math.max(nextX, -200), window.innerWidth - 80),
+      y: Math.min(Math.max(nextY, 0), window.innerHeight - 60),
+    });
+  }
+
+  function handlePointerUp() {
+    dragRef.current = null;
+    window.removeEventListener("pointermove", handlePointerMove);
+    window.removeEventListener("pointerup", handlePointerUp);
+  }
+
+  function handlePointerDown(e) {
+    e.preventDefault();
+    const origin = panelPos || { x: 0, y: 0 };
+    dragRef.current = { startX: e.clientX, startY: e.clientY, originX: origin.x, originY: origin.y };
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+  }
+
+  useEffect(() => {
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    };
+  }, []);
 
   async function ask() {
     const question = draft.trim();
@@ -167,9 +211,19 @@ export default function StepAssistPopup({ moduleTag, node, onClose }) {
 
   return (
     <div className="sap-overlay" role="presentation" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="sap-panel" role="dialog" aria-modal="true" aria-label="Assist me">
+      <div
+        className="sap-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Assist me"
+        style={panelPos ? { position: "fixed", left: panelPos.x, top: panelPos.y, margin: 0 } : undefined}
+      >
         <div className="sap-header">
-          <span>💡 Assist me</span>
+          {/* Drag handle — deliberately separate from the Close button so a press on Close never
+              gets mistaken for a drag start. */}
+          <span className="sap-drag" onPointerDown={handlePointerDown} title="Drag to move">
+            ⠿ 💡 Assist me
+          </span>
           <button type="button" className="sap-close" onClick={onClose}>
             Close
           </button>

@@ -54,10 +54,17 @@
   cursor: default;
 }
 
-.tsp-check-msg {
-  font-size: 11px;
-  color: #64748b;
-  line-height: 1.4;
+/* Check my code's result — a floating card (same pattern as the step detail card, .tsp-card-float
+   below), not the old cramped inline strip that clipped real feedback text (user report,
+   2026-09-07). Centered by default so it reads as a "toast" rather than anchored to a corner. */
+.tsp-check-float {
+  z-index: 2001; /* above the step card when both happen to be open */
+}
+
+.tsp-check-float-body {
+  font-size: 13px;
+  color: #0f172a;
+  line-height: 1.6;
 }
 
 @keyframes tsp-pulse {
