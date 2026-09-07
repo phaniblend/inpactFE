@@ -72,7 +72,11 @@ const MONACO_OPTIONS = {
   hideCursorInOverviewRuler: true,
   padding: { top: 12, bottom: 12 },
   bracketPairColorization: { enabled: true },
-  guides: { bracketPairs: true },
+  // guides.bracketPairs: true draws a filled vertical column down the whole height of every
+  // bracket scope in view — reads as an ugly grey rectangle, not a thin guide line (user report,
+  // 2026-09-07). bracketPairColorization above already colors the bracket characters themselves,
+  // so matching is still visible without the block.
+  guides: { bracketPairs: false },
   quickSuggestions: false,
   suggestOnTriggerCharacters: false,
   parameterHints: { enabled: false },

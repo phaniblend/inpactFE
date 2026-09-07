@@ -204,7 +204,11 @@ export default function WorkspaceEditor({ openFiles, activePath, contents, dirty
               autoClosingBrackets: "always",
               autoClosingQuotes: "always",
               bracketPairColorization: { enabled: true },
-              guides: { bracketPairs: true },
+              // guides.bracketPairs: true draws a filled vertical column down the whole height of
+              // every bracket scope in view — reads as an ugly grey rectangle, not a thin guide line
+              // (user report, 2026-09-07). bracketPairColorization above already colors the bracket
+              // characters themselves, so matching is still visible without the block.
+              guides: { bracketPairs: false },
             }}
           />
         ) : (
