@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Only one real, independently-crawlable URL exists: the app is a single-page, hash-routed SPA
+  (#/workbench, #/apply, etc. are client-side only — the fragment never reaches the server, so
+  search engines don't index them as separate pages). Listing fabricated entries for routes that
+  aren't distinct URLs would be dishonest, not useful — this sitemap stays a single entry until the
+  app gains real server-routed pages.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.inpact.live/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

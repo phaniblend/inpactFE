@@ -24,38 +24,44 @@
       rel="stylesheet"
     />
 
-    <!-- SEO shell (2026-09-06): Inpact is a client-rendered SPA — LandingPage.jsx already carries the
-         real <h1> ("The Architecture of Thought") and section copy for a JS-executing visitor, but a
-         plain scraper (MaxReach's offline scan included) only ever sees this static shell, which had
-         no title/description/canonical/social tags and an empty #root. Fixed here with real copy
-         describing what Inpact actually is (a live-product task platform, paid in real experience —
-         never "like a real project" or a tutorial site) rather than any placeholder/keyword-stuffed
-         text. The <noscript> block below is the thin-content fix: genuine static content a non-JS
-         crawler or reader actually sees, matching what the JS app renders — not hidden cloaking
-         content. -->
-    <title>Inpact — The Architecture of Thought</title>
+    <!-- SEO shell (2026-09-06, sharpened 2026-09-07): Inpact is a client-rendered SPA — LandingPage.jsx
+         already carries the real <h1> ("The Architecture of Thought") and section copy for a
+         JS-executing visitor, but a plain scraper only ever sees this static shell. Fixed with real
+         copy describing what Inpact actually is (a live-product task platform, paid in real
+         experience — never "like a real project", never actually a tutorial site) rather than any
+         placeholder/keyword-stuffed text. Title/description/OG/JSON-LD deliberately name the terms a
+         student would search (front-end, UI, React, TypeScript) because Inpact genuinely teaches
+         those — via real shipped tasks instead of video lessons, which the copy says outright rather
+         than implying it's something it isn't. Canonical/OG/JSON-LD urls point at www.inpact.live,
+         not the bare apex: https://inpact.live/ 301s through an external domain-forwarding hop
+         (outside both deploy repos) that a plain scraper won't follow, so it never reaches this page
+         at all — verified live 2026-09-07, apex returns a bare redirect stub with no content while
+         www.inpact.live serves this exact file. The <noscript> block below is the thin-content fix:
+         genuine static content a non-JS crawler or reader actually sees, matching what the JS app
+         renders — not hidden cloaking content. -->
+    <title>Inpact — Learn React & TypeScript, Ship Real Software</title>
     <meta
       name="description"
-      content="Inpact matches developers to real cohorts and live product tasks — genuine shipped work in React and TypeScript, earning real experience, not tutorials."
+      content="Inpact matches front-end developers with real cohorts and live UI tasks in React and TypeScript — genuine shipped work, real experience, not tutorials."
     />
-    <link rel="canonical" href="https://inpact.live/" />
+    <link rel="canonical" href="https://www.inpact.live/" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Inpact" />
-    <meta property="og:url" content="https://inpact.live/" />
-    <meta property="og:title" content="Inpact — The Architecture of Thought" />
+    <meta property="og:url" content="https://www.inpact.live/" />
+    <meta property="og:title" content="Inpact — Learn React & TypeScript, Ship Real Software" />
     <meta
       property="og:description"
-      content="Inpact matches developers to real cohorts and live product tasks — genuine shipped work in React and TypeScript, earning real experience, not tutorials."
+      content="Inpact matches front-end developers with real cohorts and live UI tasks in React and TypeScript — genuine shipped work, real experience, not tutorials."
     />
     <!-- og:image intentionally omitted: no real 1200x630 social-preview asset exists yet. Add one
          (a real product/UI screenshot, not a placeholder) and an og:image tag together, don't ship
          a broken or unrepresentative image reference in the meantime. -->
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Inpact — The Architecture of Thought" />
+    <meta name="twitter:title" content="Inpact — Learn React & TypeScript, Ship Real Software" />
     <meta
       name="twitter:description"
-      content="Inpact matches developers to real cohorts and live product tasks — genuine shipped work in React and TypeScript, earning real experience, not tutorials."
+      content="Inpact matches front-end developers with real cohorts and live UI tasks in React and TypeScript — genuine shipped work, real experience, not tutorials."
     />
 
     <script type="application/ld+json">
@@ -65,14 +71,14 @@
           {
             "@type": "Organization",
             "name": "Inpact",
-            "url": "https://inpact.live/",
-            "logo": "https://inpact.live/favicon.svg"
+            "url": "https://www.inpact.live/",
+            "logo": "https://www.inpact.live/favicon.svg"
           },
           {
             "@type": "WebSite",
             "name": "Inpact",
-            "url": "https://inpact.live/",
-            "description": "Inpact matches developers to real cohorts and live product tasks — genuine shipped work in React and TypeScript, earning real experience, not tutorials."
+            "url": "https://www.inpact.live/",
+            "description": "Inpact matches front-end developers with real cohorts and live UI tasks in React and TypeScript — genuine shipped work, real experience, not tutorials."
           }
         ]
       }

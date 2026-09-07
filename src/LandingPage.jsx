@@ -466,6 +466,56 @@ export default function LandingPage({ track, onSelectLesson, lessonList, freeLes
           </div>
         </header>
 
+        {/* Real, visible SEO/discovery content (2026-09-07) — a student searching "react tutorial" or
+            "typescript tutorial" is exactly Inpact's audience, even though Inpact deliberately isn't
+            one (never frame this as "like a tutorial" — say plainly what it actually is instead: real,
+            live tasks, paid in experience). This intro is genuine and accurate, not keyword-stuffed —
+            the tier list below is the real REACT_GRID_GROUPS curriculum, not fabricated copy. */}
+        <section
+          aria-labelledby="lp-intro-heading"
+          style={{ maxWidth: "760px", margin: "0 auto", padding: "0 16px 6px", textAlign: "center" }}
+        >
+          <h2 id="lp-intro-heading" style={{ ...LP.h2, fontSize: "clamp(1rem, 2.2vw, 1.2rem)" }}>
+            Learn front-end, UI, React &amp; TypeScript by shipping real, live product features
+          </h2>
+          <p style={{ ...LP.p, color: "#475569", maxWidth: "680px", margin: "0 auto 10px" }}>
+            Inpact isn't a video course or a coding-tutorial site. Every lesson connects straight into
+            a real, live cohort task — the same React, TypeScript, and UI-engineering skills a
+            front-end developer uses on a real product team, on a real codebase, with real acceptance
+            criteria.
+          </p>
+          {track === "react-ts" && (
+            <ul
+              style={{
+                listStyle: "none",
+                margin: "8px auto 0",
+                padding: 0,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "6px 10px",
+                justifyContent: "center",
+                maxWidth: "700px",
+              }}
+            >
+              {REACT_GRID_GROUPS.map((group) => (
+                <li
+                  key={group.key}
+                  style={{
+                    fontSize: "12px",
+                    color: "#0891b2",
+                    background: "#ecfeff",
+                    border: "1px solid #a5f3fc",
+                    borderRadius: "999px",
+                    padding: "4px 10px",
+                  }}
+                >
+                  {group.title.replace(/^Tier \d+ — /, "")}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
         <div
           style={{
             textAlign: "center",
