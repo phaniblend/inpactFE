@@ -108,11 +108,20 @@ export function StockCatalog() {
     feedback_wrong: "Match the type to what GET /api/items actually returns, then add the empty component shell.",
     pre_check_hint: `Every row in the inventory table describes the same kind of thing — an item — so before writing any table code, standardize what one item looks like as a type.
 
-- Give it an \`id\`: a required, unique identifier, so any single item can always be picked out from the rest.
-- Name the properties every item shares: \`sku\`, \`name\`, \`costPrice\`, \`sellingPrice\`, \`stockOnHand\`, and \`reorderPoint\`.
-- Match each property's kind to what the real API actually returns — the two prices and the two stock numbers are genuine numbers, and the rest are text.
+Picture two real rows the warehouse tracks:
+- Levi's 501 Blue Jeans – 32x32 — code JEAN-501-BLU-3232, costs $18.00, sells for $25.00, 25 on the shelf, reorder once it drops to 10.
+- Levi's 501 Blue Jeans – 34x32 — code JEAN-501-BLU-3432, costs $18.00, sells for $25.00, 18 on the shelf, reorder once it drops to 10.
 
-Once that shape has a name — \`Item\` — everything else in this task that touches an item (the table, the badge logic, even other files later on) can rely on the same contract instead of guessing at it.`,
+Every item needs a property for each of these real facts:
+- a unique identifier, so any one item can always be picked out from the rest
+- a stock-keeping code like the one above, that uniquely tags this exact product and size
+- a human-readable name a person would actually recognize
+- what it costs you to acquire one unit
+- what you sell one unit for
+- how many units are sitting on the shelf right now
+- the threshold at which it needs reordering
+
+Name each fact as its own property, in the camelCase style real JavaScript APIs use, and give each the kind it actually is — money and counts are numbers, everything else is text.`,
     expected: `export type Item = {
   id: string;
   sku: string;
@@ -127,17 +136,17 @@ export function InventoryTable() {
   return <div />;
 }
 `,
-    analog_example: `export type StockItem = {
+    analog_example: `export type Vehicle = {
   id: string;
-  sku: string;
-  name: string;
-  costPrice: number;
-  sellingPrice: number;
-  stockOnHand: number;
-  reorderPoint: number;
+  plateNumber: string;
+  make: string;
+  dailyRate: number;
+  weeklyRate: number;
+  milesOnRoad: number;
+  serviceDueAt: number;
 };
 
-export function StockCatalog() {
+export function VehicleRoster() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -769,7 +778,23 @@ export function POManager({ orders, onReceive }: POManagerProps) {
     feedback_correct: "Correct — the shape and the props-only shell both exist now.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "This panel takes orders and onReceive as props — it doesn't fetch or own the list itself.",
-    pre_check_hint: `A props type is a contract naming what a component needs handed to it from outside — orders to render, and a callback to ask for a refresh once something changes.`,
+    pre_check_hint: `Just like an inventory item, a purchase order is one real business record — and this component doesn't fetch it, it's handed one from the parent page.
+
+Picture two real purchase orders:
+- PO-1001 — total $150.00, still DRAFT.
+- PO-1002 — total $90.00, already RECEIVED.
+
+A purchase order needs a property for each of these real facts:
+- a unique identifier, so any one order can always be picked out from the rest
+- its own order number, the kind staff would actually read off a printed PO
+- the total amount of the order
+- its current status, in whatever words the real backend uses for that
+
+Beyond that, the component itself needs two more things handed to it from outside, since it never fetches anything on its own:
+- the full list of orders to render
+- a callback it can call to ask the parent page to refresh, once something changes
+
+Name each of these as its own property, in the camelCase style real APIs use.`,
     expected: `export type PurchaseOrder = {
   id: string;
   poNumber: string;
@@ -786,19 +811,19 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
   return <div />;
 }
 `,
-    analog_example: `export type PO = {
+    analog_example: `export type MaintenanceTicket = {
   id: string;
-  poNumber: string;
-  totalAmount: number;
+  ticketNumber: string;
+  totalCost: number;
   status: string;
 };
 
-type POManagerProps = {
-  orders: PO[];
-  onReceive: () => void;
+type MaintenanceQueueProps = {
+  tickets: MaintenanceTicket[];
+  onClose: () => void;
 };
 
-export function POManager({ orders, onReceive }: POManagerProps) {
+export function MaintenanceQueue({ tickets, onClose }: MaintenanceQueueProps) {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -1356,7 +1381,23 @@ export function SalesPipeline({ orders, onFulfill }: SalesPipelineProps) {
     feedback_correct: "Correct — the shape and the props-only shell both exist now.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "This board takes orders and onFulfill as props — it doesn't fetch or own the list itself.",
-    pre_check_hint: `Same pattern as any props-driven list component: name what shape one order has, and what callback the board needs to ask for a refresh.`,
+    pre_check_hint: `Just like the purchase order, a sales order is one real business record — and this board doesn't fetch it, it's handed one from the parent page.
+
+Picture two real sales orders:
+- SO-2001 — total $125.00, CONFIRMED and ready to ship.
+- SO-2002 — total $60.00, already SHIPPED.
+
+A sales order needs a property for each of these real facts:
+- a unique identifier, so any one order can always be picked out from the rest
+- its own order number, the kind staff would actually read off a printed SO
+- the total amount of the order
+- its current status, in whatever words the real backend uses for that
+
+Beyond that, the board itself needs two more things handed to it from outside, since it never fetches anything on its own:
+- the full list of orders to render
+- a callback it can call to ask the parent page to refresh, once a shipment goes out
+
+Name each of these as its own property, in the camelCase style real APIs use.`,
     expected: `export type SalesOrder = {
   id: string;
   soNumber: string;
@@ -1373,19 +1414,19 @@ export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoa
   return <div />;
 }
 `,
-    analog_example: `export type SO = {
+    analog_example: `export type ClassBooking = {
   id: string;
-  soNumber: string;
-  totalAmount: number;
+  bookingNumber: string;
+  totalFee: number;
   status: string;
 };
 
-type SalesPipelineProps = {
-  orders: SO[];
-  onFulfill: () => void;
+type ClassRosterProps = {
+  bookings: ClassBooking[];
+  onCheckIn: () => void;
 };
 
-export function SalesPipeline({ orders, onFulfill }: SalesPipelineProps) {
+export function ClassRoster({ bookings, onCheckIn }: ClassRosterProps) {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
