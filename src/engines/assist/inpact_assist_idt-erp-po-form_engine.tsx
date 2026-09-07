@@ -1,5 +1,14 @@
 import createINPACTEngine from "../inpact_engine_shared";
 
+const MENTAL_MODEL = `Build the purchasing panel that triggers a real receipt against the real ledger:
+
+  Props    →  orders + onReceive come from the parent — this component owns no PO data itself
+  List     →  every purchase order, its number, total, and status
+  Action   →  a "Receive Goods" button on anything not yet RECEIVED
+  Receive  →  POST /api/po/:id/receive — real stock + real cost + real GL posting happen there
+  Refresh  →  call onReceive() so the parent reloads and every other panel sees the update
+`;
+
 export const NODES = [
   {
     id: "intro",
@@ -7,311 +16,608 @@ export const NODES = [
     phase: "Lesson",
     content: {
       tag: "idt-erp-po-form",
-      title: "Purchase order form & receive modal",
-      body: `Build the screen that creates a purchase order against a real vendor and item, then receives it for real:
-
-  Form    →  pick a vendor, add item lines with quantity + unit price
-  Create  →  POST a real PO to the real Mini ERP API
-  Receive →  one click bumps real stock and posts a real ledger entry
-  Reflect →  the screen shows the item's new stock and cost after receiving
-`,
-      usecase: "The backend (Fastify + Prisma + PostgreSQL) already implements PO creation and receiving — including moving-average cost recalculation and a balanced journal entry — for real. This task is frontend only, against real endpoints.",
-      designMock: {"kind":"list-and-form","screenTitle":"Purchase Orders","caption":"This is the screen you are building — pick a vendor and items, create the PO, then receive it for real.","listCaption":"Vendor + item lines you're ordering","emptyCaption":"Nothing ordered yet","emptyMessage":"Add a line to get started.","rows":[{"title":"WIDGET-01 × 20","subtitle":"$7.50 / unit","meta":"line total $150.00"}],"fields":[{"label":"Vendor","sample":"Acme Supply Co."},{"label":"Quantity","sample":"20"},{"label":"Unit Price","sample":"7.50"}],"submitLabel":"Create PO","formMode":"create"},
+      title: "Procurement panel: purchase orders + receiving",
+      body: MENTAL_MODEL,
+      usecase: "Receiving goods for real recomputes cost via Moving Average Cost and posts a real Inventory/AP journal entry — this panel is the one-click trigger for that.",
+      designMock: {"kind":"list-and-form","screenTitle":"Purchase Orders","caption":"This is the screen you are building — each row is a real purchase order; clicking Receive Goods really posts to the ledger.","listCaption":"LIST — real purchase orders","emptyCaption":"EMPTY — when there are no purchase orders","emptyMessage":"No purchase orders yet.","rows":[{"title":"PO-1001","subtitle":"$150.00","meta":"DRAFT"},{"title":"PO-1002","subtitle":"$90.00","meta":"RECEIVED"}],"fields":[{"label":"Status","options":["All","DRAFT","RECEIVED"]}],"formMode":"filter","submitLabel":"Filter"},
     },
   },
   {
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Define blueprints for vendors, items, and line items, then create the purchase order screen layout.","Set up memory storage for available vendors, item options, and the items currently added to the order.","Fetch active vendors and item catalogs from the server on initial load.","Submit the completed order to the server using a POST call, creating an official pending purchase order.","Send a receive confirmation call to the server to mark items arrived and immediately reflect updated warehouse counts."],
+    items: [
+      "Create the component file, define the props shape (orders + onReceive), and export the empty shell.",
+      "Render the list of purchase orders — number, total, and status.",
+      "Add a Receive Goods button on any order that isn't RECEIVED yet, wired to the real receive endpoint.",
+      "Handle the response — success reloads the parent's data, failure (already received) shows the real error.",
+    ],
   },
   {
-    // Redesign: the old template opened with two pure-scaffolding steps (create the file, write
-    // an empty shell) before ever touching real data. Neither is a move in this task's actual
-    // algorithm. This step merges all three: the real content is modeling the three distinct
-    // shapes a PO form has to keep straight, and the component shell is just the container that
-    // decision needs to live in — not a lesson of its own.
     id: "step1",
     type: "question",
-    phase: "Step 1 of 5",
-    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+    phase: "Step 1 of 4",
+    paal: `Create the component file at src/components/ProcurementPanel.tsx, define its props, and export the shell.
 
-This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/PurchaseOrderForm.tsx\` before anything else. Every step from here on edits that same file.
+Create src/components/ProcurementPanel.tsx. This component doesn't own any purchase-order data itself — it receives the list and a refresh callback as props from the parent page.
 
-Define blueprints for vendors, items, and line items, then create the purchase order screen layout.
+WHAT YOUR CODE NEEDS
+- A PurchaseOrder type: id, poNumber, totalAmount, status (all matching the real /api/po response).
+- A props type: orders: PurchaseOrder[]; onReceive: () => void.
 
-WHAT YOU'LL NEED
-- Vendor type (id, name)
-- ItemOption type (id, name, cost)
-- OrderLine type (itemId, quantity, unitCost)
+Your task: define PurchaseOrder and ProcurementPanelProps, then export ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) returning <div /> — every step from here on edits this same file.`,
+    hint: `1. Create file: Add a new file at src/components/ProcurementPanel.tsx.
+2. Define PurchaseOrder: id, poNumber, totalAmount, status — matching the real POST/GET /api/po response shape.
+3. Define props: type ProcurementPanelProps = { orders: PurchaseOrder[]; onReceive: () => void; }.
+4. Export shell: export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) { return <div />; }.`,
+    example_code: `// src/components/POManager.tsx
+export type PO = {
+  id: string;
+  poNumber: string;
+  totalAmount: number;
+  status: string;
+};
 
-Your task: Define types for vendors, catalog items, and order lines, then assemble the component frame.`,
-    hint: `1. Define entities: Write type declarations for vendors, catalog items, and order line entries.
-2. Map fields: Ensure IDs and names are strings, and quantities and costs are numbers.
-3. Component frame: Build the empty parent component.`,
-    example_code: `export type Vendor = { id: string; name: string };
-export type Product = { id: string; title: string; cost: number };
-export type LineEntry = { productId: string; qty: number };
+type POManagerProps = {
+  orders: PO[];
+  onReceive: () => void;
+};
 
-export function PurchaseOrderManager() {
+export function POManager({ orders, onReceive }: POManagerProps) {
   return <div />;
 }`,
-    think_prompt: `Three different shapes are in play here: a vendor to pick from, an item to pick from, and a line you're building to send. Unlike the inventory table's display-only costPrice/sellingPrice (strings, because that's what the API echoes back), quantity and unitPrice here are values *your form* sends as real numbers. What does each of the three types need to name, and what does the component that will hold them need to be called?`,
-    mc_options: ["Three separate types (Vendor, ItemOption, OrderLine with numeric quantity/unitPrice), then export function PurchaseOrderForm() returning <div />", "One big type with every field optional", "Reuse the inventory table's Item type unchanged for everything"],
-    mc_correct_option: "Three separate types (Vendor, ItemOption, OrderLine with numeric quantity/unitPrice), then export function PurchaseOrderForm() returning <div />",
-    mc_anchor: "Three separate types (Vendor, ItemOption",
-    why_this_matters: `Purchase orders combine multiple records; modeling all three types upfront prevents data mismatches between catalogs and line items.`,
-    answer_keywords: ["type", "Vendor", "ItemOption", "OrderLine", "quantity", "unitPrice", "number", "export", "function", "PurchaseOrderForm"],
+    think_prompt: `This panel never fetches its own purchase orders — the parent page owns that list and hands it down, the same way the parent will also own items and sales orders. What does this component need to accept from outside, rather than manage on its own?`,
+    mc_options: [
+      "define PurchaseOrder and a props type ({ orders, onReceive }), then export ProcurementPanel accepting both as props",
+      "fetch /api/po itself inside this component",
+      "hardcode a fixed list of sample purchase orders",
+    ],
+    mc_correct_option: "define PurchaseOrder and a props type ({ orders, onReceive }), then export ProcurementPanel accepting both as props",
+    mc_anchor: "define PurchaseOrder and a props type ({",
+    why_this_matters: `A panel that only renders what it's handed — never fetching on its own — is what lets the parent page keep every panel showing the same, consistent data.`,
+    answer_keywords: ["PurchaseOrder", "poNumber", "totalAmount", "status", "orders", "onReceive", "ProcurementPanel"],
     seed_code: ``,
     starter_code: ``,
-    feedback_correct: "Correct — three distinct data shapes and the component both exist now; every later step builds inside this.",
+    feedback_correct: "Correct — the shape and the props-only shell both exist now.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Write three separate types matching exactly what POST /api/po expects, then the component shell that will use them.",
-    pre_check_hint: `POST /api/po expects { vendorId, items: [{ itemId, quantity, unitPrice }] } — quantity and unitPrice as real numbers, since your form is producing them, not echoing a decimal field back from the database. The component just needs to exist before it can render anything.`,
-    expected: `export type Vendor = {\n  id: string;\n  name: string;\n};\n\nexport type ItemOption = {\n  id: string;\n  sku: string;\n  name: string;\n};\n\nexport type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  return <div />;\n}\n`,
-    analog_example: `export type Vendor = { id: string; name: string };
-export type Product = { id: string; title: string; cost: number };
-export type LineEntry = { productId: string; qty: number };
+    feedback_wrong: "This panel takes orders and onReceive as props — it doesn't fetch or own the list itself.",
+    pre_check_hint: `A props type is a contract naming what a component needs handed to it from outside — orders to render, and a callback to ask for a refresh once something changes.`,
+    expected: `export type PurchaseOrder = {
+  id: string;
+  poNumber: string;
+  totalAmount: number;
+  status: string;
+};
 
-export function PurchaseOrderManager() {
+type ProcurementPanelProps = {
+  orders: PurchaseOrder[];
+  onReceive: () => void;
+};
+
+export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
+  return <div />;
+}
+`,
+    analog_example: `export type PO = {
+  id: string;
+  poNumber: string;
+  totalAmount: number;
+  status: string;
+};
+
+type POManagerProps = {
+  orders: PO[];
+  onReceive: () => void;
+};
+
+export function POManager({ orders, onReceive }: POManagerProps) {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      hook: `Purchase orders combine multiple records; modeling all three types upfront prevents data mismatches between catalogs and line items.`,
-      pain: "Collapsing three different shapes into one loose type lets the wrong id slide into the wrong field silently.",
-      mentalModel: `Build the screen that creates a purchase order against a real vendor and item, then receives it for real.`,
-      discover: `export type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  return <div />;\n}`,
+      hook: `A panel that only renders what it's handed — never fetching on its own — is what lets the parent page keep every panel showing the same, consistent data.`,
+      pain: "A component that fetches its own copy of shared data can drift out of sync the moment another panel changes that same data.",
+      mentalModel: MENTAL_MODEL,
+      discover: `export type PurchaseOrder = {
+  id: string;
+  poNumber: string;
+  totalAmount: number;
+  status: string;
+};
+
+type ProcurementPanelProps = {
+  orders: PurchaseOrder[];
+  onReceive: () => void;
+};
+
+export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
+  return <div />;
+}
+`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
-      watchOut: "Do not type quantity/unitPrice as string here — they're real numbers your form produces, unlike the inventory table's echoed decimal strings.",
-      dryRun: "Write the same three-type-plus-shell split for a different create-form against a different real API.",
-      build: `type Vendor = { id: string; name: string }; type ItemOption = { id: string; sku: string; name: string }; type OrderLine = { itemId: string; quantity: number; unitPrice: number };\n\nexport function PurchaseOrderForm() { return <div />; }`,
+      watchOut: "Do not fetch /api/po from inside this component — that's the parent page's job.",
+      dryRun: "Write the same props-only shell for a different list + action pair.",
+      build: `1. Define PurchaseOrder.\n2. Define props (orders, onReceive).\n3. Export the shell accepting both.`,
     },
   },
   {
     id: "step2",
     type: "question",
-    phase: "Step 2 of 5",
-    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+    phase: "Step 2 of 4",
+    paal: `Render the list of purchase orders — number, total, and status.
 
-Set up memory storage for available vendors, item options, and the items currently added to the order.
+Loop over the orders prop and display each one's PO number, formatted total, and current status, or a message when there are none.
 
-WHAT YOU'LL NEED
-- State for vendor list.
-- State for product items.
-- State for current order lines.
+WHAT YOUR LOGIC NEEDS
+- A conditional check for orders.length === 0.
+- An empty message: "No purchase orders yet."
+- A .map() rendering each order's poNumber, totalAmount (formatted), and status.
 
-Your task: Set up state hooks for available vendors, catalog items, and active order lines.`,
-    hint: `1. Vendors state: Initialize with an empty array of Vendor.
-2. Products state: Initialize with an empty array of ItemOption.
-3. Lines state: Initialize with an empty array of OrderLine.`,
-    example_code: `const [vendors, setVendors] = useState<Vendor[]>([]);
-const [products, setProducts] = useState<Product[]>([]);
-const [orderLines, setOrderLines] = useState<LineEntry[]>([]);`,
-    think_prompt: `This screen tracks five distinct pieces of changing data: two lists fetched from the API to pick from, the lines the learner is building, which vendor is selected, and the eventual created order. Each one needs React to know when it changes — what does that mean for how each is declared?`,
-    mc_options: ["Five separate useState calls — vendors, items, lines, vendorId, po — each starting empty/null", "One useState holding a single object with all five keys mutated directly", "Plain variables for everything except the final po result"],
-    mc_correct_option: "Five separate useState calls — vendors, items, lines, vendorId, po — each starting empty/null",
-    mc_anchor: "Five separate useState calls",
-    why_this_matters: `Isolating catalogs from the in-progress order ensures draft edits do not alter base vendor or product information.`,
-    answer_keywords: ["useState", "vendors", "items", "lines", "vendorId", "po"],
-    seed_code: `import { useState } from "react";\n\nexport type Vendor = {\n  id: string;\n  name: string;\n};\n\nexport type ItemOption = {\n  id: string;\n  sku: string;\n  name: string;\n};\n\nexport type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  return <div />;\n}\n`,
-    starter_code: `import { useState } from "react";\n\nexport type Vendor = {\n  id: string;\n  name: string;\n};\n\nexport type ItemOption = {\n  id: string;\n  sku: string;\n  name: string;\n};\n\nexport type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  // state here\n  return <div />;\n}\n`,
-    feedback_correct: "Correct — every piece of changing data has its own state slot.",
+Your task: render "No purchase orders yet." when orders.length === 0, otherwise one row per order (key={po.id}) showing poNumber, totalAmount formatted with $ and 2 decimals, and status.`,
+    hint: `1. Check for empty: orders.length === 0 ? <p>No purchase orders yet.</p> : (...)
+2. Loop orders: orders.map((po) => <div key={po.id}>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</div>)`,
+    example_code: `{orders.length === 0 ? (
+  <p>No purchase orders yet.</p>
+) : (
+  orders.map((po) => (
+    <div key={po.id} className="flex justify-between p-2 border-b">
+      <span>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</span>
+    </div>
+  ))
+)}`,
+    think_prompt: `Same list-or-empty-message pattern as every other list you've built — the only difference here is what each row actually shows. What three fields does a purchase-order row need to display?`,
+    mc_options: [
+      "branch on orders.length === 0, otherwise map each order to a row showing poNumber, totalAmount, and status",
+      "always render the rows even when orders is empty",
+      "only show the order count, not each order",
+    ],
+    mc_correct_option: "branch on orders.length === 0, otherwise map each order to a row showing poNumber, totalAmount, and status",
+    mc_anchor: "branch on orders.length === 0, otherwise",
+    why_this_matters: `Showing the real order number and status gives procurement staff the same information a paper PO file would, at a glance.`,
+    answer_keywords: ["orders", "length", "map", "poNumber", "totalAmount", "status", "key"],
+    seed_code: `export type PurchaseOrder = {
+  id: string;
+  poNumber: string;
+  totalAmount: number;
+  status: string;
+};
+
+type ProcurementPanelProps = {
+  orders: PurchaseOrder[];
+  onReceive: () => void;
+};
+
+export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
+  return <div />;
+}
+`,
+    starter_code: `export type PurchaseOrder = {
+  id: string;
+  poNumber: string;
+  totalAmount: number;
+  status: string;
+};
+
+type ProcurementPanelProps = {
+  orders: PurchaseOrder[];
+  onReceive: () => void;
+};
+
+export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
+  return (
+    <div>
+      <h3>Purchase Orders</h3>
+      {/* empty or list */}
+    </div>
+  );
+}
+`,
+    feedback_correct: "Correct — every real purchase order now renders, or an honest empty message.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Five separate useState calls, not one merged object or plain variables.",
-    pre_check_hint: `Each of these five values changes independently and on its own schedule (vendors/items arrive once from a fetch, lines grow one at a time, vendorId flips on a single click, po appears only after a real POST succeeds) — separate state slots keep each change isolated.`,
-    expected: `import { useState } from "react";\n\nexport type Vendor = {\n  id: string;\n  name: string;\n};\n\nexport type ItemOption = {\n  id: string;\n  sku: string;\n  name: string;\n};\n\nexport type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  const [vendors, setVendors] = useState<Vendor[]>([]);\n  const [items, setItems] = useState<ItemOption[]>([]);\n  const [lines, setLines] = useState<OrderLine[]>([]);\n  const [vendorId, setVendorId] = useState("");\n  const [po, setPo] = useState<any>(null);\n  return <div />;\n}\n`,
-    analog_example: `const [vendors, setVendors] = useState<Vendor[]>([]);
-const [products, setProducts] = useState<Product[]>([]);
-const [orderLines, setOrderLines] = useState<LineEntry[]>([]);`,
+    feedback_wrong: "Branch on orders.length === 0 first, then map each order into a row with a stable key.",
+    pre_check_hint: `List all purchase orders. For each, this is just the familiar length-check-then-map pattern, showing poNumber, totalAmount, and status per row.`,
+    expected: `export type PurchaseOrder = {
+  id: string;
+  poNumber: string;
+  totalAmount: number;
+  status: string;
+};
+
+type ProcurementPanelProps = {
+  orders: PurchaseOrder[];
+  onReceive: () => void;
+};
+
+export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
+  return (
+    <div>
+      <h3>Purchase Orders</h3>
+      {orders.length === 0 ? (
+        <p>No purchase orders yet.</p>
+      ) : (
+        orders.map((po) => (
+          <div key={po.id} className="flex justify-between p-2 border-b">
+            <span>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</span>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+`,
+    analog_example: `{orders.length === 0 ? (
+  <p>No purchase orders yet.</p>
+) : (
+  orders.map((po) => (
+    <div key={po.id} className="flex justify-between p-2 border-b">
+      <span>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</span>
+    </div>
+  ))
+)}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      hook: `Isolating catalogs from the in-progress order ensures draft edits do not alter base vendor or product information.`,
-      pain: "One merged state object invites accidental overwrites when updating just one field.",
-      mentalModel: `Build the screen that creates a purchase order against a real vendor and item, then receives it for real.`,
-      discover: `const [lines, setLines] = useState<OrderLine[]>([]);`,
+      hook: `Showing the real order number and status gives procurement staff the same information a paper PO file would, at a glance.`,
+      pain: "Skipping the empty check leaves a blank panel with no explanation before any PO has ever been created.",
+      mentalModel: MENTAL_MODEL,
+      discover: `orders.map((po) => (
+  <div key={po.id}>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</div>
+))`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
-      watchOut: "Do not merge independent pieces of state into one object unless they genuinely change together.",
-      dryRun: "Declare the same five-slot state shape for a different multi-part form.",
-      build: `Five useState calls: vendors, items, lines, vendorId, po.`,
+      watchOut: "Do not turn a single import or interface into its own lesson.",
+      dryRun: "Render the same kind of list for a different resource with the same shape.",
+      build: `1. Check length.\n2. Empty message.\n3. Map rows with key={po.id}.`,
     },
   },
   {
     id: "step3",
     type: "question",
-    phase: "Step 3 of 5",
-    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+    phase: "Step 3 of 4",
+    paal: `Add a Receive Goods button on any order that isn't RECEIVED yet, wired to the real receive endpoint.
 
-Fetch active vendors and item catalogs from the server on initial load.
+For any order whose status isn't RECEIVED, show a "Receive Goods" button that calls the real receipt endpoint for that specific order.
 
-WHAT YOU'LL NEED
-- useEffect with [] dependency array.
-- Promise.all or dual fetch calls requesting vendors and items.
+WHAT YOUR LOGIC NEEDS
+- A conditional render: only show the button when po.status !== "RECEIVED".
+- An onClick handler calling fetch(\`/api/po/\${po.id}/receive\`, { method: "POST" }).
+- The handler is async so it can await the response.
 
-Your task: Load live vendor and catalog lists from the API on mount.`,
-    hint: `1. Use useEffect: Trigger requests on initial mount with [].
-2. Load concurrently: Use Promise.all to fetch vendors and products in parallel.
-3. Populate state: Update both state variables with their respective responses.`,
-    example_code: `useEffect(() => {
-  Promise.all([
-    fetch("/api/vendors").then((r) => r.json()),
-    fetch("/api/items").then((r) => r.json()),
-  ]).then(([vendorData, itemData]) => {
-    setVendors(vendorData);
-    setProducts(itemData);
-  });
-}, []);`,
-    think_prompt: `You've fetched one real endpoint on mount before for the inventory table. This form needs two, fired the same way, each filling its own state slot. What does firing both on mount look like?`,
-    mc_options: ["useEffect(() => { fetch(vendorsUrl).then(r=>r.json()).then(b=>setVendors(b.data)); fetch(itemsUrl).then(r=>r.json()).then(b=>setItems(b.data)); }, [])", "Fetch vendors inside the vendor dropdown's onClick handler instead of on mount", "Call both fetches directly in the component body outside any effect"],
-    mc_correct_option: "useEffect(() => { fetch(vendorsUrl).then(r=>r.json()).then(b=>setVendors(b.data)); fetch(itemsUrl).then(r=>r.json()).then(b=>setItems(b.data)); }, [])",
-    mc_anchor: "useEffect(() => { fetch(vendorsUrl)",
-    why_this_matters: `Loading both catalogs in parallel speeds up page readiness.`,
-    answer_keywords: ["useEffect", "fetch", "vendors", "items", "setVendors", "setItems"],
-    seed_code: `import { useState } from "react";\n\nexport type Vendor = {\n  id: string;\n  name: string;\n};\n\nexport type ItemOption = {\n  id: string;\n  sku: string;\n  name: string;\n};\n\nexport type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  const [vendors, setVendors] = useState<Vendor[]>([]);\n  const [items, setItems] = useState<ItemOption[]>([]);\n  const [lines, setLines] = useState<OrderLine[]>([]);\n  const [vendorId, setVendorId] = useState("");\n  const [po, setPo] = useState<any>(null);\n  return <div />;\n}\n`,
-    starter_code: `import { useState, useEffect } from "react";\n\nexport type Vendor = {\n  id: string;\n  name: string;\n};\n\nexport type ItemOption = {\n  id: string;\n  sku: string;\n  name: string;\n};\n\nexport type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  const [vendors, setVendors] = useState<Vendor[]>([]);\n  const [items, setItems] = useState<ItemOption[]>([]);\n  const [lines, setLines] = useState<OrderLine[]>([]);\n  const [vendorId, setVendorId] = useState("");\n  const [po, setPo] = useState<any>(null);\n  // fetch vendors and items here\n  return <div />;\n}\n`,
-    feedback_correct: "Correct — vendors and items now load for real on mount.",
+Your task: add the button per row, calling POST /api/po/:id/receive for that exact order's id when clicked.`,
+    hint: `1. Conditional button: {po.status !== "RECEIVED" && (<button onClick={() => handleReceive(po.id)}>Receive Goods</button>)}
+2. Handler: async function handleReceive(id: string) { await fetch(\`/api/po/\${id}/receive\`, { method: "POST" }); }
+3. Place the handler above the return statement, inside the component.`,
+    example_code: `async function handleReceive(id: string) {
+  await fetch(\`/api/po/\${id}/receive\`, { method: "POST" });
+}
+
+{po.status !== "RECEIVED" && (
+  <button
+    onClick={() => handleReceive(po.id)}
+    className="bg-blue-600 text-white px-3 py-1 rounded"
+  >
+    Receive Goods
+  </button>
+)}`,
+    think_prompt: `Every order needs its OWN button pointed at its OWN id — clicking Receive Goods on PO-1001 must never accidentally receive PO-1002. What does the URL for this fetch need to include, and which orders should the button even appear on?`,
+    mc_options: [
+      "a button per non-RECEIVED order, calling fetch with that exact order's id in the URL",
+      "one global Receive Goods button that receives every order at once",
+      "a button that's always visible, even on already-RECEIVED orders",
+    ],
+    mc_correct_option: "a button per non-RECEIVED order, calling fetch with that exact order's id in the URL",
+    mc_anchor: "a button per non-RECEIVED order, calling",
+    why_this_matters: `One-click receiving makes warehouse processing straightforward while triggering a real, atomic stock + cost + ledger update behind the scenes.`,
+    answer_keywords: ["handleReceive", "fetch", "po.id", "receive", "POST", "status"],
+    seed_code: `export type PurchaseOrder = {
+  id: string;
+  poNumber: string;
+  totalAmount: number;
+  status: string;
+};
+
+type ProcurementPanelProps = {
+  orders: PurchaseOrder[];
+  onReceive: () => void;
+};
+
+export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
+  return (
+    <div>
+      <h3>Purchase Orders</h3>
+      {orders.length === 0 ? (
+        <p>No purchase orders yet.</p>
+      ) : (
+        orders.map((po) => (
+          <div key={po.id} className="flex justify-between p-2 border-b">
+            <span>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</span>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+`,
+    starter_code: `export type PurchaseOrder = {
+  id: string;
+  poNumber: string;
+  totalAmount: number;
+  status: string;
+};
+
+type ProcurementPanelProps = {
+  orders: PurchaseOrder[];
+  onReceive: () => void;
+};
+
+export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
+  // handleReceive goes here
+
+  return (
+    <div>
+      <h3>Purchase Orders</h3>
+      {orders.length === 0 ? (
+        <p>No purchase orders yet.</p>
+      ) : (
+        orders.map((po) => (
+          <div key={po.id} className="flex justify-between p-2 border-b">
+            <span>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</span>
+            {/* Receive Goods button goes here */}
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+`,
+    feedback_correct: "Correct — each order gets its own button, targeting its own id.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "Both fetches belong inside one useEffect with an empty dependency array, each feeding its own setter via .then().",
-    pre_check_hint: `Two independent fetches can both fire from the same mount-once effect — each just needs its own .then() chain into its own setter.`,
-    expected: `import { useState, useEffect } from "react";\n\nexport type Vendor = {\n  id: string;\n  name: string;\n};\n\nexport type ItemOption = {\n  id: string;\n  sku: string;\n  name: string;\n};\n\nexport type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  const [vendors, setVendors] = useState<Vendor[]>([]);\n  const [items, setItems] = useState<ItemOption[]>([]);\n  const [lines, setLines] = useState<OrderLine[]>([]);\n  const [vendorId, setVendorId] = useState("");\n  const [po, setPo] = useState<any>(null);\n\n  useEffect(() => {\n    fetch("http://localhost:4100/api/vendors")\n      .then((res) => res.json())\n      .then((body) => setVendors(body.data));\n    fetch("http://localhost:4100/api/items")\n      .then((res) => res.json())\n      .then((body) => setItems(body.data));\n  }, []);\n\n  return <div />;\n}\n`,
-    analog_example: `useEffect(() => {
-  Promise.all([
-    fetch("/api/vendors").then((r) => r.json()),
-    fetch("/api/items").then((r) => r.json()),
-  ]).then(([vendorData, itemData]) => {
-    setVendors(vendorData);
-    setProducts(itemData);
-  });
-}, []);`,
+    feedback_wrong: "The button must only show on non-RECEIVED orders and must call receive with that exact order's id.",
+    pre_check_hint: `The button's onClick calls an async function that posts to /api/po/:id/receive using this specific row's po.id, not a fixed value.`,
+    expected: `export type PurchaseOrder = {
+  id: string;
+  poNumber: string;
+  totalAmount: number;
+  status: string;
+};
+
+type ProcurementPanelProps = {
+  orders: PurchaseOrder[];
+  onReceive: () => void;
+};
+
+export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
+  async function handleReceive(id: string) {
+    await fetch(\`/api/po/\${id}/receive\`, { method: "POST" });
+  }
+
+  return (
+    <div>
+      <h3>Purchase Orders</h3>
+      {orders.length === 0 ? (
+        <p>No purchase orders yet.</p>
+      ) : (
+        orders.map((po) => (
+          <div key={po.id} className="flex justify-between p-2 border-b">
+            <span>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</span>
+            {po.status !== "RECEIVED" && (
+              <button onClick={() => handleReceive(po.id)} className="bg-blue-600 text-white px-3 py-1 rounded">
+                Receive Goods
+              </button>
+            )}
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+`,
+    analog_example: `async function handleReceive(id: string) {
+  await fetch(\`/api/po/\${id}/receive\`, { method: "POST" });
+}
+
+{po.status !== "RECEIVED" && (
+  <button onClick={() => handleReceive(po.id)} className="bg-blue-600 text-white px-3 py-1 rounded">
+    Receive Goods
+  </button>
+)}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      hook: `Loading both catalogs in parallel speeds up page readiness.`,
-      pain: "Fetching reference data anywhere other than mount means a form that's sometimes missing its own dropdown options.",
-      mentalModel: `Build the screen that creates a purchase order against a real vendor and item, then receives it for real.`,
-      discover: `fetch("http://localhost:4100/api/vendors").then((r) => r.json()).then((b) => setVendors(b.data));`,
+      hook: `One-click receiving makes warehouse processing straightforward while triggering a real, atomic stock + cost + ledger update behind the scenes.`,
+      pain: "A button not scoped to its own row's id risks receiving the wrong purchase order entirely.",
+      mentalModel: MENTAL_MODEL,
+      discover: `async function handleReceive(id: string) {
+  await fetch(\`/api/po/\${id}/receive\`, { method: "POST" });
+}`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
-      watchOut: "Do not nest the second fetch inside the first's .then() unless one genuinely depends on the other's result — here they don't, so fire both independently.",
-      dryRun: "Fetch two independent reference lists on mount for a different form.",
-      build: `Two independent fetch().then().then() chains inside one useEffect(() => {...}, []).`,
+      watchOut: "Do not hardcode a single PO id — always use the row's own po.id.",
+      dryRun: "Wire the same per-row action button for a different resource and endpoint.",
+      build: `1. Conditional button on status !== "RECEIVED".\n2. Handler posts to /api/po/\${id}/receive.`,
     },
   },
   {
     id: "step4",
     type: "question",
-    phase: "Step 4 of 5",
-    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
+    phase: "Step 4 of 4",
+    paal: `Handle the response — success reloads the parent's data, failure (already received) shows the real error.
 
-Submit the completed order to the server using a POST call, creating an official pending purchase order.
+After the receive request resolves, call onReceive() to tell the parent to reload everything, or surface the real error message when the API rejects the request.
 
-WHAT YOU'LL NEED
-- Submission handler triggering fetch with method POST.
-- JSON payload containing vendorId and order lines.
+WHAT YOUR LOGIC NEEDS
+- Check res.ok after the fetch resolves.
+- On success, call the onReceive() prop so the parent refetches items/orders/reports.
+- On failure, read the real error body and show it (e.g. via alert or inline state) instead of failing silently.
 
-Your task: Submit the constructed purchase order lines and selected vendor to the server via POST.`,
-    hint: `1. Setup request: Call fetch targeting "/api/po" with method "POST".
-2. Set headers: Include "Content-Type": "application/json".
-3. Serialize body: Stringify an object containing the vendor ID and orderLines state.`,
-    example_code: `async function submitOrder(vendorId: string) {
-  const res = await fetch("/api/po", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ vendorId, lines: orderLines }),
-  });
-  const newPo = await res.json();
-  return newPo;
+Your task: after fetch resolves, call onReceive() if res.ok; otherwise parse the JSON error body and surface it to the user.`,
+    hint: `1. Capture the response: const res = await fetch(...).
+2. Branch on res.ok: if (res.ok) { onReceive(); } else { const body = await res.json(); alert(body.error); }
+3. Keep the fetch call itself unchanged — only what happens after it resolves is new.`,
+    example_code: `async function handleReceive(id: string) {
+  const res = await fetch(\`/api/po/\${id}/receive\`, { method: "POST" });
+  if (res.ok) {
+    onReceive();
+  } else {
+    const body = await res.json();
+    alert(body.error || "Could not receive this order.");
+  }
 }`,
-    think_prompt: `A real POST against a real backend, same shape as every other create-form in this app: send the payload, await the response, store what comes back. What does this one send, and where does the result go?`,
-    mc_options: ["createPO POSTs {vendorId, items: lines} to /api/po and stores the response's data via setPo", "Skip storing the response — the button click is enough", "POST with no body and let the server guess the vendor and lines"],
-    mc_correct_option: "createPO POSTs {vendorId, items: lines} to /api/po and stores the response's data via setPo",
-    mc_anchor: "createPO POSTs {vendorId, items: lines}",
-    why_this_matters: `Communicating via structured JSON ensures the ERP receives the purchase order formatted exactly as required.`,
-    answer_keywords: ["createPO", "POST", "vendorId", "items", "setPo"],
-    seed_code: `import { useState, useEffect } from "react";\n\nexport type Vendor = {\n  id: string;\n  name: string;\n};\n\nexport type ItemOption = {\n  id: string;\n  sku: string;\n  name: string;\n};\n\nexport type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  const [vendors, setVendors] = useState<Vendor[]>([]);\n  const [items, setItems] = useState<ItemOption[]>([]);\n  const [lines, setLines] = useState<OrderLine[]>([]);\n  const [vendorId, setVendorId] = useState("");\n  const [po, setPo] = useState<any>(null);\n\n  useEffect(() => {\n    fetch("http://localhost:4100/api/vendors")\n      .then((res) => res.json())\n      .then((body) => setVendors(body.data));\n    fetch("http://localhost:4100/api/items")\n      .then((res) => res.json())\n      .then((body) => setItems(body.data));\n  }, []);\n\n  return <div />;\n}\n`,
-    starter_code: `import { useState, useEffect } from "react";\n\nexport type Vendor = {\n  id: string;\n  name: string;\n};\n\nexport type ItemOption = {\n  id: string;\n  sku: string;\n  name: string;\n};\n\nexport type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  const [vendors, setVendors] = useState<Vendor[]>([]);\n  const [items, setItems] = useState<ItemOption[]>([]);\n  const [lines, setLines] = useState<OrderLine[]>([]);\n  const [vendorId, setVendorId] = useState("");\n  const [po, setPo] = useState<any>(null);\n\n  useEffect(() => {\n    fetch("http://localhost:4100/api/vendors")\n      .then((res) => res.json())\n      .then((body) => setVendors(body.data));\n    fetch("http://localhost:4100/api/items")\n      .then((res) => res.json())\n      .then((body) => setItems(body.data));\n  }, []);\n\n  // createPO here\n\n  return (\n    <div>\n      {/* Create PO button, and once po exists: its status */}\n    </div>\n  );\n}\n`,
-    feedback_correct: "Correct — a real purchase order now exists on the server.",
+    think_prompt: `A real API can genuinely fail — someone else already received this exact order a second ago, and the server correctly says 409. Silently doing nothing on failure would leave staff clicking a dead button with no idea why. What has to happen in each of the two outcomes?`,
+    mc_options: [
+      "check res.ok: call onReceive() on success, read and show the real error body on failure",
+      "always call onReceive(), whether or not the request actually succeeded",
+      "ignore the response entirely once the fetch call is made",
+    ],
+    mc_correct_option: "check res.ok: call onReceive() on success, read and show the real error body on failure",
+    mc_anchor: "check res.ok: call onReceive() on success",
+    why_this_matters: `Refreshing on success keeps every panel on screen in sync with what the ledger actually did; surfacing a real failure keeps staff from believing an order was received when it wasn't.`,
+    answer_keywords: ["res.ok", "onReceive", "alert", "body.error", "json"],
+    seed_code: `export type PurchaseOrder = {
+  id: string;
+  poNumber: string;
+  totalAmount: number;
+  status: string;
+};
+
+type ProcurementPanelProps = {
+  orders: PurchaseOrder[];
+  onReceive: () => void;
+};
+
+export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
+  async function handleReceive(id: string) {
+    await fetch(\`/api/po/\${id}/receive\`, { method: "POST" });
+  }
+
+  return (
+    <div>
+      <h3>Purchase Orders</h3>
+      {orders.length === 0 ? (
+        <p>No purchase orders yet.</p>
+      ) : (
+        orders.map((po) => (
+          <div key={po.id} className="flex justify-between p-2 border-b">
+            <span>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</span>
+            {po.status !== "RECEIVED" && (
+              <button onClick={() => handleReceive(po.id)} className="bg-blue-600 text-white px-3 py-1 rounded">
+                Receive Goods
+              </button>
+            )}
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+`,
+    starter_code: `export type PurchaseOrder = {
+  id: string;
+  poNumber: string;
+  totalAmount: number;
+  status: string;
+};
+
+type ProcurementPanelProps = {
+  orders: PurchaseOrder[];
+  onReceive: () => void;
+};
+
+export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
+  async function handleReceive(id: string) {
+    const res = await fetch(\`/api/po/\${id}/receive\`, { method: "POST" });
+    // handle res.ok / error here
+  }
+
+  return (
+    <div>
+      <h3>Purchase Orders</h3>
+      {orders.length === 0 ? (
+        <p>No purchase orders yet.</p>
+      ) : (
+        orders.map((po) => (
+          <div key={po.id} className="flex justify-between p-2 border-b">
+            <span>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</span>
+            {po.status !== "RECEIVED" && (
+              <button onClick={() => handleReceive(po.id)} className="bg-blue-600 text-white px-3 py-1 rounded">
+                Receive Goods
+              </button>
+            )}
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+`,
+    feedback_correct: "Correct — a real success reloads everything, and a real failure is never silent.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "createPO must POST {vendorId, items: lines} and store the response's data via setPo.",
-    pre_check_hint: `A real POST is just fetch with a method and a JSON body — the part that matters here is not skipping the response and actually storing it, since the next step needs po.id from it.`,
-    expected: `import { useState, useEffect } from "react";\n\nexport type Vendor = {\n  id: string;\n  name: string;\n};\n\nexport type ItemOption = {\n  id: string;\n  sku: string;\n  name: string;\n};\n\nexport type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  const [vendors, setVendors] = useState<Vendor[]>([]);\n  const [items, setItems] = useState<ItemOption[]>([]);\n  const [lines, setLines] = useState<OrderLine[]>([]);\n  const [vendorId, setVendorId] = useState("");\n  const [po, setPo] = useState<any>(null);\n\n  useEffect(() => {\n    fetch("http://localhost:4100/api/vendors")\n      .then((res) => res.json())\n      .then((body) => setVendors(body.data));\n    fetch("http://localhost:4100/api/items")\n      .then((res) => res.json())\n      .then((body) => setItems(body.data));\n  }, []);\n\n  async function createPO() {\n    const res = await fetch("http://localhost:4100/api/po", {\n      method: "POST",\n      headers: { "Content-Type": "application/json" },\n      body: JSON.stringify({ vendorId, items: lines }),\n    });\n    const body = await res.json();\n    setPo(body.data);\n  }\n\n  return (\n    <div>\n      <button onClick={createPO}>Create PO</button>\n      {po && <p>Status: {po.status}</p>}\n    </div>\n  );\n}\n`,
-    analog_example: `async function submitOrder(vendorId: string) {
-  const res = await fetch("/api/po", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ vendorId, lines: orderLines }),
-  });
-  const newPo = await res.json();
-  return newPo;
+    feedback_wrong: "Branch on res.ok — call onReceive() only on success, and show the real error body on failure.",
+    pre_check_hint: `res.ok tells you whether the server actually accepted the request. On success, tell the parent to reload (onReceive()); on failure, read the JSON body's error field and show it.`,
+    expected: `export type PurchaseOrder = {
+  id: string;
+  poNumber: string;
+  totalAmount: number;
+  status: string;
+};
+
+type ProcurementPanelProps = {
+  orders: PurchaseOrder[];
+  onReceive: () => void;
+};
+
+export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
+  async function handleReceive(id: string) {
+    const res = await fetch(\`/api/po/\${id}/receive\`, { method: "POST" });
+    if (res.ok) {
+      onReceive();
+    } else {
+      const body = await res.json();
+      alert(body.error || "Could not receive this order.");
+    }
+  }
+
+  return (
+    <div>
+      <h3>Purchase Orders</h3>
+      {orders.length === 0 ? (
+        <p>No purchase orders yet.</p>
+      ) : (
+        orders.map((po) => (
+          <div key={po.id} className="flex justify-between p-2 border-b">
+            <span>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</span>
+            {po.status !== "RECEIVED" && (
+              <button onClick={() => handleReceive(po.id)} className="bg-blue-600 text-white px-3 py-1 rounded">
+                Receive Goods
+              </button>
+            )}
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+`,
+    analog_example: `async function handleReceive(id: string) {
+  const res = await fetch(\`/api/po/\${id}/receive\`, { method: "POST" });
+  if (res.ok) {
+    onReceive();
+  } else {
+    const body = await res.json();
+    alert(body.error || "Could not receive this order.");
+  }
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
-      hook: `Communicating via structured JSON ensures the ERP receives the purchase order formatted exactly as required.`,
-      pain: "Discarding the create response means the screen has no real po.id to receive against later.",
-      mentalModel: `Build the screen that creates a purchase order against a real vendor and item, then receives it for real.`,
-      discover: `async function createPO() {\n  const res = await fetch("http://localhost:4100/api/po", {\n    method: "POST",\n    headers: { "Content-Type": "application/json" },\n    body: JSON.stringify({ vendorId, items: lines }),\n  });\n  const body = await res.json();\n  setPo(body.data);\n}`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
-      watchOut: "Do not fire the POST and ignore the response — the next step needs po.id from it.",
-      dryRun: "Write the same create-and-store pattern for a different real create endpoint.",
-      build: `createPO() POSTs {vendorId, items: lines} to /api/po and stores the response via setPo.`,
-    },
-  },
-  {
-    id: "step5",
-    type: "question",
-    phase: "Step 5 of 5",
-    paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
-
-Send a receive confirmation call to the server to mark items arrived and immediately reflect updated warehouse counts.
-
-WHAT YOU'LL NEED
-- Function taking the purchase order ID.
-- POST request to /api/po/:id/receive.
-- Refresh or state update reflecting newly received stock levels.
-
-Your task: Confirm receipt of goods by calling the receive endpoint and updating screen data.`,
-    hint: `1. Construct URL: Inject the target PO's ID into the endpoint URL.
-2. Trigger POST: Send the receive command to the backend.
-3. Handle success: On a successful response, update local state or re-fetch items to display updated warehouse counts.`,
-    example_code: `async function receivePo(poId: string) {
-  const res = await fetch(\`/api/po/\${poId}/receive\`, { method: "POST" });
-  if (res.ok) {
-    // refresh catalog or trigger inventory reload
-  }
+      hook: `Refreshing on success keeps every panel on screen in sync with what the ledger actually did; surfacing a real failure keeps staff from believing an order was received when it wasn't.`,
+      pain: "Ignoring the response leaves staff clicking a button that looks like it worked, even on a real 409 rejection.",
+      mentalModel: MENTAL_MODEL,
+      discover: `if (res.ok) {
+  onReceive();
+} else {
+  const body = await res.json();
+  alert(body.error);
 }`,
-    think_prompt: `Two real, sequential POSTs: the first creates a PO and only then do you have a real po.id to receive against. What does the receive call send, and what does it do with what comes back?`,
-    mc_options: ["receivePO POSTs to /api/po/:id/receive using po.id and stores data.po via setPo", "receivePO can run before po exists, using a placeholder id", "Skip storing the receive response — the click alone is proof enough"],
-    mc_correct_option: "receivePO POSTs to /api/po/:id/receive using po.id and stores data.po via setPo",
-    mc_anchor: "receivePO POSTs to /api/po/:id/receive",
-    why_this_matters: `Closing the loop on the PO updates inventory numbers without requiring a full browser refresh.
-
-
-================================================================================`,
-    answer_keywords: ["receivePO", "POST", "receive", "po.id", "setPo"],
-    seed_code: `import { useState, useEffect } from "react";\n\nexport type Vendor = {\n  id: string;\n  name: string;\n};\n\nexport type ItemOption = {\n  id: string;\n  sku: string;\n  name: string;\n};\n\nexport type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  const [vendors, setVendors] = useState<Vendor[]>([]);\n  const [items, setItems] = useState<ItemOption[]>([]);\n  const [lines, setLines] = useState<OrderLine[]>([]);\n  const [vendorId, setVendorId] = useState("");\n  const [po, setPo] = useState<any>(null);\n\n  useEffect(() => {\n    fetch("http://localhost:4100/api/vendors")\n      .then((res) => res.json())\n      .then((body) => setVendors(body.data));\n    fetch("http://localhost:4100/api/items")\n      .then((res) => res.json())\n      .then((body) => setItems(body.data));\n  }, []);\n\n  async function createPO() {\n    const res = await fetch("http://localhost:4100/api/po", {\n      method: "POST",\n      headers: { "Content-Type": "application/json" },\n      body: JSON.stringify({ vendorId, items: lines }),\n    });\n    const body = await res.json();\n    setPo(body.data);\n  }\n\n  return (\n    <div>\n      <button onClick={createPO}>Create PO</button>\n      {po && <p>Status: {po.status}</p>}\n    </div>\n  );\n}\n`,
-    starter_code: `import { useState, useEffect } from "react";\n\nexport type Vendor = {\n  id: string;\n  name: string;\n};\n\nexport type ItemOption = {\n  id: string;\n  sku: string;\n  name: string;\n};\n\nexport type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  const [vendors, setVendors] = useState<Vendor[]>([]);\n  const [items, setItems] = useState<ItemOption[]>([]);\n  const [lines, setLines] = useState<OrderLine[]>([]);\n  const [vendorId, setVendorId] = useState("");\n  const [po, setPo] = useState<any>(null);\n\n  useEffect(() => {\n    fetch("http://localhost:4100/api/vendors")\n      .then((res) => res.json())\n      .then((body) => setVendors(body.data));\n    fetch("http://localhost:4100/api/items")\n      .then((res) => res.json())\n      .then((body) => setItems(body.data));\n  }, []);\n\n  async function createPO() {\n    const res = await fetch("http://localhost:4100/api/po", {\n      method: "POST",\n      headers: { "Content-Type": "application/json" },\n      body: JSON.stringify({ vendorId, items: lines }),\n    });\n    const body = await res.json();\n    setPo(body.data);\n  }\n\n  // receivePO here\n\n  return (\n    <div>\n      <button onClick={createPO}>Create PO</button>\n      {po && (\n        <div>\n          <p>Status: {po.status}</p>\n          {/* Receive Goods button once po exists and isn't already received */}\n        </div>\n      )}\n    </div>\n  );\n}\n`,
-    feedback_correct: "Correct — the screen creates and receives a real purchase order end to end.",
-    feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "receivePO must POST to /api/po/:id/receive using the created po's real id, and store data.po.",
-    pre_check_hint: `Receiving requires a real po.id, which only exists after createPO's response comes back — that's why receivePO reads po.id rather than anything computed earlier.`,
-    expected: `import { useState, useEffect } from "react";\n\nexport type Vendor = {\n  id: string;\n  name: string;\n};\n\nexport type ItemOption = {\n  id: string;\n  sku: string;\n  name: string;\n};\n\nexport type OrderLine = {\n  itemId: string;\n  quantity: number;\n  unitPrice: number;\n};\n\nexport function PurchaseOrderForm() {\n  const [vendors, setVendors] = useState<Vendor[]>([]);\n  const [items, setItems] = useState<ItemOption[]>([]);\n  const [lines, setLines] = useState<OrderLine[]>([]);\n  const [vendorId, setVendorId] = useState("");\n  const [po, setPo] = useState<any>(null);\n\n  useEffect(() => {\n    fetch("http://localhost:4100/api/vendors")\n      .then((res) => res.json())\n      .then((body) => setVendors(body.data));\n    fetch("http://localhost:4100/api/items")\n      .then((res) => res.json())\n      .then((body) => setItems(body.data));\n  }, []);\n\n  async function createPO() {\n    const res = await fetch("http://localhost:4100/api/po", {\n      method: "POST",\n      headers: { "Content-Type": "application/json" },\n      body: JSON.stringify({ vendorId, items: lines }),\n    });\n    const body = await res.json();\n    setPo(body.data);\n  }\n\n  async function receivePO() {\n    const res = await fetch(\`http://localhost:4100/api/po/\${po.id}/receive\`, { method: "POST" });\n    const body = await res.json();\n    setPo(body.data.po);\n  }\n\n  return (\n    <div>\n      <button onClick={createPO}>Create PO</button>\n      {po && (\n        <div>\n          <p>Status: {po.status}</p>\n          {po.status !== "RECEIVED" && <button onClick={receivePO}>Receive Goods</button>}\n        </div>\n      )}\n    </div>\n  );\n}\n`,
-    analog_example: `async function receivePo(poId: string) {
-  const res = await fetch(\`/api/po/\${poId}/receive\`, { method: "POST" });
-  if (res.ok) {
-    // refresh catalog or trigger inventory reload
-  }
-}`,
-    deepDiveLabel: "Why this step matters",
-    deepDive: {
-      hook: `Closing the loop on the PO updates inventory numbers without requiring a full browser refresh.
-
-
-================================================================================`,
-      pain: "Skipping the real receive call means the form looks done but never touches actual stock or the ledger.",
-      mentalModel: `Build the screen that creates a purchase order against a real vendor and item, then receives it for real.`,
-      discover: `async function receivePO() {\n  const res = await fetch(\`http://localhost:4100/api/po/\${po.id}/receive\`, { method: "POST" });\n  const body = await res.json();\n  setPo(body.data.po);\n}`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
-      watchOut: "Do not call receivePO before po exists — there is no id to receive against yet.",
-      dryRun: "Write the same create-then-act pattern for a different two-step real workflow.",
-      build: `createPO() POSTs to /api/po; receivePO() POSTs to /api/po/\${po.id}/receive once po exists.`,
+      watchOut: "Do not assume every fetch succeeds — always branch on res.ok.",
+      dryRun: "Handle success/failure the same way for a different action button.",
+      build: `1. Capture res.\n2. if (res.ok) onReceive().\n3. else read + show body.error.`,
     },
   },
 ];
@@ -323,13 +629,12 @@ const sideItems = [
   { label: "Step 2", id: "step2" },
   { label: "Step 3", id: "step3" },
   { label: "Step 4", id: "step4" },
-  { label: "Step 5", id: "step5" },
 ];
 
 export default createINPACTEngine({
   NODES,
   sideItems,
   lessonNum: 0,
-  title: "Purchase order form & receive modal",
-  shortName: "PO form",
+  title: "Procurement panel: purchase orders + receiving",
+  shortName: "Procurement",
 });
