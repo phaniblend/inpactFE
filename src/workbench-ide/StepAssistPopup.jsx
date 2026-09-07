@@ -218,13 +218,6 @@ export default function StepAssistPopup({ moduleTag, node, onClose }) {
               <pre className="sap-code">{node.analog_example}</pre>
             </div>
           ) : null}
-          {node.deepDive?.mentalModel ? (
-            <div className="sap-block">
-              <div className="sap-label">MENTAL MODEL</div>
-              <div className="sap-text">{withInlineCode(node.deepDive.mentalModel, "mm")}</div>
-            </div>
-          ) : null}
-
           {thread.length > 0 && (
             <div className="sap-thread">
               {thread.map((m, i) => (

@@ -42,16 +42,16 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 10",
-    paal: `Create FinancialMetrics.tsx and define what one income-statement response looks like.
+    paal: `Create the file at \`src/components/FinancialMetrics.tsx\`, then define the Financials type.
 
-Create the file at \`src/components/FinancialMetrics.tsx\` — it doesn't exist yet — and write a TypeScript type naming every field the real income-statement endpoint sends back.
+This file doesn't exist yet — create it first. Then write a TypeScript type naming every field the real income-statement endpoint sends back.
 
 WHAT YOUR BLUEPRINT NEEDS
 - revenue (text — the API sends an already-formatted 2-decimal string, e.g. "125.00")
 - cogs (text)
 - netIncome (text)
 
-Your task: create the file and write \`type Financials\` with those three fields. Nothing else yet — the component itself comes in the next step.`,
+Your task: create the file, then write \`type Financials\` with those three fields. Nothing else yet — the component itself comes in the next step.`,
     hint: `1. Create the file: Add a new file at src/components/FinancialMetrics.tsx.
 2. Match the real shape: GET /api/reports/income-statement returns { revenue, cogs, netIncome } as strings like "125.00", not numbers.
 3. Write only the type — no component yet.`,
@@ -76,7 +76,7 @@ export type Financials = {
     feedback_correct: "Correct — the blueprint matches exactly what the real endpoint sends.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Just the type for now — three string fields, matching the real API's response.",
-    pre_check_hint: `A TypeScript type just needs to match what the real endpoint actually sends — three already-formatted money strings.`,
+    pre_check_hint: `Create the file first — it doesn't exist yet. Then the type itself just needs to match what the real endpoint actually sends: three already-formatted money strings, not numbers.`,
     expected: `export type Financials = {
   revenue: string;
   cogs: string;
@@ -531,7 +531,7 @@ export default function App() {
     feedback_correct: "Correct — one shared home for all three lists.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Just the three empty state arrays for now — no fetching yet.",
-    pre_check_hint: `Three separate useState hooks, each starting as an empty array — the fetch that fills them comes in the next step.`,
+    pre_check_hint: `This step edits a different file — create src/App.tsx if it doesn't exist yet. Then declare three separate useState hooks, each starting as an empty array — the fetch that fills them comes in the next step.`,
     expected: `import { useState } from "react";
 import { type Item } from "./components/InventoryTable";
 import { type PurchaseOrder } from "./components/ProcurementPanel";
