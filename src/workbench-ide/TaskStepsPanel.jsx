@@ -196,7 +196,23 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
         setTimeout(() => setJustPassed(new Set()), 1600);
         setCheckMessage(`✅ ${newlyDone.length} step${newlyDone.length > 1 ? "s" : ""} confirmed complete.`);
       } else {
-        setCheckMessage("No new steps look complete yet — keep going.");
+        // Surface *why*, not just "keep going" — every pending step genuinely got checked and
+        // usually has real, specific feedback (found live 2026-09-07: a real missing-import bug
+        // was being detected correctly the whole time, but this generic message threw the actual
+        // reason away, making a working fix look like it wasn't catching anything). Prefer the
+        // currently-open step's feedback if it's among the failures; otherwise the earliest
+        // pending step that has one.
+        const withFeedback = settled
+          .map((s, i) => ({ node: pending[i], result: s.status === "fulfilled" ? s.value : null }))
+          .filter((r) => r.result?.feedback);
+        const activeNodeId = activeStep !== null ? steps[activeStep]?.id : null;
+        const chosen = withFeedback.find((r) => r.node.id === activeNodeId) || withFeedback[0];
+        if (chosen) {
+          const stepNum = steps.findIndex((s) => s.id === chosen.node.id) + 1;
+          setCheckMessage(`Step ${stepNum}: ${chosen.result.feedback}`);
+        } else {
+          setCheckMessage("No new steps look complete yet — keep going.");
+        }
       }
     } catch (err) {
       setCheckMessage(`Couldn't check your code: ${err?.message || "please try again."}`);
