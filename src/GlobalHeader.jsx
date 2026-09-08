@@ -35,7 +35,7 @@ export default function GlobalHeader() {
 
   return (
     <Link to="/" className="gh-logo-link" aria-label="Inpact home">
-      <InpactLogo height={36} />
+      <InpactLogo height={28} />
     </Link>
   );
 }

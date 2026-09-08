@@ -1,11 +1,20 @@
+/* A bare floating image glued to the exact corner reads as stray debris, not a deliberate UI
+   element, no matter how its size/offset get tuned — confirmed live, twice ("its still cramped on
+   top left" even after bumping the offset and size once already). A real padded, backgrounded chip
+   gives it the same "this is on purpose" visual anchor the chat launcher's circular button already
+   has, instead of an unframed image sitting raw against the corner. */
 .gh-logo-link {
   position: fixed;
-  top: 18px;
-  left: 24px;
+  top: 16px;
+  left: 16px;
   z-index: 900;
-  display: block;
-  line-height: 0;
-  opacity: 0.92;
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 20px rgba(15, 23, 42, 0.12);
+  opacity: 0.96;
 }
 
 .gh-logo-link:hover {
@@ -14,7 +23,8 @@
 
 @media (max-width: 600px) {
   .gh-logo-link {
-    top: 12px;
-    left: 14px;
+    top: 10px;
+    left: 10px;
+    padding: 6px 10px;
   }
 }
