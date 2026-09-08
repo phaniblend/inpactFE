@@ -105,9 +105,15 @@ const T = {
   TYPE_START: 2400,
 }
 
+// Explicit \n breaks on L1/L2 (white-space: pre-wrap on .cin-line renders them as real line
+// breaks) — text-wrap: balance alone picked a different break depending on the exact viewport
+// width (fine on one test width, back to stranding a single word on its own line on another —
+// user report, live: "now the 'enterprise software' in the first line and jumping to the next").
+// A fixed, designer-chosen break point is deterministic across every width, where balance's
+// per-width heuristic isn't.
 const LINES = [
-  { id: 'cin-L1', text: 'Code your way into enterprise software.' },
-  { id: 'cin-L2', text: 'Join a team. Ship real work. Claim the experience.' },
+  { id: 'cin-L1', text: 'Code your way into\nenterprise software.' },
+  { id: 'cin-L2', text: 'Join a team. Ship real work.\nClaim the experience.' },
   { id: 'cin-L3', text: '' },
   { id: 'cin-L4', text: 'Start doing.  Stop watching.' },
 ]
