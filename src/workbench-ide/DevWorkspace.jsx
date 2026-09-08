@@ -4,6 +4,7 @@ import { getFs, projectDir } from "./gitFs.js";
 import {
   ensureCloned,
   checkoutOrCreateBranch,
+  repairBacktickFolders,
   ensureBoilerplate,
   currentBranch,
   listChangedFiles,
@@ -140,6 +141,7 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
               },
             });
             await checkoutOrCreateBranch({ fs, dir, branch: branchHint });
+            await repairBacktickFolders(fs, dir);
             await ensureBoilerplate({ fs, dir, codingFocus });
           })();
         }
@@ -369,6 +371,7 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
       // haven't changed, so trigger the same sequence directly.
       await ensureCloned({ fs, dir, projectPath });
       await checkoutOrCreateBranch({ fs, dir, branch: branchHint });
+      await repairBacktickFolders(fs, dir);
       await ensureBoilerplate({ fs, dir, codingFocus });
       setBranch(await currentBranch({ fs, dir }));
       await refreshStatus();

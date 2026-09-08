@@ -61,6 +61,51 @@ async function rmrf(fs, path) {
   }
 }
 
+/** Recursively copies a file or directory from one absolute path to another, creating destination
+ * directories as needed. Used only by repairBacktickFolders below. */
+async function copyTree(fs, fromAbs, toAbs) {
+  const stat = await fs.promises.stat(fromAbs);
+  if (stat.isDirectory()) {
+    await ensureDir(fs, toAbs);
+    const entries = await fs.promises.readdir(fromAbs);
+    for (const entry of entries) await copyTree(fs, `${fromAbs}/${entry}`, `${toAbs}/${entry}`);
+  } else {
+    const content = await fs.promises.readFile(fromAbs);
+    await ensureDir(fs, toAbs.slice(0, toAbs.lastIndexOf("/")));
+    await fs.promises.writeFile(toAbs, content);
+  }
+}
+
+/**
+ * One-time repair for a real bug (fixed at the source in FileTree.jsx's submitNewFile): a learner
+ * pasting a path straight out of chat or instruction text — which writes paths as `` `src/App.tsx` ``
+ * in markdown — could carry the backtick characters into the "new file" input, producing a real
+ * folder literally named "`src" alongside the correctly-named "src". Everything built before the
+ * fix landed in the broken one, so a later file seeded into the correctly-named folder (e.g.
+ * ensureBoilerplate's src/main.tsx) split a single project across two sibling folders — confirmed
+ * live: main.tsx's `import App from "./App"` had nothing to resolve to, because App.tsx was sitting
+ * in the other "`src" folder.
+ *
+ * Merges any root-level folder whose name contains a backtick into its backtick-stripped sibling
+ * (creating that sibling first if it doesn't exist), then removes the now-empty broken folder.
+ * Idempotent — a no-op once no backtick-named folder remains.
+ */
+export async function repairBacktickFolders(fs, dir) {
+  let entries;
+  try {
+    entries = await fs.promises.readdir(dir);
+  } catch {
+    return;
+  }
+  for (const name of entries) {
+    if (name === ".git" || !name.includes("`")) continue;
+    const cleanName = name.replace(/`/g, "");
+    if (!cleanName) continue; // a name that was ALL backticks — nothing sane to merge into
+    await copyTree(fs, `${dir}/${name}`, `${dir}/${cleanName}`);
+    await rmrf(fs, `${dir}/${name}`);
+  }
+}
+
 /** Clones once; a second call against an already-cloned dir is a cheap no-op. */
 export async function ensureCloned({ fs, dir, projectPath, onProgress }) {
   if (await pathExists(fs, `${dir}/.git`)) return { cloned: false };

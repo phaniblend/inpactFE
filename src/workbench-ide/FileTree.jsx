@@ -243,7 +243,13 @@ export default function FileTree({ fs, dir, activePath, dirtyPaths, onOpenFile, 
   }
 
   function submitNewFile() {
-    const typed = newFileName.trim().replace(/^\/+/, "");
+    // Strips stray backticks along with slashes — a learner pasting a path straight out of a chat
+    // message or instruction text (which writes paths as `` `src/App.tsx` `` in markdown) carries
+    // the backtick characters along with it if they select the whole span, producing a real folder
+    // literally named "`src" (confirmed live — a task's FILES tree showing both "`src" and "src" as
+    // separate sibling folders, one holding the actual work and the other empty apart from an
+    // auto-seeded file, which broke main.tsx's relative import of App.tsx across the split).
+    const typed = newFileName.trim().replace(/^\/+/, "").replace(/`/g, "");
     if (!typed) return;
     const full = newFileParent ? `${newFileParent}/${typed}` : typed;
     onCreateFile(full);
