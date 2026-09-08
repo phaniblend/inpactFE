@@ -23,12 +23,16 @@ import PmgtConsole from './pmgt/PmgtConsole.jsx'
 import RequireRole from './auth/RequireRole.jsx'
 import JsExperienceHome from './JsExperienceHome.jsx'
 import { TeamChatProvider } from './team-messaging/TeamChatProvider.jsx'
+import GlobalHeader from './GlobalHeader.jsx'
 
 const ANY_CORE_ROLE = ['PD', 'PMGT', 'ID', 'CD']
 
 createRoot(document.getElementById('root')).render(
   <HashRouter>
     <StrictMode>
+      {/* Persistent brand mark on every page except "/" (user request, 2026-09-08 — see
+          GlobalHeader.jsx for why it's logo-only, not a full nav, and why "/" is excluded). */}
+      <GlobalHeader />
       {/* Global "Catch up" chat — wraps every route so the launcher is available platform-wide, not
           just right after applying (user request, 2026-09-08). It gates its own visibility on
           having a signed-in IPF session, so an anonymous lesson visitor on "/" etc. never sees it. */}

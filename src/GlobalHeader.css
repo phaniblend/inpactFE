@@ -1,0 +1,20 @@
+.gh-logo-link {
+  position: fixed;
+  top: 14px;
+  left: 18px;
+  z-index: 900;
+  display: block;
+  line-height: 0;
+  opacity: 0.92;
+}
+
+.gh-logo-link:hover {
+  opacity: 1;
+}
+
+@media (max-width: 600px) {
+  .gh-logo-link {
+    top: 10px;
+    left: 12px;
+  }
+}
