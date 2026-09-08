@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { COHORT_PROJECT_ID } from "./matching.js";
-import { notifyTeam } from "../team-messaging/notify.js";
+import { useTeamChat } from "../team-messaging/TeamChatProvider.jsx";
 import "./TeamIntro.css";
 
 async function api(path) {
@@ -92,106 +92,17 @@ export default function TeamIntro({ projectName, myName }) {
   // failures (a slow/down webhook shouldn't be the reason someone can't get into the room) — this
   // just tracks the click-to-feedback moment, not whether the post itself actually landed.
   const [helloState, setHelloState] = useState("idle");
-  // In-app chat modal — no external tab, no naming the messaging tech underneath. Messages send
-  // to the same shared team channel notifyTeam() already posts to; this window can only show what
-  // *you* send from it (there's no read-back API wired up yet), so the copy is upfront about that
-  // instead of implying a live two-way thread.
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [chatDraft, setChatDraft] = useState("");
-  const [chatSending, setChatSending] = useState(false);
-  // Draggable + resizable floating widget (user request, 2026-09-08 — "make this chat window
-  // draggable and resizeable"), same pointer-driven pattern already used for TaskStepsPanel's
-  // floating cards: null = default position/size until the learner first moves or resizes it,
-  // then an explicit pixel value takes over and persists for the rest of this open session.
-  const [chatPos, setChatPos] = useState(null);
-  const [chatSize, setChatSize] = useState(null);
-  const chatElRef = useRef(null);
-  const chatDragRef = useRef(null);
-  const chatResizeRef = useRef(null);
+  // The chat window itself is now global (TeamChatProvider, mounted once in main.jsx) — user
+  // request, 2026-09-08: "add chat option everywhere in the platform.. not just on first visit".
+  // "Say hello" just opens that same shared window with the hello message seeded into it, instead
+  // of running its own separate copy scoped to this one screen.
+  const { openChat, isOpen: chatOpen } = useTeamChat();
 
   async function sayHello() {
     setHelloState("sending");
     const text = `👋 ${myName || "Someone"} just joined the ${projectName} team${myTask ? ` — working on "${myTask}"` : ""}. Say hi!`;
-    await notifyTeam(text);
+    await openChat(text);
     setHelloState("sent");
-    setChatMessages([{ text, at: Date.now() }]);
-    setChatPos((prev) => prev || defaultChatPos());
-    setChatOpen(true);
-  }
-
-  // Floats bottom-right like a real chat widget, not centered like a modal dialog.
-  function defaultChatPos() {
-    if (typeof window === "undefined") return { x: 24, y: 24 };
-    return {
-      x: Math.max(24, window.innerWidth - 404),
-      y: Math.max(24, window.innerHeight - 560),
-    };
-  }
-
-  function handleChatDragPointerMove(e) {
-    const d = chatDragRef.current;
-    if (!d) return;
-    const nextX = d.originX + (e.clientX - d.startX);
-    const nextY = d.originY + (e.clientY - d.startY);
-    setChatPos({
-      x: Math.min(Math.max(nextX, -200), window.innerWidth - 80),
-      y: Math.min(Math.max(nextY, 0), window.innerHeight - 60),
-    });
-  }
-
-  function handleChatDragPointerUp() {
-    chatDragRef.current = null;
-    window.removeEventListener("pointermove", handleChatDragPointerMove);
-    window.removeEventListener("pointerup", handleChatDragPointerUp);
-  }
-
-  function handleChatDragPointerDown(e) {
-    e.preventDefault();
-    const origin = chatPos || defaultChatPos();
-    chatDragRef.current = { startX: e.clientX, startY: e.clientY, originX: origin.x, originY: origin.y };
-    window.addEventListener("pointermove", handleChatDragPointerMove);
-    window.addEventListener("pointerup", handleChatDragPointerUp);
-  }
-
-  function handleChatResizePointerMove(e) {
-    const d = chatResizeRef.current;
-    if (!d) return;
-    setChatSize({
-      width: Math.max(320, Math.min(d.startW + (e.clientX - d.startX), window.innerWidth - 32)),
-      height: Math.max(360, Math.min(d.startH + (e.clientY - d.startY), window.innerHeight - 32)),
-    });
-  }
-
-  function handleChatResizePointerUp() {
-    chatResizeRef.current = null;
-    window.removeEventListener("pointermove", handleChatResizePointerMove);
-    window.removeEventListener("pointerup", handleChatResizePointerUp);
-  }
-
-  function handleChatResizePointerDown(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const rect = chatElRef.current?.getBoundingClientRect();
-    chatResizeRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      startW: chatSize?.width ?? rect?.width ?? 380,
-      startH: chatSize?.height ?? rect?.height ?? 520,
-    };
-    window.addEventListener("pointermove", handleChatResizePointerMove);
-    window.addEventListener("pointerup", handleChatResizePointerUp);
-  }
-
-  async function sendChatMessage(e) {
-    e.preventDefault();
-    const text = chatDraft.trim();
-    if (!text || chatSending) return;
-    setChatSending(true);
-    await notifyTeam(`${myName || "Someone"}: ${text}`);
-    setChatMessages((prev) => [...prev, { text, at: Date.now() }]);
-    setChatDraft("");
-    setChatSending(false);
   }
 
   return (
@@ -230,14 +141,7 @@ export default function TeamIntro({ projectName, myName }) {
           </button>
         )}
         {helloState === "sent" && !chatOpen && (
-          <button
-            type="button"
-            className="ti-say-hello-btn ti-reopen-chat-btn"
-            onClick={() => {
-              setChatPos((prev) => prev || defaultChatPos());
-              setChatOpen(true);
-            }}
-          >
+          <button type="button" className="ti-say-hello-btn ti-reopen-chat-btn" onClick={() => openChat()}>
             Open team chat
           </button>
         )}
@@ -257,49 +161,6 @@ export default function TeamIntro({ projectName, myName }) {
           ))}
         </div>
       </section>
-
-      {chatOpen && (
-        <div
-          className="ti-chat-widget"
-          ref={chatElRef}
-          style={{
-            left: (chatPos || defaultChatPos()).x,
-            top: (chatPos || defaultChatPos()).y,
-            ...(chatSize ? { width: chatSize.width, height: chatSize.height } : {}),
-          }}
-        >
-          <button type="button" className="ti-chat-close" onClick={() => setChatOpen(false)} aria-label="Close">
-            ×
-          </button>
-          <div className="ti-chat-header" onPointerDown={handleChatDragPointerDown} title="Drag to move">
-            <span className="ti-chat-avatar" aria-hidden="true" />
-            <h3>Catch up</h3>
-          </div>
-          <p className="ti-hint ti-chat-note">
-            Messages you send here reach your whole team instantly. Replies land in the same shared channel, so check back after saying hello.
-          </p>
-          <div className="ti-chat-messages">
-            {chatMessages.map((m) => (
-              <div className="ti-chat-bubble" key={m.at}>
-                {m.text}
-              </div>
-            ))}
-          </div>
-          <form className="ti-chat-form" onSubmit={sendChatMessage}>
-            <input
-              className="ti-chat-input"
-              value={chatDraft}
-              onChange={(e) => setChatDraft(e.target.value)}
-              placeholder="Your text here....."
-              disabled={chatSending}
-            />
-            <button type="submit" className="ti-chat-send" disabled={chatSending || !chatDraft.trim()} aria-label="Send">
-              {chatSending ? "…" : "↑"}
-            </button>
-          </form>
-          <div className="ti-chat-resize-handle" onPointerDown={handleChatResizePointerDown} title="Drag to resize" />
-        </div>
-      )}
     </div>
   );
 }
