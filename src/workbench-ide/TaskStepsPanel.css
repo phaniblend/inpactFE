@@ -86,7 +86,12 @@
 
 /* "Annotate my code" output — the learner's code with coaching comments inserted on their own
    lines, rendered with real line numbers so a mistake reads as "line 9", not just a description
-   (user report, 2026-09-07: "i know finanials is wrong but where? ... no ckuse"). */
+   (user report, 2026-09-07: "i know finanials is wrong but where? ... no ckuse"). A fixed
+   max-height left a big dead gap below the code block whenever the card was resized taller (user
+   report, 2026-09-08, with a screenshot circling the empty space: "the annotation box shud expand
+   along with the model") — flex: 1 inside .tsp-check-float's column layout instead, so it actually
+   grows to fill whatever room the resize handle gives the card, with min-height as a floor for the
+   card's own default (unresized) size. */
 .tsp-annotated-code {
   margin-top: 10px;
   background: #0f172a;
@@ -96,8 +101,28 @@
   font-size: 12.5px;
   line-height: 1.6;
   overflow-x: auto;
-  max-height: 360px;
+  flex: 1;
+  min-height: 160px;
   overflow-y: auto;
+}
+
+/* Marks where one file's lines end and the next one's begin — the annotated block can span
+   several concatenated files (see renderAnnotatedCode's file-marker handling in
+   formatFeedbackText.jsx), so without this the line numbers resetting to 1 would look like a
+   glitch instead of "you're looking at a different file now". */
+.tsp-annotated-file {
+  padding: 10px 12px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #67e8f9;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+  margin-top: 4px;
+}
+
+.tsp-annotated-file:first-child {
+  border-top: none;
+  margin-top: 0;
 }
 
 .tsp-annotated-line {

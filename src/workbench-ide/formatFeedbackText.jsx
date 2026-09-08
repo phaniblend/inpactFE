@@ -18,27 +18,56 @@ function withInlineCode(text, keyPrefix) {
   );
 }
 
+// Matches the exact chunk header DevWorkspace.jsx's getCheckPayload() writes for every changed
+// file before concatenating them all into one blob: `// ---- ${path} ----\n${text}`.
+const FILE_MARKER_RE = /^\/\/ ---- (.+) ----$/;
+
 /**
  * Renders "Annotate my code" output (the learner's code with coaching comments inserted on their
- * own lines above the code they refer to — see feedbackAnnotate.js's system prompt) as a real,
+ * own lines above the code they refer to -- see feedbackAnnotate.js's system prompt) as a real,
  * line-numbered code block, so a mistake reads as "line 9" instead of a plain description (user
  * report, 2026-09-07: "i know finanials is wrong but where? ... annotate will show me my mistake
  * at least by line# and line code"). A whole-line comment (// or #) is styled distinctly from real
  * code so the AI's own notes are visually separate from what the learner wrote.
+ *
+ * `code` is the same multi-file blob getCheckPayload() built for the AI to read -- every changed
+ * file concatenated together behind a `// ---- path ----` marker, not just the one file the
+ * learner has open. Numbering every line of that whole blob sequentially put "line 9" of file B
+ * at whatever huge number it actually sat at across every earlier file's content too (user report,
+ * live, with a screenshot: "the annotation code line# is not matching with the actual file" -- line
+ * 26 in the annotation pointed at line 1 of the real, much shorter file). Resets the count to 1 at
+ * each marker and renders it as its own filename header row instead of a numbered code line, so
+ * numbers match what the learner's editor actually shows for that file. Also never numbers a
+ * coaching-comment line -- only real code lines count, so an inserted note doesn't shift every
+ * real line below it up by one either.
  */
 export function renderAnnotatedCode(code, keyPrefix = "ann") {
-  const lines = String(code ?? "").split("\n");
+  const rawLines = String(code ?? "").split("\n");
+  let realLineNo = 0;
+  const rows = rawLines.map((line, i) => {
+    const marker = FILE_MARKER_RE.exec(line.trim());
+    if (marker) {
+      realLineNo = 0;
+      return { key: `${keyPrefix}-${i}`, isFileHeader: true, file: marker[1] };
+    }
+    const isNote = /^\s*(\/\/|#)/.test(line);
+    if (!isNote) realLineNo += 1;
+    return { key: `${keyPrefix}-${i}`, isNote, lineNo: isNote ? null : realLineNo, text: line };
+  });
   return (
     <div className="tsp-annotated-code">
-      {lines.map((line, i) => {
-        const isNote = /^\s*(\/\/|#)/.test(line);
-        return (
-          <div key={`${keyPrefix}-${i}`} className={`tsp-annotated-line${isNote ? " tsp-annotated-line-note" : ""}`}>
-            <span className="tsp-annotated-lineno">{i + 1}</span>
-            <span className="tsp-annotated-linecode">{line || " "}</span>
+      {rows.map((row) =>
+        row.isFileHeader ? (
+          <div key={row.key} className="tsp-annotated-file">
+            {row.file}
           </div>
-        );
-      })}
+        ) : (
+          <div key={row.key} className={`tsp-annotated-line${row.isNote ? " tsp-annotated-line-note" : ""}`}>
+            <span className="tsp-annotated-lineno">{row.lineNo ?? ""}</span>
+            <span className="tsp-annotated-linecode">{row.text || " "}</span>
+          </div>
+        )
+      )}
     </div>
   );
 }
