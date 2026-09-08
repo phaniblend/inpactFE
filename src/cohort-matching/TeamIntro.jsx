@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { COHORT_PROJECT_ID } from "./matching.js";
 import { notifyTeam } from "../team-messaging/notify.js";
 import "./TeamIntro.css";
@@ -100,6 +100,15 @@ export default function TeamIntro({ projectName, myName }) {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatDraft, setChatDraft] = useState("");
   const [chatSending, setChatSending] = useState(false);
+  // Draggable + resizable floating widget (user request, 2026-09-08 — "make this chat window
+  // draggable and resizeable"), same pointer-driven pattern already used for TaskStepsPanel's
+  // floating cards: null = default position/size until the learner first moves or resizes it,
+  // then an explicit pixel value takes over and persists for the rest of this open session.
+  const [chatPos, setChatPos] = useState(null);
+  const [chatSize, setChatSize] = useState(null);
+  const chatElRef = useRef(null);
+  const chatDragRef = useRef(null);
+  const chatResizeRef = useRef(null);
 
   async function sayHello() {
     setHelloState("sending");
@@ -107,7 +116,71 @@ export default function TeamIntro({ projectName, myName }) {
     await notifyTeam(text);
     setHelloState("sent");
     setChatMessages([{ text, at: Date.now() }]);
+    setChatPos((prev) => prev || defaultChatPos());
     setChatOpen(true);
+  }
+
+  // Floats bottom-right like a real chat widget, not centered like a modal dialog.
+  function defaultChatPos() {
+    if (typeof window === "undefined") return { x: 24, y: 24 };
+    return {
+      x: Math.max(24, window.innerWidth - 404),
+      y: Math.max(24, window.innerHeight - 560),
+    };
+  }
+
+  function handleChatDragPointerMove(e) {
+    const d = chatDragRef.current;
+    if (!d) return;
+    const nextX = d.originX + (e.clientX - d.startX);
+    const nextY = d.originY + (e.clientY - d.startY);
+    setChatPos({
+      x: Math.min(Math.max(nextX, -200), window.innerWidth - 80),
+      y: Math.min(Math.max(nextY, 0), window.innerHeight - 60),
+    });
+  }
+
+  function handleChatDragPointerUp() {
+    chatDragRef.current = null;
+    window.removeEventListener("pointermove", handleChatDragPointerMove);
+    window.removeEventListener("pointerup", handleChatDragPointerUp);
+  }
+
+  function handleChatDragPointerDown(e) {
+    e.preventDefault();
+    const origin = chatPos || defaultChatPos();
+    chatDragRef.current = { startX: e.clientX, startY: e.clientY, originX: origin.x, originY: origin.y };
+    window.addEventListener("pointermove", handleChatDragPointerMove);
+    window.addEventListener("pointerup", handleChatDragPointerUp);
+  }
+
+  function handleChatResizePointerMove(e) {
+    const d = chatResizeRef.current;
+    if (!d) return;
+    setChatSize({
+      width: Math.max(320, Math.min(d.startW + (e.clientX - d.startX), window.innerWidth - 32)),
+      height: Math.max(360, Math.min(d.startH + (e.clientY - d.startY), window.innerHeight - 32)),
+    });
+  }
+
+  function handleChatResizePointerUp() {
+    chatResizeRef.current = null;
+    window.removeEventListener("pointermove", handleChatResizePointerMove);
+    window.removeEventListener("pointerup", handleChatResizePointerUp);
+  }
+
+  function handleChatResizePointerDown(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = chatElRef.current?.getBoundingClientRect();
+    chatResizeRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startW: chatSize?.width ?? rect?.width ?? 380,
+      startH: chatSize?.height ?? rect?.height ?? 520,
+    };
+    window.addEventListener("pointermove", handleChatResizePointerMove);
+    window.addEventListener("pointerup", handleChatResizePointerUp);
   }
 
   async function sendChatMessage(e) {
@@ -157,7 +230,14 @@ export default function TeamIntro({ projectName, myName }) {
           </button>
         )}
         {helloState === "sent" && !chatOpen && (
-          <button type="button" className="ti-say-hello-btn ti-reopen-chat-btn" onClick={() => setChatOpen(true)}>
+          <button
+            type="button"
+            className="ti-say-hello-btn ti-reopen-chat-btn"
+            onClick={() => {
+              setChatPos((prev) => prev || defaultChatPos());
+              setChatOpen(true);
+            }}
+          >
             Open team chat
           </button>
         )}
@@ -179,37 +259,45 @@ export default function TeamIntro({ projectName, myName }) {
       </section>
 
       {chatOpen && (
-        <div className="ti-chat-overlay" onClick={() => setChatOpen(false)}>
-          <div className="ti-chat-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="ti-chat-header">
-              <h3>Team chat — {projectName}</h3>
-              <button type="button" className="ti-chat-close" onClick={() => setChatOpen(false)} aria-label="Close">
-                ×
-              </button>
-            </div>
-            <p className="ti-hint ti-chat-note">
-              Messages you send here reach your whole team instantly. Replies land in the same shared channel, so check back after saying hello.
-            </p>
-            <div className="ti-chat-messages">
-              {chatMessages.map((m) => (
-                <div className="ti-chat-bubble" key={m.at}>
-                  {m.text}
-                </div>
-              ))}
-            </div>
-            <form className="ti-chat-form" onSubmit={sendChatMessage}>
-              <input
-                className="ti-chat-input"
-                value={chatDraft}
-                onChange={(e) => setChatDraft(e.target.value)}
-                placeholder="Type a message…"
-                disabled={chatSending}
-              />
-              <button type="submit" className="ti-chat-send" disabled={chatSending || !chatDraft.trim()}>
-                {chatSending ? "Sending…" : "Send"}
-              </button>
-            </form>
+        <div
+          className="ti-chat-widget"
+          ref={chatElRef}
+          style={{
+            left: (chatPos || defaultChatPos()).x,
+            top: (chatPos || defaultChatPos()).y,
+            ...(chatSize ? { width: chatSize.width, height: chatSize.height } : {}),
+          }}
+        >
+          <button type="button" className="ti-chat-close" onClick={() => setChatOpen(false)} aria-label="Close">
+            ×
+          </button>
+          <div className="ti-chat-header" onPointerDown={handleChatDragPointerDown} title="Drag to move">
+            <span className="ti-chat-avatar" aria-hidden="true" />
+            <h3>Catch up</h3>
           </div>
+          <p className="ti-hint ti-chat-note">
+            Messages you send here reach your whole team instantly. Replies land in the same shared channel, so check back after saying hello.
+          </p>
+          <div className="ti-chat-messages">
+            {chatMessages.map((m) => (
+              <div className="ti-chat-bubble" key={m.at}>
+                {m.text}
+              </div>
+            ))}
+          </div>
+          <form className="ti-chat-form" onSubmit={sendChatMessage}>
+            <input
+              className="ti-chat-input"
+              value={chatDraft}
+              onChange={(e) => setChatDraft(e.target.value)}
+              placeholder="Your text here....."
+              disabled={chatSending}
+            />
+            <button type="submit" className="ti-chat-send" disabled={chatSending || !chatDraft.trim()} aria-label="Send">
+              {chatSending ? "…" : "↑"}
+            </button>
+          </form>
+          <div className="ti-chat-resize-handle" onPointerDown={handleChatResizePointerDown} title="Drag to resize" />
         </div>
       )}
     </div>
