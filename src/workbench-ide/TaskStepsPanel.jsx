@@ -173,9 +173,12 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
     setVisitedSteps((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
   }, [activeStep, steps]);
 
+  // Centered by default (user request, 2026-09-08 — "open the step card in the center of the
+  // screen"; previously anchored to the top-right corner, same as the check-result card used to be
+  // before that one got centered for the same reason).
   function defaultCardPos() {
     if (typeof window === "undefined") return { x: 80, y: 100 };
-    return { x: Math.max(24, window.innerWidth - 540), y: 110 };
+    return { x: Math.max(24, window.innerWidth / 2 - 230), y: Math.max(24, window.innerHeight / 2 - 220) };
   }
 
   // Centered by default (a "toast" in the middle of the screen, per request), not anchored to a
@@ -506,6 +509,12 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
               ⠿ Step {activeStep + 1} of {steps.length}
             </div>
           </div>
+          {/* Which file this step is actually about — declared per-step (see e.g. the MiniERP
+              task's NODES array), not inferred from prose, since not every step restates its path
+              (user request, 2026-09-08: "include the filepath the step is talking about"). Only
+              modules that declare `file` on their steps show this row — older modules without it
+              render exactly as before. */}
+          {activeNode.file ? <div className="tsp-card-file">{activeNode.file}</div> : null}
           <label className="tsp-card-check">
             <input type="checkbox" checked={done.has(activeNode.id)} onChange={() => toggleDone(activeNode.id)} />
             <span>Mark done</span>

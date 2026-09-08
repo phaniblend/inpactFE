@@ -59,6 +59,7 @@ export const NODES = [
     id: "step1",
     type: "question",
     phase: "Step 1 of 26",
+    file: "src/components/InventoryTable.tsx",
     paal: `Create the component file at src/components/InventoryTable.tsx, define type Item, and export the InventoryTable component.
 
 Create src/components/InventoryTable.tsx, declare the Item type matching what the real API actually returns, and export an empty InventoryTable component.
@@ -177,6 +178,7 @@ export function InventoryTable() {
     id: "step2",
     type: "question",
     phase: "Step 2 of 26",
+    file: "src/components/InventoryTable.tsx",
     paal: `Fetch the real item catalog on mount and hold it in state, with a loading message while the request is in flight.
 
 Set up state for the items array and a loading flag, fetch from the real API inside useEffect, and show a loading message until the first response arrives.
@@ -315,6 +317,7 @@ useEffect(() => {
     id: "step3",
     type: "question",
     phase: "Step 3 of 26",
+    file: "src/components/InventoryTable.tsx",
     paal: `Render the fetched items as a real table — one row per item, correct columns.
 
 Once loading is false, draw an actual HTML table with one row per fetched item, or a message when the catalog is genuinely empty.
@@ -513,6 +516,7 @@ return (
     id: "step4",
     type: "question",
     phase: "Step 4 of 26",
+    file: "src/components/InventoryTable.tsx",
     paal: `Add a REORDER/HEALTHY badge column derived from each item's own stockOnHand vs reorderPoint.
 
 Add a sixth column showing a "REORDER" warning badge when an item's stock has fallen to or below its own reorder point, or a "HEALTHY" badge otherwise.
@@ -733,6 +737,7 @@ export function InventoryTable() {
     id: "step5",
     type: "question",
     phase: "Step 5 of 26",
+    file: "src/components/ProcurementPanel.tsx",
     paal: `Create the component file at src/components/ProcurementPanel.tsx, define its props, and export the shell.
 
 Create src/components/ProcurementPanel.tsx. This component doesn't own any purchase-order data itself — it receives the list and a refresh callback as props from the parent page.
@@ -856,6 +861,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
     id: "step6",
     type: "question",
     phase: "Step 6 of 26",
+    file: "src/components/ProcurementPanel.tsx",
     paal: `Render the list of purchase orders — number, total, and status.
 
 Loop over the orders prop and display each one's PO number, formatted total, and current status, or a message when there are none.
@@ -984,6 +990,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
     id: "step7",
     type: "question",
     phase: "Step 7 of 26",
+    file: "src/components/ProcurementPanel.tsx",
     paal: `Add a Receive Goods button on any order that isn't RECEIVED yet, wired to the real receive endpoint.
 
 For any order whose status isn't RECEIVED, show a "Receive Goods" button that calls the real receipt endpoint for that specific order.
@@ -1149,6 +1156,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
     id: "step8",
     type: "question",
     phase: "Step 8 of 26",
+    file: "src/components/ProcurementPanel.tsx",
     paal: `Handle the response — success reloads the parent's data, failure (already received) shows the real error.
 
 After the receive request resolves, call onReceive() to tell the parent to reload everything, or surface the real error message when the API rejects the request.
@@ -1336,6 +1344,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
     id: "step9",
     type: "question",
     phase: "Step 9 of 26",
+    file: "src/components/SalesFulfillmentBoard.tsx",
     paal: `Create the component file at src/components/SalesFulfillmentBoard.tsx, define its props, and export the shell.
 
 Create src/components/SalesFulfillmentBoard.tsx. Like the procurement panel, this component doesn't own any sales-order data itself — it receives the list and a refresh callback as props.
@@ -1459,6 +1468,7 @@ export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoa
     id: "step10",
     type: "question",
     phase: "Step 10 of 26",
+    file: "src/components/SalesFulfillmentBoard.tsx",
     paal: `Render the list of sales orders — number, customer's total, and status.
 
 Loop over the orders prop and display each one's SO number, formatted total, and current status, or a message when there are none.
@@ -1596,6 +1606,7 @@ export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoa
     id: "step11",
     type: "question",
     phase: "Step 11 of 26",
+    file: "src/components/SalesFulfillmentBoard.tsx",
     paal: `Add a Fulfill & Ship button on CONFIRMED orders, wired to the real fulfillment endpoint.
 
 For any order whose status is CONFIRMED, show a "Fulfill & Ship" button that calls the real fulfillment endpoint for that specific order.
@@ -1770,6 +1781,7 @@ export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoa
     id: "step12",
     type: "question",
     phase: "Step 12 of 26",
+    file: "src/components/SalesFulfillmentBoard.tsx",
     paal: `Handle the response — success reloads the parent's data, a real 409 (insufficient stock) is shown, not swallowed.
 
 After the fulfill request resolves, call onFulfill() to tell the parent to reload everything, or surface the real 409 INSUFFICIENT_STOCK error when the API rejects the request.
@@ -1966,6 +1978,7 @@ export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoa
     id: "step13",
     type: "question",
     phase: "Step 13 of 26",
+    file: "src/components/FinancialMetrics.tsx",
     paal: `Create the file at \`src/components/FinancialMetrics.tsx\`.
 
 Nothing can go inside a file that doesn't exist yet — this is the very first, purely mechanical step: get the file created at the right path. This step only checks that the file exists; whatever you've written into it since (even finished work from later steps) is completely fine and expected — checking this step never requires the file to be empty.
@@ -2014,6 +2027,7 @@ Your task: create the file at src/components/FinancialMetrics.tsx. That's the wh
     id: "step14",
     type: "question",
     phase: "Step 14 of 26",
+    file: "src/components/FinancialMetrics.tsx",
     paal: `Define the Financials type.
 
 You already created the file in Step 13. Now write a TypeScript type naming every field the real income-statement endpoint sends back.
@@ -2080,6 +2094,7 @@ Your task: in the file from Step 1, write \`type Financials\` with those three f
     id: "step15",
     type: "question",
     phase: "Step 15 of 26",
+    file: "src/components/FinancialMetrics.tsx",
     paal: `Export the empty FinancialMetrics component shell.
 
 Add the component itself — no data, no fetch, just a function that returns something on screen.
@@ -2153,6 +2168,7 @@ export function FinancialMetrics() {
     id: "step16",
     type: "question",
     phase: "Step 16 of 26",
+    file: "src/components/FinancialMetrics.tsx",
     paal: `Add state to hold the fetched financials, defaulting to real zeros.
 
 The Financials type already exists — you defined it in Step 14. This step just uses it: give the component somewhere to hold the financials once they arrive, defaulting to real zero-strings, not nothing.
@@ -2250,6 +2266,7 @@ export function EarningsCard() {
     id: "step17",
     type: "question",
     phase: "Step 17 of 26",
+    file: "src/components/FinancialMetrics.tsx",
     paal: `Fetch the real income statement on mount and store it in state.
 
 Fetch the real endpoint exactly once, when the component first appears, and hand the response straight to your state setter.
@@ -2377,6 +2394,7 @@ export function EarningsCard() {
     id: "step18",
     type: "question",
     phase: "Step 18 of 26",
+    file: "src/components/FinancialMetrics.tsx",
     paal: `Render the three financial cards from state.
 
 Draw the three cards — Revenue, COGS, Net Income — reading their values straight from state.
@@ -2505,6 +2523,7 @@ export function FinancialMetrics() {
     id: "step19",
     type: "question",
     phase: "Step 19 of 26",
+    file: "src/App.tsx",
     paal: `Create the file at \`src/App.tsx\`.
 
 This step edits a different file from everything so far — before declaring any state, the file itself has to exist. This step only checks that the file exists; whatever you write into it afterward (this step or later ones) is completely fine.
@@ -2553,6 +2572,7 @@ Your task: create the file at src/App.tsx. That's the whole requirement — the 
     id: "step20",
     type: "question",
     phase: "Step 20 of 26",
+    file: "src/App.tsx",
     paal: `Declare the \`items\` state array in App.tsx.
 
 You already created App.tsx in Step 19. This is the first of three shared state arrays every panel on the dashboard will read from — one array, one step at a time.
@@ -2633,6 +2653,7 @@ export default function BlogAdminApp() {
     id: "step21",
     type: "question",
     phase: "Step 21 of 26",
+    file: "src/App.tsx",
     paal: `Declare the \`purchaseOrders\` state array in App.tsx.
 
 The items array already exists from Step 20. Add the second of the three shared arrays the same way, right alongside it.
@@ -2723,6 +2744,7 @@ export default function BlogAdminApp() {
     id: "step22",
     type: "question",
     phase: "Step 22 of 26",
+    file: "src/App.tsx",
     paal: `Declare the \`salesOrders\` state array in App.tsx.
 
 items and purchaseOrders already exist from Steps 20 and 21. This is the third and last of the shared arrays.
@@ -2821,6 +2843,7 @@ export default function BlogAdminApp() {
     id: "step23",
     type: "question",
     phase: "Step 23 of 26",
+    file: "src/App.tsx",
     paal: `Write loadData(), fetching items, purchase orders, and sales orders in parallel.
 
 Add one function that fetches all three real endpoints at once and updates all three state setters.
@@ -2946,6 +2969,7 @@ export default function App() {
     id: "step24",
     type: "question",
     phase: "Step 24 of 26",
+    file: "src/App.tsx",
     paal: `Call loadData() once, when the dashboard first mounts.
 
 Run the function you just wrote exactly once, right when the page first appears.
@@ -3090,6 +3114,7 @@ export default function BlogAdminApp() {
     id: "step25",
     type: "question",
     phase: "Step 25 of 26",
+    file: "src/App.tsx",
     paal: `Render FinancialMetrics and InventoryTable — neither needs any props.
 
 Import both components and place them inside <main>. Both fetch their own data independently, so neither needs anything passed in.
@@ -3247,6 +3272,7 @@ return (
     id: "step26",
     type: "question",
     phase: "Step 26 of 26",
+    file: "src/App.tsx",
     paal: `Render ProcurementPanel and SalesFulfillmentBoard, wired to shared state and loadData.
 
 Finish the dashboard: these two panels DO need real props — the shared order lists, and loadData itself as the refresh callback.

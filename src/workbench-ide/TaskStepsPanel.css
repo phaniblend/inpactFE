@@ -414,6 +414,17 @@
   cursor: grabbing;
 }
 
+/* Which real file this step is about (user request, 2026-09-08 — "include the filepath the step
+   is talking about"). Monospace + a real accent color so it reads as a path, not prose. */
+.tsp-card-file {
+  font-family: "DM Mono", monospace;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0891b2;
+  margin-bottom: 10px;
+  word-break: break-all;
+}
+
 .tsp-card-check {
   display: flex;
   align-items: center;
