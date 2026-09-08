@@ -93,6 +93,17 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
   const mod = useMemo(() => (moduleTag ? findModuleBySlug(moduleTag) : null), [moduleTag]);
   const steps = useMemo(() => (mod?.NODES || []).filter((n) => n.type === "question"), [mod]);
   const [done, setDone] = useState(() => (moduleTag ? loadDoneSet(moduleTag) : new Set()));
+  // Separate from `done` (user report, live: opened Step 1, ticked its own "Mark done" checkbox,
+  // clicked Check my code — got "Open a step first" even though a step was plainly open). `done`
+  // is shared by two different things: the learner's own self-report checkbox, and Check my code's
+  // "this passed" confirmation — checkAllSteps() used `done` to decide what still needs checking,
+  // so self-marking a step done (a completely reasonable thing to click) silently made it
+  // unre-checkable and produced a misleading "open a step" message once nothing else was pending.
+  // aiVerified tracks only the second thing — a step Check my code has actually confirmed correct
+  // — so a self-marked-but-unverified step still gets checked for real. In-memory only (not
+  // persisted like `done`): losing this on reload just means an already-correct step gets
+  // re-verified once more, a wasted API call, never an incorrect result.
+  const [aiVerified, setAiVerified] = useState(() => new Set());
   const [assistNode, setAssistNode] = useState(null);
   const [checking, setChecking] = useState(false);
   const [checkMessage, setCheckMessage] = useState("");
@@ -137,6 +148,7 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
 
   useEffect(() => {
     setDone(moduleTag ? loadDoneSet(moduleTag) : new Set());
+    setAiVerified(new Set());
     setCheckMessage("");
     setJustPassed(new Set());
     setActiveStep(null);
@@ -351,9 +363,9 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
 
   async function checkAllSteps() {
     if (checking || !getCheckPayload) return;
-    const pending = steps.filter((s) => !done.has(s.id) && visitedSteps.has(s.id));
+    const pending = steps.filter((s) => !aiVerified.has(s.id) && visitedSteps.has(s.id));
     if (pending.length === 0) {
-      const allDone = steps.every((s) => done.has(s.id));
+      const allDone = steps.every((s) => aiVerified.has(s.id));
       setCheckContext(null);
       showCheckMessage(
         allDone
@@ -384,6 +396,11 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
           const next = new Set(prev);
           newlyDone.forEach((id) => next.add(id));
           saveDoneSet(moduleTag, next);
+          return next;
+        });
+        setAiVerified((prev) => {
+          const next = new Set(prev);
+          newlyDone.forEach((id) => next.add(id));
           return next;
         });
         setJustPassed(new Set(newlyDone));

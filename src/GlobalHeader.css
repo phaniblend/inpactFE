@@ -1,7 +1,7 @@
 .gh-logo-link {
   position: fixed;
-  top: 14px;
-  left: 18px;
+  top: 18px;
+  left: 24px;
   z-index: 900;
   display: block;
   line-height: 0;
@@ -14,7 +14,7 @@
 
 @media (max-width: 600px) {
   .gh-logo-link {
-    top: 10px;
-    left: 12px;
+    top: 12px;
+    left: 14px;
   }
 }
