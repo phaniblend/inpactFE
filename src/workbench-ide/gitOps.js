@@ -9,6 +9,7 @@
  */
 import git from "isomorphic-git";
 import http from "isomorphic-git/http/web";
+import { ENTRY_CANDIDATES } from "./previewBundler.js";
 
 /**
  * isomorphic-git requires an absolute URL (it parses the remote with `new URL(...)` internally
@@ -111,6 +112,43 @@ export async function writeFile(fs, dir, filepath, content) {
   const parentDir = full.slice(0, full.lastIndexOf("/"));
   await ensureDir(fs, parentDir);
   await fs.promises.writeFile(full, content, "utf8");
+}
+
+const DEFAULT_MAIN_TSX = `import { createRoot } from "react-dom/client";
+import App from "./App";
+
+// Real project boilerplate — the entry point that mounts your top-level component onto the page.
+// A real Vite/CRA project ships this already, before you write a single component; it's here for
+// the same reason, not something this task asks you to build. If App.tsx doesn't exist yet (or
+// hasn't been given a default export yet), Preview shows a friendly placeholder instead of a
+// crash — come back once your App component is ready.
+const root = createRoot(document.getElementById("root")!);
+root.render(
+  typeof App === "function" ? (
+    <App />
+  ) : (
+    <div style={{ padding: 24, fontFamily: "sans-serif", color: "#94a3b8" }}>
+      Waiting for App.tsx to export a component…
+    </div>
+  )
+);
+`;
+
+/**
+ * Seeds src/main.tsx into a fresh working tree if the project has no real entry point yet, so
+ * Live Preview works from the very first step instead of requiring the learner to build the entry
+ * point themselves (user request, 2026-09-08: "make these default boilerplate load as soon as the
+ * task is opened" — writing an app's mount point is real-project boilerplate you'd never actually
+ * build by hand on the job, not a skill worth its own graded step). Idempotent and safe to call on
+ * every boot: a no-op once any real entry point exists, whether auto-seeded earlier or written by
+ * the learner themselves. Skipped for backend-only tasks, which have no frontend to mount.
+ */
+export async function ensureBoilerplate({ fs, dir, codingFocus }) {
+  if (codingFocus === "backend") return;
+  for (const candidate of ENTRY_CANDIDATES) {
+    if (await pathExists(fs, `${dir}/${candidate}`)) return;
+  }
+  await writeFile(fs, dir, "src/main.tsx", DEFAULT_MAIN_TSX);
 }
 
 /** Deletes a single file or directory (recursively) from the working tree — e.g. junk created by

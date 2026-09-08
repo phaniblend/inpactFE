@@ -24,7 +24,10 @@
  * would just trade an honest limitation for a more confusing failure.
  */
 
-const ENTRY_CANDIDATES = ["src/main.tsx", "src/main.ts", "src/main.jsx", "src/main.js", "src/index.tsx", "src/index.jsx"];
+// Exported so gitOps.js's boilerplate-seeding step checks the exact same list this file uses to
+// find an entry point — one definition of "what counts as an entry point", not two lists that could
+// drift apart.
+export const ENTRY_CANDIDATES = ["src/main.tsx", "src/main.ts", "src/main.jsx", "src/main.js", "src/index.tsx", "src/index.jsx"];
 
 export function findEntryPoint(fileMap) {
   return ENTRY_CANDIDATES.find((p) => p in fileMap) || null;

@@ -4,6 +4,7 @@ import { getFs, projectDir } from "./gitFs.js";
 import {
   ensureCloned,
   checkoutOrCreateBranch,
+  ensureBoilerplate,
   currentBranch,
   listChangedFiles,
   readFile,
@@ -139,6 +140,7 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
               },
             });
             await checkoutOrCreateBranch({ fs, dir, branch: branchHint });
+            await ensureBoilerplate({ fs, dir, codingFocus });
           })();
         }
         await bootRef.current;
@@ -162,7 +164,7 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
     return () => {
       cancelled = true;
     };
-  }, [fs, dir, projectPath, branchHint, refreshStatus]);
+  }, [fs, dir, projectPath, branchHint, codingFocus, refreshStatus]);
 
   const openFile = useCallback(
     async (path) => {
@@ -367,6 +369,7 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
       // haven't changed, so trigger the same sequence directly.
       await ensureCloned({ fs, dir, projectPath });
       await checkoutOrCreateBranch({ fs, dir, branch: branchHint });
+      await ensureBoilerplate({ fs, dir, codingFocus });
       setBranch(await currentBranch({ fs, dir }));
       await refreshStatus();
       setPhase("ready");
@@ -375,7 +378,7 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
       setError(err?.message || "Could not clear the workspace.");
       setPhase("error");
     }
-  }, [fs, dir, projectPath, branchHint, refreshStatus]);
+  }, [fs, dir, projectPath, branchHint, codingFocus, refreshStatus]);
 
   if (phase === "cloning") {
     return (
