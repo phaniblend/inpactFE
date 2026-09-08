@@ -191,6 +191,13 @@
   margin-bottom: 0.85rem;
   min-height: 1.35em;
   white-space: pre-wrap;
+  /* "Code your way into enterprise software." wraps inside the ~780px-wide copy column with just
+     "software." left alone on its own line — a lone short word on a line reads as a glitch, not
+     a deliberate line break (user report: "the word 'software' is animated in the first line and
+     then jumping to the next line.. it looks like a bug"). text-wrap: balance evens out where a
+     multi-line heading breaks instead of leaving a widow word; unsupported browsers just fall
+     back to normal wrapping (today's behavior), so this is a pure improvement, never a regression. */
+  text-wrap: balance;
 }
 
 .cin-line.cin-line-playwrite {
