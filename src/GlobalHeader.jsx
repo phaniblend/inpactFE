@@ -35,7 +35,12 @@ export default function GlobalHeader() {
 
   return (
     <Link to="/" className="gh-logo-link" aria-label="Inpact home">
-      <InpactLogo height={28} />
+      {/* 28px was geometrically undistorted (verified: natural 795x343 vs rendered ~65x28 is the
+          same ~2.32 ratio) but too small for the tree icon's fine detail and the wordmark to read
+          clearly — at that size it stops looking like the actual logo (user report, live, on
+          /apply: "the logo lost its look you squished it"). 44px matches JsExperienceHome.jsx's
+          own header more closely (56px there) without being oversized for a corner mark. */}
+      <InpactLogo height={44} />
     </Link>
   );
 }

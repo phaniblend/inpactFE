@@ -27,4 +27,12 @@
     left: 10px;
     padding: 6px 10px;
   }
+
+  /* The 44px logo (set via an inline height style on the <img> itself) is comfortable at desktop
+     widths but crowds a narrow page's own top content — shrink it back down here specifically,
+     not everywhere, since the "too small to read" complaint was about the base 28px size, not
+     this already-cramped mobile case. */
+  .gh-logo-link img {
+    height: 30px !important;
+  }
 }
