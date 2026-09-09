@@ -152,7 +152,16 @@
   opacity: 0;
   transition: opacity 0.9s ease;
   box-sizing: border-box;
-  overflow: visible;
+  /* documentElement/body get overflow: hidden for this whole page's lifetime (see the mount effect
+     below) to keep the WebGL background from ever page-scrolling — but that also blocked reaching
+     anything here taller than the viewport, since .cin-copy itself had overflow: visible (content
+     past the bottom edge just had nowhere to scroll at all). Confirmed live: the CTA card sits
+     below the fold on a shorter viewport with no way to reach it (user report: "the page has
+     content below the fold and not scrollable too"). overflow-y: auto here gives this box its own
+     internal scroll region, independent of the body's — reachable via wheel/touch/keyboard even
+     though page-level scrolling stays off. */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .cin-copy.cin-copy-show {
