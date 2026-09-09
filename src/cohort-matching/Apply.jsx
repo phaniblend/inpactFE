@@ -605,6 +605,16 @@ export default function Apply() {
                 Nothing open in {submittedTrade} is ready to assign right this second, so you&apos;re queued — we&apos;ll
                 place you automatically as soon as a fitting task opens up.
               </p>
+              {/* This new application being queued says nothing about tasks already assigned from
+                  an earlier one — re-applying (e.g. to try a different trade) with real existing
+                  work already on the books read as "you lost everything" with nothing here to
+                  contradict that (user report, live: "i lost all my assignments"). Verified the
+                  underlying data was never touched — this is purely about this page never pointing
+                  back to it. */}
+              <p className="cm-done-sub">
+                Already have tasks assigned from an earlier application? Nothing about this one changes those —{" "}
+                <a href="#/workbench">go to your tasks</a> to see them.
+              </p>
             </>
           )}
         </div>
