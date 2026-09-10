@@ -33,7 +33,7 @@ export const NODES = [
       "Add a REORDER/HEALTHY badge column derived from each item's own stockOnHand vs reorderPoint.",
       "Create the component file, define the props shape (orders + onReceive), and export the empty shell.",
       "Render the list of purchase orders — number, total, and status.",
-      "Add a Receive Goods button on any order that isn't RECEIVED yet, wired to the real receive endpoint.",
+      "Add a Receive Goods button on any APPROVED order, wired to the real receive endpoint.",
       "Handle the response — success reloads the parent's data, failure (already received) shows the real error.",
       "Create the component file, define the props shape (orders + onFulfill), and export the empty shell.",
       "Render the list of sales orders — number, customer's total, and status.",
@@ -991,24 +991,24 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
     type: "question",
     phase: "Step 7 of 26",
     file: "src/components/ProcurementPanel.tsx",
-    paal: `Add a Receive Goods button on any order that isn't RECEIVED yet, wired to the real receive endpoint.
+    paal: `Add a Receive Goods button on any APPROVED order, wired to the real receive endpoint.
 
-For any order whose status isn't RECEIVED, show a "Receive Goods" button that calls the real receipt endpoint for that specific order.
+A purchase order only becomes receivable once someone has approved it — a DRAFT order isn't ready yet, and a CANCELLED one never will be. For any order whose status is APPROVED, show a "Receive Goods" button that calls the real receipt endpoint for that specific order.
 
 WHAT YOUR LOGIC NEEDS
-- A conditional render: only show the button when po.status !== "RECEIVED".
+- A conditional render: only show the button when po.status === "APPROVED".
 - An onClick handler calling fetch(\`/api/po/\${po.id}/receive\`, { method: "POST" }).
 - The handler is async so it can await the response.
 
 Your task: add the button per row, calling POST /api/po/:id/receive for that exact order's id when clicked.`,
-    hint: `1. Conditional button: {po.status !== "RECEIVED" && (<button onClick={() => handleReceive(po.id)}>Receive Goods</button>)}
+    hint: `1. Conditional button: {po.status === "APPROVED" && (<button onClick={() => handleReceive(po.id)}>Receive Goods</button>)}
 2. Handler: async function handleReceive(id: string) { await fetch(\`/api/po/\${id}/receive\`, { method: "POST" }); }
 3. Place the handler above the return statement, inside the component.`,
     example_code: `async function handleReceive(id: string) {
   await fetch(\`/api/po/\${id}/receive\`, { method: "POST" });
 }
 
-{po.status !== "RECEIVED" && (
+{po.status === "APPROVED" && (
   <button
     onClick={() => handleReceive(po.id)}
     className="bg-blue-600 text-white px-3 py-1 rounded"
@@ -1016,14 +1016,14 @@ Your task: add the button per row, calling POST /api/po/:id/receive for that exa
     Receive Goods
   </button>
 )}`,
-    think_prompt: `Every order needs its OWN button pointed at its OWN id — clicking Receive Goods on PO-1001 must never accidentally receive PO-1002. What does the URL for this fetch need to include, and which orders should the button even appear on?`,
+    think_prompt: `Every order needs its OWN button pointed at its OWN id — clicking Receive Goods on PO-1001 must never accidentally receive PO-1002. A DRAFT order hasn't been approved yet, and a CANCELLED one never will be — only one status means "ready to receive." What does the URL for this fetch need to include, and which orders should the button even appear on?`,
     mc_options: [
-      "a button per non-RECEIVED order, calling fetch with that exact order's id in the URL",
+      "a button only on APPROVED orders, calling fetch with that exact order's id in the URL",
       "one global Receive Goods button that receives every order at once",
-      "a button that's always visible, even on already-RECEIVED orders",
+      "a button that's always visible, even on DRAFT or CANCELLED orders",
     ],
-    mc_correct_option: "a button per non-RECEIVED order, calling fetch with that exact order's id in the URL",
-    mc_anchor: "a button per non-RECEIVED order, calling",
+    mc_correct_option: "a button only on APPROVED orders, calling fetch with that exact order's id in the URL",
+    mc_anchor: "a button only on APPROVED orders, calling",
     why_this_matters: `One-click receiving makes warehouse processing straightforward while triggering a real, atomic stock + cost + ledger update behind the scenes.`,
     answer_keywords: ["handleReceive", "fetch", "po.id", "receive", "POST", "status"],
     seed_code: `export type PurchaseOrder = {
@@ -1089,7 +1089,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
 `,
     feedback_correct: "Correct — each order gets its own button, targeting its own id.",
     feedback_partial: "Close — check the hint and try again.",
-    feedback_wrong: "The button must only show on non-RECEIVED orders and must call receive with that exact order's id.",
+    feedback_wrong: "The button must only show on APPROVED orders and must call receive with that exact order's id.",
     pre_check_hint: `The button's onClick calls an async function that posts to /api/po/:id/receive using this specific row's po.id, not a fixed value.`,
     expected: `export type PurchaseOrder = {
   id: string;
@@ -1117,7 +1117,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
         orders.map((po) => (
           <div key={po.id} className="flex justify-between p-2 border-b">
             <span>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</span>
-            {po.status !== "RECEIVED" && (
+            {po.status === "APPROVED" && (
               <button onClick={() => handleReceive(po.id)} className="bg-blue-600 text-white px-3 py-1 rounded">
                 Receive Goods
               </button>
@@ -1133,7 +1133,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
   await fetch(\`/api/po/\${id}/receive\`, { method: "POST" });
 }
 
-{po.status !== "RECEIVED" && (
+{po.status === "APPROVED" && (
   <button onClick={() => handleReceive(po.id)} className="bg-blue-600 text-white px-3 py-1 rounded">
     Receive Goods
   </button>
@@ -1149,7 +1149,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not hardcode a single PO id — always use the row's own po.id.",
       dryRun: "Wire the same per-row action button for a different resource and endpoint.",
-      build: `1. Conditional button on status !== "RECEIVED".\n2. Handler posts to /api/po/\${id}/receive.`,
+      build: `1. Conditional button on status === "APPROVED".\n2. Handler posts to /api/po/\${id}/receive.`,
     },
   },
   {
@@ -1215,7 +1215,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
         orders.map((po) => (
           <div key={po.id} className="flex justify-between p-2 border-b">
             <span>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</span>
-            {po.status !== "RECEIVED" && (
+            {po.status === "APPROVED" && (
               <button onClick={() => handleReceive(po.id)} className="bg-blue-600 text-white px-3 py-1 rounded">
                 Receive Goods
               </button>
@@ -1254,7 +1254,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
         orders.map((po) => (
           <div key={po.id} className="flex justify-between p-2 border-b">
             <span>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</span>
-            {po.status !== "RECEIVED" && (
+            {po.status === "APPROVED" && (
               <button onClick={() => handleReceive(po.id)} className="bg-blue-600 text-white px-3 py-1 rounded">
                 Receive Goods
               </button>
@@ -1302,7 +1302,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
         orders.map((po) => (
           <div key={po.id} className="flex justify-between p-2 border-b">
             <span>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</span>
-            {po.status !== "RECEIVED" && (
+            {po.status === "APPROVED" && (
               <button onClick={() => handleReceive(po.id)} className="bg-blue-600 text-white px-3 py-1 rounded">
                 Receive Goods
               </button>
