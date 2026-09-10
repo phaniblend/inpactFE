@@ -322,6 +322,10 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
         await pushBranch({ fs, dir, projectPath, branch });
         setSavedContents((prev) => ({ ...prev, ...contents }));
         setLastPushedBranch(branch);
+        // A commit is content changing without necessarily any file being created/deleted — the
+        // one case refreshToken alone wouldn't catch — so also bump it here to make LivePreview
+        // re-check whether there's now something real to preview.
+        setRefreshToken((t) => t + 1);
         await refreshStatus();
       } catch (err) {
         console.error("[dev-workspace] commit/push failed:", err);
@@ -443,7 +447,7 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
         >
           🤖 Assist Me
         </button>
-        <LivePreview fs={fs} dir={dir} flushPendingWrites={flushPendingWrites} />
+        <LivePreview fs={fs} dir={dir} flushPendingWrites={flushPendingWrites} refreshToken={refreshToken} />
       </div>
       <div className="dw-root">
         <FileTree

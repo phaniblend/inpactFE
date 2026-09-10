@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { readAllFiles } from "./gitOps.js";
-import { findEntryPoint, buildPreviewDocument } from "./previewBundler.js";
+import { findEntryPoint, buildPreviewDocument, isPreviewReady } from "./previewBundler.js";
 import "./LivePreview.css";
 
 /**
@@ -12,11 +12,19 @@ import "./LivePreview.css";
  * no live-run preview; this is deliberately frontend-only for now.
  *
  * Props: fs, dir (the LightningFS working directory), flushPendingWrites (from DevWorkspace, so a
- * preview taken right after typing reflects the latest keystrokes, not a stale disk read).
+ * preview taken right after typing reflects the latest keystrokes, not a stale disk read),
+ * refreshToken (from DevWorkspace, bumped on file create/delete — used to re-check readiness below).
+ *
+ * The button itself stays disabled until there's real reason to believe Preview will show something
+ * meaningful (user report, 2026-09-10: reachable from the very first step, landing on a confusing
+ * "Waiting for App.tsx to export a component…" placeholder well before that's expected) — see
+ * previewBundler.js's isPreviewReady for exactly what "ready" means.
  */
-export default function LivePreview({ fs, dir, flushPendingWrites }) {
+export default function LivePreview({ fs, dir, flushPendingWrites, refreshToken }) {
   const [open, setOpen] = useState(false);
   const [html, setHtml] = useState("");
+  const [ready, setReady] = useState(false);
+  const [notReadyNote, setNotReadyNote] = useState("");
   // Bumped on every build and used as the iframe's `key` — found live testing this: updating
   // `srcDoc` on an *already-mounted* iframe doesn't reliably re-run its scripts in every browser
   // (confirmed here by comparing a freshly-created iframe with srcdoc set before insertion, which
@@ -47,9 +55,43 @@ export default function LivePreview({ fs, dir, flushPendingWrites }) {
     if (open) buildAndShow();
   }, [open, buildAndShow]);
 
+  // Re-checked whenever a file is created/deleted (refreshToken) and once on mount — not on every
+  // keystroke, which would mean reading the whole workspace off disk on every character typed.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const fileMap = await readAllFiles(fs, dir);
+        if (cancelled) return;
+        const entry = findEntryPoint(fileMap);
+        if (!entry) {
+          setReady(false);
+          setNotReadyNote("Preview unlocks once your project has a real entry point — usually seeded automatically once you create your first component.");
+        } else if (!isPreviewReady(fileMap)) {
+          setReady(false);
+          setNotReadyNote("Preview unlocks once the component your task builds actually exists and is exported — keep going, it's usually just a step or two away.");
+        } else {
+          setReady(true);
+          setNotReadyNote("");
+        }
+      } catch {
+        // A stale/failed read just leaves the button in its last known state — never blocks on this.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fs, dir, refreshToken]);
+
   return (
     <>
-      <button type="button" className="lp-open-btn" onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className="lp-open-btn"
+        onClick={() => setOpen(true)}
+        disabled={!ready}
+        title={ready ? "" : notReadyNote}
+      >
         🖥️ Preview
       </button>
       {open && (

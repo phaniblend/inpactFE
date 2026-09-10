@@ -33,6 +33,30 @@ export function findEntryPoint(fileMap) {
   return ENTRY_CANDIDATES.find((p) => p in fileMap) || null;
 }
 
+/**
+ * Whether Preview would actually show real, mounted output right now — not just whether an entry
+ * point file exists, but whether the thing it imports and renders is really there yet. The auto-
+ * seeded entry point (gitOps.js's DEFAULT_MAIN_TSX) already degrades gracefully at runtime — inside
+ * the iframe — to a plain "Waiting for App.tsx to export a component…" message when its one real
+ * dependency doesn't resolve; this is that same check done from the outside, before ever opening the
+ * preview, so the Preview control itself can just stay disabled instead of a learner clicking through
+ * to that placeholder (user report, 2026-09-10 — reachable from the very first step, well before
+ * there's anything to mount). Finds the entry point's own first relative default import (the pattern
+ * DEFAULT_MAIN_TSX always uses, `import X from "./Y"`) and checks whether that file actually exists
+ * in the workspace with a real extension; an entry with no such relative import (hand-written,
+ * self-contained) is treated as ready the moment it exists — there's nothing else to wait for.
+ */
+export function isPreviewReady(fileMap) {
+  const entry = findEntryPoint(fileMap);
+  if (!entry) return false;
+  const src = fileMap[entry] || "";
+  const m = /\bfrom\s+["'](\.\/[^"']+)["']/.exec(src);
+  if (!m) return true;
+  const entryDir = entry.slice(0, entry.lastIndexOf("/"));
+  const targetBase = `${entryDir}/${m[1].replace(/^\.\//, "")}`;
+  return [".tsx", ".ts", ".jsx", ".js"].some((ext) => `${targetBase}${ext}` in fileMap);
+}
+
 /** JSON-safe embedding of a value into a generated <script> — avoids </script> breaking out. */
 function jsonForScript(value) {
   return JSON.stringify(value).replace(/</g, "\\u003c");
