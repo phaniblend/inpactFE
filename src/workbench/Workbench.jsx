@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { slugForProjectName } from "../products/productWalkthroughConfigs.jsx";
-import ProductWalkthrough from "../products/ProductWalkthrough.jsx";
+import WalkthroughNudge from "../products/WalkthroughNudge.jsx";
 import { useAuth, hasRole } from "../auth/useAuth.js";
 import { RESERVED_PROJECT_IDS } from "../cohort-matching/matching.js";
 import { AssistMeEmbedded } from "../assist-me/AssistMeWorkspace.jsx";
@@ -543,14 +543,7 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
         {task.state ? ` · ${task.state}` : ""}
       </div>
       <h2 className="workbench-task-title">{task.title}</h2>
-      {slugForProjectName(task.project) && (
-        <div className="workbench-walkthrough-embed">
-          <ProductWalkthrough key={slugForProjectName(task.project)} productKey={slugForProjectName(task.project)} />
-          <Link className="workbench-walkthrough-link" to={`/products/${slugForProjectName(task.project)}`} target="_blank" rel="noopener noreferrer">
-            Open as a standalone page →
-          </Link>
-        </div>
-      )}
+      {slugForProjectName(task.project) && <WalkthroughNudge productKey={slugForProjectName(task.project)} />}
 
       {waitingOnLesson && (
         <div className="workbench-lesson-pending">

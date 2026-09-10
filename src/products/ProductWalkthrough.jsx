@@ -14,17 +14,28 @@ import "./ProductWalkthrough.css";
  * an unknown or missing key — e.g. MiniERP, which has no walkthrough mockup yet — so embedding this
  * unconditionally in shared lesson chrome never breaks a product that isn't ready.
  */
-export default function ProductWalkthrough({ productKey }) {
+export default function ProductWalkthrough({ productKey, autoStart = false }) {
   const config = PRODUCT_WALKTHROUGHS[productKey];
   const [step, setStep] = useState(0); // 0-based index into config.phases
   const [playing, setPlaying] = useState(false);
   const intervalRef = useRef(null);
+  const autoStartedRef = useRef(false);
 
   useEffect(() => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, []);
+
+  // Fires once, only when a caller (the curiosity-nudge modal) asks for it — the standalone
+  // overview page and lesson-intro embed still start on a deliberate click, same as always.
+  useEffect(() => {
+    if (autoStart && config && !autoStartedRef.current) {
+      autoStartedRef.current = true;
+      togglePlay();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart, config]);
 
   if (!config) return null;
 

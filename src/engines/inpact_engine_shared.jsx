@@ -11,7 +11,7 @@ import AngularTabbedEditor from "./angular/AngularTabbedEditor";
 import { mergeAngularTsWithHtml, mergeAngularCssIntoTS, splitAngularSeed } from "./angular/angularTabMerge.js";
 import LessonEditorOutputTabs from "./LessonEditorOutputTabs";
 import DesignMockPreview from "../id-module/DesignMockPreview.jsx";
-import ProductWalkthrough from "../products/ProductWalkthrough.jsx";
+import WalkthroughNudge from "../products/WalkthroughNudge.jsx";
 import InterfaceTour from "./InterfaceTour";
 import RichLearnerText from "./RichLearnerText";
 import { inferReactTsAnalogousExample } from "./reactTsAnalogousExamples.js";
@@ -2280,8 +2280,7 @@ export default function createINPACTEngine(config) {
           {c.usecase && <div style={{ ...revealPadding, background: "rgba(8,145,178,0.08)", border: "1px solid rgba(8,145,178,0.25)", borderLeft: "3px solid #0891b2", borderRadius: "8px", padding: "16px 20px", marginBottom: "28px" }}><div style={{ fontSize: "10px", letterSpacing: "2px", color: "#0891b2", marginBottom: "8px" }}>💡 WHY THIS MATTERS</div><RichLearnerText text={c.usecase} variant="muted" style={{ fontSize: "14px", color: "#475569", lineHeight: "1.7" }} /></div>}
           {c.walkthroughProduct ? (
             <div style={revealPadding}>
-              <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#0891b2", marginBottom: "8px" }}>🔧 SEE THE REAL ENGINE RUN</div>
-              <ProductWalkthrough key={c.walkthroughProduct} productKey={c.walkthroughProduct} />
+              <WalkthroughNudge key={c.walkthroughProduct} productKey={c.walkthroughProduct} />
             </div>
           ) : null}
           <div style={s.btnRow}><button type="button" className="inpact-btn-primary" style={s.btn("primary")} onClick={next}>CONTINUE →</button></div>

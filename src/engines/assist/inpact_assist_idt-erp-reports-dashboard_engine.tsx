@@ -19,6 +19,7 @@ export const NODES = [
       title: "MiniERP: inventory, procurement, sales & financial dashboard",
       body: MENTAL_MODEL,
       usecase: "The real MiniERP backend (ledger, item valuation, procure-to-pay, order-to-cash) is already running — this task builds the entire frontend against it: the inventory table, the procurement panel, the sales fulfillment board, the financial metrics cards, and the App.tsx that assembles all four into one live, self-updating dashboard.",
+      walkthroughProduct: "minierp",
       designMock: {"kind":"list-and-form","screenTitle":"MiniERP Command Center","caption":"This is the screen you are building — real financial cards on top, real inventory/procurement/sales panels below, all sharing one live data source.","listCaption":"CARDS — real figures from the ledger","emptyCaption":"EMPTY — before the first fetch resolves","emptyMessage":"Loading…","rows":[{"title":"Revenue","subtitle":"$125.00","meta":""},{"title":"Net Income","subtitle":"$85.00","meta":""}],"fields":[{"label":"Status","options":["All"]}],"formMode":"filter","submitLabel":"Refresh"},
     },
   },
