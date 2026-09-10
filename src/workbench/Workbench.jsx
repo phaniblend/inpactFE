@@ -771,6 +771,9 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
                     pullsUrl={pullsUrl}
                     codingFocus={fields.codingFocus}
                     moduleTag={assist.status === "wired" ? assist.tag : null}
+                    taskTitle={task.title}
+                    acceptanceCriteria={fields.acceptance}
+                    acceptanceUi={fields.acceptanceUi}
                   />
                 </>
               )}

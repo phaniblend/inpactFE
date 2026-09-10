@@ -35,15 +35,25 @@ import "./DevWorkspace.css";
  * default tab; "Git" is one click away, not gone.
  *
  * Props:
- *   projectPath  — OneDev project path, e.g. "OneInbox" (Workbench.jsx already computes this)
- *   branchHint   — suggested branch name, e.g. "js/build-assignment-ui" (Workbench.jsx already computes this)
- *   pullsUrl     — OneDev's own PR-list page for this project, for the "open a PR" link
- *   codingFocus  — "frontend" | "backend" | "both" | "" — picks WorkspaceEditor's compiler-options preset
- *   moduleTag    — the task's wired AssistModule tag, for TaskStepsPanel (null if none wired yet)
+ *   projectPath   — OneDev project path, e.g. "OneInbox" (Workbench.jsx already computes this)
+ *   branchHint    — suggested branch name, e.g. "js/build-assignment-ui" (Workbench.jsx already computes this)
+ *   pullsUrl      — OneDev's own PR-list page for this project, for the "open a PR" link
+ *   codingFocus   — "frontend" | "backend" | "both" | "" — picks WorkspaceEditor's compiler-options preset
+ *   moduleTag     — the task's wired AssistModule tag, for TaskStepsPanel (null if none wired yet)
+ *   taskTitle     — the task's real title, shown in the description block above the editor
+ *   acceptanceCriteria — string[], the task's "Task description" bullets (Workbench.jsx's fields.acceptance)
+ *   acceptanceUi  — string[], the task's "Acceptance criteria" bullets (Workbench.jsx's fields.acceptanceUi)
+ *
+ * The Steps/Git sidebar is opt-in, not on by default (user request, 2026-09-10 — the always-visible
+ * step checklist was competing with the task description for attention the moment the editor opened,
+ * before anyone had even read what they're building). Task description shows inline above the
+ * 3-pane layout on load instead; the sidebar (both its Steps and Git tabs, same as before) opens and
+ * closes as one unit behind the "🤖 Assist Me" toggle in the toolbar.
  */
-export default function DevWorkspace({ projectPath, branchHint, pullsUrl, codingFocus, moduleTag }) {
+export default function DevWorkspace({ projectPath, branchHint, pullsUrl, codingFocus, moduleTag, taskTitle, acceptanceCriteria, acceptanceUi }) {
   const { session } = useAuth();
   const [sidebarTab, setSidebarTab] = useState(moduleTag ? "steps" : "git");
+  const [assistOpen, setAssistOpen] = useState(false);
   const fs = useMemo(() => getFs(), []);
   const dir = useMemo(() => projectDir(projectPath), [projectPath]);
 
@@ -399,9 +409,40 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
     );
   }
 
+  const hasDescription = taskTitle || (acceptanceCriteria && acceptanceCriteria.length) || (acceptanceUi && acceptanceUi.length);
+
   return (
     <div className="dw-wrapper">
+      {hasDescription && (
+        <div className="dw-description">
+          {taskTitle && <h3 className="dw-description-title">{taskTitle}</h3>}
+          {acceptanceCriteria && acceptanceCriteria.length > 0 && (
+            <ul className="dw-description-list">
+              {acceptanceCriteria.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          )}
+          {acceptanceUi && acceptanceUi.length > 0 && (
+            <>
+              <div className="dw-description-subhead">Acceptance criteria</div>
+              <ul className="dw-description-list">
+                {acceptanceUi.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
       <div className="dw-toolbar">
+        <button
+          type="button"
+          className={`dw-assist-toggle${assistOpen ? " dw-assist-toggle-active" : ""}`}
+          onClick={() => setAssistOpen((v) => !v)}
+        >
+          🤖 Assist Me
+        </button>
         <LivePreview fs={fs} dir={dir} flushPendingWrites={flushPendingWrites} />
       </div>
       <div className="dw-root">
@@ -425,6 +466,7 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
           onChange={changeContent}
           codingFocus={codingFocus}
         />
+        {assistOpen && (
         <div className="dw-sidebar">
           <div className="dw-sidebar-tabs">
             <button
@@ -459,6 +501,7 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   );

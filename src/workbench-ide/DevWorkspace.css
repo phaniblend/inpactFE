@@ -3,10 +3,64 @@
   flex-direction: column;
 }
 
+.dw-description {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+}
+
+.dw-description-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.dw-description-subhead {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #64748b;
+  margin: 10px 0 4px;
+}
+
+.dw-description-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.6;
+}
+
 .dw-toolbar {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
   padding-bottom: 8px;
+}
+
+.dw-assist-toggle {
+  margin-right: auto;
+  background: #fff;
+  border: 1px solid #0891b2;
+  color: #0891b2;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.dw-assist-toggle:hover {
+  background: #ecfeff;
+}
+
+.dw-assist-toggle-active {
+  background: #0891b2;
+  color: #fff;
 }
 
 .dw-root {
