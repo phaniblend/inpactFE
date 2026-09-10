@@ -19,6 +19,7 @@ export const NODES = [
       title: "RouteMatrix: driver stop board",
       body: MENTAL_MODEL,
       usecase: "The real RouteMatrix backend already solves each driver's route (a capacity-checked, distance-minimized stop order) and already closes a route out automatically once its last stop is complete — this task builds the screen a driver actually works their real deliveries from, stop by stop.",
+      walkthroughProduct: "routematrix",
       designMock: {"kind":"list-and-form","screenTitle":"My Route","caption":"This is the screen you are building — every stop is a real delivery in the driver's real assigned sequence.","listCaption":"STOPS — in real delivery sequence","emptyCaption":"EMPTY — if no route is currently assigned","emptyMessage":"No active route assigned.","rows":[{"title":"1. Maria Chen — 480 Elm St","subtitle":"PENDING","meta":"Mark Delivered"},{"title":"2. Devon Ruiz — 12 Birch Ave","subtitle":"COMPLETED","meta":"✓"}],"fields":[{"label":"Signed by","placeholder":"e.g. M. Chen"}],"formMode":"filter","submitLabel":"Mark Delivered"},
     },
   },

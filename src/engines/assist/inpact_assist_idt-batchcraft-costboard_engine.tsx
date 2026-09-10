@@ -20,6 +20,7 @@ export const NODES = [
       title: "BatchCraft: recipe cost board",
       body: MENTAL_MODEL,
       usecase: "The real BatchCraft backend already recursively solves every recipe's true plate cost — factoring in raw trim-loss yield and nested sub-recipes — and already depletes real pantry stock when a prep batch runs. This task builds the screen a kitchen manager actually watches margins and runs prep from.",
+      walkthroughProduct: "batchcraft",
       designMock: {"kind":"list-and-form","screenTitle":"Recipe Cost Board","caption":"This is the screen you are building — every row is a real recipe with its real, backend-computed cost.","listCaption":"TABLE — real recipes, live from the API","emptyCaption":"EMPTY — if nothing has been costed yet","emptyMessage":"No recipes costed yet.","rows":[{"title":"Marinara Sauce","subtitle":"$1.84 / serving","meta":"38% (over 30% target)"},{"title":"Lasagna","subtitle":"$4.20 / serving","meta":"27%"}],"fields":[{"label":"Batch multiplier","placeholder":"e.g. 3.5"},{"label":"Prepared by","placeholder":"e.g. J. Alvarez"}],"formMode":"filter","submitLabel":"Run Prep Batch"},
     },
   },

@@ -11,6 +11,7 @@ import AngularTabbedEditor from "./angular/AngularTabbedEditor";
 import { mergeAngularTsWithHtml, mergeAngularCssIntoTS, splitAngularSeed } from "./angular/angularTabMerge.js";
 import LessonEditorOutputTabs from "./LessonEditorOutputTabs";
 import DesignMockPreview from "../id-module/DesignMockPreview.jsx";
+import ProductWalkthrough from "../products/ProductWalkthrough.jsx";
 import InterfaceTour from "./InterfaceTour";
 import RichLearnerText from "./RichLearnerText";
 import { inferReactTsAnalogousExample } from "./reactTsAnalogousExamples.js";
@@ -1088,6 +1089,11 @@ export default function createINPACTEngine(config) {
     const mainScrollRef = useRef(null);
     const [completedNodes, setCompletedNodes] = useState([]);
     const [passedCodeByStepId, setPassedCodeByStepId] = useState({});
+    // "funda-gate" node state — declared at this top level (not inside renderFundaGate itself)
+    // because renderFundaGate is only invoked conditionally from the type switch below; a hook
+    // called there would violate the rules of hooks. Keyed by node.id so re-entering an earlier
+    // gate (via Back) doesn't lose or bleed into another gate's progress.
+    const [fundaGateState, setFundaGateState] = useState({}); // { [nodeId]: { comfortable, quizIndex, quizPassed, showVideoFor } }
     const [aiFeedback, setAiFeedback] = useState("");
     const [validationFallbackNote, setValidationFallbackNote] = useState("");
     /** Multi-file focus-clear baseline for the first question step only (matches that step's `initialCode`). Later steps never clear on focus. */
@@ -2272,6 +2278,12 @@ export default function createINPACTEngine(config) {
             </div>
           ) : null}
           {c.usecase && <div style={{ ...revealPadding, background: "rgba(8,145,178,0.08)", border: "1px solid rgba(8,145,178,0.25)", borderLeft: "3px solid #0891b2", borderRadius: "8px", padding: "16px 20px", marginBottom: "28px" }}><div style={{ fontSize: "10px", letterSpacing: "2px", color: "#0891b2", marginBottom: "8px" }}>💡 WHY THIS MATTERS</div><RichLearnerText text={c.usecase} variant="muted" style={{ fontSize: "14px", color: "#475569", lineHeight: "1.7" }} /></div>}
+          {c.walkthroughProduct ? (
+            <div style={revealPadding}>
+              <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#0891b2", marginBottom: "8px" }}>🔧 SEE THE REAL ENGINE RUN</div>
+              <ProductWalkthrough key={c.walkthroughProduct} productKey={c.walkthroughProduct} />
+            </div>
+          ) : null}
           <div style={s.btnRow}><button type="button" className="inpact-btn-primary" style={s.btn("primary")} onClick={next}>CONTINUE →</button></div>
         </div>
       );
@@ -2302,6 +2314,158 @@ export default function createINPACTEngine(config) {
               }}
             >
               LET&apos;S BUILD →
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    /** "funda-gate" node — found live 2026-09-01: a step can silently assume prerequisite
+     * fundamentals (useState, array iteration, whatever) a total beginner may not actually have.
+     * node.fundas: [{ name, blurb, videoUrl, quiz: { question, options, correctIndex } }].
+     * Per funda: "Are you comfortable with this?" — Yes goes straight to the spot quiz; No shows
+     * the video first. Either path ends at the same quiz; a wrong answer sends them back to the
+     * video and the quiz reopens — same loop, no way to skip past a fundamental by guessing once.
+     * "Continue" only enables once every funda in this gate has been passed. */
+    function renderFundaGate() {
+      const fundas = Array.isArray(node?.fundas) ? node.fundas : [];
+      const gateId = node?.id || "funda-gate";
+      const state = fundaGateState[gateId] || {};
+
+      function setFundaState(i, patch) {
+        setFundaGateState((prev) => ({
+          ...prev,
+          [gateId]: {
+            ...(prev[gateId] || {}),
+            [i]: { ...((prev[gateId] || {})[i] || {}), ...patch },
+          },
+        }));
+      }
+
+      const allPassed = fundas.length > 0 && fundas.every((_, i) => state[i]?.quizPassed);
+
+      return (
+        <div>
+          {node.phase && <div style={s.phase}>{node.phase}</div>}
+          <h1 style={s.h1}>Before you start: prerequisite check</h1>
+          <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.6, marginBottom: 20 }}>
+            The tasks in this lesson require proficiency in the following fundamentals. Confirm you
+            know each one, or take a moment to learn it first.
+          </p>
+          {fundas.map((funda, i) => {
+            const f = state[i] || {};
+            const showQuiz = f.comfortable === true || f.showingQuizAfterVideo;
+            return (
+              <div key={funda.name} style={{ border: "1px solid #e2e8f0", borderRadius: 10, padding: 16, marginBottom: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>
+                    {f.quizPassed ? "✓ " : ""}
+                    {funda.name}
+                  </div>
+                  {f.quizPassed && <span style={{ fontSize: 11, fontWeight: 700, color: "#16a34a" }}>READY</span>}
+                </div>
+                {funda.blurb && <p style={{ fontSize: 13, color: "#64748b", margin: "6px 0 12px", lineHeight: 1.55 }}>{funda.blurb}</p>}
+
+                {!f.quizPassed && f.comfortable === undefined && (
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <span style={{ fontSize: 13, color: "#334155", alignSelf: "center" }}>Comfortable with this?</span>
+                    <button type="button" style={s.btn("secondary")} onClick={() => setFundaState(i, { comfortable: true })}>
+                      Yes
+                    </button>
+                    <button
+                      type="button"
+                      style={s.btn("secondary")}
+                      onClick={() => setFundaState(i, { comfortable: false })}
+                    >
+                      No
+                    </button>
+                  </div>
+                )}
+
+                {!f.quizPassed && f.comfortable === false && !f.showingQuizAfterVideo && (
+                  <div>
+                    {funda.videoUrl && (
+                      <a
+                        href={funda.videoUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ fontSize: 13, color: "#0891b2", fontWeight: 600, textDecoration: "underline" }}
+                      >
+                        ▶ Watch: {funda.name}
+                      </a>
+                    )}
+                    <div style={{ marginTop: 10 }}>
+                      <button
+                        type="button"
+                        style={s.btn("primary")}
+                        onClick={() => setFundaState(i, { showingQuizAfterVideo: true })}
+                      >
+                        I've reviewed this — test me
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {!f.quizPassed && showQuiz && funda.quiz && (
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "#0f172a", margin: "4px 0 8px" }}>{funda.quiz.question}</p>
+                    <div style={{ display: "grid", gap: 8, marginBottom: 10 }}>
+                      {funda.quiz.options.map((opt, oi) => (
+                        <label
+                          key={oi}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            fontSize: 13,
+                            color: "#334155",
+                            border: "1px solid #e2e8f0",
+                            borderRadius: 8,
+                            padding: "8px 10px",
+                            cursor: "pointer",
+                            background: f.picked === oi ? "#ecfeff" : "#fff",
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name={`funda-${gateId}-${i}`}
+                            checked={f.picked === oi}
+                            onChange={() => setFundaState(i, { picked: oi, wrong: false })}
+                          />
+                          {opt}
+                        </label>
+                      ))}
+                    </div>
+                    {f.wrong && (
+                      <p style={{ fontSize: 12, color: "#b91c1c", marginBottom: 8 }}>
+                        Not quite — take another look at the video, then try again.
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      style={s.btn("primary")}
+                      disabled={f.picked === undefined}
+                      onClick={() => {
+                        const correct = f.picked === funda.quiz.correctIndex;
+                        if (correct) {
+                          setFundaState(i, { quizPassed: true });
+                        } else {
+                          // Same loop the whole feature is built around: a wrong answer sends them
+                          // back to the video, not just a retry of the same quiz blind.
+                          setFundaState(i, { wrong: true, comfortable: false, showingQuizAfterVideo: false, picked: undefined });
+                        }
+                      }}
+                    >
+                      Check answer
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          <div style={s.btnRow}>
+            <button type="button" className="inpact-btn-primary" style={s.btn("primary")} disabled={!allPassed} onClick={() => next()}>
+              {allPassed ? "Continue →" : "Pass every check above to continue"}
             </button>
           </div>
         </div>
@@ -3215,6 +3379,25 @@ export default function createINPACTEngine(config) {
                       Pause before coding: Answer the quick thinking prompt first
                     </div>
 
+                    {/* Found live 2026-09-02: this modal quizzed the learner on `think_prompt`
+                        without ever showing `node.paal` — the actual teaching text that explains
+                        what the answer needs to contain. It lives in the TASK box behind this
+                        modal, which the learner may never have scrolled to before the modal
+                        opened. Repeating it here makes the modal self-contained regardless of
+                        what's visible behind it. */}
+                    {node.paal ? (
+                      <div style={{ marginBottom: "14px" }}>
+                        <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#0891b2", marginBottom: "8px", fontWeight: 800 }}>
+                          WHAT YOU NEED TO KNOW
+                        </div>
+                        <RichLearnerText
+                          text={node.paal}
+                          variant="task"
+                          style={{ fontSize: "14px", lineHeight: 1.6, color: "#334155" }}
+                        />
+                      </div>
+                    ) : null}
+
                     <div style={{ marginBottom: "12px" }}>
                       <div style={{ fontSize: "10px", letterSpacing: "3px", color: "#0891b2", marginBottom: "10px", fontWeight: 800 }}>
                         THINK
@@ -3437,6 +3620,7 @@ export default function createINPACTEngine(config) {
       switch (node.type) {
         case "reveal": return renderReveal();
         case "objectives": return renderObjectives();
+        case "funda-gate": return renderFundaGate();
         case "question": return renderEditorContent();
         default: return renderReveal();
       }
@@ -3729,6 +3913,10 @@ export default function createINPACTEngine(config) {
                 editorProgress={{
                   items: sideItems,
                   activeNodeIndex: nodeIndex,
+                  // Matched by id first (see EditorProgressRail) — sideItems is a hand-authored
+                  // list that can drift out of position-alignment with NODES (e.g. the funda-gate
+                  // node has no sideItems entry), so raw index alone highlighted the wrong row.
+                  activeItemId: node?.id,
                   completedIds: completedNodes,
                   onSelectIndex: selectSideItemByIndex,
                 }}

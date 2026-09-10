@@ -22,6 +22,7 @@ import CDReview from './cd-review/CDReview.jsx'
 import PmgtConsole from './pmgt/PmgtConsole.jsx'
 import RequireRole from './auth/RequireRole.jsx'
 import JsExperienceHome from './JsExperienceHome.jsx'
+import ProductOverview from './products/ProductOverview.jsx'
 import { TeamChatProvider } from './team-messaging/TeamChatProvider.jsx'
 import GlobalHeader from './GlobalHeader.jsx'
 
@@ -42,6 +43,9 @@ createRoot(document.getElementById('root')).render(
           <Route path="/pd-studio" element={<RequireRole roles={['PD']}><PDStudio /></RequireRole>} />
           <Route path="/workbench" element={<RequireRole roles={[]}><Workbench /></RequireRole>} />
           <Route path="/apply" element={<Apply />} />
+          {/* Public, shareable product overview + animated engineering walkthrough — a pilot
+              audience or a prospective aspirant can land here directly, no session required. */}
+          <Route path="/products/:slug" element={<ProductOverview />} />
           <Route path="/matching-queue" element={<RequireRole roles={ANY_CORE_ROLE}><MatchingQueue /></RequireRole>} />
           <Route path="/core-studio" element={<RequireRole roles={ANY_CORE_ROLE}><CoreStudioConsole /></RequireRole>} />
           <Route path="/huddle-calendar" element={<RequireRole roles={ANY_CORE_ROLE}><HuddleCalendar /></RequireRole>} />

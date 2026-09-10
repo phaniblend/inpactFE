@@ -482,6 +482,19 @@
   margin: 6px 0 12px;
 }
 
+.workbench-walkthrough-link {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0891b2;
+  text-decoration: none;
+  margin: 0 0 16px;
+}
+
+.workbench-walkthrough-link:hover {
+  text-decoration: underline;
+}
+
 .workbench-tour-nudge {
   display: flex;
   align-items: center;

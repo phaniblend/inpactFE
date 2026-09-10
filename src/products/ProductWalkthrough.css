@@ -1,0 +1,265 @@
+/* Scoped styles for ProductWalkthrough.jsx — ported from the three pasted "Interactive Walkthrough
+   Simulator" HTML mockups (SentinelPOS/RouteMatrix/BatchCraft, 2026-09-10). Deliberately a
+   self-contained dark "engineering console" card, distinct from the app's light Comfortaa branding
+   — same choice the original mockups made, kept as-is since it reads as "here's what's really
+   running under the hood," not the marketing chrome around it. */
+
+.pw-container {
+  --pw-bg: #070b14;
+  --pw-card-bg: #0f172a;
+  --pw-panel-border: #1e293b;
+  --pw-text: #f8fafc;
+  --pw-text-muted: #94a3b8;
+  --pw-accent: #38bdf8;
+  --pw-emerald: #34d399;
+  --pw-amber: #fbbf24;
+  --pw-rose: #f43f5e;
+  --pw-code-bg: #020617;
+
+  background: var(--pw-card-bg);
+  border: 1px solid var(--pw-panel-border);
+  border-radius: 12px;
+  padding: 28px;
+  color: var(--pw-text);
+  font-family: inherit;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.pw-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--pw-panel-border);
+  padding-bottom: 14px;
+}
+
+.pw-title {
+  font-size: 19px;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pw-subtitle {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--pw-text-muted);
+}
+
+.pw-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.pw-badge-accent { border: 1px solid var(--pw-accent); color: var(--pw-accent); background: rgba(56, 189, 248, 0.15); }
+.pw-badge-emerald { border: 1px solid var(--pw-emerald); color: var(--pw-emerald); background: rgba(52, 211, 153, 0.15); }
+.pw-badge-rose { border: 1px solid var(--pw-rose); color: var(--pw-rose); background: rgba(244, 63, 94, 0.15); }
+
+.pw-timeline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pw-timeline-step {
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid var(--pw-panel-border);
+  border-radius: 8px;
+  padding: 10px;
+  transition: all 0.3s ease;
+}
+
+.pw-timeline-step.active {
+  border-color: var(--pw-accent);
+  background: rgba(56, 189, 248, 0.08);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.2);
+}
+
+.pw-timeline-step.completed {
+  border-color: var(--pw-emerald);
+  opacity: 0.8;
+}
+
+.pw-step-number {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--pw-text-muted);
+  margin-bottom: 4px;
+}
+
+.pw-timeline-step.active .pw-step-number { color: var(--pw-accent); }
+.pw-timeline-step.completed .pw-step-number { color: var(--pw-emerald); }
+
+.pw-step-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.pw-simulation-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 640px) {
+  .pw-simulation-grid { grid-template-columns: 1fr; }
+  .pw-timeline { grid-template-columns: repeat(2, 1fr); }
+}
+
+.pw-sim-panel {
+  background: var(--pw-code-bg);
+  border: 1px solid var(--pw-panel-border);
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+}
+
+.pw-panel-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--pw-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+}
+
+.pw-stage-canvas {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pw-canvas-flow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.pw-flow-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.pw-flow-arrow {
+  color: #475569;
+  font-size: 14px;
+}
+
+.pw-canvas-decompose {
+  font-size: 10.5px;
+  color: #475569;
+  text-align: center;
+}
+
+.pw-flow-node {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  font-size: 11.5px;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: all 0.4s ease;
+}
+
+.pw-flow-node-wide { min-width: 220px; }
+
+.pw-flow-node.active {
+  border-color: var(--pw-accent);
+  transform: scale(1.06);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+}
+
+.pw-flow-node-tag { color: var(--pw-text-muted); font-size: 9.5px; }
+.pw-flow-node-tag-emerald { color: var(--pw-emerald); }
+.pw-flow-node-tag-amber { color: var(--pw-amber); }
+
+.pw-map-svg {
+  background: #020617;
+  border-radius: 6px;
+  border: 1px solid var(--pw-panel-border);
+}
+
+.pw-console-stream {
+  background: #000;
+  border-radius: 6px;
+  padding: 10px;
+  font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  color: #94a3b8;
+  flex: 1;
+  min-height: 160px;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid #1e293b;
+}
+
+.pw-log-accent { color: var(--pw-accent); font-weight: bold; }
+.pw-log-warn { color: var(--pw-amber); }
+.pw-log-err { color: var(--pw-rose); }
+.pw-log-success { color: var(--pw-emerald); }
+
+.pw-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--pw-panel-border);
+}
+
+.pw-step-label {
+  font-size: 12px;
+  color: var(--pw-text-muted);
+}
+
+.pw-step-label strong { color: #fff; }
+
+.pw-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.pw-container button {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #fff;
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+  font-family: inherit;
+}
+
+.pw-container button:hover:not(:disabled) { background: #334155; }
+.pw-container button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.pw-container button.pw-btn-primary {
+  background: var(--pw-accent);
+  color: #020617;
+  border-color: var(--pw-accent);
+}
+
+.pw-container button.pw-btn-primary:hover:not(:disabled) { background: #7dd3fc; }
