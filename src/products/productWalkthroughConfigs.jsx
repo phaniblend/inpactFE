@@ -214,7 +214,7 @@ export const PRODUCT_WALKTHROUGHS = {
 // Product slugs that have ANY walkthrough — a GuidedTour (guidedTours.jsx) or a ProductWalkthrough
 // config (this file). Listed directly rather than imported from guidedTours.jsx to avoid a
 // products/ <-> products/ import cycle risk as more tours get added; keep in sync by hand.
-const GUIDED_TOUR_SLUGS = new Set(["minierp"]);
+const GUIDED_TOUR_SLUGS = new Set(["minierp", "sentinelpos", "routematrix", "batchcraft"]);
 
 export function slugForProjectName(name) {
   const key = (name || "").toLowerCase().replace(/[^a-z0-9]/g, "");

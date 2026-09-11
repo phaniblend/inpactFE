@@ -332,7 +332,7 @@
   position: fixed;
   width: min(460px, calc(100vw - 48px));
   max-height: calc(100vh - 48px);
-  overflow-y: auto;
+  overflow: hidden;
   box-sizing: border-box;
   background: #fff;
   border: 1px solid #cbd5e1;
@@ -342,6 +342,15 @@
   padding: 16px 20px 20px;
   display: flex;
   flex-direction: column;
+}
+
+/* The drag handle + Close button stay put — only .tsp-card-body (everything below the head)
+   scrolls underneath it (user request, 2026-09-10: the header was scrolling out of view along
+   with the rest of the card's content, taking Close and the drag handle with it). */
+.tsp-card-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* Bottom-right resize handle (2026-09-07, user request — "resize handles on all models especially
@@ -372,6 +381,7 @@
 }
 
 .tsp-card-head {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;

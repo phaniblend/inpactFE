@@ -33,7 +33,7 @@ const PRODUCT_COPY = {
   },
 };
 
-const PRODUCT_TITLES = { minierp: "MiniERP" };
+const PRODUCT_TITLES = { minierp: "MiniERP", sentinelpos: "SentinelPOS", routematrix: "RouteMatrix", batchcraft: "BatchCraft" };
 
 export default function ProductOverview() {
   const { slug } = useParams();

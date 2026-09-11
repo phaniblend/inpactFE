@@ -509,51 +509,53 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
               ⠿ Step {activeStep + 1} of {steps.length}
             </div>
           </div>
-          {/* Which file this step is actually about — declared per-step (see e.g. the MiniERP
-              task's NODES array), not inferred from prose, since not every step restates its path
-              (user request, 2026-09-08: "include the filepath the step is talking about"). Only
-              modules that declare `file` on their steps show this row — older modules without it
-              render exactly as before. */}
-          {activeNode.file ? <div className="tsp-card-file">{activeNode.file}</div> : null}
-          <label className="tsp-card-check">
-            <input type="checkbox" checked={done.has(activeNode.id)} onChange={() => toggleDone(activeNode.id)} />
-            <span>Mark done</span>
-          </label>
-          <div className="tsp-what">
-            <span className="tsp-tag">What</span> {whatFromPaal(activeNode.paal)}
-          </div>
-          {/* `hint` is usually the literal code answer (or close to it) — showing that as "How"
-              just restates "What" a second time, found live 2026-09-02 testing this.
-              `pre_check_hint` (written for a different original purpose — guidance shown before
-              the learner has attempted the step) is the field that's actually technique-level
-              across every module checked: what to do conceptually, not the finished line of
-              code. Fall back to `hint` only when a module has no pre_check_hint at all. */}
-          {activeNode.pre_check_hint || activeNode.hint ? (
-            <div className="tsp-how">
-              <span className="tsp-tag">How</span>
-              <div className="tsp-how-body">{formatFeedbackText(activeNode.pre_check_hint || activeNode.hint, "how")}</div>
+          <div className="tsp-card-body">
+            {/* Which file this step is actually about — declared per-step (see e.g. the MiniERP
+                task's NODES array), not inferred from prose, since not every step restates its path
+                (user request, 2026-09-08: "include the filepath the step is talking about"). Only
+                modules that declare `file` on their steps show this row — older modules without it
+                render exactly as before. */}
+            {activeNode.file ? <div className="tsp-card-file">{activeNode.file}</div> : null}
+            <label className="tsp-card-check">
+              <input type="checkbox" checked={done.has(activeNode.id)} onChange={() => toggleDone(activeNode.id)} />
+              <span>Mark done</span>
+            </label>
+            <div className="tsp-what">
+              <span className="tsp-tag">What</span> {whatFromPaal(activeNode.paal)}
             </div>
-          ) : null}
-          <button type="button" className="tsp-assist-btn" onClick={() => setAssistNode(activeNode)}>
-            💡 Assist me
-          </button>
-          <div className="tsp-card-nav">
-            <button
-              type="button"
-              className="tsp-nav-btn"
-              disabled={activeStep === 0}
-              onClick={() => setActiveStep((i) => Math.max(0, i - 1))}
-            >
-              ← Prev
+            {/* `hint` is usually the literal code answer (or close to it) — showing that as "How"
+                just restates "What" a second time, found live 2026-09-02 testing this.
+                `pre_check_hint` (written for a different original purpose — guidance shown before
+                the learner has attempted the step) is the field that's actually technique-level
+                across every module checked: what to do conceptually, not the finished line of
+                code. Fall back to `hint` only when a module has no pre_check_hint at all. */}
+            {activeNode.pre_check_hint || activeNode.hint ? (
+              <div className="tsp-how">
+                <span className="tsp-tag">How</span>
+                <div className="tsp-how-body">{formatFeedbackText(activeNode.pre_check_hint || activeNode.hint, "how")}</div>
+              </div>
+            ) : null}
+            <button type="button" className="tsp-assist-btn" onClick={() => setAssistNode(activeNode)}>
+              💡 Assist me
             </button>
-            <button
-              type="button"
-              className="tsp-nav-btn tsp-nav-btn-primary"
-              disabled={activeStep === steps.length - 1}
-              onClick={() => setActiveStep((i) => Math.min(steps.length - 1, i + 1))}
-            >
-              Next →
-            </button>
+            <div className="tsp-card-nav">
+              <button
+                type="button"
+                className="tsp-nav-btn"
+                disabled={activeStep === 0}
+                onClick={() => setActiveStep((i) => Math.max(0, i - 1))}
+              >
+                ← Prev
+              </button>
+              <button
+                type="button"
+                className="tsp-nav-btn tsp-nav-btn-primary"
+                disabled={activeStep === steps.length - 1}
+                onClick={() => setActiveStep((i) => Math.min(steps.length - 1, i + 1))}
+              >
+                Next →
+              </button>
+            </div>
           </div>
           <div className="tsp-resize-handle" onPointerDown={handleResizePointerDown} title="Drag to resize" />
         </div>
@@ -577,16 +579,18 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
               ⠿ Check my code
             </div>
           </div>
-          <div className="tsp-check-float-body">{formatFeedbackText(checkMessage)}</div>
-          {checkContext ? (
-            <>
-              <button type="button" className="tsp-assist-btn tsp-annotate-btn" onClick={annotateCode} disabled={annotating}>
-                {annotating ? "Annotating…" : "🔍 Annotate my code"}
-              </button>
-              {annotateError ? <div className="tsp-annotate-error">{annotateError}</div> : null}
-              {annotatedCode ? renderAnnotatedCode(annotatedCode) : null}
-            </>
-          ) : null}
+          <div className="tsp-card-body">
+            <div className="tsp-check-float-body">{formatFeedbackText(checkMessage)}</div>
+            {checkContext ? (
+              <>
+                <button type="button" className="tsp-assist-btn tsp-annotate-btn" onClick={annotateCode} disabled={annotating}>
+                  {annotating ? "Annotating…" : "🔍 Annotate my code"}
+                </button>
+                {annotateError ? <div className="tsp-annotate-error">{annotateError}</div> : null}
+                {annotatedCode ? renderAnnotatedCode(annotatedCode) : null}
+              </>
+            ) : null}
+          </div>
           <div className="tsp-resize-handle" onPointerDown={handleCheckResizePointerDown} title="Drag to resize" />
         </div>
       ) : null}
