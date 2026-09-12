@@ -31,6 +31,16 @@ export default function GuidedTour({ renderStage, chapters, autoStart = false })
   const [activeChapter, setActiveChapter] = useState(-1);
   const [playLabel, setPlayLabel] = useState("Start Tour");
 
+  // Invalidates the currently-running chapter loop on unmount — executeFlowFrom is a plain async
+  // function, so unmounting this component doesn't stop it on its own; the next sleep()/speakText()
+  // check rejects with "CANCELED" instead of continuing. Kept unconditional (not just when
+  // speechSynthesis exists below) since the loop itself should stop either way, not only its audio.
+  useEffect(() => {
+    return () => {
+      sessionRef.current += 1;
+    };
+  }, []);
+
   useEffect(() => {
     const synth = window.speechSynthesis;
     if (!synth) return;
@@ -43,6 +53,10 @@ export default function GuidedTour({ renderStage, chapters, autoStart = false })
     }
     loadVoices();
     synth.onvoiceschanged = loadVoices;
+    // Silences whatever's speaking *right now* the instant this unmounts — the session-invalidation
+    // effect above stops the loop from starting anything new, but without this, whatever utterance
+    // was already mid-playback keeps running to completion (user report, 2026-09-13: "the audio
+    // keeps playing even after closing the product tour").
     return () => {
       synth.cancel();
     };
@@ -99,6 +113,13 @@ export default function GuidedTour({ renderStage, chapters, autoStart = false })
     return new Promise((resolve, reject) => {
       const synth = window.speechSynthesis;
       if (!synth) return resolve();
+      // Guard at the actual point of speaking, not just in onend/onerror below — a step earlier in
+      // this same chapter (e.g. moveCursorTo, which doesn't take a session id) can still be in
+      // flight when the tour gets torn down, so by the time execution reaches here the session may
+      // already be stale. Refusing to start new audio here is what actually stops it, since once
+      // synth.speak() runs the browser will speak it through to completion regardless of whether
+      // anything is still mounted to show for it.
+      if (sId !== sessionRef.current) return reject("CANCELED");
       synth.cancel();
       const utter = new SpeechSynthesisUtterance(text);
       if (voiceRef.current) utter.voice = voiceRef.current;
