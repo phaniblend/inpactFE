@@ -107,6 +107,14 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
   const [assistNode, setAssistNode] = useState(null);
   const [checking, setChecking] = useState(false);
   const [checkMessage, setCheckMessage] = useState("");
+  // Kept separate from `checkMessage` itself — not concatenated into the same string — so which
+  // step this result is for is never glued onto the feedback text's own first line. That gluing
+  // (`Step ${n}: ${feedback}`, later `Step ${n}:\n\n${feedback}`) previously defeated
+  // formatFeedbackText's numbered/bulleted-list detection whenever the AI's own feedback also
+  // started with "1. " — the combined string's first line started with "Step 1: 1. ..." (an "S",
+  // not a digit), so a real numbered list from the AI still rendered as one run-on paragraph (user
+  // report, 2026-09-13, screenshot: "ITS EVEN MORE CRAMPED").
+  const [checkMessageLabel, setCheckMessageLabel] = useState("");
   const [justPassed, setJustPassed] = useState(() => new Set());
   // null = no detail card open; a number = that step's floating card is open.
   const [activeStep, setActiveStep] = useState(null);
@@ -326,13 +334,15 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
 
   // Opens the floating check-result card alongside setting its text — only if it isn't already
   // positioned, so re-checking repeatedly doesn't keep re-centering a card the learner dragged.
-  function showCheckMessage(msg) {
+  function showCheckMessage(msg, label = "") {
     setCheckMessage(msg);
+    setCheckMessageLabel(label);
     setCheckCardPos((prev) => prev || defaultCheckCardPos());
   }
 
   function closeCheckCard() {
     setCheckMessage("");
+    setCheckMessageLabel("");
     setCheckContext(null);
     setAnnotating(false);
     setAnnotateError("");
@@ -427,12 +437,7 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
           setCheckContext({ node: chosen.node, code, language, feedback: chosen.result.feedback });
           setAnnotatedCode(null);
           setAnnotateError("");
-          // A real blank line between the step label and the feedback body — not a shared first
-          // line — so formatFeedbackText's numbered/bulleted-list detection sees the feedback's own
-          // first line (e.g. "1. ...") on its own, not "Step 1: 1. ..." glued together (found while
-          // fixing the "lump of text" report below: gluing them defeated list detection even after
-          // the AI started returning a real numbered list).
-          showCheckMessage(`Step ${stepNum}:\n\n${chosen.result.feedback}`);
+          showCheckMessage(chosen.result.feedback, `Step ${stepNum}`);
         } else {
           setCheckContext(null);
           showCheckMessage("No new steps look complete yet — keep going.");
@@ -589,6 +594,7 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
             </div>
           </div>
           <div className="tsp-card-body">
+            {checkMessageLabel ? <span className="tsp-tag tsp-check-step-tag">{checkMessageLabel}</span> : null}
             <div className="tsp-check-float-body">{formatFeedbackText(checkMessage)}</div>
             {checkContext ? (
               <>

@@ -72,21 +72,26 @@ export function renderAnnotatedCode(code, keyPrefix = "ann") {
   );
 }
 
-/** A paragraph is a bullet list when every one of its lines starts with "- " — a lump of
- * instructions read as one thing to parse, not a set of separate, checkable actions (user report,
- * 2026-09-07: "can we give instructions more formatted, bulleted may be instead of a lump of
- * text"). Each bullet still gets backtick spans converted to inline <code>. */
+/** A paragraph is a bullet list when it has more than one line and every line starts with "- " —
+ * a lump of instructions read as one thing to parse, not a set of separate, checkable actions
+ * (user report, 2026-09-07: "can we give instructions more formatted, bulleted may be instead of a
+ * lump of text"). Each bullet still gets backtick spans converted to inline <code>. Requires more
+ * than one line, not just one — a single sentence that happens to start with "- " isn't a list. */
 function isBulletParagraph(lines) {
-  return lines.length > 0 && lines.every((l) => /^-\s+/.test(l.trim()));
+  return lines.length > 1 && lines.every((l) => /^-\s+/.test(l.trim()));
 }
 
 /** Same idea, but for "1. / 2. / 3. ..." — an ordered sequence of actions (do this, then this)
  * reads better as a real numbered list than as one dense "How" paragraph (user report, 2026-09-13,
  * pointing at an improved-mock comparison whose "How" was three clear numbered steps against the
  * live version's one run-on paragraph). Renders as a real <ol> below, so the browser's own numbers
- * are used rather than the literal "1."/"2." text. */
+ * are used rather than the literal "1."/"2." text. Requires more than one line: a single line that
+ * merely *starts* with "1. " (e.g. "1. The Incident type is missing... 2. The cashier object...",
+ * every item crammed onto one physical line instead of its own) is NOT a real list — treating it as
+ * one anyway would silently swallow every item after the first into "item 1"'s own text, hiding
+ * them rather than separating them (found live 2026-09-13 from exactly that AI response shape). */
 function isNumberedParagraph(lines) {
-  return lines.length > 0 && lines.every((l) => /^\d+\.\s+/.test(l.trim()));
+  return lines.length > 1 && lines.every((l) => /^\d+\.\s+/.test(l.trim()));
 }
 
 export function formatFeedbackText(text, keyPrefix = "fb") {
