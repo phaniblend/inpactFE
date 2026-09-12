@@ -30,6 +30,33 @@ export default function GuidedTour({ renderStage, chapters, autoStart = false })
   const [isPaused, setIsPaused] = useState(false);
   const [activeChapter, setActiveChapter] = useState(-1);
   const [playLabel, setPlayLabel] = useState("Start Tour");
+  // Fullscreen (user report, 2026-09-13: "the product tour is hiding in small screen" — on a phone,
+  // the desktop-oriented mock UI plus the tray/chapter bar below it easily runs taller than the
+  // viewport, and inside WalkthroughNudge's modal that meant scrolling past the fold to reach the
+  // controls at all, with nothing signaling there was more below). Toggling this escapes whatever
+  // modal/page it's mounted in (`position: fixed` on the wrapper) and gives the stage the full
+  // viewport to work with instead of a capped max-height.
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  function toggleFullscreen() {
+    setIsFullscreen((f) => !f);
+  }
+
+  // Esc to exit (standard fullscreen convention), and lock the page behind it from scrolling while
+  // active — otherwise the background page and the tour both take wheel/touch input at once.
+  useEffect(() => {
+    if (!isFullscreen) return;
+    function onKeyDown(e) {
+      if (e.key === "Escape") setIsFullscreen(false);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isFullscreen]);
 
   // Invalidates the currently-running chapter loop on unmount — executeFlowFrom is a plain async
   // function, so unmounting this component doesn't stop it on its own; the next sleep()/speakText()
@@ -215,7 +242,21 @@ export default function GuidedTour({ renderStage, chapters, autoStart = false })
   }
 
   return (
-    <div className="gt-wrapper">
+    <div className={`gt-wrapper${isFullscreen ? " gt-fullscreen" : ""}`}>
+      <div className="gt-toolbar">
+        {/* Its own slim row above the stage, not overlaid on it — every product's own topbar
+            (brand name, status pill) already fills that corner, and a floating button on top of it
+            collided with the pill on narrow screens (found live testing this fix). */}
+        <button
+          type="button"
+          className="gt-fullscreen-btn"
+          onClick={toggleFullscreen}
+          title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+          aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+        >
+          {isFullscreen ? "⤡ Exit fullscreen" : "⤢ Fullscreen"}
+        </button>
+      </div>
       <div className="gt-stage" ref={stageRef}>
         <div className="gt-highlight" ref={highlightRef} />
         {renderStage(register)}

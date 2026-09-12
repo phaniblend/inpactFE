@@ -31,6 +31,70 @@
   flex-direction: column;
 }
 
+/* Fullscreen (user report, 2026-09-13: "the product tour is hiding in small screen. give it a full
+   screen option and fit the tour within the fold"). `position: fixed` escapes whatever modal or
+   page flow this is mounted in — including WalkthroughNudge's own capped-height modal — and gives
+   the whole tour the real viewport to work with, wrapper and tray both, instead of a fixed
+   `max-width` card that a phone-sized `.gt-stage` (still floored at its own min-height below) plus
+   the tray/chapter-bar underneath it can easily run taller than. */
+.gt-wrapper.gt-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  max-width: none;
+  background: var(--gt-bg);
+  padding: 14px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.gt-wrapper.gt-fullscreen .gt-stage {
+  flex: 1;
+  min-height: 0;
+}
+
+.gt-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.gt-fullscreen-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--gt-card-bg);
+  border: 1px solid var(--gt-panel-border);
+  border-radius: 6px;
+  color: var(--gt-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+.gt-fullscreen-btn:hover { color: #fff; background: #1e293b; border-color: var(--gt-accent); }
+
+/* Fit within the fold by default too, not only once fullscreen is explicitly chosen — a phone-sized
+   viewport shouldn't need fullscreen just to see the stage without the tray/chapter bar already
+   scrolled out of view underneath it. */
+@media (max-width: 480px) {
+  .gt-stage { min-height: 300px; }
+  .gt-viewport { padding: 12px; gap: 10px; }
+  .gt-kpi-row { grid-template-columns: 1fr; gap: 8px; }
+  .gt-tray { padding: 10px 12px; }
+  /* Every product's topbar packs brand name + subtitle + a status pill into one row that assumes
+     desktop width — at phone width the subtitle wrapped onto multiple lines and visually collided
+     with the pill next to it (found live testing the fullscreen fix below). The brand name and
+     pill are the load-bearing bits (the page's own heading above already states what the product
+     is); the subtitle is dropped here, not wrapped, so the row can stay a fixed single-line height
+     instead of growing unpredictably per product. */
+  .gt-topbar { height: 46px; padding: 0 12px; }
+  .gt-brand-sub { display: none; }
+}
+
 .gt-highlight {
   position: absolute;
   border: 2px solid var(--gt-emerald);
