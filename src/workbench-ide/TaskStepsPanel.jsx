@@ -3,7 +3,7 @@ import { findModuleBySlug } from "../assist-me/AssistMeWorkspace.jsx";
 import { fetchLessonCodeValidation } from "../ai-lessons/clientLessonValidation.js";
 import { fetchFeedbackAnnotate } from "../ai-lessons/clientFeedbackAnnotate.js";
 import StepAssistPopup from "./StepAssistPopup.jsx";
-import { formatFeedbackText, renderAnnotatedCode } from "./formatFeedbackText.jsx";
+import { formatFeedbackText, renderAnnotatedCode, withInlineCode } from "./formatFeedbackText.jsx";
 import "./TaskStepsPanel.css";
 
 function doneStorageKey(moduleTag) {
@@ -521,7 +521,11 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
               <span>Mark done</span>
             </label>
             <div className="tsp-what">
-              <span className="tsp-tag">What</span> {whatFromPaal(activeNode.paal)}
+              {/* Inline `backtick` spans (a file path, a type name) now render as real <code>, not
+                  literal backticks — matching "How" below, and an improved-mock comparison the user
+                  pointed at, 2026-09-13, where the file path and type name stood out from the
+                  sentence around them. */}
+              <span className="tsp-tag">What</span> {withInlineCode(whatFromPaal(activeNode.paal), "what")}
             </div>
             {/* `hint` is usually the literal code answer (or close to it) — showing that as "How"
                 just restates "What" a second time, found live 2026-09-02 testing this.

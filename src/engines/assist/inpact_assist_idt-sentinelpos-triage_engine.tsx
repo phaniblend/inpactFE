@@ -42,7 +42,7 @@ export const NODES = [
     type: "question",
     phase: "Step 1 of 6",
     file: "src/components/IncidentTriage.tsx",
-    paal: `Create the component file at src/components/IncidentTriage.tsx, define type Incident, and export the IncidentTriage component.
+    paal: `Create \`src/components/IncidentTriage.tsx\`, define the \`Incident\` type, and export the \`IncidentTriage\` component.
 
 Create src/components/IncidentTriage.tsx, declare the Incident type matching what the real API actually returns, and export an empty IncidentTriage component.
 
@@ -88,22 +88,11 @@ export function CaseQueue() {
     feedback_correct: "Correct — the blueprint matches the real API, and the component shell exists.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Match the type to what GET /api/v1/incidents actually returns, then add the empty component shell.",
-    pre_check_hint: `Every row in the triage table describes the same kind of thing — an incident — so before writing any table code, standardize what one incident looks like as a type.
+    pre_check_hint: `1. Create the file \`src/components/IncidentTriage.tsx\`.
+2. Declare \`type Incident\` with the fields the real API actually returns: \`id\`, \`incidentCode\`, a nested \`cashier\` object (\`name\`, \`employeeNumber\`), \`severity\`, \`zScore\`, \`flaggedAmount\`, and \`events\`.
+3. Export \`IncidentTriage\` as a function component returning a placeholder \`<div />\` — every step from here on edits this same file.
 
-Picture two real incidents:
-- INC-Z-482910 — cashier Maria Chen (#4821), CRITICAL, Z = 2.8, $340.00 flagged.
-- INC-Z-482844 — cashier Devon Ruiz (#3390), HIGH, Z = 2.1, $95.50 flagged.
-
-Every incident needs a property for each of these real facts:
-- a unique identifier, so any one incident can always be picked out from the rest
-- a human-readable case code, the kind an analyst would actually read off a report
-- which cashier it's about — a name and their employee number, grouped together as their own value, not two loose top-level fields
-- how severe the backend's own scoring judged it
-- the real statistical score that triggered it
-- the real dollar amount at risk
-- the raw evidence records behind it — their own shape isn't this component's problem yet, just that there's a list of them
-
-Name each fact as its own property, in the camelCase style real JavaScript APIs use, and give each the kind it actually is — money and the score are numbers, the cashier is its own nested object, everything else text.`,
+Every row in the triage table describes the same kind of thing — an incident — so this type is what standardizes what one incident looks like: money and the score are numbers, \`cashier\` is its own nested object (not two loose top-level fields), everything else is text.`,
     expected: `export type Incident = {
   id: string;
   incidentCode: string;
