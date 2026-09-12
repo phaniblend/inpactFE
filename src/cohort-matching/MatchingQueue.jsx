@@ -60,6 +60,8 @@ export default function MatchingQueue() {
   const [assignTaskId, setAssignTaskId] = useState("");
   const [assigning, setAssigning] = useState(false);
   const [assignNote, setAssignNote] = useState("");
+  const [unassigning, setUnassigning] = useState(null); // matchId currently being unassigned
+  const [unassignError, setUnassignError] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -258,6 +260,26 @@ export default function MatchingQueue() {
     }
   }
 
+  async function handleUnassign(matchId) {
+    if (!window.confirm("Unassign this task? It goes back to Open and someone else can be placed on it.")) return;
+    setUnassigning(matchId);
+    setUnassignError("");
+    try {
+      const res = await fetch("/api/recruit/unassign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matchId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Unassign failed (${res.status})`);
+      await load();
+    } catch (err) {
+      setUnassignError(err.message);
+    } finally {
+      setUnassigning(null);
+    }
+  }
+
   async function saveAspiration(name) {
     const level = aspirationDraft[name];
     if (!level) return;
@@ -401,6 +423,7 @@ export default function MatchingQueue() {
 
           <section className="cm-section">
             <h2>Placed ({placed.length})</h2>
+            {unassignError && <div className="cm-error">{unassignError}</div>}
             {placed.map((app) => {
               const info = parseApplication(app);
               const theirMatches = matches.filter((m) => extractApplicationId(m.description) === app.id);
@@ -413,8 +436,16 @@ export default function MatchingQueue() {
                     {theirMatches.map((m) => {
                       const taskLine = /^Task:\s*(.+)$/m.exec(m.description || "")?.[1]?.trim();
                       return (
-                        <div className="cm-app-note" key={m.id}>
-                          → {taskLine || m.title.replace(/^Matched:\s*/, "")}
+                        <div className="cm-app-note cm-app-note-match" key={m.id}>
+                          <span>→ {taskLine || m.title.replace(/^Matched:\s*/, "")}</span>
+                          <button
+                            type="button"
+                            className="cm-unassign-btn"
+                            disabled={unassigning === m.id}
+                            onClick={() => handleUnassign(m.id)}
+                          >
+                            {unassigning === m.id ? "Unassigning…" : "Unassign"}
+                          </button>
                         </div>
                       );
                     })}
