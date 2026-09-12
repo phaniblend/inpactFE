@@ -61,7 +61,7 @@ export const NODES = [
     type: "question",
     phase: "Step 1 of 26",
     file: "src/components/InventoryTable.tsx",
-    paal: `Create the component file at src/components/InventoryTable.tsx, define type Item, and export the InventoryTable component.
+    paal: `Create \`src/components/InventoryTable.tsx\`, define the \`Item\` type, and export the \`InventoryTable\` component.
 
 Create src/components/InventoryTable.tsx, declare the Item type matching what the real API actually returns, and export an empty InventoryTable component.
 
@@ -107,22 +107,11 @@ export function StockCatalog() {
     feedback_correct: "Correct — the blueprint matches the real API, and the component shell exists.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Match the type to what GET /api/items actually returns, then add the empty component shell.",
-    pre_check_hint: `Every row in the inventory table describes the same kind of thing — an item — so before writing any table code, standardize what one item looks like as a type.
+    pre_check_hint: `1. Create the file \`src/components/InventoryTable.tsx\`.
+2. Declare \`type Item\` with the fields the real API actually returns: \`id\`, \`sku\`, \`name\`, \`costPrice\`, \`sellingPrice\`, \`stockOnHand\`, and \`reorderPoint\`.
+3. Export \`InventoryTable\` as a function component returning a placeholder \`<div />\` — every step from here on edits this same file.
 
-Picture two real rows the warehouse tracks:
-- Levi's 501 Blue Jeans – 32x32 — code JEAN-501-BLU-3232, costs $18.00, sells for $25.00, 25 on the shelf, reorder once it drops to 10.
-- Levi's 501 Blue Jeans – 34x32 — code JEAN-501-BLU-3432, costs $18.00, sells for $25.00, 18 on the shelf, reorder once it drops to 10.
-
-Every item needs a property for each of these real facts:
-- a unique identifier, so any one item can always be picked out from the rest
-- a stock-keeping code like the one above, that uniquely tags this exact product and size
-- a human-readable name a person would actually recognize
-- what it costs you to acquire one unit
-- what you sell one unit for
-- how many units are sitting on the shelf right now
-- the threshold at which it needs reordering
-
-Name each fact as its own property, in the camelCase style real JavaScript APIs use, and give each the kind it actually is — money and counts are numbers, everything else is text.`,
+Every row in the inventory table describes the same kind of thing — an item — so this type is what standardizes what one item looks like: money and counts are numbers, everything else is text.`,
     expected: `export type Item = {
   id: string;
   sku: string;
