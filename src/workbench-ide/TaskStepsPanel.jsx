@@ -427,7 +427,12 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
           setCheckContext({ node: chosen.node, code, language, feedback: chosen.result.feedback });
           setAnnotatedCode(null);
           setAnnotateError("");
-          showCheckMessage(`Step ${stepNum}: ${chosen.result.feedback}`);
+          // A real blank line between the step label and the feedback body — not a shared first
+          // line — so formatFeedbackText's numbered/bulleted-list detection sees the feedback's own
+          // first line (e.g. "1. ...") on its own, not "Step 1: 1. ..." glued together (found while
+          // fixing the "lump of text" report below: gluing them defeated list detection even after
+          // the AI started returning a real numbered list).
+          showCheckMessage(`Step ${stepNum}:\n\n${chosen.result.feedback}`);
         } else {
           setCheckContext(null);
           showCheckMessage("No new steps look complete yet — keep going.");
