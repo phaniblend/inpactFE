@@ -63,15 +63,15 @@
   font-size: 13px;
   font-weight: 700;
   color: #0f172a;
-}
-
-.sap-drag {
+  /* The whole header is the drag handle now (user report, 2026-09-13: "the whole header shud be
+     draggable" — previously only the "Assist me" label text itself started a drag), except the
+     Close button, which opts back out via its own higher-specificity cursor below. */
   cursor: grab;
   user-select: none;
   touch-action: none;
 }
 
-.sap-drag:active {
+.sap-header:active {
   cursor: grabbing;
 }
 

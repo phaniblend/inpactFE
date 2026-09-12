@@ -176,6 +176,11 @@ export default function StepAssistPopup({ moduleTag, node, onClose }) {
   }
 
   function handlePointerDown(e) {
+    // The whole header is the drag handle now (user report, 2026-09-13: "the whole header shud be
+    // draggable" — previously only the "Assist me" label text itself started a drag), except the
+    // Close button — dragging must never hijack a click on it, so skip starting a drag when the
+    // press actually began on Close.
+    if (e.target.closest(".sap-close")) return;
     e.preventDefault();
     const origin = panelPos || { x: 0, y: 0 };
     dragRef.current = { startX: e.clientX, startY: e.clientY, originX: origin.x, originY: origin.y };
@@ -270,12 +275,11 @@ export default function StepAssistPopup({ moduleTag, node, onClose }) {
             : undefined
         }
       >
-        <div className="sap-header">
-          {/* Drag handle — deliberately separate from the Close button so a press on Close never
-              gets mistaken for a drag start. */}
-          <span className="sap-drag" onPointerDown={handlePointerDown} title="Drag to move">
-            ⠿ 💡 Assist me
-          </span>
+        <div className="sap-header" onPointerDown={handlePointerDown} title="Drag to move">
+          {/* The Close button still excludes itself from the drag via handlePointerDown's own
+              e.target.closest(".sap-close") guard, rather than being the one narrow non-draggable
+              spot on an otherwise-draggable header. */}
+          <span className="sap-drag">⠿ 💡 Assist me</span>
           <button type="button" className="sap-close" onClick={onClose}>
             Close
           </button>
