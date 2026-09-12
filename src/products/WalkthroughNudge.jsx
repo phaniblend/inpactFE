@@ -19,7 +19,11 @@ import "./WalkthroughNudge.css";
  */
 const NUDGES = {
   minierp: "Curious how the books balance themselves before you write a line of code?",
-  sentinelpos: "Want to see how a $185 refund gets caught as fraud, in real time?",
+  // Deliberately the plain, literal ask rather than one narrow scenario (user correction,
+  // 2026-09-12: the task page's nudge should be straight about "understand SentinelPOS and its
+  // features" — the fraud-catch moment is one chapter of seven, and leading with just that undersold
+  // the rest of the tour).
+  sentinelpos: "New to SentinelPOS? See exactly what it does — every feature, walked through — before you touch the code.",
   routematrix: "Curious how a route knows the exact moment it's actually done?",
   batchcraft: "Want to see what your recipe is really costing you, once the waste is counted?",
 };

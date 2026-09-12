@@ -58,8 +58,34 @@
   cursor: wait;
 }
 
-.ti-reopen-chat-btn {
+.ti-hello-sent {
+  margin: 14px 0 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.ti-hello-sent strong {
+  color: #0f172a;
+  font-family: "Comfortaa", system-ui, sans-serif;
+}
+
+.ti-open-chat-link {
   margin-left: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0891b2;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.ti-open-chat-link:hover {
+  color: #0e7490;
 }
 
 /* The chat window itself moved to a global widget (team-messaging/TeamChatWidget.css), mounted
