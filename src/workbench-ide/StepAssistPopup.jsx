@@ -136,8 +136,11 @@ export default function StepAssistPopup({ moduleTag, node, onClose }) {
   // Draggable (2026-09-07, "make all the models draggable/closeable"): starts centered via the
   // overlay's own flex-centering (panelPos null on first render, no inline style yet), then this
   // effect fixes it at that same visual spot as soon as it mounts — no jump — so it can be dragged
-  // anywhere from there. Keeps the dimmed backdrop + click-outside-to-close (unlike the lighter
-  // step/check-result cards) since this is a heavier, read-then-ask panel worth focusing on.
+  // anywhere from there. Keeps the dimmed backdrop, but — unlike an earlier version of this panel —
+  // no longer closes on a backdrop click: a stray click while reading the step behind it, or while
+  // the panel's been dragged aside, was silently discarding a typed-but-unsent question and the
+  // whole mentor thread (user report, 2026-09-13: "assist me is closing the modal when clicked
+  // outside"). Close is now only ever the explicit Close button.
   const [panelPos, setPanelPos] = useState(null);
   const dragRef = useRef(null);
   // Resize handle (2026-09-07, user request — "resize handles on all models especially
@@ -246,7 +249,7 @@ export default function StepAssistPopup({ moduleTag, node, onClose }) {
   const typeSpec = extractTypeSpec(node.paal, node.expected);
 
   return (
-    <div className="sap-overlay" role="presentation" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="sap-overlay" role="presentation">
       <div
         ref={panelElRef}
         className="sap-panel"
