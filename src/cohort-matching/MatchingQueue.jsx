@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { notifyTeam } from "../team-messaging/notify.js";
 import { SKILL_LEVELS, skillLabel } from "./skillLevels.js";
+import TaskPicker from "./TaskPicker.jsx";
 import {
   RESERVED_PROJECT_IDS,
   COHORT_PROJECT_ID,
@@ -336,16 +337,7 @@ export default function MatchingQueue() {
             </label>
             <label>
               Open task <span className="cm-hint">(unassigned only)</span>
-              <select required value={assignTaskId} onChange={(e) => setAssignTaskId(e.target.value)}>
-                <option value="">
-                  {unassignedTasks.length === 0 ? "No unassigned open tasks…" : "Choose an open task…"}
-                </option>
-                {unassignedTasks.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    #{t.number} {t.title} — {projectName(t.projectId)}
-                  </option>
-                ))}
-              </select>
+              <TaskPicker tasks={unassignedTasks} projectName={projectName} value={assignTaskId} onChange={setAssignTaskId} />
             </label>
             <button type="submit" disabled={assigning || !assignEmail.trim() || !assignTaskId}>
               {assigning ? "Assigning…" : "Assign task"}
