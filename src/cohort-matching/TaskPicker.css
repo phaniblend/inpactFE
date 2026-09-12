@@ -2,7 +2,13 @@
   position: relative;
 }
 
-.tp-trigger {
+/* Every rule below that styles a <button> is scoped as `.tp-root .foo` rather than bare `.foo` —
+   MatchingQueue's own `.cm-assign-form button { background: #0891b2; color: #fff; ... }` (meant
+   only for the real "Assign task" submit button) is a class+element selector, which out-specifies
+   a bare single-class selector and painted every button in this picker — trigger, product chips,
+   task rows — solid teal regardless of state (user report, 2026-09-13, screenshot: "this is not
+   usable at all"). Two classes here (0,2,0) beats that rule's (0,1,1) instead of losing to it. */
+.tp-root .tp-trigger {
   width: 100%;
   display: flex;
   align-items: center;
@@ -12,12 +18,14 @@
   border: 1px solid #cbd5e1;
   border-radius: 6px;
   background: #fff;
+  color: #0f172a;
   font-size: 14px;
+  font-weight: 400;
   font-family: inherit;
   text-align: left;
   cursor: pointer;
 }
-.tp-trigger:hover {
+.tp-root .tp-trigger:hover {
   border-color: #94a3b8;
 }
 
@@ -69,7 +77,7 @@
   gap: 6px;
 }
 
-.tp-product-chip {
+.tp-root .tp-product-chip {
   padding: 4px 10px;
   font-size: 11.5px;
   font-weight: 600;
@@ -80,16 +88,16 @@
   cursor: pointer;
   font-family: inherit;
 }
-.tp-product-chip:hover {
+.tp-root .tp-product-chip:hover {
   border-color: #0891b2;
 }
-.tp-product-chip.active {
+.tp-root .tp-product-chip.active {
   background: #0891b2;
   border-color: #0891b2;
   color: #fff;
 }
 
-.tp-product-clear {
+.tp-root .tp-product-clear {
   padding: 4px 10px;
   font-size: 11.5px;
   font-weight: 600;
@@ -100,7 +108,7 @@
   cursor: pointer;
   font-family: inherit;
 }
-.tp-product-clear:hover {
+.tp-root .tp-product-clear:hover {
   color: #475569;
   border-color: #94a3b8;
 }
@@ -132,7 +140,7 @@
   color: #0891b2;
 }
 
-.tp-option {
+.tp-root .tp-option {
   display: block;
   width: 100%;
   text-align: left;
@@ -141,14 +149,15 @@
   background: none;
   border-radius: 6px;
   font-size: 13px;
+  font-weight: 400;
   color: #0f172a;
   cursor: pointer;
   font-family: inherit;
 }
-.tp-option:hover {
+.tp-root .tp-option:hover {
   background: #f0fdfa;
 }
-.tp-option.active {
+.tp-root .tp-option.active {
   background: #ecfeff;
   font-weight: 700;
 }
