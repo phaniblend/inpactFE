@@ -161,18 +161,22 @@
   margin-bottom: 0;
 }
 
-/* Deliberately light-touch — no border, minimal padding — so a sentence naming several fields
-   (`severity`, `zScore`, `flaggedAmount`, `events`) reads as emphasized words, not a row of buttons.
-   The heavier bordered-pill look (see .sap-fields code in StepAssistPopup.css) works for a handful
-   of isolated reference values; it reads as clutter once half a sentence is made of them (user
-   report, 2026-09-13: "ITS EVEN MORE CRAMPED", a check-result feedback line with ~10 inline terms). */
+/* A visible border + real vertical padding — tried removing both (2026-09-13) to fight a "wall of
+   buttons" feeling in one over-stuffed check-result line, but that made every other, more normal
+   use (a short field list in "How", one or two terms in a sentence) nearly invisible against the
+   body font instead — a lowercase word like `id` or `name` with a near-white background and zero
+   border reads as plain text (user report, 2026-09-13: "THE INCIDENT FIELDS ARENT DISTINGUISHABLE").
+   The actual cause of the cramped feeling was structural (every numbered item glued onto one
+   physical line — fixed separately, see checkMessageLabel and the isNumberedParagraph line-count
+   check), not this styling; restoring real contrast here doesn't reintroduce that. */
 .tsp-feedback-p code,
 .tsp-feedback-list code {
   font-family: ui-monospace, monospace;
   font-size: 0.92em;
   background: #f1f5f9;
-  border-radius: 3px;
-  padding: 0 3px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 1px 5px;
   color: #0f172a;
 }
 
