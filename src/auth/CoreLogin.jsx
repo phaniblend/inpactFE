@@ -46,7 +46,7 @@ export default function CoreLogin({ onSignedIn }) {
       </div>
       <h1 style={{ fontSize: 22, margin: "0 0 8px" }}>Sign in</h1>
       <p style={{ margin: "0 0 20px", fontSize: 13, color: "#64748b", lineHeight: 1.45 }}>
-        Product Design, ID, CD, and other ops screens use this login — not the job-seeker Apply landing.
+        Product Design, ID, CD, and other ops screens use this login — not the Aspirant Apply landing.
       </p>
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13 }}>
@@ -71,8 +71,19 @@ export default function CoreLogin({ onSignedIn }) {
         href={googleStartHref}
         style={{ ...buttonStyle, display: "block", textAlign: "center", textDecoration: "none", background: "#fff", color: "#334155", border: "1px solid #cbd5e1" }}
       >
-        Sign in with Google (job seekers)
+        Sign in with Google (Aspirants)
       </a>
+      {/* Dev-only: import.meta.env.DEV is hard-false in any production build regardless of server
+          config, and server/auth-router.js's /dev-js-login is itself gated behind ALLOW_DEV_JS_LOGIN
+          — two independent locks. Skips needing a real Gmail account to test the JS side locally. */}
+      {import.meta.env.DEV && (
+        <a
+          href={`/api/auth/dev-js-login?returnTo=${encodeURIComponent(googleReturnTo.startsWith("/") ? `#${googleReturnTo}` : googleReturnTo)}`}
+          style={{ ...buttonStyle, display: "block", textAlign: "center", textDecoration: "none", background: "#fff", color: "#94a3b8", border: "1px dashed #cbd5e1", marginTop: 8, fontSize: 12 }}
+        >
+          🧪 Dev: sign in as test applicant (local only)
+        </a>
+      )}
       <p style={{ marginTop: 20, fontSize: 12, color: "#94a3b8" }}>
         Applying for the first time? <a href="#/apply">Go to Apply</a> instead — no account needed there.
       </p>
