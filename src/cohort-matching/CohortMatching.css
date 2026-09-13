@@ -705,3 +705,75 @@
   border-radius: 10px;
   padding: 3px 10px;
 }
+
+.cm-danger-zone {
+  padding: 16px 18px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+}
+
+.cm-danger-zone h2 {
+  color: #991b1b;
+}
+
+.cm-danger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #fee2e2;
+}
+.cm-danger-row:first-of-type {
+  border-top: none;
+}
+
+.cm-danger-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #7f1d1d;
+}
+
+.cm-danger-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cm-danger-confirm input {
+  padding: 6px 9px;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.cm-danger-confirm-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: #991b1b;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.cm-danger-confirm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cm-danger-cancel-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  background: none;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}

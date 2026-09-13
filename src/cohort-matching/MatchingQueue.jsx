@@ -62,6 +62,53 @@ export default function MatchingQueue() {
   const [assignNote, setAssignNote] = useState("");
   const [unassigning, setUnassigning] = useState(null); // matchId currently being unassigned
   const [unassignError, setUnassignError] = useState("");
+  // Non-live product cleanup (user request, 2026-09-13: "we shud not have other products in our
+  // database... our focus is just these four"). Loaded separately from `load()` — a different
+  // concern (product lifecycle, not matching), and irrelevant on every one of load()'s frequent
+  // re-fetches after an assign/unassign.
+  const [nonLiveProjects, setNonLiveProjects] = useState(null); // null = loading
+  const [expandedDeleteId, setExpandedDeleteId] = useState(null); // which project's confirm row is open
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
+
+  const loadNonLiveProjects = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/non-live-projects");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Couldn't load (${res.status})`);
+      setNonLiveProjects(data.projects || []);
+    } catch (err) {
+      setDeleteError(err.message);
+      setNonLiveProjects([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadNonLiveProjects();
+  }, [loadNonLiveProjects]);
+
+  async function handleDeleteProject(project) {
+    if (deleteConfirmText.trim() !== project.name) return;
+    setDeletingId(project.id);
+    setDeleteError("");
+    try {
+      const res = await fetch("/api/admin/delete-project", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId: project.id, confirmName: deleteConfirmText.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Delete failed (${res.status})`);
+      setExpandedDeleteId(null);
+      setDeleteConfirmText("");
+      await loadNonLiveProjects();
+    } catch (err) {
+      setDeleteError(err.message);
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -477,6 +524,64 @@ export default function MatchingQueue() {
               );
             })}
           </section>
+
+          {nonLiveProjects === null ? null : nonLiveProjects.length > 0 ? (
+            <section className="cm-section cm-danger-zone">
+              <h2>Non-live products ({nonLiveProjects.length})</h2>
+              <p className="cm-sub" style={{ marginBottom: 12 }}>
+                Real OneDev projects that were never promoted to one of the 4 live products. Deleting one is
+                permanent — it removes the project and every issue/task in it, with no undo. Type the project's
+                exact name to confirm before it does anything.
+              </p>
+              {deleteError && <div className="cm-error">{deleteError}</div>}
+              {nonLiveProjects.map((p) => (
+                <div className="cm-danger-row" key={p.id}>
+                  <span className="cm-danger-name">{p.name}</span>
+                  {expandedDeleteId === p.id ? (
+                    <div className="cm-danger-confirm">
+                      <input
+                        type="text"
+                        placeholder={`Type "${p.name}" to confirm`}
+                        value={deleteConfirmText}
+                        onChange={(e) => setDeleteConfirmText(e.target.value)}
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        className="cm-danger-confirm-btn"
+                        disabled={deleteConfirmText.trim() !== p.name || deletingId === p.id}
+                        onClick={() => handleDeleteProject(p)}
+                      >
+                        {deletingId === p.id ? "Deleting…" : "Permanently delete"}
+                      </button>
+                      <button
+                        type="button"
+                        className="cm-danger-cancel-btn"
+                        onClick={() => {
+                          setExpandedDeleteId(null);
+                          setDeleteConfirmText("");
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="cm-unassign-btn"
+                      onClick={() => {
+                        setExpandedDeleteId(p.id);
+                        setDeleteConfirmText("");
+                        setDeleteError("");
+                      }}
+                    >
+                      Delete…
+                    </button>
+                  )}
+                </div>
+              ))}
+            </section>
+          ) : null}
         </>
       )}
     </div>
