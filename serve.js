@@ -31,14 +31,73 @@ const ONEDEV_BASE = (
 ).replace(/\/+$/, "");
 const OPS_TOKEN = process.env.RECRUIT_BOOTSTRAP_TOKEN || "IPAAL-FE-BOOTSTRAP-20261031";
 const COHORT_PROJECT_ID = 2;
-const LIVE_PRODUCT_IDS = new Set([13, 14, 15, 16]);
+const TEAM_OPS_PROJECT_ID = 3;
+const MODULE_LIBRARY_PROJECT_ID = 4;
+// Only cohort / team-ops / module-library — product id 5 may be a desk on older boards.
+const RESERVED_PROJECT_IDS = new Set([
+  COHORT_PROJECT_ID,
+  TEAM_OPS_PROJECT_ID,
+  MODULE_LIBRARY_PROJECT_ID,
+]);
+
+/** Set when /ops/assign-live-fe runs so My tasks can list desk+live matches (API still filters LIVE-only). */
+let runtimeOnedevCreds = null;
 
 const app = express();
 
+function field(desc, key) {
+  return new RegExp(`^${key}:\\s*(.+)$`, "m").exec(desc || "")?.[1]?.trim() || "";
+}
+
+function isFrontendCodingTask(issue) {
+  if (issue.state && issue.state !== "Open") return false;
+  if (/^NeedsTutorial:\s*true/m.test(issue.description || "")) return false;
+  if (/^Match(ed)?:/i.test(issue.title || "")) return false;
+  if (/^(Application|Matched|Unassigned|Module|Cohort|Proposal):/i.test(issue.title || "")) return false;
+  const trade = field(issue.description, "Trade").toLowerCase();
+  if (trade !== "coding") return false;
+  const focus = field(issue.description, "CodingFocus").toLowerCase();
+  return !focus || focus === "frontend" || focus === "both" || focus.includes("front");
+}
+
+async function onedevFetch(creds, apiPath, opts = {}) {
+  const auth = "Basic " + Buffer.from(`${creds.user}:${creds.pass}`).toString("base64");
+  const r = await fetch(`${ONEDEV_BASE}/~api${apiPath}`, {
+    ...opts,
+    headers: {
+      Authorization: auth,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      ...(opts.headers || {}),
+    },
+  });
+  const text = await r.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = text;
+  }
+  if (!r.ok) {
+    throw new Error(`OneDev ${r.status}: ${typeof data === "string" ? data : JSON.stringify(data)}`);
+  }
+  return data;
+}
+
+async function listAllIssues(creds) {
+  const all = [];
+  for (let offset = 0; offset < 5000; offset += 200) {
+    const batch = await onedevFetch(creds, `/issues?query=&offset=${offset}&count=200`);
+    if (!Array.isArray(batch) || batch.length === 0) break;
+    all.push(...batch);
+    if (batch.length < 200) break;
+  }
+  return all;
+}
+
 /**
- * One-shot: assign every open LIVE-product FE Coding task to an aspirant email.
- * Hits the sibling OneDev on private networking (public OneDev domain is not provisioned).
- * POST /ops/assign-live-fe  header X-Bootstrap-Token + JSON { email, name?, user?, pass? }
+ * Assign every open FE Coding task (desk products + live products) to an aspirant.
+ * POST /ops/assign-live-fe  header X-Bootstrap-Token + JSON { email, name?, user?, pass?, allFe?: true }
  */
 app.post("/ops/assign-live-fe", express.json({ limit: "1mb" }), async (req, res) => {
   const token = String(req.get("X-Bootstrap-Token") || req.body?.token || "");
@@ -49,59 +108,22 @@ app.post("/ops/assign-live-fe", express.json({ limit: "1mb" }), async (req, res)
   const name = String(req.body?.name || 'Venkat "Phani" Bhushan').trim();
   const user = String(req.body?.user || process.env.ONEDEV_API_USER || "").trim();
   const pass = String(req.body?.pass || process.env.ONEDEV_API_PASS || "");
+  const allFe = req.body?.allFe !== false; // default: every FE board, not just LIVE ids
+  const takeOver = req.body?.takeOver !== false; // unassign others' Matched: so this email can own them
   if (!user || !pass) {
     return res.status(400).json({ error: "ONEDEV_API_USER/PASS missing (body or env)." });
   }
-  const auth = "Basic " + Buffer.from(`${user}:${pass}`).toString("base64");
+  const creds = { user, pass };
+  runtimeOnedevCreds = creds;
   const log = [];
-
-  async function od(path, opts = {}) {
-    const r = await fetch(`${ONEDEV_BASE}/~api${path}`, {
-      ...opts,
-      headers: {
-        Authorization: auth,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        ...(opts.headers || {}),
-      },
-    });
-    const text = await r.text();
-    let data = null;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = text;
-    }
-    if (!r.ok) {
-      const err = new Error(`OneDev ${r.status}: ${typeof data === "string" ? data : JSON.stringify(data)}`);
-      err.status = r.status;
-      throw err;
-    }
-    return data;
-  }
-
-  async function listAllIssues() {
-    const all = [];
-    for (let offset = 0; offset < 5000; offset += 200) {
-      const batch = await od(`/issues?query=&offset=${offset}&count=200`);
-      if (!Array.isArray(batch) || batch.length === 0) break;
-      all.push(...batch);
-      if (batch.length < 200) break;
-    }
-    return all;
-  }
-
-  function field(desc, key) {
-    return new RegExp(`^${key}:\\s*(.+)$`, "m").exec(desc || "")?.[1]?.trim() || "";
-  }
 
   try {
     const [projects, issues] = await Promise.all([
-      od("/projects?offset=0&count=100"),
-      listAllIssues(),
+      onedevFetch(creds, "/projects?offset=0&count=100"),
+      listAllIssues(creds),
     ]);
     const pname = (id) => projects.find((p) => p.id === id)?.name || `project-${id}`;
-    log.push(`onedev=${ONEDEV_BASE} projects=${projects.length} issues=${issues.length}`);
+    log.push(`onedev=${ONEDEV_BASE} projects=${projects.length} issues=${issues.length} allFe=${allFe}`);
 
     const apps = issues.filter(
       (i) =>
@@ -113,7 +135,7 @@ app.post("/ops/assign-live-fe", express.json({ limit: "1mb" }), async (req, res)
     );
     let application = apps.sort((a, b) => b.id - a.id)[0] || null;
     if (!application) {
-      const id = await od("/issues", {
+      const id = await onedevFetch(creds, "/issues", {
         method: "POST",
         body: JSON.stringify({
           projectId: COHORT_PROJECT_ID,
@@ -126,7 +148,7 @@ app.post("/ops/assign-live-fe", express.json({ limit: "1mb" }), async (req, res)
             `CodingFocus: frontend`,
             `OwnershipAck: true`,
             `OwnershipAckAt: ${new Date().toISOString()}`,
-            `Note: bulk LIVE FE assign via inpactFE /ops/assign-live-fe`,
+            `Note: bulk FE assign via inpactFE /ops/assign-live-fe`,
           ].join("\n"),
         }),
       });
@@ -136,40 +158,54 @@ app.post("/ops/assign-live-fe", express.json({ limit: "1mb" }), async (req, res)
       log.push(`reusing Application #${application.id}`);
     }
 
-    const matches = issues.filter(
+    let matches = issues.filter(
       (i) => i.projectId === COHORT_PROJECT_ID && String(i.title || "").startsWith("Matched:")
-    );
-    const claimed = new Set(
-      matches
-        .map((m) => Number(/TaskId:\s*(\d+)/.exec(m.description || "")?.[1]))
-        .filter((n) => Number.isFinite(n) && n > 0)
-    );
-    const alreadyOurs = new Set(
-      matches
-        .filter((m) => Number(/ApplicationId:\s*(\d+)/.exec(m.description || "")?.[1]) === application.id)
-        .map((m) => Number(/TaskId:\s*(\d+)/.exec(m.description || "")?.[1]))
-        .filter((n) => Number.isFinite(n) && n > 0)
     );
 
     const feTasks = issues.filter((i) => {
-      if (!LIVE_PRODUCT_IDS.has(i.projectId)) return false;
-      if (i.state && i.state !== "Open") return false;
-      if (/^NeedsTutorial:\s*true/m.test(i.description || "")) return false;
-      if (/^Match(ed)?:/i.test(i.title || "")) return false;
-      const trade = field(i.description, "Trade").toLowerCase();
-      if (trade !== "coding") return false;
-      const focus = field(i.description, "CodingFocus").toLowerCase();
-      return !focus || focus === "frontend" || focus === "both" || focus.includes("front");
+      if (RESERVED_PROJECT_IDS.has(i.projectId)) return false;
+      if (!allFe && ![13, 14, 15, 16].includes(i.projectId)) return false;
+      return isFrontendCodingTask(i);
     });
+
+    const byProduct = {};
+    for (const t of feTasks) {
+      const n = pname(t.projectId);
+      byProduct[n] = (byProduct[n] || 0) + 1;
+    }
+    log.push(`FE Coding open: ${feTasks.length} → ${JSON.stringify(byProduct)}`);
 
     let assigned = 0;
     let skipped = 0;
+    let tookOver = 0;
+    const alreadyOurs = new Set();
+
     for (const task of feTasks) {
-      if (alreadyOurs.has(task.id) || claimed.has(task.id)) {
-        skipped++;
-        continue;
+      const existing = matches.find((m) => Number(/TaskId:\s*(\d+)/.exec(m.description || "")?.[1]) === task.id);
+      if (existing) {
+        const appId = Number(/ApplicationId:\s*(\d+)/.exec(existing.description || "")?.[1]);
+        if (appId === application.id) {
+          alreadyOurs.add(task.id);
+          skipped++;
+          continue;
+        }
+        if (!takeOver) {
+          skipped++;
+          log.push(`skip claimed #${task.number || task.id} [${pname(task.projectId)}]`);
+          continue;
+        }
+        const newTitle = String(existing.title || "").replace(/^Matched:/, "Unassigned:");
+        // OneDev wants raw text body (not JSON.stringify) on title/description routes.
+        await onedevFetch(creds, `/issues/${existing.id}/title`, {
+          method: "POST",
+          body: newTitle,
+        });
+        tookOver++;
+        log.push(`took over match #${existing.id} for task #${task.number || task.id}`);
+        matches = matches.filter((m) => m.id !== existing.id);
       }
-      await od("/issues", {
+
+      await onedevFetch(creds, "/issues", {
         method: "POST",
         body: JSON.stringify({
           projectId: COHORT_PROJECT_ID,
@@ -184,7 +220,6 @@ app.post("/ops/assign-live-fe", express.json({ limit: "1mb" }), async (req, res)
           ].join("\n"),
         }),
       });
-      claimed.add(task.id);
       alreadyOurs.add(task.id);
       assigned++;
       log.push(`✓ #${task.number || task.id} [${pname(task.projectId)}] ${task.title}`);
@@ -197,7 +232,9 @@ app.post("/ops/assign-live-fe", express.json({ limit: "1mb" }), async (req, res)
       feTaskCount: feTasks.length,
       assigned,
       skipped,
+      tookOver,
       matchesNow: alreadyOurs.size,
+      byProduct,
       log,
     });
   } catch (err) {
@@ -221,6 +258,92 @@ app.post("/ops/assign-live-fe", express.json({ limit: "1mb" }), async (req, res)
 // this doesn't change behavior for any existing JSON route — it only stops corrupting the ones
 // that were never JSON to begin with.
 app.use(express.raw({ type: () => true, limit: "80mb" }));
+
+/**
+ * My tasks: API only returns LIVE_PRODUCT_IDS. After bulk desk+live assign, rebuild the list
+ * from OneDev so every FE match for this session email shows up.
+ */
+app.get("/api/recruit/my-tasks", async (req, res) => {
+  const creds =
+    runtimeOnedevCreds ||
+    (process.env.ONEDEV_API_USER && process.env.ONEDEV_API_PASS
+      ? { user: process.env.ONEDEV_API_USER, pass: process.env.ONEDEV_API_PASS }
+      : null);
+
+  try {
+    const meRes = await fetch(`${API_TARGET}/api/auth/me`, {
+      headers: {
+        Accept: "application/json",
+        ...(req.headers.cookie ? { Cookie: req.headers.cookie } : {}),
+      },
+    });
+    if (!meRes.ok) {
+      return res.status(401).json({ error: "Not signed in" });
+    }
+    const me = await meRes.json();
+    const email = String(me.email || "").trim().toLowerCase();
+    if (!email) return res.status(401).json({ error: "Not signed in" });
+
+    if (!creds) {
+      // Fall through to API proxy behavior by forwarding.
+      const upstream = await fetch(`${API_TARGET}/api/recruit/my-tasks`, {
+        headers: {
+          Accept: "application/json",
+          ...(req.headers.cookie ? { Cookie: req.headers.cookie } : {}),
+        },
+      });
+      const buf = Buffer.from(await upstream.arrayBuffer());
+      res.status(upstream.status);
+      res.setHeader("Content-Type", upstream.headers.get("content-type") || "application/json");
+      return res.send(buf);
+    }
+
+    const [projects, issues] = await Promise.all([
+      onedevFetch(creds, "/projects?offset=0&count=100"),
+      listAllIssues(creds),
+    ]);
+    const pname = (id) => projects.find((p) => p.id === id)?.name || `project-${id}`;
+    const myAppIds = new Set(
+      issues
+        .filter(
+          (i) =>
+            i.projectId === COHORT_PROJECT_ID &&
+            String(i.title || "").startsWith("Application:") &&
+            String(i.description || "")
+              .split("\n")
+              .some((line) => line.trim().toLowerCase() === `email: ${email}`)
+        )
+        .map((i) => i.id)
+    );
+    const tasks = issues
+      .filter(
+        (i) =>
+          i.projectId === COHORT_PROJECT_ID &&
+          String(i.title || "").startsWith("Matched:") &&
+          myAppIds.has(Number(/ApplicationId:\s*(\d+)/.exec(i.description || "")?.[1]))
+      )
+      .map((m) => {
+        const taskId = Number(/TaskId:\s*(\d+)/.exec(m.description || "")?.[1]);
+        const task = issues.find((i) => i.id === taskId);
+        if (!task) return null;
+        return {
+          id: task.id,
+          number: task.number,
+          title: task.title,
+          description: task.description,
+          state: task.state,
+          projectId: task.projectId,
+          project: pname(task.projectId),
+        };
+      })
+      .filter(Boolean);
+
+    return res.json({ tasks });
+  } catch (err) {
+    console.error("[my-tasks override]", err.message);
+    return res.status(500).json({ error: "Couldn't load your tasks — please try again." });
+  }
+});
 
 // Manual proxy, not http-proxy-middleware: two path-mounting attempts (`app.use("/api", ...)`
 // with plain middleware and with pathFilter) both silently dropped or mismatched the /api prefix
