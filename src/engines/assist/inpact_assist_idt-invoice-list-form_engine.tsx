@@ -16,14 +16,14 @@ export const NODES = [
   Submit   →  the new row appears on the list
 `,
       usecase: "Cash-flow tools always start as a list of what is owed plus a form to add the next invoice.",
-      designMock: {"kind":"list-and-form","screenTitle":"Invoices","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No invoices yet.","rows":[{"title":"River Co","subtitle":"250","meta":"2026-09-01"},{"title":"Second row","subtitle":"Another","meta":"2026-09-01"}],"fields":[{"label":"Client","sample":"River Co"},{"label":"Amount","sample":"250"},{"label":"Due date","sample":"2026-09-01"}],"submitLabel":"Create"},
+      designMock: {"kind":"list-and-form","screenTitle":"Invoices","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No invoices yet.","rows":[{"title":"River Co","subtitle":"250","meta":"2026-09-01"},{"title":"River Co B","subtitle":"250 (alt)","meta":"2026-09-01"}],"fields":[{"label":"Client","sample":"River Co"},{"label":"Amount","sample":"250"},{"label":"Due date","sample":"2026-09-01"}],"submitLabel":"Create"},
     },
   },
   {
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Outline an invoice blueprint (invoice number, client, total) and build the page shell.","Store invoices in memory; render an itemized row for each bill, or a \"No invoices issued\" screen if empty.","Connect text inputs to memory so recipient and billing numbers are saved with every keystroke.","Prevent default submission refresh, push the fresh invoice into the list, and wipe the inputs clean."],
+    items: ["Outline an invoice blueprint (invoice number, client, total) and build the page shell.","Store invoices in memory; render an itemized row for each bill, or a \"No invoices issued\" screen if empty.","Connect text inputs to memory so client and billing numbers are saved with every keystroke.","Prevent default submission refresh, push the fresh invoice into the list, and wipe the inputs clean."],
   },
   {
     id: "step1",
@@ -36,21 +36,22 @@ This file doesn't exist yet — you're the first to touch it. Create it at \`src
 Outline an invoice blueprint (invoice number, client, total) and build the page shell.
 
 WHAT YOU'LL NEED
-- id (text)
-- client (text)
-- amount (text)
+- id (text — unique key, not always shown on screen)
+- client (per contract)
+- amount (per contract)
+- dueDate (per contract)
 
 Your task: Create the blueprint for an invoice and construct the outer component.`,
     hint: `1. Blueprint declaration: Rename Bill to Invoice and InvoiceTracker to your component name.
 2. Define fields: Add id, client, and amount with string types.
 3. Return shell: Return an empty <div /> from your component.`,
-    example_code: `export type Bill = {
+    example_code: `export type Guest = {
   id: string;
-  recipient: string;
-  total: string;
+  name: string;
+  note: string;
 };
 
-export function InvoiceTracker() {
+export function GuestList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -85,13 +86,13 @@ export function InvoiceDesk() {
   return <div />;
 }
 `,
-    analog_example: `export type Bill = {
+    analog_example: `export type Guest = {
   id: string;
-  recipient: string;
-  total: string;
+  name: string;
+  note: string;
 };
 
-export function InvoiceTracker() {
+export function GuestList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -107,23 +108,11 @@ export function InvoiceTracker() {
   Form     →  Client, Amount, Due date
   Submit   →  the new row appears on the list
 `,
-      discover: `export type Invoice = {
-  id: string;
-  client: string;
-  amount: string;
-  dueDate: string;
-};
-
-export function InvoiceDesk() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Blueprint declaration: Rename Bill to Invoice and InvoiceTracker to your component name.
-2. Define fields: Add id, client, and amount with string types.
-3. Return shell: Return an empty <div /> from your component.`,
+      build: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     },
   },
   {
@@ -135,28 +124,24 @@ export function InvoiceDesk() {
 Store invoices in memory; render an itemized row for each bill, or a "No invoices issued" screen if empty.
 
 WHAT YOU'LL NEED
-- State array holding invoices.
-- Conditional check for empty list.
-- List rendering displaying invoice rows.
+- id (text — unique key, not always shown on screen)
+- client (per contract)
+- amount (per contract)
+- dueDate (per contract)
 
 Your task: Store invoices in state and display each entry, showing a placeholder if none exist.`,
     hint: `1. Set up state: Use useState<Invoice[]>([]).
 2. Check for empty: Use invoices.length === 0 to render an empty-state message.
 3. Map rows: Render each invoice with a unique key={inv.id}.`,
-    example_code: `const [invoices, setInvoices] = useState<Bill[]>([]);
-
-return (
-  <div>
-    {invoices.length === 0 ? (
-      <p>No invoices created yet</p>
-    ) : (
-      invoices.map((inv) => (
-        <div key={inv.id}>
-          {inv.recipient} - \${inv.total}
-        </div>
-      ))
-    )}
-  </div>
+    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     think_prompt: `\`\`\`text
 LIST — Invoices
@@ -235,20 +220,15 @@ export function InvoiceDesk() {
   );
 }
 `,
-    analog_example: `const [invoices, setInvoices] = useState<Bill[]>([]);
-
-return (
-  <div>
-    {invoices.length === 0 ? (
-      <p>No invoices created yet</p>
-    ) : (
-      invoices.map((inv) => (
-        <div key={inv.id}>
-          {inv.recipient} - \${inv.total}
-        </div>
-      ))
-    )}
-  </div>
+    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -263,38 +243,11 @@ return (
   Form     →  Client, Amount, Due date
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Invoice = {
-  id: string;
-  client: string;
-  amount: string;
-  dueDate: string;
-};
-
-export function InvoiceDesk() {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  return (
-    <div>
-      {invoices.length === 0 ? (
-        <p>No invoices yet.</p>
-      ) : (
-        <ul>
-          {invoices.map((a) => (
-            <li key={a.id}>{a.client}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Set up state: Use useState<Invoice[]>([]).
-2. Check for empty: Use invoices.length === 0 to render an empty-state message.
-3. Map rows: Render each invoice with a unique key={inv.id}.`,
+      build: `To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. Once it does, checking its length before deciding what to render is just an ordinary conditional — the empty case and the list case are two branches of one render.`,
     },
   },
   {
@@ -303,21 +256,20 @@ export function InvoiceDesk() {
     phase: "Step 3 of 4",
     paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
 
-Connect text inputs to memory so recipient and billing numbers are saved with every keystroke.
+Connect text inputs to memory so client and billing numbers are saved with every keystroke.
 
 WHAT YOU'LL NEED
-- State hooks for client and amount.
-- Controlled input props (value and onChange).
+- id (text — unique key, not always shown on screen)
+- client (per contract)
+- amount (per contract)
+- dueDate (per contract)
 
 Your task: Connect client and invoice amount inputs to React state.`,
     hint: `1. Initialize fields: Declare useState("") for client and amount.
 2. Bind values: Set value to the corresponding state variable.
 3. Handle changes: Use onChange to update state with e.target.value.`,
-    example_code: `const [recipient, setRecipient] = useState("");
-const [total, setTotal] = useState("");
-
-<input value={recipient} onChange={(e) => setRecipient(e.target.value)} />
-<input value={total} onChange={(e) => setTotal(e.target.value)} />`,
+    example_code: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Invoices
   [ Client ]  [ Amount ]  [ Due date ]   → Create
@@ -391,11 +343,8 @@ export function InvoiceDesk() {
   );
 }
 `,
-    analog_example: `const [recipient, setRecipient] = useState("");
-const [total, setTotal] = useState("");
-
-<input value={recipient} onChange={(e) => setRecipient(e.target.value)} />
-<input value={total} onChange={(e) => setTotal(e.target.value)} />`,
+    analog_example: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -409,35 +358,11 @@ const [total, setTotal] = useState("");
   Form     →  Client, Amount, Due date
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Invoice = {
-  id: string;
-  client: string;
-  amount: string;
-  dueDate: string;
-};
-
-export function InvoiceDesk() {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [client, setClient] = useState("");
-  const [amount, setAmount] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  return (
-    <form>
-        <input value={client} onChange={(e) => setClient(e.target.value)} placeholder="Client" />
-        <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount" />
-        <input value={dueDate} onChange={(e) => setDueDate(e.target.value)} placeholder="Due date" />
-    </form>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize fields: Declare useState("") for client and amount.
-2. Bind values: Set value to the corresponding state variable.
-3. Handle changes: Use onChange to update state with e.target.value.`,
+      build: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
     },
   },
   {
@@ -449,23 +374,17 @@ export function InvoiceDesk() {
 Prevent default submission refresh, push the fresh invoice into the list, and wipe the inputs clean.
 
 WHAT YOU'LL NEED
-- e.preventDefault() call.
-- New invoice object creation.
-- State update appending the invoice.
-- Setters clearing input states.
+- id (text — unique key, not always shown on screen)
+- client (per contract)
+- amount (per contract)
+- dueDate (per contract)
 
 Your task: Add the new invoice to your list without a page refresh and reset the form inputs.`,
     hint: `1. Block reload: Put e.preventDefault() at the top of the function.
 2. Build item: Package id, client, and amount into a new object.
 3. Append item: Use setInvoices((prev) => [...prev, entry]).
 4. Clear form: Reset input states back to empty strings.`,
-    example_code: `function addInvoice(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), recipient, total };
-  setInvoices((prev) => [...prev, entry]);
-  setRecipient("");
-  setTotal("");
-}`,
+    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     think_prompt: `\`\`\`text
 FORM — Invoices
   [ Client ]  [ Amount ]  [ Due date ]   → Create
@@ -476,10 +395,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `The invoice list updates immediately in place, providing a smooth user experience.
-
-
-================================================================================`,
+    why_this_matters: `The invoice list updates immediately in place, providing a smooth user experience.`,
     answer_keywords: ["preventDefault","setInvoices","prev","client","amount","dueDate"],
     seed_code: `import { useState } from "react";
 
@@ -586,21 +502,12 @@ export function InvoiceDesk() {
   );
 }
 `,
-    analog_example: `function addInvoice(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), recipient, total };
-  setInvoices((prev) => [...prev, entry]);
-  setRecipient("");
-  setTotal("");
-}`,
+    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `The invoice list updates immediately in place, providing a smooth user experience.
-
-
-================================================================================`,
+      hook: `The invoice list updates immediately in place, providing a smooth user experience.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists invoices and a form to add one:
 
@@ -609,56 +516,11 @@ export function InvoiceDesk() {
   Form     →  Client, Amount, Due date
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Invoice = {
-  id: string;
-  client: string;
-  amount: string;
-  dueDate: string;
-};
-
-export function InvoiceDesk() {
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [client, setClient] = useState("");
-  const [amount, setAmount] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: Invoice = { id: String(Date.now()), client, amount, dueDate };
-    setInvoices((prev) => [...prev, next]);
-    setClient("");
-    setAmount("");
-    setDueDate("");
-  }
-  return (
-    <div>
-      {invoices.length === 0 ? (
-        <p>No invoices yet.</p>
-      ) : (
-        <ul>
-          {invoices.map((a) => (
-            <li key={a.id}>{a.client} · {a.amount} · {a.dueDate}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={client} onChange={(e) => setClient(e.target.value)} placeholder="Client" />
-        <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount" />
-        <input value={dueDate} onChange={(e) => setDueDate(e.target.value)} placeholder="Due date" />
-        <button type="submit">Create</button>
-      </form>
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Block reload: Put e.preventDefault() at the top of the function.
-2. Build item: Package id, client, and amount into a new object.
-3. Append item: Use setInvoices((prev) => [...prev, entry]).
-4. Clear form: Reset input states back to empty strings.`,
+      build: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     },
   },
 ];

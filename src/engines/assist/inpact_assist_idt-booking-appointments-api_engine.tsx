@@ -42,12 +42,9 @@ Your task: Create a memory drawer on the server to hold records and a function t
     hint: `1. Define the storage drawer: Declare a let variable initialized to an empty array, typed with your record shape.
 2. Track counters: Declare a counter number variable outside the functions so it persists.
 3. Build the generator: Write a helper function that returns the incremented counter turned into a string.`,
-    example_code: `let records: Guest[] = [];
-let nextId = 1;
-
-function generateId(): string {
-  return String(nextId++);
-}`,
+    example_code: `let guests = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/appointments
 GET /api/appointments
@@ -75,12 +72,9 @@ let nextIdCounter = 1;
 function nextId() { return String(nextIdCounter++); }
 export function getStore() { return appointments; }
 `,
-    analog_example: `let records: Guest[] = [];
-let nextId = 1;
-
-function generateId(): string {
-  return String(nextId++);
-}`,
+    analog_example: `let guests = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -93,17 +87,11 @@ function generateId(): string {
   Validate →  required fields before insert
   Conflict →  same provider + same startsAt is a conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let appointments = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return appointments; }
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Define the storage drawer: Declare a let variable initialized to an empty array, typed with your record shape.
-2. Track counters: Declare a counter number variable outside the functions so it persists.
-3. Build the generator: Write a helper function that returns the incremented counter turned into a string.`,
+      build: `Two requests that arrive close together must never be handed the same id — a counter that only ever increases guarantees each new record gets a value nothing before it used, which a timestamp alone cannot promise.`,
     },
   },
   {
@@ -122,9 +110,7 @@ Your task: Act as a bouncer that rejects incomplete submissions before they touc
     hint: `1. Inspect the incoming data: Check body properties using the NOT operator (!).
 2. Group the checks: Combine missing-property checks using OR (||).
 3. Send early rejection: Inside the condition block, immediately return status 400 with an informative error message.`,
-    example_code: `if (!body.name || !body.time) {
-  return res.status(400).json({ error: "Name and time are required" });
-}`,
+    example_code: `if (!input?.name?.trim()) return "name is required";`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/appointments
 POST /api/appointments
@@ -164,9 +150,7 @@ export function validateAppointment(input) {
   return null;
 }
 `,
-    analog_example: `if (!body.name || !body.time) {
-  return res.status(400).json({ error: "Name and time are required" });
-}`,
+    analog_example: `if (!input?.name?.trim()) return "name is required";`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -179,23 +163,11 @@ export function validateAppointment(input) {
   Validate →  required fields before insert
   Conflict →  same provider + same startsAt is a conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let appointments = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return appointments; }
-export function validateAppointment(input) {
-  if (typeof input?.provider !== "string" || !input.provider.trim()) return "provider is required";
-  if (typeof input?.service !== "string" || !input.service.trim()) return "service is required";
-  if (typeof input?.startsAt !== "string" || !input.startsAt.trim()) return "startsAt is required";
-  return null;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Inspect the incoming data: Check body properties using the NOT operator (!).
-2. Group the checks: Combine missing-property checks using OR (||).
-3. Send early rejection: Inside the condition block, immediately return status 400 with an informative error message.`,
+      build: `A validator is just a function that inspects the fields it was given and returns either a short error message or nothing at all — the caller decides what to do with that answer.`,
     },
   },
   {
@@ -214,11 +186,8 @@ Your task: Scan existing bookings to verify that the requested time slot or key 
     hint: `1. Scan the drawer: Use .some() on your records array to check if any existing element meets your conflict rule.
 2. Match conflict fields: Inside the callback, return true if the stored identifying keys match the incoming body keys.
 3. Reject collisions: If .some() returns true, halt execution immediately with status 409 (Conflict).`,
-    example_code: `const hasConflict = records.some(
-  (record) => record.date === body.date && record.slot === body.slot
-);
-if (hasConflict) {
-  return res.status(409).json({ error: "Slot already booked" });
+    example_code: `function seatTaken(seat, holds) {
+  return holds.some((h) => h.seat === seat);
 }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/appointments
@@ -253,11 +222,8 @@ export function hasSlotConflict(candidate) {
   return appointments.some((row) => row.provider === candidate.provider && row.startsAt === candidate.startsAt);
 }
 `,
-    analog_example: `const hasConflict = records.some(
-  (record) => record.date === body.date && record.slot === body.slot
-);
-if (hasConflict) {
-  return res.status(409).json({ error: "Slot already booked" });
+    analog_example: `function seatTaken(seat, holds) {
+  return holds.some((h) => h.seat === seat);
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -271,18 +237,11 @@ if (hasConflict) {
   Validate →  required fields before insert
   Conflict →  same provider + same startsAt is a conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let appointments = [];
-export function validateAppointment(input) { return null; }
-export function hasSlotConflict(candidate) {
-  return appointments.some((row) => row.provider === candidate.provider && row.startsAt === candidate.startsAt);
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Scan the drawer: Use .some() on your records array to check if any existing element meets your conflict rule.
-2. Match conflict fields: Inside the callback, return true if the stored identifying keys match the incoming body keys.
-3. Reject collisions: If .some() returns true, halt execution immediately with status 409 (Conflict).`,
+      build: `Checking one candidate record against a list of existing ones for a matching combination of fields is exactly what Array.prototype.some() is for — it stops at the first match and returns true or false.`,
     },
   },
   {
@@ -301,17 +260,7 @@ Your task: Expose a route to read all stored items and a route to save new ones 
     hint: `1. Deliver the records: In the GET handler, return status 200 containing your in-memory array.
 2. Run safety guards: In the POST handler, place your missing-field check (400) and overlap check (409) at the top.
 3. Stamp and save: Create the new record object using your ID helper, push it into the storage array, and reply with status 201.`,
-    example_code: `export function handleGet(res: Response) {
-  return res.status(200).json(records);
-}
-
-export function handlePost(req: Request, res: Response) {
-  // run validation -> return 400 if invalid
-  // run conflict check -> return 409 if conflict
-  const record = { id: generateId(), ...req.body };
-  records.push(record);
-  return res.status(201).json(record);
-}`,
+    example_code: `if (seatTaken(body.seat, holds)) return res.status(409).json({ error: "taken" });`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/appointments
 GET /api/appointments
@@ -325,10 +274,7 @@ A route handler is where validation, conflict-checking, and storage come togethe
     mc_options: ["GET lists store; POST validates, rejects conflict, else 201","POST always 201 even on overlap","GET returns HTML instead of JSON"],
     mc_correct_option: "GET lists store; POST validates, rejects conflict, else 201",
     mc_anchor: "GET lists store; POST validates, rejects",
-    why_this_matters: `Separating read and write doorways makes your API predictable, standard, and easy for frontend components to consume.
-
-
-================================================================================`,
+    why_this_matters: `Separating read and write doorways makes your API predictable, standard, and easy for frontend components to consume.`,
     answer_keywords: ["409","400","201","validateAppointment","hasSlotConflict"],
     seed_code: `let appointments = [];
 let nextIdCounter = 1;
@@ -374,25 +320,12 @@ export function createHandlers() {
   };
 }
 `,
-    analog_example: `export function handleGet(res: Response) {
-  return res.status(200).json(records);
-}
-
-export function handlePost(req: Request, res: Response) {
-  // run validation -> return 400 if invalid
-  // run conflict check -> return 409 if conflict
-  const record = { id: generateId(), ...req.body };
-  records.push(record);
-  return res.status(201).json(record);
-}`,
+    analog_example: `if (seatTaken(body.seat, holds)) return res.status(409).json({ error: "taken" });`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Separating read and write doorways makes your API predictable, standard, and easy for frontend components to consume.
-
-
-================================================================================`,
+      hook: `Separating read and write doorways makes your API predictable, standard, and easy for frontend components to consume.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Implement /api/appointments with persistence and a conflict rule:
 
@@ -400,35 +333,11 @@ export function handlePost(req: Request, res: Response) {
   Validate →  required fields before insert
   Conflict →  same provider + same startsAt is a conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let appointments = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function validateAppointment(input) { return null; }
-export function hasSlotConflict(candidate) {
-  return appointments.some((row) => row.provider === candidate.provider && row.startsAt === candidate.startsAt);
-}
-export function createHandlers() {
-  return {
-    list(_req, res) {
-      res.json(appointments);
-    },
-    create(req, res) {
-      const err = validateAppointment(req.body);
-      if (err) return res.status(400).json({ error: err });
-      if (hasSlotConflict(req.body)) return res.status(409).json({ error: "conflict" });
-      const row = { id: nextId(), provider: req.body.provider, service: req.body.service, startsAt: req.body.startsAt };
-      appointments.push(row);
-      res.status(201).json(row);
-    },
-  };
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Deliver the records: In the GET handler, return status 200 containing your in-memory array.
-2. Run safety guards: In the POST handler, place your missing-field check (400) and overlap check (409) at the top.
-3. Stamp and save: Create the new record object using your ID helper, push it into the storage array, and reply with status 201.`,
+      build: `A route handler's job is to call helpers in the right order and translate their answers into HTTP status codes — the actual rules already live in the functions written in earlier steps.`,
     },
   },
 ];

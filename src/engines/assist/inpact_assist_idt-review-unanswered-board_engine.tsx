@@ -17,7 +17,7 @@ export const NODES = [
   Filter   →  only matching rows render — the full list stays in state
 `,
       usecase: "Owners open a board of unanswered reviews first. Filter for display; keep full inbox in state.",
-      designMock: {"kind":"list-and-form","screenTitle":"Needs reply","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No unanswered reviews.","rows":[{"title":"Sam","subtitle":"2","meta":"needs-reply"},{"title":"Second row","subtitle":"Another","meta":"needs-reply"}],"fields":[{"label":"Author","sample":"Sam"},{"label":"Rating","sample":"2"},{"label":"Status","sample":"needs-reply"}],"submitLabel":"Log"},
+      designMock: {"kind":"list-and-form","screenTitle":"Needs reply","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No unanswered reviews.","rows":[{"title":"Sam","subtitle":"2","meta":"needs-reply"},{"title":"Sam B","subtitle":"2 (alt)","meta":"needs-reply"}],"fields":[{"label":"Author","sample":"Sam"},{"label":"Rating","sample":"2"},{"label":"Status","sample":"needs-reply"}],"submitLabel":"Log"},
     },
   },
   {
@@ -37,20 +37,21 @@ This file doesn't exist yet — you're the first to touch it. Create it at \`src
 Model a review item with a reply status and construct the urgent board view.
 
 WHAT YOU'LL NEED
-- id (text)
-- reviewer (text)
-- status (text)
+- id (text — unique key, not always shown on screen)
+- author (per contract)
+- rating (per contract)
+- status (per contract)
 
 Your task: Define the shape of a review with its status tag, and build the board shell.`,
     hint: `1. Blueprint declaration: Rename FilterableFeedback to your type name and define required fields.
 2. Shell component: Declare your component returning an empty <div />.`,
-    example_code: `export type FilterableFeedback = {
+    example_code: `export type Guest = {
   id: string;
-  reviewer: string;
-  status: string;
+  name: string;
+  note: string;
 };
 
-export function UnansweredBoard() {
+export function GuestList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -85,13 +86,13 @@ export function UnansweredBoard() {
   return <div />;
 }
 `,
-    analog_example: `export type FilterableFeedback = {
+    analog_example: `export type Guest = {
   id: string;
-  reviewer: string;
-  status: string;
+  name: string;
+  note: string;
 };
 
-export function UnansweredBoard() {
+export function GuestList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -108,22 +109,11 @@ export function UnansweredBoard() {
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `export type Review = {
-  id: string;
-  author: string;
-  rating: string;
-  status: string;
-};
-
-export function UnansweredBoard() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Blueprint declaration: Rename FilterableFeedback to your type name and define required fields.
-2. Shell component: Declare your component returning an empty <div />.`,
+      build: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     },
   },
   {
@@ -135,30 +125,24 @@ export function UnansweredBoard() {
 Filter reviews to display only those needing a reply, showing "All reviews answered!" when the queue is clear.
 
 WHAT YOU'LL NEED
-- State array holding all reviews.
-- .filter() call selecting reviews where status === 'needs-reply'.
-- Conditional empty check.
+- id (text — unique key, not always shown on screen)
+- author (per contract)
+- rating (per contract)
+- status (per contract)
 
 Your task: Filter reviews to show only those needing a reply, displaying a message if all are answered.`,
     hint: `1. Master list: Keep all records in allReviews state.
 2. Filter logic: Create pendingReviews using .filter(r => r.status === "needs-reply").
 3. Conditional render: Check pendingReviews.length === 0 to render the fallback message or the list rows.`,
-    example_code: `const [allReviews, setAllReviews] = useState<FilterableFeedback[]>([]);
-
-const pendingReviews = allReviews.filter((r) => r.status === "needs-reply");
-
-return (
-  <div>
-    {pendingReviews.length === 0 ? (
-      <p>All reviews answered!</p>
-    ) : (
-      pendingReviews.map((r) => (
-        <div key={r.id}>
-          Review from {r.reviewer} needs a reply
-        </div>
-      ))
-    )}
-  </div>
+    example_code: `const visible = guests.filter((g) => g.status === "active");
+return visible.length === 0 ? (
+  <p>No matches.</p>
+) : (
+  <ul>
+    {visible.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     think_prompt: `\`\`\`text
 LIST (filtered) — Needs reply
@@ -238,22 +222,15 @@ export function UnansweredBoard() {
   );
 }
 `,
-    analog_example: `const [allReviews, setAllReviews] = useState<FilterableFeedback[]>([]);
-
-const pendingReviews = allReviews.filter((r) => r.status === "needs-reply");
-
-return (
-  <div>
-    {pendingReviews.length === 0 ? (
-      <p>All reviews answered!</p>
-    ) : (
-      pendingReviews.map((r) => (
-        <div key={r.id}>
-          Review from {r.reviewer} needs a reply
-        </div>
-      ))
-    )}
-  </div>
+    analog_example: `const visible = guests.filter((g) => g.status === "active");
+return visible.length === 0 ? (
+  <p>No matches.</p>
+) : (
+  <ul>
+    {visible.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -269,39 +246,11 @@ return (
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `import { useState } from "react";
-
-export type Review = {
-  id: string;
-  author: string;
-  rating: string;
-  status: string;
-};
-
-export function UnansweredBoard() {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const visible = reviews.filter((a) => a.status === "needs-reply");
-  return (
-    <div>
-      {visible.length === 0 ? (
-        <p>No unanswered reviews.</p>
-      ) : (
-        <ul>
-          {visible.map((a) => (
-            <li key={a.id}>{a.author}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Master list: Keep all records in allReviews state.
-2. Filter logic: Create pendingReviews using .filter(r => r.status === "needs-reply").
-3. Conditional render: Check pendingReviews.length === 0 to render the fallback message or the list rows.`,
+      build: `.filter() always returns a brand-new array and never touches the one it was called on — so the full list stays in state, and the array you check for "empty" and then map is the filtered one, not the original.`,
     },
   },
   {
@@ -313,16 +262,16 @@ export function UnansweredBoard() {
 Connect input boxes to state to capture review logging details cleanly.
 
 WHAT YOU'LL NEED
-- State hooks for reviewer and status inputs.
-- Value and onChange props wired on inputs.
+- id (text — unique key, not always shown on screen)
+- author (per contract)
+- rating (per contract)
+- status (per contract)
 
 Your task: Connect review logging inputs to React state.`,
     hint: `1. Initialize states: Call useState("") for your form inputs.
 2. Wire inputs: Connect value and onChange to each state variable.`,
-    example_code: `const [reviewer, setReviewer] = useState("");
-const [status, setStatus] = useState("needs-reply");
-
-<input value={reviewer} onChange={(e) => setReviewer(e.target.value)} />`,
+    example_code: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Needs reply
   [ Author ]  [ Rating ]  [ Status ]   → Log
@@ -396,10 +345,8 @@ export function UnansweredBoard() {
   );
 }
 `,
-    analog_example: `const [reviewer, setReviewer] = useState("");
-const [status, setStatus] = useState("needs-reply");
-
-<input value={reviewer} onChange={(e) => setReviewer(e.target.value)} />`,
+    analog_example: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -414,34 +361,11 @@ const [status, setStatus] = useState("needs-reply");
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `import { useState } from "react";
-
-export type Review = {
-  id: string;
-  author: string;
-  rating: string;
-  status: string;
-};
-
-export function UnansweredBoard() {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [author, setAuthor] = useState("");
-  const [rating, setRating] = useState("");
-  const [status, setStatus] = useState("");
-  return (
-    <form>
-        <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Author" />
-        <input value={rating} onChange={(e) => setRating(e.target.value)} placeholder="Rating" />
-        <input value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status" />
-    </form>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize states: Call useState("") for your form inputs.
-2. Wire inputs: Connect value and onChange to each state variable.`,
+      build: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
     },
   },
   {
@@ -453,22 +377,17 @@ export function UnansweredBoard() {
 Intercept submit, save the review to memory, clear the form, and let the unanswered filter place it on the board.
 
 WHAT YOU'LL NEED
-- Form interceptor using e.preventDefault().
-- Object assembly matching blueprint.
-- Spread update to state.
-- Form reset calls.
+- id (text — unique key, not always shown on screen)
+- author (per contract)
+- rating (per contract)
+- status (per contract)
 
 Your task: Append the new review to state without reloading the page and reset the inputs.`,
     hint: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, reviewer, and status into an object.
+2. Build item: Package id, author, and status into an object.
 3. Append item: Use setAllReviews((prev) => [...prev, entry]).
 4. Clear form: Reset input states to "".`,
-    example_code: `function handleAdd(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), reviewer, status };
-  setAllReviews((prev) => [...prev, entry]);
-  setReviewer("");
-}`,
+    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     think_prompt: `\`\`\`text
 FORM — Needs reply
   [ Author ]  [ Rating ]  [ Status ]   → Log
@@ -479,10 +398,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `The new review is added to the master list, and your filter automatically displays it if it is marked needs-reply.
-
-
-================================================================================`,
+    why_this_matters: `The new review is added to the master list, and your filter automatically displays it if it is marked needs-reply.`,
     answer_keywords: ["preventDefault","setReviews","prev","author","rating","status"],
     seed_code: `import { useState } from "react";
 
@@ -589,20 +505,12 @@ export function UnansweredBoard() {
   );
 }
 `,
-    analog_example: `function handleAdd(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), reviewer, status };
-  setAllReviews((prev) => [...prev, entry]);
-  setReviewer("");
-}`,
+    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `The new review is added to the master list, and your filter automatically displays it if it is marked needs-reply.
-
-
-================================================================================`,
+      hook: `The new review is added to the master list, and your filter automatically displays it if it is marked needs-reply.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists reviews and a form to add one:
 
@@ -612,56 +520,11 @@ export function UnansweredBoard() {
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `import { useState } from "react";
-
-export type Review = {
-  id: string;
-  author: string;
-  rating: string;
-  status: string;
-};
-
-export function UnansweredBoard() {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [author, setAuthor] = useState("");
-  const [rating, setRating] = useState("");
-  const [status, setStatus] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: Review = { id: String(Date.now()), author, rating, status };
-    setReviews((prev) => [...prev, next]);
-    setAuthor("");
-    setRating("");
-    setStatus("");
-  }
-  return (
-    <div>
-      {reviews.length === 0 ? (
-        <p>No unanswered reviews.</p>
-      ) : (
-        <ul>
-          {reviews.map((a) => (
-            <li key={a.id}>{a.author} · {a.rating} · {a.status}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Author" />
-        <input value={rating} onChange={(e) => setRating(e.target.value)} placeholder="Rating" />
-        <input value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status" />
-        <button type="submit">Log</button>
-      </form>
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, reviewer, and status into an object.
-3. Append item: Use setAllReviews((prev) => [...prev, entry]).
-4. Clear form: Reset input states to "".`,
+      build: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     },
   },
 ];

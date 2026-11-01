@@ -118,22 +118,7 @@ export function POManager({ orders, onReceive }: POManagerProps) {
       hook: `A panel that only renders what it's handed — never fetching on its own — is what lets the parent page keep every panel showing the same, consistent data.`,
       pain: "A component that fetches its own copy of shared data can drift out of sync the moment another panel changes that same data.",
       mentalModel: MENTAL_MODEL,
-      discover: `export type PurchaseOrder = {
-  id: string;
-  poNumber: string;
-  totalAmount: number;
-  status: string;
-};
-
-type ProcurementPanelProps = {
-  orders: PurchaseOrder[];
-  onReceive: () => void;
-};
-
-export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not fetch /api/po from inside this component — that's the parent page's job.",
       dryRun: "Write the same props-only shell for a different list + action pair.",
@@ -259,9 +244,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
       hook: `Showing the real order number and status gives procurement staff the same information a paper PO file would, at a glance.`,
       pain: "Skipping the empty check leaves a blank panel with no explanation before any PO has ever been created.",
       mentalModel: MENTAL_MODEL,
-      discover: `orders.map((po) => (
-  <div key={po.id}>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</div>
-))`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Render the same kind of list for a different resource with the same shape.",
@@ -424,8 +407,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
       hook: `One-click receiving makes warehouse processing straightforward while triggering a real, atomic stock + cost + ledger update behind the scenes.`,
       pain: "A button not scoped to its own row's id risks receiving the wrong purchase order entirely.",
       mentalModel: MENTAL_MODEL,
-      discover: `async function handleReceive(id: string) {
-  await fetch(\`/api/po/\${id}/receive\`, { method: "POST" });
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.", { method: "POST" });
 }`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not hardcode a single PO id — always use the row's own po.id.",
@@ -608,12 +590,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
       hook: `Refreshing on success keeps every panel on screen in sync with what the ledger actually did; surfacing a real failure keeps staff from believing an order was received when it wasn't.`,
       pain: "Ignoring the response leaves staff clicking a button that looks like it worked, even on a real 409 rejection.",
       mentalModel: MENTAL_MODEL,
-      discover: `if (res.ok) {
-  onReceive();
-} else {
-  const body = await res.json();
-  alert(body.error);
-}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not assume every fetch succeeds — always branch on res.ok.",
       dryRun: "Handle success/failure the same way for a different action button.",

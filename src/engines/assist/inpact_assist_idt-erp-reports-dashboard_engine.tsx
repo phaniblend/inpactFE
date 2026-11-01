@@ -144,20 +144,7 @@ export function VehicleRoster() {
       hook: `A blueprint that matches the real API's actual shape is what lets your editor catch a typo'd field name before you ever run the code.`,
       pain: "A type that guesses wrong about the real response shape produces confusing runtime bugs TypeScript should have caught.",
       mentalModel: MENTAL_MODEL,
-      discover: `export type Item = {
-  id: string;
-  sku: string;
-  name: string;
-  costPrice: number;
-  sellingPrice: number;
-  stockOnHand: number;
-  reorderPoint: number;
-};
-
-export function InventoryTable() {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not guess a field's type — check what the real endpoint actually returns.",
       dryRun: "Write the same step for a different real endpoint you haven't used before.",
@@ -289,14 +276,7 @@ useEffect(() => {
       hook: `Running fetch inside useEffect with a loading flag means the request fires exactly once, and users see an honest "still loading" instead of a false "empty" for a moment.`,
       pain: "Without a loading flag, a genuinely empty catalog and a catalog that just hasn't loaded yet look identical to the user.",
       mentalModel: MENTAL_MODEL,
-      discover: `useEffect(() => {
-  fetch("/api/items")
-    .then((res) => res.json())
-    .then((data) => {
-      setItems(data);
-      setLoading(false);
-    });
-}, []);`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not call fetch() directly inside the component body (outside useEffect) — that refetches on every render.",
       dryRun: "Write the same fetch-on-mount step for a different real endpoint on this same backend.",
@@ -490,12 +470,7 @@ return (
       hook: `A real semantic table (not a styled <div> grid) is what screen readers and browser table features actually understand.`,
       pain: "Skipping the empty check leaves a permanently blank table with no explanation once the fetch resolves to nothing.",
       mentalModel: MENTAL_MODEL,
-      discover: `<table>
-  <thead><tr><th>SKU</th><th>Name</th><th>Cost (MAC)</th><th>Price</th><th>Stock</th></tr></thead>
-  <tbody>
-    {items.map((i) => <tr key={i.id}>...</tr>)}
-  </tbody>
-</table>`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not skip the empty-array check — a table with zero rows and no message reads as broken.",
       dryRun: "Draw the same table shape for a different real dataset with different columns.",
@@ -712,11 +687,7 @@ export function InventoryTable() {
       hook: `A clear per-item stock table gives immediate visibility into exactly which products need replenishment, using each product's own real threshold.`,
       pain: "A hardcoded threshold would misflag items that are genuinely fine at their own lower reorder point, or miss ones that are genuinely critical at a higher one.",
       mentalModel: MENTAL_MODEL,
-      discover: `{i.stockOnHand <= i.reorderPoint ? (
-  <span style={{ color: "red", fontWeight: 700 }}>REORDER</span>
-) : (
-  <span style={{ color: "green" }}>HEALTHY</span>
-)}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not hardcode a single stock threshold for every item — always compare a row to its own reorderPoint.",
       dryRun: "Add the same kind of threshold badge to a different table with a different pair of fields.",
@@ -825,22 +796,7 @@ export function MaintenanceQueue({ tickets, onClose }: MaintenanceQueueProps) {
       hook: `A panel that only renders what it's handed — never fetching on its own — is what lets the parent page keep every panel showing the same, consistent data.`,
       pain: "A component that fetches its own copy of shared data can drift out of sync the moment another panel changes that same data.",
       mentalModel: MENTAL_MODEL,
-      discover: `export type PurchaseOrder = {
-  id: string;
-  poNumber: string;
-  totalAmount: number;
-  status: string;
-};
-
-type ProcurementPanelProps = {
-  orders: PurchaseOrder[];
-  onReceive: () => void;
-};
-
-export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not fetch /api/po from inside this component — that's the parent page's job.",
       dryRun: "Write the same props-only shell for a different list + action pair.",
@@ -967,9 +923,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
       hook: `Showing the real order number and status gives procurement staff the same information a paper PO file would, at a glance.`,
       pain: "Skipping the empty check leaves a blank panel with no explanation before any PO has ever been created.",
       mentalModel: MENTAL_MODEL,
-      discover: `orders.map((po) => (
-  <div key={po.id}>{po.poNumber} - \${po.totalAmount.toFixed(2)} ({po.status})</div>
-))`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Render the same kind of list for a different resource with the same shape.",
@@ -1133,8 +1087,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
       hook: `One-click receiving makes warehouse processing straightforward while triggering a real, atomic stock + cost + ledger update behind the scenes.`,
       pain: "A button not scoped to its own row's id risks receiving the wrong purchase order entirely.",
       mentalModel: MENTAL_MODEL,
-      discover: `async function handleReceive(id: string) {
-  await fetch(\`/api/po/\${id}/receive\`, { method: "POST" });
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.", { method: "POST" });
 }`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not hardcode a single PO id — always use the row's own po.id.",
@@ -1318,12 +1271,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
       hook: `Refreshing on success keeps every panel on screen in sync with what the ledger actually did; surfacing a real failure keeps staff from believing an order was received when it wasn't.`,
       pain: "Ignoring the response leaves staff clicking a button that looks like it worked, even on a real 409 rejection.",
       mentalModel: MENTAL_MODEL,
-      discover: `if (res.ok) {
-  onReceive();
-} else {
-  const body = await res.json();
-  alert(body.error);
-}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not assume every fetch succeeds — always branch on res.ok.",
       dryRun: "Handle success/failure the same way for a different action button.",
@@ -1432,22 +1380,7 @@ export function ClassRoster({ bookings, onCheckIn }: ClassRosterProps) {
       hook: `A board that only renders what it's handed keeps every panel on the page showing the same real, current data.`,
       pain: "A component that fetches its own copy of shared sales-order data can drift out of sync with what the procurement panel or inventory table just changed.",
       mentalModel: MENTAL_MODEL,
-      discover: `export type SalesOrder = {
-  id: string;
-  soNumber: string;
-  totalAmount: number;
-  status: string;
-};
-
-type SalesFulfillmentBoardProps = {
-  orders: SalesOrder[];
-  onFulfill: () => void;
-};
-
-export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoardProps) {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not fetch /api/so from inside this component — that's the parent page's job.",
       dryRun: "Write the same props-only shell for a different list + action pair.",
@@ -1583,9 +1516,7 @@ export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoa
       hook: `Showing the real order number and status gives warehouse staff exactly what they need to decide what to ship next.`,
       pain: "Skipping the empty check leaves a blank board with no explanation before any SO has ever been created.",
       mentalModel: MENTAL_MODEL,
-      discover: `orders.map((so) => (
-  <div key={so.id}>{so.soNumber} - \${so.totalAmount.toFixed(2)} ({so.status})</div>
-))`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Render the same kind of list for a different resource with the same shape.",
@@ -1758,8 +1689,7 @@ export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoa
       hook: `The pipeline view guides orders smoothly through each fulfillment stage while enforcing stock availability at the exact moment of dispatch.`,
       pain: "A button not scoped to its own row's id or its own status risks shipping the wrong order, or shipping one already shipped.",
       mentalModel: MENTAL_MODEL,
-      discover: `async function handleFulfill(id: string) {
-  await fetch(\`/api/so/\${id}/fulfill\`, { method: "POST" });
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.", { method: "POST" });
 }`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not hardcode a single SO id — always use the row's own so.id.",
@@ -1952,12 +1882,7 @@ export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoa
       hook: `Refreshing on success keeps every panel synced with the ledger; surfacing a real 409 keeps staff from believing an order shipped when stock genuinely ran out.`,
       pain: "Ignoring the response leaves staff clicking a button that looks like it worked, even on a real 409 rejection.",
       mentalModel: MENTAL_MODEL,
-      discover: `if (res.ok) {
-  onFulfill();
-} else {
-  const body = await res.json();
-  alert(body.error);
-}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not assume every fetch succeeds — always branch on res.ok.",
       dryRun: "Handle success/failure the same way for a different action button.",
@@ -2006,7 +1931,7 @@ Your task: create the file at src/components/FinancialMetrics.tsx. That's the wh
       hook: `Every later step in this task assumes this file already exists — skip this and the next step has nowhere to write the type.`,
       pain: "Trying to define a type or component in a file that was never created just means your edits go nowhere.",
       mentalModel: MENTAL_MODEL,
-      discover: `// src/components/FinancialMetrics.tsx (just created)`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "This step only checks the file exists — it's fine (expected, even) if later-step code is already in it.",
       dryRun: "Create the same kind of starter file for a different real component.",
@@ -2068,12 +1993,7 @@ Your task: in the file from Step 1, write \`type Financials\` with those three f
       hook: `Matching the type to the real API's already-formatted strings avoids a pointless re-parse (or a silent bug) later when you render them.`,
       pain: "Typing money fields as number when the real API sends formatted strings produces a type that lies about the data it describes.",
       mentalModel: MENTAL_MODEL,
-      discover: `export type Financials = {
-  revenue: string;
-  cogs: string;
-  netIncome: string;
-};
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not assume a money field is a number without checking what the real endpoint actually returns.",
       dryRun: "Write the same single-purpose type for a different real report endpoint.",
@@ -2145,9 +2065,7 @@ export function FinancialMetrics() {
       hook: `A component that exists (even doing nothing yet) is something the rest of your dashboard can already import and place, before its real behavior is finished.`,
       pain: "Trying to write state, fetch, and render all in one step makes it hard to tell which part broke if something goes wrong.",
       mentalModel: MENTAL_MODEL,
-      discover: `export function FinancialMetrics() {
-  return <div />;
-}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not add state or a fetch call yet — this step is only the shell.",
       dryRun: "Write the same one-line shell for a different component.",
@@ -2245,7 +2163,7 @@ export function EarningsCard() {
       hook: `Defaulting to real zero-strings means the cards render sensibly from the very first frame, instead of flashing "$undefined" for a moment.`,
       pain: "Undefined initial state produces a visible flash of broken-looking output before the real fetch resolves.",
       mentalModel: MENTAL_MODEL,
-      discover: `const [financials, setFinancials] = useState<Financials>({ revenue: "0.00", cogs: "0.00", netIncome: "0.00" });`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not leave the initial state undefined or as empty strings — use real zero-strings.",
       dryRun: "Default state the same way for a different single-object real report.",
@@ -2369,11 +2287,7 @@ export function EarningsCard() {
       hook: `Real-time financial cards, fetched straight from the ledger, are what let a business owner trust the number on screen without waiting for a manual month-end close.`,
       pain: "Skipping this step leaves a type and a state slot, but no actual data ever arrives.",
       mentalModel: MENTAL_MODEL,
-      discover: `useEffect(() => {
-  fetch("/api/reports/income-statement")
-    .then((res) => res.json())
-    .then(setFinancials);
-}, []);`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not call fetch() directly inside the component body (outside useEffect) — that refetches on every render.",
       dryRun: "Write the same fetch-on-mount step for a different real single-object endpoint.",
@@ -2498,11 +2412,7 @@ export function FinancialMetrics() {
       hook: `Reading straight from state means the cards always show whatever the last real fetch (or future refresh) actually returned — never a stale, hardcoded number.`,
       pain: "Hardcoding the figures would make the cards look right once and wrong forever after.",
       mentalModel: MENTAL_MODEL,
-      discover: `<div className="grid grid-cols-3 gap-4">
-  <div>Revenue: \${financials.revenue}</div>
-  <div>COGS: \${financials.cogs}</div>
-  <div>Net Income: \${financials.netIncome}</div>
-</div>`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not hardcode any of the three figures — always read from financials.",
       dryRun: "Render the same three-card layout for a different single-object real report.",
@@ -2551,7 +2461,7 @@ Your task: create the file at src/App.tsx. That's the whole requirement — the 
       hook: `Every later step in this task assumes this file already exists — skip this and the next step has nowhere to write the state arrays.`,
       pain: "Trying to declare state in a file that was never created just means your edits go nowhere.",
       mentalModel: MENTAL_MODEL,
-      discover: `// src/App.tsx (just created)`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "This step only checks the file exists — it's fine if later-step code is already in it.",
       dryRun: "Create the same kind of starter file for a different real component.",
@@ -2632,7 +2542,7 @@ export default function BlogAdminApp() {
       hook: `Declaring this list once, in the parent, is what makes it possible for every panel to see the same real inventory data.`,
       pain: "Letting each child component own its own copy means an action in one panel never shows up in another.",
       mentalModel: MENTAL_MODEL,
-      discover: `const [items, setItems] = useState<Item[]>([]);`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not add purchaseOrders or salesOrders yet — this step is just the items array.",
       dryRun: "Declare the same shared-state pattern for a different real list.",
@@ -2723,7 +2633,7 @@ export default function BlogAdminApp() {
       hook: `Declaring purchaseOrders here too keeps every shared list in the same one place, not scattered across whichever component happens to need it first.`,
       pain: "Letting each child component own its own copy means an action in one panel never shows up in another.",
       mentalModel: MENTAL_MODEL,
-      discover: `const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not add salesOrders yet — this step is just the purchaseOrders array.",
       dryRun: "Declare the same shared-state pattern for a different real list.",
@@ -2822,7 +2732,7 @@ export default function BlogAdminApp() {
       hook: `All three lists now live in one shared place — every panel that reads or updates them sees the same real data.`,
       pain: "Letting each child component own its own copy means an action in one panel never shows up in another.",
       mentalModel: MENTAL_MODEL,
-      discover: `const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not add a fetch yet — this step is just the salesOrders array.",
       dryRun: "Declare the same shared-state pattern for a different real list.",
@@ -2943,12 +2853,7 @@ export default function App() {
       hook: `One loadData() function is what every panel's action (a receipt, a fulfillment) can call to refresh the whole dashboard at once.`,
       pain: "Fetching sequentially instead of with Promise.all makes the dashboard wait three times longer than it needs to.",
       mentalModel: MENTAL_MODEL,
-      discover: `const loadData = async () => {
-  const [i, po, so] = await Promise.all([...]);
-  setItems(i);
-  setPurchaseOrders(po);
-  setSalesOrders(so);
-};`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not call loadData() anywhere yet — this step only defines it.",
       dryRun: "Write the same parallel-loader pattern for a different set of three related resources.",
@@ -3091,9 +2996,7 @@ export default function BlogAdminApp() {
       hook: `This is what makes the dashboard show real data the instant it loads, instead of three empty panels waiting for a manual trigger.`,
       pain: "A bare loadData() call outside useEffect would re-run on every single render, hammering all three endpoints constantly.",
       mentalModel: MENTAL_MODEL,
-      discover: `useEffect(() => {
-  loadData();
-}, []);`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not call loadData() outside of useEffect — that would refire on every render.",
       dryRun: "Wire the same on-mount call for a different loader function.",
@@ -3248,10 +3151,7 @@ return (
       hook: `Not every component on this dashboard needs shared state — some are genuinely self-sufficient, and forcing props onto them would just add noise.`,
       pain: "Passing unnecessary props onto a self-sufficient component adds a coupling that isn't real.",
       mentalModel: MENTAL_MODEL,
-      discover: `<main>
-  <FinancialMetrics />
-  <InventoryTable />
-</main>`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not pass props to components that don't declare any — they already fetch their own data.",
       dryRun: "Place the same two self-sufficient components in a different layout.",
@@ -3418,8 +3318,7 @@ import { SubscriberOutreach } from "./components/SubscriberOutreach";
       hook: `Wiring "Receive Goods" and "Fulfill & Ship" back to the same loadData() is what makes the new package's cost, the updated stock count, and the moved financial figures all appear together, instantly, on one screen.`,
       pain: "Passing loadData() instead of loadData would call it once during render instead of handing the panel something it can call later, on its own trigger.",
       mentalModel: MENTAL_MODEL,
-      discover: `<ProcurementPanel orders={purchaseOrders} onReceive={loadData} />
-<SalesFulfillmentBoard orders={salesOrders} onFulfill={loadData} />`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not pass loadData() (with parentheses) as a prop — that calls it immediately instead of handing over the function.",
       dryRun: "Wire the same real props + callback pattern for a different pair of action panels.",

@@ -16,14 +16,14 @@ export const NODES = [
   Submit   →  the new row appears on the list
 `,
       usecase: "Reusable wording is another list+form — same React skill, different nouns.",
-      designMock: {"kind":"list-and-form","screenTitle":"Templates","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No templates yet.","rows":[{"title":"Appt tomorrow","subtitle":"See you at {time}","meta":"sms"},{"title":"Second row","subtitle":"Another","meta":"sms"}],"fields":[{"label":"Name","sample":"Appt tomorrow"},{"label":"Body","sample":"See you at {time}"},{"label":"Channel","sample":"sms"}],"submitLabel":"Save template"},
+      designMock: {"kind":"list-and-form","screenTitle":"Templates","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No templates yet.","rows":[{"title":"Appt tomorrow","subtitle":"See you at {time}","meta":"sms"},{"title":"Appt tomorrow B","subtitle":"See you at {time} (alt)","meta":"sms"}],"fields":[{"label":"Name","sample":"Appt tomorrow"},{"label":"Body","sample":"See you at {time}"},{"label":"Channel","sample":"sms"}],"submitLabel":"Save template"},
     },
   },
   {
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Model a template blueprint (template name, subject, body text) and build the template gallery shell.","Hold templates in memory; render each reusable template card, or show \"No saved templates found\" when empty.","Wire template name and message textareas to state so drafting happens in real time.","Intercept submission, save the new template to the gallery, and clear the inputs."],
+    items: ["Model a name blueprint (name name, subject, body text) and build the name gallery shell.","Hold templates in memory; render each reusable name card, or show \"No saved templates found\" when empty.","Wire name name and message textareas to state so drafting happens in real time.","Intercept submission, save the new name to the gallery, and clear the inputs."],
   },
   {
     id: "step1",
@@ -33,23 +33,24 @@ export const NODES = [
 
 This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/TemplateDesk.tsx\` before anything else. Every step from here on edits that same file.
 
-Model a template blueprint (template name, subject, body text) and build the template gallery shell.
+Model a name blueprint (name name, subject, body text) and build the name gallery shell.
 
 WHAT YOU'LL NEED
-- id (text)
-- name (text)
-- template (text)
+- id (text — unique key, not always shown on screen)
+- name (per contract)
+- body (per contract)
+- channel (per contract)
 
-Your task: Define the shape of a reminder template and create the component shell.`,
+Your task: Define the shape of a reminder name and create the component shell.`,
     hint: `1. Blueprint declaration: Rename ReminderTemplate to your type name and define required fields.
 2. Shell component: Declare your component returning an empty <div />.`,
-    example_code: `export type ReminderTemplate = {
+    example_code: `export type Guest = {
   id: string;
   name: string;
-  template: string;
+  note: string;
 };
 
-export function TemplateManager() {
+export function GuestList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -63,7 +64,7 @@ Every value with a shape needs one type to describe that shape before any compon
     mc_options: ["Define type ReminderTemplate (id + name, body, channel), then export function TemplateDesk() returning <div />","Skip the type and write JSX directly against untyped objects","Wait until every backend endpoint exists before modeling the row or the component"],
     mc_correct_option: "Define type ReminderTemplate (id + name, body, channel), then export function TemplateDesk() returning <div />",
     mc_anchor: "Define type ReminderTemplate (id + name,",
-    why_this_matters: `Defining the template shape ensures reusable message formats share consistent properties.`,
+    why_this_matters: `Defining the name shape ensures reusable message formats share consistent properties.`,
     answer_keywords: ["export","type","ReminderTemplate","name","body","channel","export","function","TemplateDesk","return"],
     seed_code: ``,
     starter_code: ``,
@@ -84,20 +85,20 @@ export function TemplateDesk() {
   return <div />;
 }
 `,
-    analog_example: `export type ReminderTemplate = {
+    analog_example: `export type Guest = {
   id: string;
   name: string;
-  template: string;
+  note: string;
 };
 
-export function TemplateManager() {
+export function GuestList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Defining the template shape ensures reusable message formats share consistent properties.`,
+      hook: `Defining the name shape ensures reusable message formats share consistent properties.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists templates and a form to add one:
 
@@ -106,22 +107,11 @@ export function TemplateManager() {
   Form     →  Name, Body, Channel
   Submit   →  the new row appears on the list
 `,
-      discover: `export type ReminderTemplate = {
-  id: string;
-  name: string;
-  body: string;
-  channel: string;
-};
-
-export function TemplateDesk() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Blueprint declaration: Rename ReminderTemplate to your type name and define required fields.
-2. Shell component: Declare your component returning an empty <div />.`,
+      build: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     },
   },
   {
@@ -130,31 +120,27 @@ export function TemplateDesk() {
     phase: "Step 2 of 4",
     paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
 
-Hold templates in memory; render each reusable template card, or show "No saved templates found" when empty.
+Hold templates in memory; render each reusable name card, or show "No saved templates found" when empty.
 
 WHAT YOU'LL NEED
-- State array holding template items.
-- Conditional empty check.
-- Map loop rendering template cards.
+- id (text — unique key, not always shown on screen)
+- name (per contract)
+- body (per contract)
+- channel (per contract)
 
 Your task: Store templates in state and display them, showing a placeholder if none exist.`,
     hint: `1. Set up state: Use useState<ReminderTemplate[]>([]).
 2. Check for empty: Use templates.length === 0 to render the empty message.
 3. Render entries: Map through templates, passing key={t.id}.`,
-    example_code: `const [templates, setTemplates] = useState<ReminderTemplate[]>([]);
-
-return (
-  <div>
-    {templates.length === 0 ? (
-      <p>No templates saved</p>
-    ) : (
-      templates.map((t) => (
-        <div key={t.id}>
-          <strong>{t.name}:</strong> {t.template}
-        </div>
-      ))
-    )}
-  </div>
+    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     think_prompt: `\`\`\`text
 LIST — Templates
@@ -233,20 +219,15 @@ export function TemplateDesk() {
   );
 }
 `,
-    analog_example: `const [templates, setTemplates] = useState<ReminderTemplate[]>([]);
-
-return (
-  <div>
-    {templates.length === 0 ? (
-      <p>No templates saved</p>
-    ) : (
-      templates.map((t) => (
-        <div key={t.id}>
-          <strong>{t.name}:</strong> {t.template}
-        </div>
-      ))
-    )}
-  </div>
+    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -261,38 +242,11 @@ return (
   Form     →  Name, Body, Channel
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type ReminderTemplate = {
-  id: string;
-  name: string;
-  body: string;
-  channel: string;
-};
-
-export function TemplateDesk() {
-  const [templates, setTemplates] = useState<ReminderTemplate[]>([]);
-  return (
-    <div>
-      {templates.length === 0 ? (
-        <p>No templates yet.</p>
-      ) : (
-        <ul>
-          {templates.map((a) => (
-            <li key={a.id}>{a.name}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Set up state: Use useState<ReminderTemplate[]>([]).
-2. Check for empty: Use templates.length === 0 to render the empty message.
-3. Render entries: Map through templates, passing key={t.id}.`,
+      build: `To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. Once it does, checking its length before deciding what to render is just an ordinary conditional — the empty case and the list case are two branches of one render.`,
     },
   },
   {
@@ -301,20 +255,19 @@ export function TemplateDesk() {
     phase: "Step 3 of 4",
     paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
 
-Wire template name and message textareas to state so drafting happens in real time.
+Wire name name and message textareas to state so drafting happens in real time.
 
 WHAT YOU'LL NEED
-- State hooks for name and template text inputs.
-- Value and onChange props wired on inputs.
+- id (text — unique key, not always shown on screen)
+- name (per contract)
+- body (per contract)
+- channel (per contract)
 
-Your task: Connect template creation inputs to React state.`,
-    hint: `1. Initialize states: Call useState("") for name and template.
+Your task: Connect name creation inputs to React state.`,
+    hint: `1. Initialize states: Call useState("") for name and name.
 2. Wire inputs: Connect value and onChange to each state variable.`,
     example_code: `const [name, setName] = useState("");
-const [template, setTemplate] = useState("");
-
-<input value={name} onChange={(e) => setName(e.target.value)} />
-<textarea value={template} onChange={(e) => setTemplate(e.target.value)} />`,
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Templates
   [ Name ]  [ Body ]  [ Channel ]   → Save template
@@ -389,10 +342,7 @@ export function TemplateDesk() {
 }
 `,
     analog_example: `const [name, setName] = useState("");
-const [template, setTemplate] = useState("");
-
-<input value={name} onChange={(e) => setName(e.target.value)} />
-<textarea value={template} onChange={(e) => setTemplate(e.target.value)} />`,
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -406,34 +356,11 @@ const [template, setTemplate] = useState("");
   Form     →  Name, Body, Channel
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type ReminderTemplate = {
-  id: string;
-  name: string;
-  body: string;
-  channel: string;
-};
-
-export function TemplateDesk() {
-  const [templates, setTemplates] = useState<ReminderTemplate[]>([]);
-  const [name, setName] = useState("");
-  const [body, setBody] = useState("");
-  const [channel, setChannel] = useState("");
-  return (
-    <form>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
-        <input value={body} onChange={(e) => setBody(e.target.value)} placeholder="Body" />
-        <input value={channel} onChange={(e) => setChannel(e.target.value)} placeholder="Channel" />
-    </form>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize states: Call useState("") for name and template.
-2. Wire inputs: Connect value and onChange to each state variable.`,
+      build: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
     },
   },
   {
@@ -442,26 +369,20 @@ export function TemplateDesk() {
     phase: "Step 4 of 4",
     paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
 
-Intercept submission, save the new template to the gallery, and clear the inputs.
+Intercept submission, save the new name to the gallery, and clear the inputs.
 
 WHAT YOU'LL NEED
-- Form interceptor using e.preventDefault().
-- New template object creation.
-- Spread update to state.
-- Form reset calls.
+- id (text — unique key, not always shown on screen)
+- name (per contract)
+- body (per contract)
+- channel (per contract)
 
-Your task: Append the new template to state without a page refresh and reset the form.`,
+Your task: Append the new name to state without a page refresh and reset the form.`,
     hint: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, name, and template into an object.
+2. Build item: Package id, name, and name into an object.
 3. Append item: Use setTemplates((prev) => [...prev, entry]).
 4. Clear form: Reset input states to "".`,
-    example_code: `function saveTemplate(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), name, template };
-  setTemplates((prev) => [...prev, entry]);
-  setName("");
-  setTemplate("");
-}`,
+    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     think_prompt: `\`\`\`text
 FORM — Templates
   [ Name ]  [ Body ]  [ Channel ]   → Save template
@@ -472,10 +393,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `Templates appear instantly in the gallery without page reloads.
-
-
-================================================================================`,
+    why_this_matters: `Templates appear instantly in the gallery without page reloads.`,
     answer_keywords: ["preventDefault","setTemplates","prev","name","body","channel"],
     seed_code: `import { useState } from "react";
 
@@ -582,21 +500,12 @@ export function TemplateDesk() {
   );
 }
 `,
-    analog_example: `function saveTemplate(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), name, template };
-  setTemplates((prev) => [...prev, entry]);
-  setName("");
-  setTemplate("");
-}`,
+    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Templates appear instantly in the gallery without page reloads.
-
-
-================================================================================`,
+      hook: `Templates appear instantly in the gallery without page reloads.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists templates and a form to add one:
 
@@ -605,56 +514,11 @@ export function TemplateDesk() {
   Form     →  Name, Body, Channel
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type ReminderTemplate = {
-  id: string;
-  name: string;
-  body: string;
-  channel: string;
-};
-
-export function TemplateDesk() {
-  const [templates, setTemplates] = useState<ReminderTemplate[]>([]);
-  const [name, setName] = useState("");
-  const [body, setBody] = useState("");
-  const [channel, setChannel] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: ReminderTemplate = { id: String(Date.now()), name, body, channel };
-    setTemplates((prev) => [...prev, next]);
-    setName("");
-    setBody("");
-    setChannel("");
-  }
-  return (
-    <div>
-      {templates.length === 0 ? (
-        <p>No templates yet.</p>
-      ) : (
-        <ul>
-          {templates.map((a) => (
-            <li key={a.id}>{a.name} · {a.body} · {a.channel}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
-        <input value={body} onChange={(e) => setBody(e.target.value)} placeholder="Body" />
-        <input value={channel} onChange={(e) => setChannel(e.target.value)} placeholder="Channel" />
-        <button type="submit">Save template</button>
-      </form>
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, name, and template into an object.
-3. Append item: Use setTemplates((prev) => [...prev, entry]).
-4. Clear form: Reset input states to "".`,
+      build: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     },
   },
 ];

@@ -16,7 +16,7 @@ export const NODES = [
   Submit   →  the new row appears on the list
 `,
       usecase: "Leads die in DMs. A capture list+form is the light CRM screen SMBs need before they can afford a full suite.",
-      designMock: {"kind":"list-and-form","screenTitle":"Leads","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No leads yet.","rows":[{"title":"Jordan","subtitle":"Instagram","meta":"Wants quote"},{"title":"Second row","subtitle":"Another","meta":"Wants quote"}],"fields":[{"label":"Name","sample":"Jordan"},{"label":"Source","sample":"Instagram"},{"label":"Note","sample":"Wants quote"}],"submitLabel":"Capture"},
+      designMock: {"kind":"list-and-form","screenTitle":"Leads","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No leads yet.","rows":[{"title":"Jordan","subtitle":"Instagram","meta":"Wants quote"},{"title":"Jordan B","subtitle":"Instagram (alt)","meta":"Wants quote"}],"fields":[{"label":"Name","sample":"Jordan"},{"label":"Source","sample":"Instagram"},{"label":"Note","sample":"Wants quote"}],"submitLabel":"Capture"},
     },
   },
   {
@@ -36,20 +36,21 @@ This file doesn't exist yet — you're the first to touch it. Create it at \`src
 Define the shape of a sales lead (name, email, company) and build the inbox frame.
 
 WHAT YOU'LL NEED
-- id (text)
-- name (text)
-- email (text)
+- id (text — unique key, not always shown on screen)
+- name (per contract)
+- source (per contract)
+- note (per contract)
 
 Your task: Define the shape of a sales lead and create the component shell.`,
     hint: `1. Blueprint declaration: Rename Lead to your type name and define required fields.
 2. Shell component: Declare your component returning an empty <div />.`,
-    example_code: `export type Lead = {
+    example_code: `export type Guest = {
   id: string;
   name: string;
-  email: string;
+  note: string;
 };
 
-export function LeadInbox() {
+export function GuestList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -84,13 +85,13 @@ export function LeadInbox() {
   return <div />;
 }
 `,
-    analog_example: `export type Lead = {
+    analog_example: `export type Guest = {
   id: string;
   name: string;
-  email: string;
+  note: string;
 };
 
-export function LeadInbox() {
+export function GuestList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -106,22 +107,11 @@ export function LeadInbox() {
   Form     →  Name, Source, Note
   Submit   →  the new row appears on the list
 `,
-      discover: `export type Lead = {
-  id: string;
-  name: string;
-  source: string;
-  note: string;
-};
-
-export function LeadInbox() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Blueprint declaration: Rename Lead to your type name and define required fields.
-2. Shell component: Declare your component returning an empty <div />.`,
+      build: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     },
   },
   {
@@ -133,28 +123,24 @@ export function LeadInbox() {
 Hold leads in state; render each contact card, or display "Inbox zero — no new leads" when empty.
 
 WHAT YOU'LL NEED
-- State array holding leads.
-- Conditional empty check.
-- Map loop rendering lead cards.
+- id (text — unique key, not always shown on screen)
+- name (per contract)
+- source (per contract)
+- note (per contract)
 
 Your task: Store leads in state and display them, showing a placeholder if the inbox is empty.`,
     hint: `1. Set up state: Use useState<Lead[]>([]).
 2. Check for empty: Use leads.length === 0 to render the empty message.
 3. Render entries: Map through leads, passing key={lead.id}.`,
-    example_code: `const [leads, setLeads] = useState<Lead[]>([]);
-
-return (
-  <div>
-    {leads.length === 0 ? (
-      <p>No leads in inbox</p>
-    ) : (
-      leads.map((lead) => (
-        <div key={lead.id}>
-          {lead.name} ({lead.email})
-        </div>
-      ))
-    )}
-  </div>
+    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     think_prompt: `\`\`\`text
 LIST — Leads
@@ -233,20 +219,15 @@ export function LeadInbox() {
   );
 }
 `,
-    analog_example: `const [leads, setLeads] = useState<Lead[]>([]);
-
-return (
-  <div>
-    {leads.length === 0 ? (
-      <p>No leads in inbox</p>
-    ) : (
-      leads.map((lead) => (
-        <div key={lead.id}>
-          {lead.name} ({lead.email})
-        </div>
-      ))
-    )}
-  </div>
+    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -261,38 +242,11 @@ return (
   Form     →  Name, Source, Note
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Lead = {
-  id: string;
-  name: string;
-  source: string;
-  note: string;
-};
-
-export function LeadInbox() {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  return (
-    <div>
-      {leads.length === 0 ? (
-        <p>No leads yet.</p>
-      ) : (
-        <ul>
-          {leads.map((a) => (
-            <li key={a.id}>{a.name}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Set up state: Use useState<Lead[]>([]).
-2. Check for empty: Use leads.length === 0 to render the empty message.
-3. Render entries: Map through leads, passing key={lead.id}.`,
+      build: `To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. Once it does, checking its length before deciding what to render is just an ordinary conditional — the empty case and the list case are two branches of one render.`,
     },
   },
   {
@@ -304,17 +258,16 @@ export function LeadInbox() {
 Connect form fields to state so potential client details are captured live as you type.
 
 WHAT YOU'LL NEED
-- State hooks for name and email.
-- Value and onChange props wired on inputs.
+- id (text — unique key, not always shown on screen)
+- name (per contract)
+- source (per contract)
+- note (per contract)
 
 Your task: Connect lead capture inputs to React state.`,
     hint: `1. Initialize states: Call useState("") for name and email.
 2. Wire inputs: Connect value and onChange to each state variable.`,
     example_code: `const [name, setName] = useState("");
-const [email, setEmail] = useState("");
-
-<input value={name} onChange={(e) => setName(e.target.value)} />
-<input value={email} onChange={(e) => setEmail(e.target.value)} />`,
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Leads
   [ Name ]  [ Source ]  [ Note ]   → Capture
@@ -389,10 +342,7 @@ export function LeadInbox() {
 }
 `,
     analog_example: `const [name, setName] = useState("");
-const [email, setEmail] = useState("");
-
-<input value={name} onChange={(e) => setName(e.target.value)} />
-<input value={email} onChange={(e) => setEmail(e.target.value)} />`,
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -406,34 +356,11 @@ const [email, setEmail] = useState("");
   Form     →  Name, Source, Note
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Lead = {
-  id: string;
-  name: string;
-  source: string;
-  note: string;
-};
-
-export function LeadInbox() {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [name, setName] = useState("");
-  const [source, setSource] = useState("");
-  const [note, setNote] = useState("");
-  return (
-    <form>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
-        <input value={source} onChange={(e) => setSource(e.target.value)} placeholder="Source" />
-        <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note" />
-    </form>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize states: Call useState("") for name and email.
-2. Wire inputs: Connect value and onChange to each state variable.`,
+      build: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
     },
   },
   {
@@ -445,23 +372,17 @@ export function LeadInbox() {
 Stop the submit button from reloading the page, stack the lead into your inbox, and reset the form fields.
 
 WHAT YOU'LL NEED
-- Form interceptor using e.preventDefault().
-- New lead object creation.
-- Spread update to state.
-- Form reset calls.
+- id (text — unique key, not always shown on screen)
+- name (per contract)
+- source (per contract)
+- note (per contract)
 
 Your task: Append the new lead to your inbox without refreshing the page and reset the form.`,
     hint: `1. Halt refresh: Call e.preventDefault() first.
 2. Build item: Package id, name, and email into an object.
 3. Append item: Use setLeads((prev) => [...prev, entry]).
 4. Clear form: Reset input states to "".`,
-    example_code: `function captureLead(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), name, email };
-  setLeads((prev) => [...prev, entry]);
-  setName("");
-  setEmail("");
-}`,
+    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     think_prompt: `\`\`\`text
 FORM — Leads
   [ Name ]  [ Source ]  [ Note ]   → Capture
@@ -472,10 +393,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `New leads appear in the list instantly, keeping your sales workflow responsive.
-
-
-================================================================================`,
+    why_this_matters: `New leads appear in the list instantly, keeping your sales workflow responsive.`,
     answer_keywords: ["preventDefault","setLeads","prev","name","source","note"],
     seed_code: `import { useState } from "react";
 
@@ -582,21 +500,12 @@ export function LeadInbox() {
   );
 }
 `,
-    analog_example: `function captureLead(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), name, email };
-  setLeads((prev) => [...prev, entry]);
-  setName("");
-  setEmail("");
-}`,
+    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `New leads appear in the list instantly, keeping your sales workflow responsive.
-
-
-================================================================================`,
+      hook: `New leads appear in the list instantly, keeping your sales workflow responsive.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists leads and a form to add one:
 
@@ -605,56 +514,11 @@ export function LeadInbox() {
   Form     →  Name, Source, Note
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Lead = {
-  id: string;
-  name: string;
-  source: string;
-  note: string;
-};
-
-export function LeadInbox() {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [name, setName] = useState("");
-  const [source, setSource] = useState("");
-  const [note, setNote] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: Lead = { id: String(Date.now()), name, source, note };
-    setLeads((prev) => [...prev, next]);
-    setName("");
-    setSource("");
-    setNote("");
-  }
-  return (
-    <div>
-      {leads.length === 0 ? (
-        <p>No leads yet.</p>
-      ) : (
-        <ul>
-          {leads.map((a) => (
-            <li key={a.id}>{a.name} · {a.source} · {a.note}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
-        <input value={source} onChange={(e) => setSource(e.target.value)} placeholder="Source" />
-        <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note" />
-        <button type="submit">Capture</button>
-      </form>
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, name, and email into an object.
-3. Append item: Use setLeads((prev) => [...prev, entry]).
-4. Clear form: Reset input states to "".`,
+      build: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     },
   },
 ];

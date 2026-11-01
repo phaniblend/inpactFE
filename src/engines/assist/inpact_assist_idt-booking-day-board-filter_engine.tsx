@@ -17,7 +17,7 @@ export const NODES = [
   Filter   →  only matching rows render — the full list stays in state
 `,
       usecase: "Operators scan one provider's day. Filtering a list without destroying the full dataset is a core frontend skill.",
-      designMock: {"kind":"list-and-form","screenTitle":"Day board","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No appointments for this filter.","rows":[{"title":"Maya","subtitle":"Cut","meta":"10:00"},{"title":"Second row","subtitle":"Another","meta":"10:00"}],"fields":[{"label":"Provider","sample":"Maya"},{"label":"Service","sample":"Cut"},{"label":"Starts at","sample":"10:00"}],"submitLabel":"Add"},
+      designMock: {"kind":"list-and-form","screenTitle":"Day board","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No appointments for this filter.","rows":[{"title":"Maya","subtitle":"Cut","meta":"10:00"},{"title":"Maya B","subtitle":"Cut (alt)","meta":"10:00"}],"fields":[{"label":"Provider","sample":"Maya"},{"label":"Service","sample":"Cut"},{"label":"Starts at","sample":"10:00"}],"submitLabel":"Add"},
     },
   },
   {
@@ -37,22 +37,22 @@ This file doesn't exist yet — you're the first to touch it. Create it at \`src
 Define the appointment blueprint (including the provider name) and set up the day-board screen layout.
 
 WHAT YOU'LL NEED
-- id (text)
-- provider (text)
-- patient (text)
-- time (text)
+- id (text — unique key, not always shown on screen)
+- provider (per contract)
+- service (per contract)
+- startsAt (per contract)
 
 Your task: Create the blueprint for a provider-linked appointment and an empty wrapper component.`,
     hint: `1. Declare the type: Swap ScheduleItem for your appointment type name.
 2. Add your properties: Follow "field: string;" line-by-line for all required data keys.
 3. Create the component: Match the function frame, replacing ScheduleBoard with your component name.`,
-    example_code: `export type ScheduleItem = {
+    example_code: `export type Guest = {
   id: string;
-  category: string;
-  label: string;
+  name: string;
+  note: string;
 };
 
-export function ScheduleBoard() {
+export function GuestList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -87,13 +87,13 @@ export function DayBoard() {
   return <div />;
 }
 `,
-    analog_example: `export type ScheduleItem = {
+    analog_example: `export type Guest = {
   id: string;
-  category: string;
-  label: string;
+  name: string;
+  note: string;
 };
 
-export function ScheduleBoard() {
+export function GuestList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -110,23 +110,11 @@ export function ScheduleBoard() {
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `export type Appointment = {
-  id: string;
-  provider: string;
-  service: string;
-  startsAt: string;
-};
-
-export function DayBoard() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Declare the type: Swap ScheduleItem for your appointment type name.
-2. Add your properties: Follow "field: string;" line-by-line for all required data keys.
-3. Create the component: Match the function frame, replacing ScheduleBoard with your component name.`,
+      build: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     },
   },
   {
@@ -138,28 +126,24 @@ export function DayBoard() {
 View appointments through a provider filter lens, displaying only their patients or a "No visits for this provider" message.
 
 WHAT YOU'LL NEED
-- Array state holding appointments.
-- An active filter variable (e.g. selected provider).
-- A .filter() call producing a displayed subset.
-- A fallback note if the filtered subset is empty.
+- id (text — unique key, not always shown on screen)
+- provider (per contract)
+- service (per contract)
+- startsAt (per contract)
 
 Your task: Filter the appointment list by a selected provider and display only matches, or a note if none exist.`,
     hint: `1. Maintain the full list: Store all appointments in main state using useState.
 2. Apply the filter: Create a derived variable with items.filter(...), checking if item.provider matches the target provider.
 3. Render conditionally: Check visibleItems.length === 0. If zero, render your empty message; otherwise, loop through visibleItems with .map().`,
-    example_code: `const [items, setItems] = useState<ScheduleItem[]>([]);
-const [filter, setFilter] = useState("Dr. Smith");
-
-const visibleItems = items.filter((item) => item.category === filter);
-
-return (
-  <div>
-    {visibleItems.length === 0 ? (
-      <p>No entries found</p>
-    ) : (
-      visibleItems.map((item) => <div key={item.id}>{item.label}</div>)
-    )}
-  </div>
+    example_code: `const visible = guests.filter((g) => g.status === "active");
+return visible.length === 0 ? (
+  <p>No matches.</p>
+) : (
+  <ul>
+    {visible.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     think_prompt: `\`\`\`text
 LIST (filtered) — Day board
@@ -239,19 +223,15 @@ export function DayBoard() {
   );
 }
 `,
-    analog_example: `const [items, setItems] = useState<ScheduleItem[]>([]);
-const [filter, setFilter] = useState("Dr. Smith");
-
-const visibleItems = items.filter((item) => item.category === filter);
-
-return (
-  <div>
-    {visibleItems.length === 0 ? (
-      <p>No entries found</p>
-    ) : (
-      visibleItems.map((item) => <div key={item.id}>{item.label}</div>)
-    )}
-  </div>
+    analog_example: `const visible = guests.filter((g) => g.status === "active");
+return visible.length === 0 ? (
+  <p>No matches.</p>
+) : (
+  <ul>
+    {visible.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -267,39 +247,11 @@ return (
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `import { useState } from "react";
-
-export type Appointment = {
-  id: string;
-  provider: string;
-  service: string;
-  startsAt: string;
-};
-
-export function DayBoard() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const visible = appointments.filter((a) => a.provider === "Maya");
-  return (
-    <div>
-      {visible.length === 0 ? (
-        <p>No appointments for this filter.</p>
-      ) : (
-        <ul>
-          {visible.map((a) => (
-            <li key={a.id}>{a.provider}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Maintain the full list: Store all appointments in main state using useState.
-2. Apply the filter: Create a derived variable with items.filter(...), checking if item.provider matches the target provider.
-3. Render conditionally: Check visibleItems.length === 0. If zero, render your empty message; otherwise, loop through visibleItems with .map().`,
+      build: `.filter() always returns a brand-new array and never touches the one it was called on — so the full list stays in state, and the array you check for "empty" and then map is the filtered one, not the original.`,
     },
   },
   {
@@ -311,20 +263,17 @@ export function DayBoard() {
 Connect input text boxes to memory so newly entered appointment details are tracked live.
 
 WHAT YOU'LL NEED
-- State variables for provider, patient, and time.
-- Matching input boxes with value and onChange wired.
+- id (text — unique key, not always shown on screen)
+- provider (per contract)
+- service (per contract)
+- startsAt (per contract)
 
 Your task: Track what the user types into appointment fields in real time using component state.`,
     hint: `1. Initialize fields: Declare useState("") for each input needed.
 2. Link value: Set the input's value prop to the state variable.
 3. Link onChange: Update the corresponding state variable using e.target.value.`,
-    example_code: `const [label, setLabel] = useState("");
-
-<input
-  value={label}
-  onChange={(e) => setLabel(e.target.value)}
-  placeholder="Label"
-/>;`,
+    example_code: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Day board
   [ Provider ]  [ Service ]  [ Starts at ]   → Add
@@ -398,13 +347,8 @@ export function DayBoard() {
   );
 }
 `,
-    analog_example: `const [label, setLabel] = useState("");
-
-<input
-  value={label}
-  onChange={(e) => setLabel(e.target.value)}
-  placeholder="Label"
-/>;`,
+    analog_example: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -419,35 +363,11 @@ export function DayBoard() {
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `import { useState } from "react";
-
-export type Appointment = {
-  id: string;
-  provider: string;
-  service: string;
-  startsAt: string;
-};
-
-export function DayBoard() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [provider, setProvider] = useState("");
-  const [service, setService] = useState("");
-  const [startsAt, setStartsAt] = useState("");
-  return (
-    <form>
-        <input value={provider} onChange={(e) => setProvider(e.target.value)} placeholder="Provider" />
-        <input value={service} onChange={(e) => setService(e.target.value)} placeholder="Service" />
-        <input value={startsAt} onChange={(e) => setStartsAt(e.target.value)} placeholder="Starts at" />
-    </form>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize fields: Declare useState("") for each input needed.
-2. Link value: Set the input's value prop to the state variable.
-3. Link onChange: Update the corresponding state variable using e.target.value.`,
+      build: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
     },
   },
   {
@@ -459,22 +379,17 @@ export function DayBoard() {
 Intercept submission, add the new visit to memory, clear the form, and let the provider filter sort it.
 
 WHAT YOU'LL NEED
-- Form submission interceptor.
-- Creation of an item matching your Step 1 blueprint.
-- Spread update appending the item to state.
-- Field reset calls.
+- id (text — unique key, not always shown on screen)
+- provider (per contract)
+- service (per contract)
+- startsAt (per contract)
 
 Your task: Add the new appointment to the master list without a page refresh and reset the input form.`,
     hint: `1. Halt refresh: Call e.preventDefault() at the top of your handler.
 2. Construct item: Build an object containing an id and your form state values.
 3. Update state safely: Append using setItems((prev) => [...prev, next]).
 4. Reset inputs: Clear the input state variables by setting them back to "".`,
-    example_code: `function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  const next = { id: String(Date.now()), category: currentCategory, label };
-  setItems((prev) => [...prev, next]);
-  setLabel("");
-}`,
+    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     think_prompt: `\`\`\`text
 FORM — Day board
   [ Provider ]  [ Service ]  [ Starts at ]   → Add
@@ -485,10 +400,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `Appending to state keeps the master list updated, and your filter from Step 2 will immediately determine if the new item appears on the current board.
-
-
-================================================================================`,
+    why_this_matters: `Appending to state keeps the master list updated, and your filter from Step 2 will immediately determine if the new item appears on the current board.`,
     answer_keywords: ["preventDefault","setAppointments","prev","provider","service","startsAt"],
     seed_code: `import { useState } from "react";
 
@@ -595,20 +507,12 @@ export function DayBoard() {
   );
 }
 `,
-    analog_example: `function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  const next = { id: String(Date.now()), category: currentCategory, label };
-  setItems((prev) => [...prev, next]);
-  setLabel("");
-}`,
+    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Appending to state keeps the master list updated, and your filter from Step 2 will immediately determine if the new item appears on the current board.
-
-
-================================================================================`,
+      hook: `Appending to state keeps the master list updated, and your filter from Step 2 will immediately determine if the new item appears on the current board.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists appointments and a form to add one:
 
@@ -618,56 +522,11 @@ export function DayBoard() {
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `import { useState } from "react";
-
-export type Appointment = {
-  id: string;
-  provider: string;
-  service: string;
-  startsAt: string;
-};
-
-export function DayBoard() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [provider, setProvider] = useState("");
-  const [service, setService] = useState("");
-  const [startsAt, setStartsAt] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: Appointment = { id: String(Date.now()), provider, service, startsAt };
-    setAppointments((prev) => [...prev, next]);
-    setProvider("");
-    setService("");
-    setStartsAt("");
-  }
-  return (
-    <div>
-      {appointments.length === 0 ? (
-        <p>No appointments for this filter.</p>
-      ) : (
-        <ul>
-          {appointments.map((a) => (
-            <li key={a.id}>{a.provider} · {a.service} · {a.startsAt}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={provider} onChange={(e) => setProvider(e.target.value)} placeholder="Provider" />
-        <input value={service} onChange={(e) => setService(e.target.value)} placeholder="Service" />
-        <input value={startsAt} onChange={(e) => setStartsAt(e.target.value)} placeholder="Starts at" />
-        <button type="submit">Add</button>
-      </form>
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Halt refresh: Call e.preventDefault() at the top of your handler.
-2. Construct item: Build an object containing an id and your form state values.
-3. Update state safely: Append using setItems((prev) => [...prev, next]).
-4. Reset inputs: Clear the input state variables by setting them back to "".`,
+      build: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     },
   },
 ];

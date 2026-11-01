@@ -64,21 +64,7 @@ function DataFetcher() {
       hook: `Imagine you're building a large software project with many different utility functions. If every file started with \`import * as Utils from './utils';\` and then accessed \`Utils.someFunction()\`, your code would become verbose. More importantly, when your build tool bundles your application, it might include *all* functions from \`utils.js\`, even if you only used one. This leads to larger bundle sizes, slower load times for users, and a less efficient application. The problem escalates in larger projects where many modules might be imported this way, bloating the final application unnecessarily. There's a strong need for a way to only bring in exactly what's needed.`,
       pain: "⚠️ **Lesson:** Importing entire modules or default exports when only specific named exports are needed can lead to larger application bundle sizes and slower performance. Symptom: Applications taking longer to load due to unnecessary code being included in the final build.",
       mentalModel: `**Mental model:** The Surgical Tool Kit. Think of a module like 'react' as a large toolbox containing many specialized tools (like \`useState\`, \`useEffect\`, \`useContext\`). Instead of grabbing the entire toolbox and rummaging through it every time you need a wrench (\`React.useState\`), named imports allow you to surgically pick out *only* the specific tools you need (\`import { useState } from 'react';\`). This keeps your workbench (your component file) tidy, makes it immediately clear which tools you're using, and, crucially, allows the build process to only include those specific tools in your final application, making it lighter and faster.`,
-      discover: `**Pattern - Named Imports:**
-\`\`\`tsx
-import { createContext, useContext } from 'react';
-
-const ThemeContext = createContext('light');
-
-function ThemedComponent() {
-  const theme = useContext(ThemeContext);
-  return <p>Current theme: {theme}</p>;
-}
-\`\`\`
-- \`createContext\` and \`useContext\` are specific functions exported by the 'react' module.
-- The \`import { ... } from '...'\` syntax explicitly lists which exports to bring into scope.
-- This enables 'tree-shaking', where build tools can eliminate unused exports from the final bundle.
-- Improves code readability by showing exactly what dependencies a file has.`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Always use named imports (\`import { name } from 'module';\`) when a module exports multiple items.
 - ✅ Prefer named imports for better tree-shaking and smaller bundle sizes.
@@ -131,24 +117,7 @@ const displayUser = (user: UserProfile) => {
       hook: `Imagine you're building a complex application, perhaps a system for managing thousands of customer orders. Each order has a status: 'pending', 'shipped', 'delivered', 'cancelled'. Without a clear, enforced structure for these order objects, different parts of your team might represent them inconsistently. One developer might use \`orderStatus: 'pending'\`, another \`status: 'PND'\`, and a third \`state: 0\`. When it comes time to filter orders by status, or display them in a table, the inconsistencies lead to bugs, wasted time debugging, and a fragile codebase. The pain of maintaining such a system grows exponentially with its complexity, making simple tasks like adding a new filter a nightmare. You need a way to declare a contract for your data that everyone can rely on, ensuring that every 'order' object conforms to a predictable shape.`,
       pain: "⚠️ **Lesson:** Without explicit type definitions for data structures, consistency across a codebase degrades, leading to runtime errors, difficult debugging, and increased development time for features like filtering or display. Symptom: Functions expecting a `status` property might receive `state` or `orderStatus`, causing unexpected behavior or crashes.",
       mentalModel: `**Mental model:** The Data Blueprint. Think of an \`interface\` (or a \`type\` alias) as a blueprint for your data objects. Just as an architect's blueprint specifies the exact dimensions, materials, and layout for a building, a TypeScript interface specifies the exact properties, their names, and their types for an object. When you create an object that 'implements' this interface, TypeScript ensures it adheres to the blueprint. This means every part of your application that interacts with a 'Resource' object knows exactly what properties to expect and what type of data those properties will hold, making it impossible to accidentally refer to \`resource.title\` when the blueprint specifies \`resource.name\`.`,
-      discover: `**Pattern - Type Definition:**
-\`\`\`tsx
-interface Item { 
-  id: string;
-  name: string;
-  category: 'food' | 'drink' | 'other';
-  price: number;
-}
-
-const inventory: Item[] = [
-  { id: 'i1', name: 'Apple', category: 'food', price: 1.00 },
-  { id: 'i2', name: 'Water', category: 'drink', price: 1.50 },
-];
-\`\`\`
-- Defines the expected shape of an \`Item\` object.
-- Uses literal types (\`'food' | 'drink' | 'other'\`) for \`category\` to restrict possible values, which is excellent for filtering.
-- Ensures all objects in the \`inventory\` array conform to the \`Item\` blueprint.
-- Provides compile-time checks, preventing common data-related bugs.`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Use \`interface\` for defining the shape of objects, especially when you might want to extend it later.
 - ✅ Use \`type\` aliases for unions, intersections, or primitive types, or when you need to define a specific type for a function signature.
@@ -199,25 +168,7 @@ const inventory: Item[] = [
       hook: `Imagine you're trying to teach a new developer how to build interactive web interfaces. In the past, they'd encounter \`class MyComponent extends React.Component { ... }\`, needing to understand \`this\` context, lifecycle methods like \`componentDidMount\`, and \`setState\` as a method. This often felt like learning object-oriented programming just to render a button. Then, to add state or side effects, they'd have to juggle multiple lifecycle methods, leading to scattered logic and complex mental models. The cognitive load was significant, especially for beginners. The desire was for a simpler, more direct way to build components that felt more like pure functions, but still had access to state and lifecycle features.`,
       pain: "⚠️ **Lesson:** Class components introduced complexity with `this` binding, lifecycle methods, and scattered logic, making them harder to understand, test, and refactor, especially for beginners. Symptom: Developers struggling with `this` context issues or placing unrelated logic in the same lifecycle method.",
       mentalModel: `**Mental model:** The Functional Recipe. Think of a functional component as a recipe for a dish. You provide the ingredients (props), and the recipe (function) tells you exactly how to combine them to produce the final dish (JSX). There's no complex 'chef' object (\`this\`) to manage; you just follow the steps. When you need to add a new ingredient (state) or perform an action during cooking (side effect), you use specialized tools (hooks like \`useState\` or \`useEffect\`) that are explicitly designed for that purpose, keeping the recipe clear and focused. This makes the process more predictable and easier to follow, especially when the recipe gets more complex.`,
-      discover: `**Pattern - Functional Component:**
-\`\`\`tsx
-function Counter() {
-  const [count, setCount] = useState(0);
-
-  const increment = () => setCount(count + 1);
-
-  return (
-    <div>
-      <p>Count: {count}</p>
-      <button onClick={increment}>Increment</button>
-    </div>
-  );
-}
-\`\`\`
-- Defined as a standard JavaScript function.
-- Uses \`useState\` hook for managing component-specific state.
-- Logic for updating state (\`increment\`) is defined directly within the component.
-- Returns JSX directly, describing the UI based on current props and state.`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Use functional components for all new components.
 - ✅ Leverage React Hooks (\`useState\`, \`useEffect\`, \`useContext\`, etc.) for state and lifecycle features.
@@ -272,24 +223,7 @@ function Counter() {
       hook: `Imagine you have a complex dashboard displaying real-time data. A user clicks a button, and a specific chart needs to update with new data. If you simply changed a variable in JavaScript, nothing on the screen would change. The browser wouldn't know to re-draw that part of the UI. In traditional web development, you'd have to manually select the DOM element, update its text content, or re-render a whole section of HTML. This manual DOM manipulation is tedious, error-prone, and inefficient, especially when dealing with many interdependent UI elements. The challenge is how to declaratively describe your UI and have the framework efficiently update it when the underlying data changes, without you having to micromanage every pixel.`,
       pain: "⚠️ **Lesson:** Directly modifying variables in a component does not trigger UI updates; manual DOM manipulation is inefficient and error-prone. Symptom: Data changes in the component logic, but the displayed UI remains static, leading to a desynchronized user experience.",
       mentalModel: `**Mental model:** The State-Driven Painter. Think of your React component as a painter who has a canvas (the UI) and a set of instructions (your JSX). When you call a \`set\` function from \`useState\` (e.g., \`setCount(newCount)\`), it's like telling the painter, 'Hey, this specific detail on the canvas needs to change to \`newCount\`.' The painter doesn't immediately grab a brush. Instead, React (the art director) notes down all the changes requested. Then, at an optimized time, React tells the painter to re-evaluate the entire 'recipe' (re-run your component function) with the *new* state values. It then compares the 'new painting' (the JSX returned) with the 'old painting' (the previous DOM) and only paints the differences, ensuring the UI is always a faithful representation of your component's current state, without you needing to manually manage the brushstrokes.`,
-      discover: `**Pattern - State Update and Re-render:**
-\`\`\`tsx
-function Toggle() {
-  const [isOn, setIsOn] = useState(false);
-
-  const handleClick = () => {
-    setIsOn(!isOn); // 1. Update state
-  };
-
-  return (
-    <button onClick={handleClick}>
-      {isOn ? 'ON' : 'OFF'} {/* 2. UI reflects state */}
-    </button>
-  );
-}
-\`\`\`
-- \`useState\` initializes \`isOn\` to \`false\` on first render.
-- \`handleClick\` calls \`setIsOn(!isOn)\`, which schedules a state update.
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.", which schedules a state update.
 - React detects the state change and re-runs the \`Toggle\` component function.
 - The new \`isOn\` value (\`true\`) is used, causing the button text to change to 'ON'.
 - React efficiently updates only the necessary part of the DOM.`,
@@ -354,35 +288,7 @@ function Toggle() {
       hook: `Imagine a visually impaired user trying to navigate a website using a screen reader. If the site is built entirely with generic \`div\` elements, the screen reader has no meaningful cues about the page's structure. It might just read out 'div, div, div' without conveying that one \`div\` is a navigation menu, another is the main content, and a third is a footer. This makes the experience confusing and frustrating, effectively locking out users who rely on assistive technologies. Similarly, search engines crawl websites to understand their content and structure. A page full of generic \`div\`s provides little context, making it harder for search engines to accurately index and rank the content. The problem is how to convey meaning and structure to both humans and machines beyond just visual presentation.`,
       pain: "⚠️ **Lesson:** Over-reliance on non-semantic `div` and `span` elements hinders accessibility for users with assistive technologies and reduces search engine optimization (SEO) by obscuring page structure. Symptom: Screen readers providing unhelpful navigation cues, or search engines struggling to understand the hierarchy and relevance of content.",
       mentalModel: `**Mental model:** The Labeled Filing Cabinet. Think of your webpage as a filing cabinet. If all the drawers are identical and unlabeled (\`div\`s), it's hard for anyone (human or machine) to quickly find what they're looking for. Semantic HTML elements are like clearly labeled drawers: \`header\` for the top section, \`nav\` for navigation, \`main\` for the primary content, \`article\` for a self-contained piece of content, \`aside\` for supplementary information, and \`footer\` for the bottom section. These labels immediately tell anyone interacting with the cabinet (including screen readers and search engine bots) what kind of content to expect in each section, making it much easier to organize, find, and understand information.`,
-      discover: `**Pattern - Semantic HTML Structure:**
-\`\`\`tsx
-<header>
-  <h1>Website Title</h1>
-  <nav>
-    <a href="/">Home</a>
-    <a href="/about">About</a>
-  </nav>
-</header>
-<main>
-  <article>
-    <h2>Article Title</h2>
-    <p>Article content...</p>
-  </article>
-  <aside>
-    <h3>Related Links</h3>
-    <ul><li>...</li></ul>
-  </aside>
-</main>
-<footer>
-  <p>&copy; 2023</p>
-</footer>
-\`\`\`
-- \`header\` clearly identifies the introductory content of a section or page.
-- \`nav\` indicates a section containing navigation links.
-- \`main\` denotes the dominant content of the \`body\`.
-- \`article\` represents self-contained content, like a blog post or news story.
-- \`aside\` contains content related to the surrounding content but considered separate.
-- \`footer\` contains concluding content for its nearest sectioning root or the entire page.`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Use \`header\`, \`nav\`, \`main\`, \`article\`, \`section\`, \`aside\`, \`footer\` for major page regions.
 - ✅ Use \`h1\` through \`h6\` for headings, ensuring a logical hierarchy.
@@ -451,24 +357,7 @@ function ItemFilter() {
       hook: `Imagine you have a list of ten thousand customer records, and you need to display only the 'active' ones. If your filtering logic is inefficient, every time a user types a character into a search box or clicks a filter button, the application might freeze for a noticeable moment. This lag, even if brief, accumulates and degrades the user experience, especially on less powerful devices. For very large datasets, a naive filtering approach can quickly become a performance bottleneck, leading to frustrated users and a perception of a slow, unresponsive application. The challenge is to filter large arrays without causing UI jank or excessive resource consumption.`,
       pain: "⚠️ **Lesson:** Inefficient filtering of large arrays can lead to performance bottlenecks, causing UI lag and a poor user experience. Symptom: The application becomes unresponsive or noticeably slow when filter criteria change, especially with large datasets.",
       mentalModel: `**Mental model:** The Data Sieve. Think of \`Array.prototype.filter()\` as a specialized sieve for your data. You pour your entire collection of resources into the sieve, and for each resource, you apply a specific test (your filtering condition). Only the resources that pass the test fall through the sieve and into a new, filtered collection. Crucially, this process *always* creates a *new* array; it doesn't modify the original. This 'immutability' is a core principle in React, as it allows React to efficiently detect changes and re-render only what's necessary, without worrying about side effects on the original data. While it iterates over the entire array, its simplicity and immutability often make it a highly performant and readable choice for most filtering tasks.`,
-      discover: `**Pattern - Array Filtering:**
-\`\`\`tsx
-const numbers = [1, 2, 3, 4, 5, 6];
-const evenNumbers = numbers.filter(num => num % 2 === 0);
-// evenNumbers is [2, 4, 6]
-
-const products = [
-  { id: 1, name: 'Laptop', price: 1200 },
-  { id: 2, name: 'Mouse', price: 25 },
-  { id: 3, name: 'Keyboard', price: 75 },
-];
-const affordableProducts = products.filter(p => p.price < 100);
-// affordableProducts is [{ id: 2, name: 'Mouse', price: 25 }, { id: 3, name: 'Keyboard', price: 75 }]
-\`\`\`
-- \`filter()\` creates a new array containing only elements for which the provided callback function returns \`true\`.
-- The original array remains unchanged (immutability).
-- It iterates over each element, applying the condition.
-- Ideal for creating subsets of data based on specific criteria.`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Use \`filter()\` when you need a new array containing a subset of the original elements.
 - ✅ Ensure your filter callback function is pure (no side effects).
@@ -524,30 +413,7 @@ const affordableProducts = products.filter(p => p.price < 100);
       hook: `Imagine you have a dynamic list of items, like a shopping cart, where items can be added, removed, or reordered. If React doesn't have a stable way to identify each individual item in the list, it struggles to efficiently update the DOM. When an item is removed, React might incorrectly update an existing item's content instead of removing the correct one. If items are reordered, React might re-render every single item, even if only their positions changed, leading to performance issues and potential state bugs (e.g., an input field's value jumping to the wrong item). The problem is how to give React a unique identifier for each element in a list so it can perform minimal, correct updates.`,
       pain: "⚠️ **Lesson:** Omitting or misusing the `key` prop when rendering lists can lead to inefficient UI updates, incorrect component state, and subtle bugs, especially when list items are added, removed, or reordered. Symptom: List items displaying incorrect data after updates, or performance degradation during list manipulations.",
       mentalModel: `**Mental model:** The Unique ID Badge. Think of each item in your dynamic list as an employee in a company. When you render a list, React needs to keep track of each 'employee'. The \`key\` prop is like a unique ID badge for each employee. If an employee changes their desk (reorders), React can quickly identify them by their ID badge and move only that employee. If a new employee joins (item added), React can efficiently insert them. If an employee leaves (item removed), React knows exactly which one to dismiss. Without these ID badges, React would have to guess, potentially confusing one employee for another or re-interviewing everyone just to figure out who moved, leading to unnecessary work and errors.`,
-      discover: `**Pattern - List Rendering with \`key\`:**
-\`\`\`tsx
-const users = [
-  { id: 'u1', name: 'Alice' },
-  { id: 'u2', name: 'Bob' },
-  { id: 'u3', name: 'Charlie' },
-];
-
-function UserList() {
-  return (
-    <ul>
-      {users.map(user => (
-        <li key={user.id}> {/* Unique 'id' is used as key */}
-          {user.name}
-        </li>
-      ))}
-    </ul>
-  );
-}
-\`\`\`
-- The \`key\` prop is a special string attribute that must be included when creating lists of elements.
-- It helps React identify which items have changed, are added, or are removed.
-- Keys should be unique among siblings in the list.
-- Using stable IDs from your data (like \`user.id\`) is the best practice.`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Always provide a \`key\` prop when rendering a list of elements.
 - ✅ The \`key\` must be a stable, unique identifier for each item within its sibling list.
@@ -616,37 +482,7 @@ function ErrorLogViewer() {
       hook: `Imagine your \`ResourceList\` component grows very large. It handles displaying all resources, filtering them, managing the filter state, and now also a history view. The file becomes hundreds of lines long, difficult to read, and even harder to maintain. Any change to the filtering logic might accidentally break the history view, or vice-versa. Testing becomes a nightmare because one component is responsible for too many things. The component is doing too much, violating the Single Responsibility Principle, and making collaboration and debugging inefficient. You need a way to break down this complexity into manageable, independent pieces.`,
       pain: "⚠️ **Lesson:** A single component handling too many responsibilities (e.g., displaying, filtering, and managing multiple distinct views) leads to bloated, hard-to-maintain code and increased risk of bugs. Symptom: Components growing excessively large, with intertwined logic for different features, making them difficult to understand, test, or reuse.",
       mentalModel: `**Mental model:** The Specialized Workstation. Think of your \`ResourceList\` as a general-purpose factory floor. Initially, it handles everything. But as the factory grows, you realize it's more efficient to set up specialized workstations. The 'Resource History' view is a perfect candidate for its own workstation (a separate component). This workstation would receive the raw resources as props, and its *sole responsibility* would be to filter them for 'completed' or 'archived' status and display them. This makes each workstation smaller, easier to understand, test independently, and even reuse in other parts of the factory. The main factory floor (the parent component) then just coordinates these specialized workstations, passing them the necessary raw materials.`,
-      discover: `**Pattern - Component Composition for Views:**
-\`\`\`tsx
-// ResourceHistory.tsx
-interface ResourceHistoryProps { 
-  allResources: Resource[];
-}
-
-function ResourceHistory({ allResources }: ResourceHistoryProps) {
-  const historyItems = allResources.filter(r => r.status === 'completed' || r.status === 'archived');
-  return (
-    <section>
-      <h2>Resource History</h2>
-      <ul>
-        {historyItems.length > 0 ? (
-          historyItems.map(resource => <li key={resource.id}>{resource.name}</li>)
-        ) : (
-          <li>No history items.</li>
-        )}
-      </ul>
-    </section>
-  );
-}
-
-// In parent component (e.g., ResourceList)
-// <ResourceHistory allResources={resources} />
-\`\`\`
-- Creates a new, dedicated component (\`ResourceHistory\`) for the specific view.
-- The new component receives the full data (\`allResources\`) as a prop.
-- It encapsulates its own filtering logic and rendering for that specific view.
-- Improves modularity, readability, and reusability of the history view.
-- Decouples the history view's logic from the main list's filtering logic.`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Create a new component when a section of your UI has distinct responsibilities or complex logic.
 - ✅ Pass data down to child components via props.

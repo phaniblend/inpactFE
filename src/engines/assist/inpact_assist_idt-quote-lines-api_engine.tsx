@@ -41,12 +41,9 @@ WHAT YOU'LL NEED
 Your task: Set up server storage for quote line items and an ID generator.`,
     hint: `1. In-memory store: Declare an empty array typed with your line item interface.
 2. ID helper: Return an incremental ID string from your helper function.`,
-    example_code: `let quoteLines: QuoteLineRecord[] = [];
-let lineIdCounter = 1;
-
-function generateLineId(): string {
-  return \`line-\${lineIdCounter++}\`;
-}`,
+    example_code: `let guests = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/quote-lines
 GET /api/quote-lines
@@ -74,12 +71,9 @@ let nextIdCounter = 1;
 function nextId() { return String(nextIdCounter++); }
 export function getStore() { return lines; }
 `,
-    analog_example: `let quoteLines: QuoteLineRecord[] = [];
-let lineIdCounter = 1;
-
-function generateLineId(): string {
-  return \`line-\${lineIdCounter++}\`;
-}`,
+    analog_example: `let guests = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -92,16 +86,11 @@ function generateLineId(): string {
   Validate →  required fields before insert
   Conflict →  same quoteId + same label → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let lines = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return lines; }
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. In-memory store: Declare an empty array typed with your line item interface.
-2. ID helper: Return an incremental ID string from your helper function.`,
+      build: `Two requests that arrive close together must never be handed the same id — a counter that only ever increases guarantees each new record gets a value nothing before it used, which a timestamp alone cannot promise.`,
     },
   },
   {
@@ -119,9 +108,7 @@ WHAT YOU'LL NEED
 Your task: Reject line item requests missing quoteId, label, or price with status 400.`,
     hint: `1. Inspect fields: Evaluate required properties using !req.body.property.
 2. Reject missing: Send status 400 if any required field is falsy.`,
-    example_code: `if (!req.body.quoteId || !req.body.label || !req.body.price) {
-  return res.status(400).json({ error: "Quote ID, label, and price are required" });
-}`,
+    example_code: `if (!input?.name?.trim()) return "name is required";`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/quote-lines
 POST /api/quote-lines
@@ -161,9 +148,7 @@ export function validateLine(input) {
   return null;
 }
 `,
-    analog_example: `if (!req.body.quoteId || !req.body.label || !req.body.price) {
-  return res.status(400).json({ error: "Quote ID, label, and price are required" });
-}`,
+    analog_example: `if (!input?.name?.trim()) return "name is required";`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -176,22 +161,11 @@ export function validateLine(input) {
   Validate →  required fields before insert
   Conflict →  same quoteId + same label → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let lines = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return lines; }
-export function validateLine(input) {
-  if (typeof input?.quoteId !== "string" || !input.quoteId.trim()) return "quoteId is required";
-  if (typeof input?.label !== "string" || !input.label.trim()) return "label is required";
-  if (typeof input?.amount !== "number" || input.amount <= 0) return "amount must be > 0";
-  return null;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Inspect fields: Evaluate required properties using !req.body.property.
-2. Reject missing: Send status 400 if any required field is falsy.`,
+      build: `A validator is just a function that inspects the fields it was given and returns either a short error message or nothing at all — the caller decides what to do with that answer.`,
     },
   },
   {
@@ -210,11 +184,8 @@ Your task: Scan existing quote lines and reject with status 409 if a line with t
     hint: `1. Scan store: Use .some() on your quoteLines array.
 2. Match criteria: Compare quoteId and normalized label values.
 3. Reject duplicates: If found, halt execution with status 409.`,
-    example_code: `const exists = quoteLines.some(
-  (l) => l.quoteId === req.body.quoteId && l.label.toLowerCase() === req.body.label.toLowerCase()
-);
-if (exists) {
-  return res.status(409).json({ error: "A line with this label already exists on this quote" });
+    example_code: `function seatTaken(seat, holds) {
+  return holds.some((h) => h.seat === seat);
 }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/quote-lines
@@ -246,14 +217,11 @@ export function hasDuplicateLine(candidate) {}
     expected: `let lines = [];
 export function validateLine(input) { return null; }
 export function hasDuplicateLine(candidate) {
-  return lines.some((row) => row.quoteId === candidate.quoteId && row.amount === candidate.amount);
+  return lines.some((row) => row.quoteId === candidate.quoteId && row.label === candidate.label);
 }
 `,
-    analog_example: `const exists = quoteLines.some(
-  (l) => l.quoteId === req.body.quoteId && l.label.toLowerCase() === req.body.label.toLowerCase()
-);
-if (exists) {
-  return res.status(409).json({ error: "A line with this label already exists on this quote" });
+    analog_example: `function seatTaken(seat, holds) {
+  return holds.some((h) => h.seat === seat);
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -267,18 +235,11 @@ if (exists) {
   Validate →  required fields before insert
   Conflict →  same quoteId + same label → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let lines = [];
-export function validateLine(input) { return null; }
-export function hasDuplicateLine(candidate) {
-  return lines.some((row) => row.quoteId === candidate.quoteId && row.amount === candidate.amount);
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Scan store: Use .some() on your quoteLines array.
-2. Match criteria: Compare quoteId and normalized label values.
-3. Reject duplicates: If found, halt execution with status 409.`,
+      build: `Checking one candidate record against a list of existing ones for a matching combination of fields is exactly what Array.prototype.some() is for — it stops at the first match and returns true or false.`,
     },
   },
   {
@@ -297,17 +258,7 @@ Your task: Build endpoints to return line items and add new lines with validatio
     hint: `1. Return store: Send status 200 with the quoteLines array in GET.
 2. Protect POST: Run validation and duplicate checks before pushing the record.
 3. Save record: Assign a unique ID, push the item to storage, and return status 201.`,
-    example_code: `export function getLines(res: Response) {
-  return res.status(200).json(quoteLines);
-}
-
-export function createLine(req: Request, res: Response) {
-  // Step 2 validation check (400)
-  // Step 3 duplicate label check (409)
-  const item = { id: generateLineId(), ...req.body };
-  quoteLines.push(item);
-  return res.status(201).json(item);
-}`,
+    example_code: `if (seatTaken(body.seat, holds)) return res.status(409).json({ error: "taken" });`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/quote-lines
 GET /api/quote-lines
@@ -321,10 +272,7 @@ A route handler is where validation, conflict-checking, and storage come togethe
     mc_options: ["GET lists store; POST validates, rejects conflict, else 201","POST always 201 even on overlap","GET returns HTML instead of JSON"],
     mc_correct_option: "GET lists store; POST validates, rejects conflict, else 201",
     mc_anchor: "GET lists store; POST validates, rejects",
-    why_this_matters: `Consistent error codes (400 for bad data, 409 for duplicates) make API behavior predictable.
-
-
-================================================================================`,
+    why_this_matters: `Consistent error codes (400 for bad data, 409 for duplicates) make API behavior predictable.`,
     answer_keywords: ["409","400","201","validateLine","hasDuplicateLine"],
     seed_code: `let lines = [];
 let nextIdCounter = 1;
@@ -352,7 +300,7 @@ let nextIdCounter = 1;
 function nextId() { return String(nextIdCounter++); }
 export function validateLine(input) { return null; }
 export function hasDuplicateLine(candidate) {
-  return lines.some((row) => row.quoteId === candidate.quoteId && row.amount === candidate.amount);
+  return lines.some((row) => row.quoteId === candidate.quoteId && row.label === candidate.label);
 }
 export function createHandlers() {
   return {
@@ -370,25 +318,12 @@ export function createHandlers() {
   };
 }
 `,
-    analog_example: `export function getLines(res: Response) {
-  return res.status(200).json(quoteLines);
-}
-
-export function createLine(req: Request, res: Response) {
-  // Step 2 validation check (400)
-  // Step 3 duplicate label check (409)
-  const item = { id: generateLineId(), ...req.body };
-  quoteLines.push(item);
-  return res.status(201).json(item);
-}`,
+    analog_example: `if (seatTaken(body.seat, holds)) return res.status(409).json({ error: "taken" });`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Consistent error codes (400 for bad data, 409 for duplicates) make API behavior predictable.
-
-
-================================================================================`,
+      hook: `Consistent error codes (400 for bad data, 409 for duplicates) make API behavior predictable.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Implement /api/quote-lines with persistence and a conflict rule:
 
@@ -396,35 +331,11 @@ export function createLine(req: Request, res: Response) {
   Validate →  required fields before insert
   Conflict →  same quoteId + same label → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let lines = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function validateLine(input) { return null; }
-export function hasDuplicateLine(candidate) {
-  return lines.some((row) => row.quoteId === candidate.quoteId && row.amount === candidate.amount);
-}
-export function createHandlers() {
-  return {
-    list(_req, res) {
-      res.json(lines);
-    },
-    create(req, res) {
-      const err = validateLine(req.body);
-      if (err) return res.status(400).json({ error: err });
-      if (hasDuplicateLine(req.body)) return res.status(409).json({ error: "conflict" });
-      const row = { id: nextId(), quoteId: req.body.quoteId, label: req.body.label, amount: req.body.amount };
-      lines.push(row);
-      res.status(201).json(row);
-    },
-  };
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Return store: Send status 200 with the quoteLines array in GET.
-2. Protect POST: Run validation and duplicate checks before pushing the record.
-3. Save record: Assign a unique ID, push the item to storage, and return status 201.`,
+      build: `A route handler's job is to call helpers in the right order and translate their answers into HTTP status codes — the actual rules already live in the functions written in earlier steps.`,
     },
   },
 ];

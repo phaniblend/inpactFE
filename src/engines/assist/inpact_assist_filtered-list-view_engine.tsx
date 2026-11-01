@@ -84,19 +84,7 @@ function ShoppingCartIcon(): JSX.Element {
       pain: `⚠️ **Lesson:** Functional components, by default, don't "remember" values between renders, and changes to regular variables don't trigger re-renders.
 **Symptom:** UI elements fail to update visually when their underlying data changes, leading to a static or unresponsive user interface.`,
       mentalModel: `**Mental model:** The "Component Memory Hook." Think of \`useState\` as providing a special, persistent memory slot for your component. When you declare state with \`useState\`, React allocates a dedicated piece of memory for that variable that persists across re-renders. Crucially, when you use the "setter" function provided by \`useState\` (e.g., \`setCount\`), React not only updates the value in that memory slot but also automatically knows that the component needs to be re-rendered with the new value. This is the core mechanism that makes your functional components dynamic and interactive, allowing them to respond to user input and display changing data.`,
-      discover: `**Pattern - name:** Importing \`useState\`
-\`\`\`tsx
-import { useState } from 'react';
-
-function MyComponent(): JSX.Element {
-  const [value, setValue] = useState(initialValue);
-  // ... component logic
-}
-\`\`\`
-- \`useState\` is a named export from the 'react' library, hence the curly braces.
-- It must be imported at the top of the file where it's used.
-- It allows functional components to manage local, reactive state.
-- The \`useState\` hook returns an array containing the current state value and a function to update it.`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Always import \`useState\` using named import syntax: \`import { useState } from 'react';\`.
 - ✅ Use \`useState\` at the top level of your functional component.
@@ -178,23 +166,7 @@ type ProductCategory = 'all' | 'electronics' | 'books' | 'clothing';
       pain: `⚠️ **Lesson:** Using generic types like \`string\` for properties that should have a limited set of values can lead to runtime errors due to typos or invalid assignments.
 **Symptom:** Data inconsistencies, unexpected application behavior, and difficult-to-diagnose bugs that only appear at runtime.`,
       mentalModel: `**Mental model:** The "Type-Safe Enumeration." Instead of relying on runtime checks or hoping developers remember the exact string values, literal string unions act like a compile-time enumeration. You're telling TypeScript, "This variable can *only* be one of these specific string values." It's like having a strict checklist for every assignment. If you try to assign anything not on the list, TypeScript immediately flags it as an error. This shifts potential bugs from runtime to compile-time, making development much safer and faster, as you get instant feedback on invalid data.`,
-      discover: `**Pattern - name:** Literal String Union Types
-\`\`\`tsx
-type Status = 'draft' | 'published' | 'archived';
-
-interface Article {
-  id: string;
-  title: string;
-  status: Status; // Enforces 'draft', 'published', or 'archived'
-}
-
-const myArticle: Article = { id: '1', title: 'Hello', status: 'published' }; // OK
-// const anotherArticle: Article = { id: '2', title: 'World', status: 'pending' }; // Type error!
-\`\`\`
-- Defines a type that can only hold one of a specified set of string literal values.
-- Provides compile-time safety, preventing typos and invalid assignments.
-- Improves code readability by clearly documenting expected values.
-- Can be used directly in interfaces or as standalone type aliases.`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Use literal string unions when a property or variable should be restricted to a known, finite set of string values.
 - ✅ Define these unions using the \`type\` keyword (e.g., \`type Color = 'red' | 'green' | 'blue';\`).
@@ -304,28 +276,7 @@ const Counter = (): JSX.Element => {
       pain: `⚠️ **Lesson:** Omitting explicit return types for functional components can lead to ambiguity, missed type errors, and runtime failures when invalid output is accidentally returned.
 **Symptom:** Unclear component contracts, unexpected rendering issues, and type-related bugs that are only discovered during execution.`,
       mentalModel: `**Mental model:** The "Component Contract." Explicitly typing a component's return as \`JSX.Element\` is like signing a contract. You're declaring, "This component promises to always return valid JSX that React can render." This contract provides clarity for anyone using or maintaining the component. If you accidentally write code that returns something else, TypeScript immediately flags it, enforcing the contract at compile-time. This ensures that components consistently produce renderable output, making your application more predictable and robust. It's a small addition that yields significant benefits in terms of code quality and maintainability.`,
-      discover: `**Pattern - name:** Explicit \`JSX.Element\` Return Type
-\`\`\`tsx
-// Good practice: explicit return type
-const MyComponent = (): JSX.Element => {
-  // ... logic
-  return (
-    <div>Hello</div>
-  );
-};
-
-// Less explicit, but often inferred by TypeScript
-// const MyComponent = () => {
-//   // ... logic
-//   return (
-//     <div>Hello</div>
-//   );
-// };
-\`\`\`
-- \`JSX.Element\` is a global type available in TypeScript React projects.
-- It explicitly states that the component will return a valid React element.
-- Improves type safety by catching cases where a component might accidentally return non-JSX.
-- Enhances code readability and serves as clear documentation for the component's output.`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Explicitly type functional component returns as \`JSX.Element\` for clarity.
 - ✅ Use \`JSX.Element\` when your component always returns a single React element or \`null\`.
@@ -490,32 +441,7 @@ const ProductList = (): JSX.Element => {
       pain: `⚠️ **Lesson:** Data that needs to be displayed and potentially modified by user interaction must be managed as React state to ensure reactivity and UI updates.
 **Symptom:** UI elements fail to update when their underlying data changes, leading to a static or unresponsive application.`,
       mentalModel: `**Mental model:** The "Reactive Data Store." Think of \`useState\` as creating a special, observable data store for your component. When you put your \`items\` array into \`useState\`, you're telling React, "This array is important; if it changes, please re-render my component." The \`setItems\` function isn't just for changing the array; it's the *signal* to React that a change has occurred and a re-render is necessary. Even if your data starts static, wrapping it in \`useState\` prepares it for future dynamic interactions (adding, deleting, editing), ensuring that any modifications will correctly trigger UI updates. It transforms static data into dynamic, reactive data.`,
-      discover: `**Pattern - name:** Initializing Dynamic Data with \`useState\`
-\`\`\`tsx
-interface DataItem { id: string; value: string; }
-
-const MyList = (): JSX.Element => {
-  const [data, setData] = useState<DataItem[]>([
-    { id: 'a', value: 'Initial A' },
-    { id: 'b', value: 'Initial B' },
-  ]);
-
-  const addItem = (newValue: string) => {
-    setData(prevData => [...prevData, { id: String(Date.now()), value: newValue }]);
-  };
-
-  return (
-    <div>
-      {data.map(item => <p key={item.id}>{item.value}</p>)}
-      <button onClick={() => addItem('New Item')}>Add Item</button>
-    </div>
-  );
-};
-\`\`\`
-- Even initially static data should be in state if it might change later.
-- \`useState\` provides a setter function (\`setData\`) to update the array.
-- Using the setter function triggers a re-render of the component.
-- This pattern ensures that any modifications to the list are reflected in the UI.`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Use \`useState\` for any data that the user can interact with or that changes over time.
 - ✅ Initialize array state with an empty array \`[]\` or an array of initial objects.
@@ -750,24 +676,7 @@ const PhotoGallery = (): JSX.Element => {
       pain: `⚠️ **Lesson:** Direct \`if/else\` statements cannot be used inside JSX for conditional rendering, leading to syntax errors or forcing developers into less readable workarounds.
 **Symptom:** JSX parsing errors when attempting to use standard JavaScript control flow statements directly within the return block of a component.`,
       mentalModel: `**Mental model:** The "Inline Branching Expression." Think of the ternary operator (\`condition ? expressionIfTrue : expressionIfFalse\`) as a compact, inline way to choose between two different JSX outputs based on a boolean condition. Unlike an \`if/else\` statement, which is a *statement* that performs an action, the ternary operator is an *expression* that evaluates to a value (in this case, a JSX element). Because JSX allows embedding JavaScript *expressions* within curly braces, the ternary operator fits perfectly. It allows you to declaratively say, "If this condition is true, render *this* JSX; otherwise, render *that* JSX," all within the flow of your component's return statement.`,
-      discover: `**Pattern - name:** Ternary Operator for Conditional Rendering
-\`\`\`tsx
-const MyComponent = ({ isLoggedIn }: { isLoggedIn: boolean }): JSX.Element => {
-  return (
-    <div>
-      {isLoggedIn ? (
-        <p>Welcome back!</p>
-      ) : (
-        <button>Log In</button>
-      )}
-    </div>
-  );
-};
-\`\`\`
-- The ternary operator \`condition ? expressionIfTrue : expressionIfFalse\` is a JavaScript expression.
-- It allows you to conditionally render one of two JSX elements or components.
-- It's ideal for simple toggles or when you need to render *something* in both cases.
-- For rendering nothing, you can use \`condition && <Element />\` (logical AND operator).`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Use the ternary operator (\`?\` \`:\`) for choosing between two distinct JSX outputs.
 - ✅ Embed the ternary operator directly within JSX using curly braces \`{}\`.
@@ -1119,42 +1028,7 @@ const ProductCatalog = (): JSX.Element => {
       pain: `⚠️ **Lesson:** Failing to reset related state variables when a primary view or filter changes can lead to inconsistent UI states and a confusing user experience.
 **Symptom:** Users encounter unexpected filters or views persisting after navigation, requiring manual resets and causing frustration.`,
       mentalModel: `**Mental model:** The "Contextual Reset." Think of each major view or filtering mode as having its own expected "context." When you switch contexts (e.g., from a filtered main list to a dedicated history list), it's best practice to reset any state variables that are specific to the *previous* context or that would create an illogical combination in the *new* context. For instance, when entering the "Completed History" view, the general filter for 'active' or 'pending' items becomes irrelevant, so resetting it to 'all' or a default makes sense. This ensures that each view or mode starts from a clean, predictable state, aligning the application's behavior with user expectations and preventing confusing overlaps in state.`,
-      discover: `**Pattern - name:** Contextual State Reset
-\`\`\`tsx
-const MyDashboard = (): JSX.Element => {
-  const [currentTab, setCurrentTab] = useState<'main' | 'settings'>('main');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-
-  const handleTabChange = (tab: 'main' | 'settings') => {
-    setCurrentTab(tab);
-    // When switching tabs, clear the search query as it's specific to the main tab
-    setSearchQuery('');
-  };
-
-  return (
-    <div>
-      <button onClick={() => handleTabChange('main')}>Main</button>
-      <button onClick={() => handleTabChange('settings')}>Settings</button>
-
-      {currentTab === 'main' && (
-        <div>
-          <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search..." />
-          {/* ... main content filtered by searchQuery ... */}
-        </div>
-      )}
-      {currentTab === 'settings' && (
-        <div>
-          {/* ... settings content ... */}
-        </div>
-      )}
-    </div>
-  );
-};
-\`\`\`
-- When a major state (like \`currentTab\` or \`showCompletedHistory\`) changes, evaluate if other related states become irrelevant or contradictory.
-- Reset those related states to a sensible default (e.g., \`currentFilter\` to 'all', \`searchQuery\` to empty).
-- This prevents unexpected behavior and ensures a clean slate for the new context.
-- Improves user experience by making the UI's behavior predictable.`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Reset filters when switching to a dedicated view that implies its own filtering.
 - ✅ Clear search terms when navigating to a different section where search is not applicable.
@@ -1603,26 +1477,7 @@ const UserDirectory = (): JSX.Element => {
       pain: `⚠️ **Lesson:** Omitting the \`key\` prop or using an unstable key when rendering lists can lead to performance problems, incorrect UI updates, and unexpected behavior in dynamic lists.
 **Symptom:** Slow list rendering, UI elements losing focus, incorrect data displayed after updates, or console warnings about missing keys.`,
       mentalModel: `**Mental model:** The "Element Identity Tag." Think of the \`key\` prop as a unique, persistent ID badge for each item in a list. When React renders a list, it uses these keys to track which specific item corresponds to which DOM element. If an item's position changes, React can efficiently move the existing DOM element rather than re-creating it. If an item is added or removed, React knows exactly which element to add or remove without affecting its siblings. This "identity tag" allows React to perform highly optimized updates, ensuring that only the necessary changes are made to the DOM, leading to smoother performance and more predictable UI behavior.`,
-      discover: `**Pattern - name:** Unique \`key\` Prop for List Items
-\`\`\`tsx
-interface Todo { id: string; text: string; }
-
-const TodoList = ({ todos }: { todos: Todo[] }): JSX.Element => {
-  return (
-    <ul>
-      {todos.map(todo => (
-        <li key={todo.id}> {/* todo.id is a stable, unique identifier */}
-          {todo.text}
-        </li>
-      ))}
-    </ul>
-  );
-};
-\`\`\`
-- The \`key\` prop must be a stable, unique identifier for each item within its list.
-- React uses \`key\`s to efficiently reconcile changes in lists.
-- It helps React identify which items have changed, been added, or been removed.
-- Using \`index\` as a key is generally discouraged if the list order can change, as it's not stable.`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `**Quick rules:**
 - ✅ Provide a unique and stable \`key\` prop for every item rendered in a list.
 - ✅ The \`key\` should be a string or number that uniquely identifies the item among its siblings.

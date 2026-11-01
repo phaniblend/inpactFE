@@ -17,7 +17,7 @@ export const NODES = [
   Filter   →  only matching rows render — the full list stays in state
 `,
       usecase: "Finance desks filter to overdue. Same list skill — filter for display, keep full state.",
-      designMock: {"kind":"list-and-form","screenTitle":"Overdue board","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No overdue invoices.","rows":[{"title":"River Co","subtitle":"250","meta":"overdue"},{"title":"Second row","subtitle":"Another","meta":"overdue"}],"fields":[{"label":"Client","sample":"River Co"},{"label":"Amount","sample":"250"},{"label":"Status","sample":"overdue"}],"submitLabel":"Add"},
+      designMock: {"kind":"list-and-form","screenTitle":"Overdue board","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No overdue invoices.","rows":[{"title":"River Co","subtitle":"250","meta":"overdue"},{"title":"River Co B","subtitle":"250 (alt)","meta":"overdue"}],"fields":[{"label":"Client","sample":"River Co"},{"label":"Amount","sample":"250"},{"label":"Status","sample":"overdue"}],"submitLabel":"Add"},
     },
   },
   {
@@ -37,22 +37,21 @@ This file doesn't exist yet — you're the first to touch it. Create it at \`src
 Model an invoice item with a status tag and prepare the overdue board layout.
 
 WHAT YOU'LL NEED
-- id (text)
-- client (text)
-- amount (text)
-- status (text)
+- id (text — unique key, not always shown on screen)
+- client (per contract)
+- amount (per contract)
+- status (per contract)
 
 Your task: Define the shape of an invoice including its status tag, and build the board component.`,
     hint: `1. Blueprint declaration: Define your invoice type including a status property.
 2. Shell component: Create your component returning an empty <div />.`,
-    example_code: `export type FilterableInvoice = {
+    example_code: `export type Guest = {
   id: string;
-  client: string;
-  amount: string;
-  status: string;
+  name: string;
+  note: string;
 };
 
-export function OverdueBoard() {
+export function GuestList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -87,14 +86,13 @@ export function OverdueBoard() {
   return <div />;
 }
 `,
-    analog_example: `export type FilterableInvoice = {
+    analog_example: `export type Guest = {
   id: string;
-  client: string;
-  amount: string;
-  status: string;
+  name: string;
+  note: string;
 };
 
-export function OverdueBoard() {
+export function GuestList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -111,22 +109,11 @@ export function OverdueBoard() {
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `export type InvoiceRow = {
-  id: string;
-  client: string;
-  amount: string;
-  status: string;
-};
-
-export function OverdueBoard() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Blueprint declaration: Define your invoice type including a status property.
-2. Shell component: Create your component returning an empty <div />.`,
+      build: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     },
   },
   {
@@ -138,30 +125,24 @@ export function OverdueBoard() {
 Filter invoices in memory to display only overdue rows, showing an "All accounts current" banner if none exist.
 
 WHAT YOU'LL NEED
-- State array holding all invoices.
-- .filter() call selecting items where status === 'overdue'.
-- Conditional check displaying an empty message if no items match.
+- id (text — unique key, not always shown on screen)
+- client (per contract)
+- amount (per contract)
+- status (per contract)
 
 Your task: Filter stored invoices to show only overdue items, displaying a message if none are overdue.`,
     hint: `1. Master list: Keep all records in allInvoices state.
 2. Filter logic: Create overdueInvoices using .filter(inv => inv.status === "overdue").
 3. Conditional render: Check overdueInvoices.length === 0 to render either the message or the list rows.`,
-    example_code: `const [allInvoices, setAllInvoices] = useState<FilterableInvoice[]>([]);
-
-const overdueInvoices = allInvoices.filter((inv) => inv.status === "overdue");
-
-return (
-  <div>
-    {overdueInvoices.length === 0 ? (
-      <p>No overdue invoices found</p>
-    ) : (
-      overdueInvoices.map((inv) => (
-        <div key={inv.id}>
-          {inv.client} owes \${inv.amount}
-        </div>
-      ))
-    )}
-  </div>
+    example_code: `const visible = guests.filter((g) => g.status === "active");
+return visible.length === 0 ? (
+  <p>No matches.</p>
+) : (
+  <ul>
+    {visible.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     think_prompt: `\`\`\`text
 LIST (filtered) — Overdue board
@@ -241,22 +222,15 @@ export function OverdueBoard() {
   );
 }
 `,
-    analog_example: `const [allInvoices, setAllInvoices] = useState<FilterableInvoice[]>([]);
-
-const overdueInvoices = allInvoices.filter((inv) => inv.status === "overdue");
-
-return (
-  <div>
-    {overdueInvoices.length === 0 ? (
-      <p>No overdue invoices found</p>
-    ) : (
-      overdueInvoices.map((inv) => (
-        <div key={inv.id}>
-          {inv.client} owes \${inv.amount}
-        </div>
-      ))
-    )}
-  </div>
+    analog_example: `const visible = guests.filter((g) => g.status === "active");
+return visible.length === 0 ? (
+  <p>No matches.</p>
+) : (
+  <ul>
+    {visible.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -272,39 +246,11 @@ return (
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `import { useState } from "react";
-
-export type InvoiceRow = {
-  id: string;
-  client: string;
-  amount: string;
-  status: string;
-};
-
-export function OverdueBoard() {
-  const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
-  const visible = invoices.filter((a) => a.status === "overdue");
-  return (
-    <div>
-      {visible.length === 0 ? (
-        <p>No overdue invoices.</p>
-      ) : (
-        <ul>
-          {visible.map((a) => (
-            <li key={a.id}>{a.client}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Master list: Keep all records in allInvoices state.
-2. Filter logic: Create overdueInvoices using .filter(inv => inv.status === "overdue").
-3. Conditional render: Check overdueInvoices.length === 0 to render either the message or the list rows.`,
+      build: `.filter() always returns a brand-new array and never touches the one it was called on — so the full list stays in state, and the array you check for "empty" and then map is the filtered one, not the original.`,
     },
   },
   {
@@ -316,18 +262,16 @@ export function OverdueBoard() {
 Connect input boxes to state so new billing data is tracked cleanly.
 
 WHAT YOU'LL NEED
-- State hooks for client, amount, and status.
-- Value and onChange props wired to inputs.
+- id (text — unique key, not always shown on screen)
+- client (per contract)
+- amount (per contract)
+- status (per contract)
 
 Your task: Track invoice form inputs in React state.`,
     hint: `1. Initialize states: Call useState("") for your form inputs.
 2. Bind inputs: Link value and onChange to your state variables.`,
-    example_code: `const [client, setClient] = useState("");
-const [amount, setAmount] = useState("");
-const [status, setStatus] = useState("current");
-
-<input value={client} onChange={(e) => setClient(e.target.value)} />
-<input value={amount} onChange={(e) => setAmount(e.target.value)} />`,
+    example_code: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Overdue board
   [ Client ]  [ Amount ]  [ Status ]   → Add
@@ -401,12 +345,8 @@ export function OverdueBoard() {
   );
 }
 `,
-    analog_example: `const [client, setClient] = useState("");
-const [amount, setAmount] = useState("");
-const [status, setStatus] = useState("current");
-
-<input value={client} onChange={(e) => setClient(e.target.value)} />
-<input value={amount} onChange={(e) => setAmount(e.target.value)} />`,
+    analog_example: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -421,34 +361,11 @@ const [status, setStatus] = useState("current");
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `import { useState } from "react";
-
-export type InvoiceRow = {
-  id: string;
-  client: string;
-  amount: string;
-  status: string;
-};
-
-export function OverdueBoard() {
-  const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
-  const [client, setClient] = useState("");
-  const [amount, setAmount] = useState("");
-  const [status, setStatus] = useState("");
-  return (
-    <form>
-        <input value={client} onChange={(e) => setClient(e.target.value)} placeholder="Client" />
-        <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount" />
-        <input value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status" />
-    </form>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize states: Call useState("") for your form inputs.
-2. Bind inputs: Link value and onChange to your state variables.`,
+      build: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
     },
   },
   {
@@ -460,23 +377,17 @@ export function OverdueBoard() {
 Intercept form submit, append the invoice to the main list, reset the form, and let the overdue filter manage display.
 
 WHAT YOU'LL NEED
-- Form interceptor using e.preventDefault().
-- Object assembly matching your blueprint.
-- Spread update to master state.
-- Form reset calls.
+- id (text — unique key, not always shown on screen)
+- client (per contract)
+- amount (per contract)
+- status (per contract)
 
 Your task: Append the new invoice to your master state and clear inputs without refreshing the page.`,
     hint: `1. Stop reload: Call e.preventDefault() first.
 2. Assemble record: Create an object with an ID and your form state values.
 3. Update state: Append using setAllInvoices((prev) => [...prev, entry]).
 4. Clear form: Reset input states to "".`,
-    example_code: `function handleAdd(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), client, amount, status };
-  setAllInvoices((prev) => [...prev, entry]);
-  setClient("");
-  setAmount("");
-}`,
+    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     think_prompt: `\`\`\`text
 FORM — Overdue board
   [ Client ]  [ Amount ]  [ Status ]   → Add
@@ -487,10 +398,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `The new invoice is added to the master list, and your filter automatically displays it if it is marked overdue.
-
-
-================================================================================`,
+    why_this_matters: `The new invoice is added to the master list, and your filter automatically displays it if it is marked overdue.`,
     answer_keywords: ["preventDefault","setInvoices","prev","client","amount","status"],
     seed_code: `import { useState } from "react";
 
@@ -597,21 +505,12 @@ export function OverdueBoard() {
   );
 }
 `,
-    analog_example: `function handleAdd(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), client, amount, status };
-  setAllInvoices((prev) => [...prev, entry]);
-  setClient("");
-  setAmount("");
-}`,
+    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `The new invoice is added to the master list, and your filter automatically displays it if it is marked overdue.
-
-
-================================================================================`,
+      hook: `The new invoice is added to the master list, and your filter automatically displays it if it is marked overdue.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists invoices and a form to add one:
 
@@ -621,56 +520,11 @@ export function OverdueBoard() {
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `import { useState } from "react";
-
-export type InvoiceRow = {
-  id: string;
-  client: string;
-  amount: string;
-  status: string;
-};
-
-export function OverdueBoard() {
-  const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
-  const [client, setClient] = useState("");
-  const [amount, setAmount] = useState("");
-  const [status, setStatus] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: InvoiceRow = { id: String(Date.now()), client, amount, status };
-    setInvoices((prev) => [...prev, next]);
-    setClient("");
-    setAmount("");
-    setStatus("");
-  }
-  return (
-    <div>
-      {invoices.length === 0 ? (
-        <p>No overdue invoices.</p>
-      ) : (
-        <ul>
-          {invoices.map((a) => (
-            <li key={a.id}>{a.client} · {a.amount} · {a.status}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={client} onChange={(e) => setClient(e.target.value)} placeholder="Client" />
-        <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount" />
-        <input value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status" />
-        <button type="submit">Add</button>
-      </form>
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Stop reload: Call e.preventDefault() first.
-2. Assemble record: Create an object with an ID and your form state values.
-3. Update state: Append using setAllInvoices((prev) => [...prev, entry]).
-4. Clear form: Reset input states to "".`,
+      build: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     },
   },
 ];

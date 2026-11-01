@@ -42,12 +42,9 @@ Your task: Create server-side storage for shift coverage requests and an ID gene
     hint: `1. Initialize store: Create an empty array typed with your coverage blueprint.
 2. Initialize ID tracker: Create an integer counter variable.
 3. ID generator: Write a helper returning formatted ID strings.`,
-    example_code: `let coverageEntries: CoverageItem[] = [];
-let idCounter = 1;
-
-function nextCoverageId(): string {
-  return \`cov-\${idCounter++}\`;
-}`,
+    example_code: `let tasks = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/coverage
 GET /api/coverage
@@ -75,12 +72,9 @@ let nextIdCounter = 1;
 function nextId() { return String(nextIdCounter++); }
 export function getStore() { return coverage; }
 `,
-    analog_example: `let coverageEntries: CoverageItem[] = [];
-let idCounter = 1;
-
-function nextCoverageId(): string {
-  return \`cov-\${idCounter++}\`;
-}`,
+    analog_example: `let tasks = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -93,17 +87,11 @@ function nextCoverageId(): string {
   Validate →  required fields
   Derive   →  if claimedBy set → filled; else open
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let coverage = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return coverage; }
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize store: Create an empty array typed with your coverage blueprint.
-2. Initialize ID tracker: Create an integer counter variable.
-3. ID generator: Write a helper returning formatted ID strings.`,
+      build: `Two requests that arrive close together must never be handed the same id — a counter that only ever increases guarantees each new record gets a value nothing before it used, which a timestamp alone cannot promise.`,
     },
   },
   {
@@ -121,9 +109,7 @@ WHAT YOU'LL NEED
 Your task: Verify that incoming coverage requests specify shift date and department, returning 400 if missing.`,
     hint: `1. Validate fields: Check req.body properties using !body.property.
 2. Halt on failure: Return res.status(400).json(...) if any check fails.`,
-    example_code: `if (!req.body.shiftDate || !req.body.role) {
-  return res.status(400).json({ error: "Shift date and role are mandatory" });
-}`,
+    example_code: `if (!input?.title?.trim()) return "title is required";`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/coverage
 POST /api/coverage
@@ -163,9 +149,7 @@ export function validateCoverage(input) {
   return null;
 }
 `,
-    analog_example: `if (!req.body.shiftDate || !req.body.role) {
-  return res.status(400).json({ error: "Shift date and role are mandatory" });
-}`,
+    analog_example: `if (!input?.title?.trim()) return "title is required";`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -178,22 +162,11 @@ export function validateCoverage(input) {
   Validate →  required fields
   Derive   →  if claimedBy set → filled; else open
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let coverage = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return coverage; }
-export function validateCoverage(input) {
-  if (typeof input?.shiftId !== "string" || !input.shiftId.trim()) return "shiftId is required";
-  if (typeof input?.reason !== "string" || !input.reason.trim()) return "reason is required";
-  if (typeof input?.neededBy !== "string" || !input.neededBy.trim()) return "neededBy is required";
-  return null;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Validate fields: Check req.body properties using !body.property.
-2. Halt on failure: Return res.status(400).json(...) if any check fails.`,
+      build: `A validator is just a function that inspects the fields it was given and returns either a short error message or nothing at all — the caller decides what to do with that answer.`,
     },
   },
   {
@@ -211,7 +184,11 @@ WHAT YOU'LL NEED
 Your task: Determine on the server whether coverage is "open" or "filled" based on worker assignment.`,
     hint: `1. Check assignment: Look at whether an assignee was provided.
 2. Derive label: If an assignee exists, assign "filled"; otherwise, assign "open".`,
-    example_code: `const status = req.body.assignedWorkerId ? "filled" : "open";`,
+    example_code: `function taskStatus(item, today) {
+  if (item.done) return "done";
+  if (new Date(item.due) < today) return "late";
+  return "open";
+}`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/coverage
 GET /api/coverage
@@ -241,12 +218,15 @@ export function deriveCoverageStatus(row, now = new Date()) {}
     pre_check_hint: `A derive function takes one stored row (plus, optionally, the current time) and returns a label computed purely from that row's own fields — it never reads anything the client sent in the current request.`,
     expected: `let coverage = [];
 export function validateCoverage(input) { return null; }
-export function deriveCoverageStatus(row, now = new Date()) {
-  if (new Date(row.neededBy) < now) return "stale";
-  return "fresh";
+export function deriveCoverageStatus(row) {
+  return row.claimedBy ? "filled" : "open";
 }
 `,
-    analog_example: `const status = req.body.assignedWorkerId ? "filled" : "open";`,
+    analog_example: `function taskStatus(item, today) {
+  if (item.done) return "done";
+  if (new Date(item.due) < today) return "late";
+  return "open";
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -259,18 +239,11 @@ export function deriveCoverageStatus(row, now = new Date()) {
   Validate →  required fields
   Derive   →  if claimedBy set → filled; else open
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let coverage = [];
-export function validateCoverage(input) { return null; }
-export function deriveCoverageStatus(row, now = new Date()) {
-  if (new Date(row.neededBy) < now) return "stale";
-  return "fresh";
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Check assignment: Look at whether an assignee was provided.
-2. Derive label: If an assignee exists, assign "filled"; otherwise, assign "open".`,
+      build: `A derive function takes one stored row (plus, optionally, the current time) and returns a label computed purely from that row's own fields — it never reads anything the client sent in the current request.`,
     },
   },
   {
@@ -289,17 +262,7 @@ Your task: Build the GET list endpoint and POST creation endpoint with the calcu
     hint: `1. Return list: Return status 200 with coverageEntries in the GET handler.
 2. Execute workflow: Run validation and status derivation inside the POST handler.
 3. Store and respond: Append the item to coverageEntries and return status 201 with the created object.`,
-    example_code: `export function getCoverage(res: Response) {
-  return res.status(200).json(coverageEntries);
-}
-
-export function addCoverage(req: Request, res: Response) {
-  // Step 2 validation check
-  // Step 3 derived status
-  const item = { id: nextCoverageId(), ...req.body, status };
-  coverageEntries.push(item);
-  return res.status(201).json(item);
-}`,
+    example_code: `res.json(tasks.map((t) => ({ ...t, status: taskStatus(t) })));`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/coverage
 GET /api/coverage
@@ -313,10 +276,7 @@ Attaching a computed field to data on its way out of a route means running the d
     mc_options: ["GET/POST attach derived status; POST validates first","POST stores client status verbatim","GET omits status"],
     mc_correct_option: "GET/POST attach derived status; POST validates first",
     mc_anchor: "GET/POST attach derived status; POST val",
-    why_this_matters: `Consistently returning the newly created object with its derived status gives the client instant confirmation.
-
-
-================================================================================`,
+    why_this_matters: `Consistently returning the newly created object with its derived status gives the client instant confirmation.`,
     answer_keywords: ["deriveCoverageStatus","validateCoverage","201"],
     seed_code: `let coverage = [];
 let nextIdCounter = 1;
@@ -359,25 +319,12 @@ export function createHandlers() {
   };
 }
 `,
-    analog_example: `export function getCoverage(res: Response) {
-  return res.status(200).json(coverageEntries);
-}
-
-export function addCoverage(req: Request, res: Response) {
-  // Step 2 validation check
-  // Step 3 derived status
-  const item = { id: nextCoverageId(), ...req.body, status };
-  coverageEntries.push(item);
-  return res.status(201).json(item);
-}`,
+    analog_example: `res.json(tasks.map((t) => ({ ...t, status: taskStatus(t) })));`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Consistently returning the newly created object with its derived status gives the client instant confirmation.
-
-
-================================================================================`,
+      hook: `Consistently returning the newly created object with its derived status gives the client instant confirmation.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Implement /api/coverage with a derived status:
 
@@ -385,32 +332,11 @@ export function addCoverage(req: Request, res: Response) {
   Validate →  required fields
   Derive   →  if claimedBy set → filled; else open
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let coverage = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function validateCoverage(input) { return null; }
-export function deriveCoverageStatus(row, now = new Date()) { return "open"; }
-export function createHandlers() {
-  return {
-    list(_req, res) {
-      res.json(coverage.map((r) => ({ ...r, status: deriveCoverageStatus(r) })));
-    },
-    create(req, res) {
-      const err = validateCoverage(req.body);
-      if (err) return res.status(400).json({ error: err });
-      const row = { id: nextId(), shiftId: req.body.shiftId, reason: req.body.reason, neededBy: req.body.neededBy };
-      coverage.push(row);
-      res.status(201).json({ ...row, status: deriveCoverageStatus(row) });
-    },
-  };
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Return list: Return status 200 with coverageEntries in the GET handler.
-2. Execute workflow: Run validation and status derivation inside the POST handler.
-3. Store and respond: Append the item to coverageEntries and return status 201 with the created object.`,
+      build: `A route handler's job is to call helpers in the right order and translate their answers into HTTP responses — validate first, then map the derive function over whatever gets returned.`,
     },
   },
 ];

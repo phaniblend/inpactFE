@@ -41,12 +41,9 @@ WHAT YOU'LL NEED
 Your task: Set up server storage for customer reviews and an ID generator.`,
     hint: `1. In-memory store: Declare an empty array typed with your feedback shape.
 2. ID helper: Return an incremental ID string from your helper function.`,
-    example_code: `let feedbackStore: FeedbackRecord[] = [];
-let fbIdCounter = 1;
-
-function generateFeedbackId(): string {
-  return \`fb-\${fbIdCounter++}\`;
-}`,
+    example_code: `let tasks = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/reviews
 GET /api/reviews
@@ -74,12 +71,9 @@ let nextIdCounter = 1;
 function nextId() { return String(nextIdCounter++); }
 export function getStore() { return reviews; }
 `,
-    analog_example: `let feedbackStore: FeedbackRecord[] = [];
-let fbIdCounter = 1;
-
-function generateFeedbackId(): string {
-  return \`fb-\${fbIdCounter++}\`;
-}`,
+    analog_example: `let tasks = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -92,16 +86,11 @@ function generateFeedbackId(): string {
   Validate →  required fields
   Derive   →  if replied true → answered; else needs-reply
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let reviews = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return reviews; }
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. In-memory store: Declare an empty array typed with your feedback shape.
-2. ID helper: Return an incremental ID string from your helper function.`,
+      build: `Two requests that arrive close together must never be handed the same id — a counter that only ever increases guarantees each new record gets a value nothing before it used, which a timestamp alone cannot promise.`,
     },
   },
   {
@@ -119,9 +108,7 @@ WHAT YOU'LL NEED
 Your task: Reject reviews lacking customer name or rating with status 400.`,
     hint: `1. Inspect fields: Evaluate required properties using !req.body.property.
 2. Reject missing: Send status 400 if any required field is falsy.`,
-    example_code: `if (!req.body.reviewer || !req.body.rating) {
-  return res.status(400).json({ error: "Reviewer and rating are required" });
-}`,
+    example_code: `if (!input?.title?.trim()) return "title is required";`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/reviews
 POST /api/reviews
@@ -162,9 +149,7 @@ export function validateReview(input) {
   return null;
 }
 `,
-    analog_example: `if (!req.body.reviewer || !req.body.rating) {
-  return res.status(400).json({ error: "Reviewer and rating are required" });
-}`,
+    analog_example: `if (!input?.title?.trim()) return "title is required";`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -177,23 +162,11 @@ export function validateReview(input) {
   Validate →  required fields
   Derive   →  if replied true → answered; else needs-reply
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let reviews = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return reviews; }
-export function validateReview(input) {
-  if (typeof input?.author !== "string" || !input.author.trim()) return "author is required";
-  if (typeof input?.rating !== "number" || input.rating <= 0) return "rating must be > 0";
-  if (typeof input?.body !== "string" || !input.body.trim()) return "body is required";
-  if (typeof input?.postedAt !== "string" || !input.postedAt.trim()) return "postedAt is required";
-  return null;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Inspect fields: Evaluate required properties using !req.body.property.
-2. Reject missing: Send status 400 if any required field is falsy.`,
+      build: `A validator is just a function that inspects the fields it was given and returns either a short error message or nothing at all — the caller decides what to do with that answer.`,
     },
   },
   {
@@ -211,7 +184,11 @@ WHAT YOU'LL NEED
 Your task: Determine whether a review is "replied" or "needs-reply" based on attached response data on the server.`,
     hint: `1. Inspect replies: Check if reply text or an answer is provided.
 2. Set status: Assign "replied" if present; otherwise, assign "needs-reply".`,
-    example_code: `const status = req.body.replyText ? "replied" : "needs-reply";`,
+    example_code: `function taskStatus(item, today) {
+  if (item.done) return "done";
+  if (new Date(item.due) < today) return "late";
+  return "open";
+}`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/reviews
 GET /api/reviews
@@ -241,13 +218,15 @@ export function deriveReviewStatus(row, now = new Date()) {}
     pre_check_hint: `A derive function takes one stored row (plus, optionally, the current time) and returns a label computed purely from that row's own fields — it never reads anything the client sent in the current request.`,
     expected: `let reviews = [];
 export function validateReview(input) { return null; }
-export function deriveReviewStatus(row, now = new Date()) {
-  if (row.replied === true) return "answered";
-  if (new Date(row.rating) < now) return "needs-reply";
-  return "needs-reply";
+export function deriveReviewStatus(row) {
+  return row.replied === true ? "answered" : "needs-reply";
 }
 `,
-    analog_example: `const status = req.body.replyText ? "replied" : "needs-reply";`,
+    analog_example: `function taskStatus(item, today) {
+  if (item.done) return "done";
+  if (new Date(item.due) < today) return "late";
+  return "open";
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -260,19 +239,11 @@ export function deriveReviewStatus(row, now = new Date()) {
   Validate →  required fields
   Derive   →  if replied true → answered; else needs-reply
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let reviews = [];
-export function validateReview(input) { return null; }
-export function deriveReviewStatus(row, now = new Date()) {
-  if (row.replied === true) return "answered";
-  if (new Date(row.rating) < now) return "needs-reply";
-  return "needs-reply";
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Inspect replies: Check if reply text or an answer is provided.
-2. Set status: Assign "replied" if present; otherwise, assign "needs-reply".`,
+      build: `A derive function takes one stored row (plus, optionally, the current time) and returns a label computed purely from that row's own fields — it never reads anything the client sent in the current request.`,
     },
   },
   {
@@ -291,17 +262,7 @@ Your task: Build endpoints to fetch reviews and log new reviews with the calcula
     hint: `1. Return store: Send status 200 with the feedbackStore array in GET.
 2. Protect POST: Run validation and status derivation before pushing the record.
 3. Save record: Assign a unique ID, push the item to storage, and return status 201.`,
-    example_code: `export function getFeedback(res: Response) {
-  return res.status(200).json(feedbackStore);
-}
-
-export function logFeedback(req: Request, res: Response) {
-  // Step 2 validation check
-  // Step 3 derive status
-  const item = { id: generateFeedbackId(), ...req.body, status };
-  feedbackStore.push(item);
-  return res.status(201).json(item);
-}`,
+    example_code: `res.json(tasks.map((t) => ({ ...t, status: taskStatus(t) })));`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/reviews
 GET /api/reviews
@@ -315,10 +276,7 @@ Attaching a computed field to data on its way out of a route means running the d
     mc_options: ["GET/POST attach derived status; POST validates first","POST stores client status verbatim","GET omits status"],
     mc_correct_option: "GET/POST attach derived status; POST validates first",
     mc_anchor: "GET/POST attach derived status; POST val",
-    why_this_matters: `The client receives back the logged review along with its server-calculated status tag.
-
-
-================================================================================`,
+    why_this_matters: `The client receives back the logged review along with its server-calculated status tag.`,
     answer_keywords: ["deriveReviewStatus","validateReview","201"],
     seed_code: `let reviews = [];
 let nextIdCounter = 1;
@@ -361,25 +319,12 @@ export function createHandlers() {
   };
 }
 `,
-    analog_example: `export function getFeedback(res: Response) {
-  return res.status(200).json(feedbackStore);
-}
-
-export function logFeedback(req: Request, res: Response) {
-  // Step 2 validation check
-  // Step 3 derive status
-  const item = { id: generateFeedbackId(), ...req.body, status };
-  feedbackStore.push(item);
-  return res.status(201).json(item);
-}`,
+    analog_example: `res.json(tasks.map((t) => ({ ...t, status: taskStatus(t) })));`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `The client receives back the logged review along with its server-calculated status tag.
-
-
-================================================================================`,
+      hook: `The client receives back the logged review along with its server-calculated status tag.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Implement /api/reviews with a derived status:
 
@@ -387,32 +332,11 @@ export function logFeedback(req: Request, res: Response) {
   Validate →  required fields
   Derive   →  if replied true → answered; else needs-reply
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let reviews = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function validateReview(input) { return null; }
-export function deriveReviewStatus(row, now = new Date()) { return "open"; }
-export function createHandlers() {
-  return {
-    list(_req, res) {
-      res.json(reviews.map((r) => ({ ...r, status: deriveReviewStatus(r) })));
-    },
-    create(req, res) {
-      const err = validateReview(req.body);
-      if (err) return res.status(400).json({ error: err });
-      const row = { id: nextId(), author: req.body.author, rating: req.body.rating, body: req.body.body, postedAt: req.body.postedAt, replied: false };
-      reviews.push(row);
-      res.status(201).json({ ...row, status: deriveReviewStatus(row) });
-    },
-  };
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Return store: Send status 200 with the feedbackStore array in GET.
-2. Protect POST: Run validation and status derivation before pushing the record.
-3. Save record: Assign a unique ID, push the item to storage, and return status 201.`,
+      build: `A route handler's job is to call helpers in the right order and translate their answers into HTTP responses — validate first, then map the derive function over whatever gets returned.`,
     },
   },
 ];

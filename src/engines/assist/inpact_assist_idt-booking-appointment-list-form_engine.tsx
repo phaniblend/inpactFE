@@ -16,7 +16,7 @@ export const NODES = [
   Submit   →  the new row appears on the list
 `,
       usecase: "Most web apps need a screen that lists data as rows you can scan — people, orders, tickets. You also need a form to add a new row, and a clear message when the list is empty.",
-      designMock: {"kind":"list-and-form","screenTitle":"Bookings","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No appointments yet.","rows":[{"title":"Maya","subtitle":"Color & cut","meta":"Tue 2:00 PM"},{"title":"Second row","subtitle":"Another","meta":"Tue 2:00 PM"}],"fields":[{"label":"Provider","sample":"Maya"},{"label":"Service","sample":"Color & cut"},{"label":"Starts at","sample":"Tue 2:00 PM"}],"submitLabel":"Book"},
+      designMock: {"kind":"list-and-form","screenTitle":"Bookings","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No appointments yet.","rows":[{"title":"Maya","subtitle":"Color & cut","meta":"Tue 2:00 PM"},{"title":"Maya B","subtitle":"Color & cut (alt)","meta":"Tue 2:00 PM"}],"fields":[{"label":"Provider","sample":"Maya"},{"label":"Service","sample":"Color & cut"},{"label":"Starts at","sample":"Tue 2:00 PM"}],"submitLabel":"Book"},
     },
   },
   {
@@ -36,9 +36,10 @@ This file doesn't exist yet — you're the first to touch it. Create it at \`src
 Create an appointment blueprint (name, time) and set up the outer container component.
 
 WHAT YOU'LL NEED
-- id (text)
-- patient (text)
-- time (text)
+- id (text — unique key, not always shown on screen)
+- provider (per contract)
+- service (per contract)
+- startsAt (per contract)
 
 Your task: Create the blueprint for a single appointment and set up an empty screen frame to hold the view.`,
     hint: `1. Mirror the declaration: Look at "export type Guest = {". Replace Guest with your task's blueprint name.
@@ -108,24 +109,11 @@ export function GuestList() {
   Form     →  Provider, Service, Starts at
   Submit   →  the new row appears on the list
 `,
-      discover: `export type Appointment = {
-  id: string;
-  provider: string;
-  service: string;
-  startsAt: string;
-};
-
-export function BookingDesk() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Mirror the declaration: Look at "export type Guest = {". Replace Guest with your task's blueprint name.
-2. Fill the lines: In the example, every detail follows "name: string;". Add your fields one by one using that exact shape (property name, colon, string, semicolon).
-3. Close the blueprint: End with "};" just like the pattern.
-4. Mirror the component frame: Look at "export function GuestList() { ... }". Replace GuestList with your component name, keeping the return structure intact.`,
+      build: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     },
   },
   {
@@ -137,25 +125,25 @@ export function BookingDesk() {
 Store appointments in app memory; show rows if booked, or a "No appointments scheduled today" note if empty.
 
 WHAT YOU'LL NEED
-- An array state holding items typed with your blueprint.
-- A condition checking if the list length is 0.
-- A fallback message when empty, or a loop drawing each row.
+- id (text — unique key, not always shown on screen)
+- provider (per contract)
+- service (per contract)
+- startsAt (per contract)
 
 Your task: Give the app a memory slot for your appointments collection and show either the booked rows or a friendly empty note.`,
     hint: `1. Set up memory: Replace Guest in useState<Guest[]>([]) with your task's item type.
 2. Check for empty: Check if your array's length equals 0 using a ternary operator (? :).
 3. Render the fallback: Put your polite "no records" text inside the first branch.
 4. Render the list: In the second branch, use .map() to loop through each item, ensuring you pass the unique id into the key attribute.`,
-    example_code: `const [items, setItems] = useState<Guest[]>([]);
-
-return (
-  <div>
-    {items.length === 0 ? (
-      <p>No guests yet</p>
-    ) : (
-      items.map((item) => <div key={item.id}>{item.name}</div>)
-    )}
-  </div>
+    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     think_prompt: `\`\`\`text
 LIST — Bookings
@@ -234,16 +222,15 @@ export function BookingDesk() {
   );
 }
 `,
-    analog_example: `const [items, setItems] = useState<Guest[]>([]);
-
-return (
-  <div>
-    {items.length === 0 ? (
-      <p>No guests yet</p>
-    ) : (
-      items.map((item) => <div key={item.id}>{item.name}</div>)
-    )}
-  </div>
+    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -258,39 +245,11 @@ return (
   Form     →  Provider, Service, Starts at
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Appointment = {
-  id: string;
-  provider: string;
-  service: string;
-  startsAt: string;
-};
-
-export function BookingDesk() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  return (
-    <div>
-      {appointments.length === 0 ? (
-        <p>No appointments yet.</p>
-      ) : (
-        <ul>
-          {appointments.map((a) => (
-            <li key={a.id}>{a.provider}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Set up memory: Replace Guest in useState<Guest[]>([]) with your task's item type.
-2. Check for empty: Check if your array's length equals 0 using a ternary operator (? :).
-3. Render the fallback: Put your polite "no records" text inside the first branch.
-4. Render the list: In the second branch, use .map() to loop through each item, ensuring you pass the unique id into the key attribute.`,
+      build: `To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. Once it does, checking its length before deciding what to render is just an ordinary conditional — the empty case and the list case are two branches of one render.`,
     },
   },
   {
@@ -302,21 +261,17 @@ export function BookingDesk() {
 Connect the booking input boxes directly to memory so names and times are tracked as you type.
 
 WHAT YOU'LL NEED
-- State variables for each field the user types.
-- An input with value pointing to state.
-- An onChange handler feeding event text into the setter.
+- id (text — unique key, not always shown on screen)
+- provider (per contract)
+- service (per contract)
+- startsAt (per contract)
 
 Your task: Connect your form's text boxes directly to memory so every typed keystroke is saved immediately.`,
     hint: `1. Create field memory: For every text input, create a pair using useState("").
 2. Bind the screen: In your <input />, point value to that state variable.
 3. Listen for typing: Write onChange={(e) => setYourField(e.target.value)} to forward the typed text into memory.`,
     example_code: `const [name, setName] = useState("");
-
-<input
-  value={name}
-  onChange={(e) => setName(e.target.value)}
-  placeholder="Enter name"
-/>;`,
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Bookings
   [ Provider ]  [ Service ]  [ Starts at ]   → Book
@@ -391,12 +346,7 @@ export function BookingDesk() {
 }
 `,
     analog_example: `const [name, setName] = useState("");
-
-<input
-  value={name}
-  onChange={(e) => setName(e.target.value)}
-  placeholder="Enter name"
-/>;`,
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -410,35 +360,11 @@ export function BookingDesk() {
   Form     →  Provider, Service, Starts at
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Appointment = {
-  id: string;
-  provider: string;
-  service: string;
-  startsAt: string;
-};
-
-export function BookingDesk() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [provider, setProvider] = useState("");
-  const [service, setService] = useState("");
-  const [startsAt, setStartsAt] = useState("");
-  return (
-    <form>
-        <input value={provider} onChange={(e) => setProvider(e.target.value)} placeholder="Provider" />
-        <input value={service} onChange={(e) => setService(e.target.value)} placeholder="Service" />
-        <input value={startsAt} onChange={(e) => setStartsAt(e.target.value)} placeholder="Starts at" />
-    </form>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Create field memory: For every text input, create a pair using useState("").
-2. Bind the screen: In your <input />, point value to that state variable.
-3. Listen for typing: Write onChange={(e) => setYourField(e.target.value)} to forward the typed text into memory.`,
+      build: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
     },
   },
   {
@@ -450,22 +376,17 @@ export function BookingDesk() {
 Stop the form from refreshing the page on click, append the new appointment to the list, and wipe the inputs clean.
 
 WHAT YOU'LL NEED
-- An onSubmit function intercepting form submission.
-- A call to stop the default browser reload.
-- An update adding the new record to your existing list.
-- Resets setting form state variables back to empty strings.
+- id (text — unique key, not always shown on screen)
+- provider (per contract)
+- service (per contract)
+- startsAt (per contract)
 
 Your task: Save the newly typed item into your collection on submit without refreshing the browser, then reset the text boxes.`,
     hint: `1. Stop browser reload: Put e.preventDefault() as the very first line inside your submission handler.
 2. Assemble the record: Create an object containing a unique id and the values from your input state.
 3. Append without mutating: Use the spread operator ([...prev, newItem]) inside your list setter to add the new entry safely.
 4. Clean the slate: Call your input state setters with empty strings "" so the form clears.`,
-    example_code: `function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  const newItem = { id: String(Date.now()), name };
-  setItems((prev) => [...prev, newItem]);
-  setName("");
-}`,
+    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     think_prompt: `\`\`\`text
 FORM — Bookings
   [ Provider ]  [ Service ]  [ Starts at ]   → Book
@@ -476,10 +397,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `Stopping page reload prevents the entire browser from blinking, creating an instant and seamless app experience.
-
-
-================================================================================`,
+    why_this_matters: `Stopping page reload prevents the entire browser from blinking, creating an instant and seamless app experience.`,
     answer_keywords: ["preventDefault","setAppointments","prev","provider","service","startsAt"],
     seed_code: `import { useState } from "react";
 
@@ -586,20 +504,12 @@ export function BookingDesk() {
   );
 }
 `,
-    analog_example: `function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  const newItem = { id: String(Date.now()), name };
-  setItems((prev) => [...prev, newItem]);
-  setName("");
-}`,
+    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Stopping page reload prevents the entire browser from blinking, creating an instant and seamless app experience.
-
-
-================================================================================`,
+      hook: `Stopping page reload prevents the entire browser from blinking, creating an instant and seamless app experience.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists appointments and a form to add one:
 
@@ -608,56 +518,11 @@ export function BookingDesk() {
   Form     →  Provider, Service, Starts at
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Appointment = {
-  id: string;
-  provider: string;
-  service: string;
-  startsAt: string;
-};
-
-export function BookingDesk() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [provider, setProvider] = useState("");
-  const [service, setService] = useState("");
-  const [startsAt, setStartsAt] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: Appointment = { id: String(Date.now()), provider, service, startsAt };
-    setAppointments((prev) => [...prev, next]);
-    setProvider("");
-    setService("");
-    setStartsAt("");
-  }
-  return (
-    <div>
-      {appointments.length === 0 ? (
-        <p>No appointments yet.</p>
-      ) : (
-        <ul>
-          {appointments.map((a) => (
-            <li key={a.id}>{a.provider} · {a.service} · {a.startsAt}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={provider} onChange={(e) => setProvider(e.target.value)} placeholder="Provider" />
-        <input value={service} onChange={(e) => setService(e.target.value)} placeholder="Service" />
-        <input value={startsAt} onChange={(e) => setStartsAt(e.target.value)} placeholder="Starts at" />
-        <button type="submit">Book</button>
-      </form>
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Stop browser reload: Put e.preventDefault() as the very first line inside your submission handler.
-2. Assemble the record: Create an object containing a unique id and the values from your input state.
-3. Append without mutating: Use the spread operator ([...prev, newItem]) inside your list setter to add the new entry safely.
-4. Clean the slate: Call your input state setters with empty strings "" so the form clears.`,
+      build: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     },
   },
 ];

@@ -87,10 +87,7 @@ export function JobCostBoard() {
       hook: `Keeping this step to only the file and the export is what makes every later step addable one at a time.`,
       pain: "Bundling the type or state into this same step means the next step has no single, clear thing to check — was it the type that broke, or the export?",
       mentalModel: MENTAL_MODEL,
-      discover: `export function RecipeCostBoard() {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One action per step\n- Name the location relative to the component (above it, inside it)\n- Nothing here yet but the shell itself",
       watchOut: "Do not add the type or any state in this step — those are their own steps next.",
       dryRun: "Write the same one-line shell for a different component you haven't built yet.",
@@ -199,17 +196,7 @@ export function JobCostBoard() {
       hook: `A type declared above the component is what lets TypeScript check every use of it in this file against one single source of truth.`,
       pain: "A type declared inside the component body would be redeclared on every render and unusable as a prop or return type anywhere else.",
       mentalModel: MENTAL_MODEL,
-      discover: `export type RecipeCostSummary = {
-  id: string;
-  code: string;
-  name: string;
-  type: string;
-  costPerServing: number;
-  foodCostPct: number;
-  targetCostPct: number;
-  sellingPrice: number;
-};
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One action per step\n- The type goes above the component, never inside it\n- Match the real API's shape, not a guess",
       watchOut: "Do not declare the type inside the component function — it belongs above it, at module scope.",
       dryRun: "Write the same above-the-component type declaration for a different real endpoint.",
@@ -326,8 +313,7 @@ export function JobCostBoard() {
       hook: `Declaring state inside the component is what gives React a value it can track and re-render on.`,
       pain: "State declared above the component (at module scope) would be one shared value for every instance of this component ever rendered, not per-instance.",
       mentalModel: MENTAL_MODEL,
-      discover: `const [recipes, setRecipes] = useState<RecipeCostSummary[]>([]);
-const [loading, setLoading] = useState(true);`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One action per step\n- State goes inside the component, never above it\n- Import first, then declare",
       watchOut: "Do not declare useState calls outside the component function.",
       dryRun: "Add the same import-then-declare-state pattern for a different component's own data.",
@@ -457,14 +443,7 @@ export function RecipeCostBoard() {
       hook: `Running fetch inside useEffect, right where the state it updates already lives, is what keeps the request tied to this exact component instance and firing exactly once.`,
       pain: "Calling fetch() directly in the component body (outside useEffect) would refetch on every single render.",
       mentalModel: MENTAL_MODEL,
-      discover: `useEffect(() => {
-  fetch("/api/v1/recipes/costs")
-    .then((res) => res.json())
-    .then((data) => {
-      setRecipes(data);
-      setLoading(false);
-    });
-}, []);`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One action per step\n- The effect goes inside the component, right after the state it updates\n- Empty dependency array means \"run once, on mount\"",
       watchOut: "Do not call fetch() outside useEffect — that refetches on every render.",
       dryRun: "Write the same fetch-on-mount effect for a different real endpoint on this same backend.",
@@ -663,11 +642,7 @@ return (
       hook: `Checking loading, then empty, then the real table — in that order — is what stops a still-loading board from flashing a false "nothing here" for a moment.`,
       pain: "Skipping the loading check would show \"No recipes costed yet\" for a moment on every single page load, even when data is on its way.",
       mentalModel: MENTAL_MODEL,
-      discover: `if (loading) return <p>Loading…</p>;
-if (recipes.length === 0) return <p>No recipes costed yet.</p>;
-return (
-  <table>...</table>
-);`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One action per step\n- Order matters: loading, then empty, then real content\n- Table goes in the component's return, nowhere else",
       watchOut: "Do not skip the loading check — a still-loading board and a genuinely empty one must read differently.",
       dryRun: "Draw the same three-state return (loading/empty/table) for a different real dataset.",
@@ -876,11 +851,7 @@ export function RecipeCostBoard() {
       hook: `Comparing each recipe's own two real fields against each other — instead of one fixed number — is what makes the alert honest even when different recipes carry different real targets.`,
       pain: "A fixed threshold like 30 would flag the wrong recipes the moment any one of them carries a different real target.",
       mentalModel: MENTAL_MODEL,
-      discover: `{r.foodCostPct > r.targetCostPct ? (
-  <span style={{ color: "red", fontWeight: 700 }}>{r.foodCostPct}%</span>
-) : (
-  <span>{r.foodCostPct}%</span>
-)}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One action per step\n- This step touches only the Food Cost % cell\n- Compare each row to its own target, never a hardcoded number",
       watchOut: "Do not hardcode a threshold percentage — always compare that row's own two fields.",
       dryRun: "Add the same per-row-target comparison to a different table with a different pair of fields.",
@@ -1097,9 +1068,7 @@ const [preparedBy, setPreparedBy] = useState("");`,
       hook: `Declaring state before the JSX that reads it is what keeps a component's state declarations grouped and easy to find.`,
       pain: "Scattering new useState calls throughout the JSX wherever they're first read makes a component's actual state hard to see at a glance.",
       mentalModel: MENTAL_MODEL,
-      discover: `const [selected, setSelected] = useState<RecipeCostSummary | null>(null);
-const [multiplier, setMultiplier] = useState(1);
-const [preparedBy, setPreparedBy] = useState("");`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One action per step\n- All new state goes inside the component, grouped with existing state\n- It's fine to declare state before anything reads it",
       watchOut: "Do not touch the table's JSX in this step — that comes next.",
       dryRun: "Add the same three-state-variable group for a different upcoming form.",
@@ -1358,8 +1327,7 @@ export function RecipeCostBoard() {
       hook: `Gating the button to PREP_ITEM rows is what keeps the board from ever offering to "prep a batch" of a dish that was never meant to be prepped.`,
       pain: "Showing the button on every row would let someone try to prep-batch a finished dish, a request the real backend would reject anyway.",
       mentalModel: MENTAL_MODEL,
-      discover: `{r.type === "PREP_ITEM" && <button onClick={() => setSelected(r)}>Run Prep Batch</button>}
-{selected && <div><h4>{selected.name}</h4>...</div>}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One action per step\n- The button and its form are one coherent UI addition\n- Wiring the inputs' values comes next, not here",
       watchOut: "Do not show the Run Prep Batch button on MENU_ITEM rows — gate it strictly to r.type === \"PREP_ITEM\".",
       dryRun: "Wire the same type-gated select-and-show-form pattern for a different list with two distinct row kinds.",
@@ -1657,9 +1625,7 @@ export function RecipeCostBoard() {
       hook: `Guarding against a missing selection before this function does anything real is what stops a stray call from posting a prep-batch request with no real recipe id at all.`,
       pain: "Skipping the guard would let this function run with selected still null, crashing on selected.id.",
       mentalModel: MENTAL_MODEL,
-      discover: `async function handleRunBatch() {
-  if (!selected) return;
-  await fetch(\`/api/v1/recipes/\${selected.id}/prep-batches\`, { method: "POST", ... });
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.", { method: "POST", ... });
   setSelected(null);
   fetch("/api/v1/recipes/costs").then((r) => r.json()).then(setRecipes);
 }`,
@@ -1974,8 +1940,7 @@ export function RecipeCostBoard() {
       hook: `Wiring onChange on both inputs is what makes this a real, editable form — and a dedicated Submit button is what stops a batch from running on every keystroke.`,
       pain: "An input with value but no onChange looks editable but silently ignores every keystroke — a classic React gotcha.",
       mentalModel: MENTAL_MODEL,
-      discover: `<input value={multiplier} onChange={(e) => setMultiplier(Number(e.target.value))} />
-<button onClick={handleRunBatch}>Submit</button>`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One action per step\n- Every controlled input needs both value and onChange\n- Submit is a deliberate click, not a side effect of typing",
       watchOut: "Do not call handleRunBatch from an input's onChange — only the Submit button should trigger it.",
       dryRun: "Wire the same value+onChange+Submit pattern for a different two-field real form.",

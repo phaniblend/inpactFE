@@ -148,25 +148,7 @@ export function PickupQueueBoard() {
       hook: `A stop type that names sequence as its own field is what lets the board trust the real delivery order instead of guessing it from array position.`,
       pain: "A type that skips sequence forces the UI to assume array order matches delivery order, which breaks the moment the API ever returns stops unsorted.",
       mentalModel: MENTAL_MODEL,
-      discover: `export type RouteStopView = {
-  id: string;
-  sequence: number;
-  status: string;
-  customerName: string;
-  customerAddress: string;
-};
-
-export type ActiveRoute = {
-  id: string;
-  routeCode: string;
-  status: string;
-  stops: RouteStopView[];
-};
-
-export function RouteStopBoard() {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not fold route fields and stop fields into one flat type — a route holds a list of stops, it isn't one.",
       dryRun: "Write the same nested-list type for a different real ordered sequence you haven't modeled before.",
@@ -313,14 +295,7 @@ useEffect(() => {
       hook: `Running fetch inside useEffect with a loading flag means the request fires exactly once, and a driver sees an honest "still loading" instead of a false "nothing assigned" for a moment.`,
       pain: "Without a loading flag, a genuinely unassigned driver and one whose route just hasn't loaded yet look identical.",
       mentalModel: MENTAL_MODEL,
-      discover: `useEffect(() => {
-  fetch("/api/v1/routes/active")
-    .then((res) => res.json())
-    .then((data) => {
-      setRoute(data);
-      setLoading(false);
-    });
-}, []);`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not call fetch() directly inside the component body (outside useEffect) — that refetches on every render.",
       dryRun: "Write the same fetch-on-mount step for a different real endpoint on this same backend.",
@@ -508,8 +483,7 @@ return (
       hook: `Sorting by the real sequence field is what guarantees a driver always sees their actual delivery order, even if the API ever changes how it lists stops.`,
       pain: "Trusting raw array order instead of the sequence field would send a driver to stop 3 before stop 1 the moment the API's ordering ever shifts.",
       mentalModel: MENTAL_MODEL,
-      discover: `const sortedStops = [...route.stops].sort((a, b) => a.sequence - b.sequence);
-{sortedStops.map((stop) => <div key={stop.id}>...</div>)}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not sort route.stops in place — spread it into a new array first so state stays untouched.",
       dryRun: "Draw the same sorted-list-plus-empty-state pattern for a different real ordered sequence.",
@@ -733,12 +707,7 @@ export function RouteStopBoard() {
       hook: `A completed stop that visibly fades out, and a plain needsAction flag driving the button, is what keeps the board honest about what's actually still left to do.`,
       pain: "Without a needsAction flag tied to the real status, a completed stop could end up with a button that lets a driver \"complete\" it again.",
       mentalModel: MENTAL_MODEL,
-      discover: `const needsAction = stop.status !== "COMPLETED";
-{stop.status === "COMPLETED" ? (
-  <span style={{ color: "#64748b", textDecoration: "line-through" }}>{stop.status}</span>
-) : (
-  <span>{stop.status}</span>
-)}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not compute needsAction from position in the list — always compare that row's own status.",
       dryRun: "Add the same kind of done/pending distinction to a different list with a different pair of states.",
@@ -985,8 +954,7 @@ export function RouteStopBoard() {
       hook: `Reloading the real active route after completing a stop is what lets the board pick up the backend's own auto-closeout the moment the last stop is done — not a guess made client-side.`,
       pain: "Removing the row locally without reloading would miss the backend's own auto-closeout, leaving the board out of sync with what's actually true.",
       mentalModel: MENTAL_MODEL,
-      discover: `async function handleComplete(stopId: string, signatureData: string) {
-  await fetch(\`/api/v1/routes/stops/\${stopId}/complete\`, { method: "POST", ... });
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.", { method: "POST", ... });
   fetch("/api/v1/routes/active").then((r) => r.json()).then(setRoute);
 }`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",

@@ -481,6 +481,15 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [mockOpen]);
+  // Audit P24: hide GlobalHeader while a mock / tour / Start Dev surface occupies the view.
+  useEffect(() => {
+    const focus = mockOpen || tourOpen || workspaceOpen;
+    if (focus) document.body.dataset.inpactWorkbenchFocus = "1";
+    else delete document.body.dataset.inpactWorkbenchFocus;
+    return () => {
+      delete document.body.dataset.inpactWorkbenchFocus;
+    };
+  }, [mockOpen, tourOpen, workspaceOpen]);
   // `projects` is only ever populated for the core/admin board — a JS session's Workbench never
   // fetches the full delivery-project list (deliberate, 2026-08-09: a JS should see only their own
   // slice, not the whole product catalog), so this lookup always misses for a JS user, silently
@@ -505,7 +514,7 @@ function OpenTaskView({ task, publishedModules, onBack, isJS, projects = [] }) {
     setProductOverview(null);
     if (!task.projectId) return;
     let cancelled = false;
-    fetch(`/api/onedev/projects/${task.projectId}`)
+    fetch(`/api/recruit/project-overview?projectId=${encodeURIComponent(task.projectId)}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (!cancelled) setProductOverview(data?.description || null);

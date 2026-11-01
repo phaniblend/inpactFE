@@ -21,8 +21,16 @@ export function getFs() {
   return fs;
 }
 
-/** Sanitized per-project working directory — projectPath can contain "/" (OneDev nested paths). */
-export function projectDir(projectPath) {
-  const safe = String(projectPath || "unknown").replace(/[^a-zA-Z0-9/_-]/g, "-");
-  return `/projects/${safe}`;
+/**
+ * Sanitized working directory per project + task branch (audit P26, 2026-11-01).
+ * One dir per project reused every task's dirty tree (prior learners' pasted answers, half-written
+ * types, gym-pass examples). Keying by branchHint (includes task.id) gives each matched instance
+ * a clean LightningFS path so checkout doesn't inherit someone else's working tree.
+ */
+export function projectDir(projectPath, branchHint = "") {
+  const safeProject = String(projectPath || "unknown").replace(/[^a-zA-Z0-9/_-]/g, "-");
+  const safeBranch = String(branchHint || "main")
+    .replace(/[^a-zA-Z0-9/_-]/g, "-")
+    .slice(0, 80);
+  return `/projects/${safeProject}/${safeBranch}`;
 }

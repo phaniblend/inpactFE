@@ -125,20 +125,7 @@ export function CaseQueue() {
       hook: `A blueprint that matches the real API's actual shape is what lets your editor catch a typo'd field name before you ever run the code.`,
       pain: "A type that guesses wrong about the real response shape produces confusing runtime bugs TypeScript should have caught.",
       mentalModel: MENTAL_MODEL,
-      discover: `export type Incident = {
-  id: string;
-  incidentCode: string;
-  cashier: { name: string; employeeNumber: string };
-  severity: string;
-  zScore: number;
-  flaggedAmount: number;
-  events: unknown[];
-};
-
-export function IncidentTriage() {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not flatten cashier into loose top-level fields — the real API nests it.",
       dryRun: "Write the same step for a different real endpoint you haven't used before.",
@@ -270,14 +257,7 @@ useEffect(() => {
       hook: `Running fetch inside useEffect with a loading flag means the request fires exactly once, and analysts see an honest "still loading" instead of a false "all clear" for a moment.`,
       pain: "Without a loading flag, a genuinely clear queue and a queue that just hasn't loaded yet look identical to the analyst.",
       mentalModel: MENTAL_MODEL,
-      discover: `useEffect(() => {
-  fetch("/api/v1/incidents")
-    .then((res) => res.json())
-    .then((data) => {
-      setIncidents(data);
-      setLoading(false);
-    });
-}, []);`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not call fetch() directly inside the component body (outside useEffect) — that refetches on every render.",
       dryRun: "Write the same fetch-on-mount step for a different real endpoint on this same backend.",
@@ -475,12 +455,7 @@ return (
       hook: `A real semantic table (not a styled <div> grid) is what screen readers and browser table features actually understand.`,
       pain: "Skipping the empty check leaves a permanently blank table with no explanation once the fetch resolves to nothing.",
       mentalModel: MENTAL_MODEL,
-      discover: `<table>
-  <thead><tr><th>Case</th><th>Cashier</th><th>Severity</th><th>Z-Score</th><th>Flagged</th></tr></thead>
-  <tbody>
-    {incidents.map((inc) => <tr key={inc.id}>...</tr>)}
-  </tbody>
-</table>`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not skip the empty-array check — a table with zero rows and no message reads as broken.",
       dryRun: "Draw the same table shape for a different real dataset with different columns.",
@@ -690,11 +665,7 @@ export function IncidentTriage() {
       hook: `A visually distinct CRITICAL badge is what lets an analyst triage the riskiest cases first instead of reading every row in order.`,
       pain: "Leaving every severity the same plain color forces an analyst to read every row's text to find the urgent ones.",
       mentalModel: MENTAL_MODEL,
-      discover: `{inc.severity === "CRITICAL" ? (
-  <span style={{ color: "red", fontWeight: 700 }}>{inc.severity}</span>
-) : (
-  <span style={{ color: "#b45309" }}>{inc.severity}</span>
-)}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not hardcode a color per row index — always compare that row's own severity.",
       dryRun: "Add the same kind of status badge to a different table with a different pair of states.",
@@ -937,9 +908,7 @@ export function IncidentTriage() {
       hook: `Seeing the exact raw events behind a score is what lets an analyst confirm a real pattern of theft before locking it in as evidence — not just trust a number.`,
       pain: "Without tracking which specific incident was clicked, a drawer showing the wrong evidence would look like proof it isn't.",
       mentalModel: MENTAL_MODEL,
-      discover: `const [selected, setSelected] = useState<Incident | null>(null);
-// row: onClick={() => setSelected(inc)}
-{selected && <pre>{JSON.stringify(selected.events, null, 2)}</pre>}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not re-fetch the incident on click — the row you clicked already has its own real data in state.",
       dryRun: "Wire the same select-and-show-detail pattern for a different list of real records.",
@@ -1217,8 +1186,7 @@ export function IncidentTriage() {
       hook: `Reloading from the real server after a resolve is what keeps the table honest — a resolved incident actually disappears because the server actually resolved it, not because the UI just pretended to.`,
       pain: "Hiding the row locally without telling the server would make the table lie about what's actually still open.",
       mentalModel: MENTAL_MODEL,
-      discover: `async function handleResolve(id: string, status: string, notes: string) {
-  await fetch(\`/api/v1/incidents/\${id}/resolve\`, { method: "POST", ... });
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.", { method: "POST", ... });
   setSelected(null);
   fetch("/api/v1/incidents").then((r) => r.json()).then(setIncidents);
 }`,

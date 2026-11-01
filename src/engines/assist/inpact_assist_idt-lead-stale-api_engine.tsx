@@ -12,7 +12,7 @@ export const NODES = [
 
   Store    →  in-memory Lead rows
   Validate →  required fields
-  Derive   →  if capturedAt older than N days → stale; else fresh
+  Derive   →  if capturedAt older than 7 days → stale; else fresh
   Routes   →  GET/POST attach computed status (do not trust client status)`,
       usecase: "Stale leads must be computed from capture time so the inbox stays honest.",
       designMock: {"kind":"api-sample","screenTitle":"/api/leads","caption":"Status is computed on the way out — clients cannot fake it.","getSample":"GET /api/leads\n→ [ { \"id\": \"1\", \"status\": \"…\" } ]","postSample":"POST /api/leads\n{ …fields… }\n→ 201 { …row, \"status\": \"…\" }"},
@@ -41,12 +41,9 @@ WHAT YOU'LL NEED
 Your task: Set up server storage for leads and an ID generator.`,
     hint: `1. In-memory store: Declare an empty array typed with your lead shape.
 2. ID helper: Return an incremental ID string from your helper function.`,
-    example_code: `let leadsArchive: StoredLead[] = [];
-let leadCounter = 1;
-
-function makeLeadId(): string {
-  return \`lead-\${leadCounter++}\`;
-}`,
+    example_code: `let tasks = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/leads
 GET /api/leads
@@ -74,12 +71,9 @@ let nextIdCounter = 1;
 function nextId() { return String(nextIdCounter++); }
 export function getStore() { return leads; }
 `,
-    analog_example: `let leadsArchive: StoredLead[] = [];
-let leadCounter = 1;
-
-function makeLeadId(): string {
-  return \`lead-\${leadCounter++}\`;
-}`,
+    analog_example: `let tasks = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -90,18 +84,13 @@ function makeLeadId(): string {
 
   Store    →  in-memory Lead rows
   Validate →  required fields
-  Derive   →  if capturedAt older than N days → stale; else fresh
+  Derive   →  if capturedAt older than 7 days → stale; else fresh
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let leads = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return leads; }
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. In-memory store: Declare an empty array typed with your lead shape.
-2. ID helper: Return an incremental ID string from your helper function.`,
+      build: `Two requests that arrive close together must never be handed the same id — a counter that only ever increases guarantees each new record gets a value nothing before it used, which a timestamp alone cannot promise.`,
     },
   },
   {
@@ -119,9 +108,7 @@ WHAT YOU'LL NEED
 Your task: Reject lead submissions lacking a name or contact details with status 400.`,
     hint: `1. Inspect fields: Evaluate required properties using !req.body.property.
 2. Reject missing: Send status 400 if any required field is falsy.`,
-    example_code: `if (!req.body.name || !req.body.contact) {
-  return res.status(400).json({ error: "Name and contact info are required" });
-}`,
+    example_code: `if (!input?.title?.trim()) return "title is required";`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/leads
 POST /api/leads
@@ -161,9 +148,7 @@ export function validateLead(input) {
   return null;
 }
 `,
-    analog_example: `if (!req.body.name || !req.body.contact) {
-  return res.status(400).json({ error: "Name and contact info are required" });
-}`,
+    analog_example: `if (!input?.title?.trim()) return "title is required";`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -174,24 +159,13 @@ export function validateLead(input) {
 
   Store    →  in-memory Lead rows
   Validate →  required fields
-  Derive   →  if capturedAt older than N days → stale; else fresh
+  Derive   →  if capturedAt older than 7 days → stale; else fresh
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let leads = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return leads; }
-export function validateLead(input) {
-  if (typeof input?.name !== "string" || !input.name.trim()) return "name is required";
-  if (typeof input?.source !== "string" || !input.source.trim()) return "source is required";
-  if (typeof input?.capturedAt !== "string" || !input.capturedAt.trim()) return "capturedAt is required";
-  return null;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Inspect fields: Evaluate required properties using !req.body.property.
-2. Reject missing: Send status 400 if any required field is falsy.`,
+      build: `A validator is just a function that inspects the fields it was given and returns either a short error message or nothing at all — the caller decides what to do with that answer.`,
     },
   },
   {
@@ -209,15 +183,17 @@ WHAT YOU'LL NEED
 Your task: Calculate whether a lead is "fresh" or "stale" based on interaction timestamps on the server.`,
     hint: `1. Compare dates: Calculate elapsed time since lastContact.
 2. Set status: Assign "stale" if threshold is exceeded; otherwise, assign "fresh".`,
-    example_code: `const sevenDays = 7 * 24 * 60 * 60 * 1000;
-const isStale = Date.now() - new Date(req.body.lastContact).getTime() > sevenDays;
-const status = isStale ? "stale" : "fresh";`,
+    example_code: `function taskStatus(item, today) {
+  if (item.done) return "done";
+  if (new Date(item.due) < today) return "late";
+  return "open";
+}`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/leads
 GET /api/leads
 → [ { "id": "1", "status": "…" } ]
 
-Rule: if capturedAt older than N days → stale; else fresh
+Rule: if capturedAt older than 7 days → stale; else fresh
 \`\`\`
 
 A status label describing a record can always be recalculated from that record's own stored facts — comparing dates, or checking a boolean flag — rather than being sent by the client and simply trusted. Given the rule above, should the browser send status, or should the server compute it — and from what?`,
@@ -242,13 +218,16 @@ export function deriveLeadStatus(row, now = new Date()) {}
     expected: `let leads = [];
 export function validateLead(input) { return null; }
 export function deriveLeadStatus(row, now = new Date()) {
-  if (new Date(row.capturedAt) < now) return "stale";
+  const staleMs = 7 * 24 * 60 * 60 * 1000;
+  if (now.getTime() - new Date(row.capturedAt).getTime() > staleMs) return "stale";
   return "fresh";
 }
 `,
-    analog_example: `const sevenDays = 7 * 24 * 60 * 60 * 1000;
-const isStale = Date.now() - new Date(req.body.lastContact).getTime() > sevenDays;
-const status = isStale ? "stale" : "fresh";`,
+    analog_example: `function taskStatus(item, today) {
+  if (item.done) return "done";
+  if (new Date(item.due) < today) return "late";
+  return "open";
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -259,20 +238,13 @@ const status = isStale ? "stale" : "fresh";`,
 
   Store    →  in-memory Lead rows
   Validate →  required fields
-  Derive   →  if capturedAt older than N days → stale; else fresh
+  Derive   →  if capturedAt older than 7 days → stale; else fresh
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let leads = [];
-export function validateLead(input) { return null; }
-export function deriveLeadStatus(row, now = new Date()) {
-  if (new Date(row.capturedAt) < now) return "stale";
-  return "fresh";
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Compare dates: Calculate elapsed time since lastContact.
-2. Set status: Assign "stale" if threshold is exceeded; otherwise, assign "fresh".`,
+      build: `A derive function takes one stored row (plus, optionally, the current time) and returns a label computed purely from that row's own fields — it never reads anything the client sent in the current request.`,
     },
   },
   {
@@ -291,17 +263,7 @@ Your task: Build endpoints to fetch leads and create new leads with the calculat
     hint: `1. Return store: Send status 200 with the leads array in GET.
 2. Protect POST: Run validation and status derivation before pushing the record.
 3. Save record: Assign a unique ID, push the item to storage, and return status 201.`,
-    example_code: `export function getLeads(res: Response) {
-  return res.status(200).json(leadsArchive);
-}
-
-export function createLead(req: Request, res: Response) {
-  // Step 2 validation check
-  // Step 3 derive fresh/stale status
-  const item = { id: makeLeadId(), ...req.body, status };
-  leadsArchive.push(item);
-  return res.status(201).json(item);
-}`,
+    example_code: `res.json(tasks.map((t) => ({ ...t, status: taskStatus(t) })));`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/leads
 GET /api/leads
@@ -315,10 +277,7 @@ Attaching a computed field to data on its way out of a route means running the d
     mc_options: ["GET/POST attach derived status; POST validates first","POST stores client status verbatim","GET omits status"],
     mc_correct_option: "GET/POST attach derived status; POST validates first",
     mc_anchor: "GET/POST attach derived status; POST val",
-    why_this_matters: `The client receives back the saved lead along with its server-calculated freshness tag.
-
-
-================================================================================`,
+    why_this_matters: `The client receives back the saved lead along with its server-calculated freshness tag.`,
     answer_keywords: ["deriveLeadStatus","validateLead","201"],
     seed_code: `let leads = [];
 let nextIdCounter = 1;
@@ -361,58 +320,24 @@ export function createHandlers() {
   };
 }
 `,
-    analog_example: `export function getLeads(res: Response) {
-  return res.status(200).json(leadsArchive);
-}
-
-export function createLead(req: Request, res: Response) {
-  // Step 2 validation check
-  // Step 3 derive fresh/stale status
-  const item = { id: makeLeadId(), ...req.body, status };
-  leadsArchive.push(item);
-  return res.status(201).json(item);
-}`,
+    analog_example: `res.json(tasks.map((t) => ({ ...t, status: taskStatus(t) })));`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `The client receives back the saved lead along with its server-calculated freshness tag.
-
-
-================================================================================`,
+      hook: `The client receives back the saved lead along with its server-calculated freshness tag.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Implement /api/leads with a derived status:
 
   Store    →  in-memory Lead rows
   Validate →  required fields
-  Derive   →  if capturedAt older than N days → stale; else fresh
+  Derive   →  if capturedAt older than 7 days → stale; else fresh
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let leads = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function validateLead(input) { return null; }
-export function deriveLeadStatus(row, now = new Date()) { return "open"; }
-export function createHandlers() {
-  return {
-    list(_req, res) {
-      res.json(leads.map((r) => ({ ...r, status: deriveLeadStatus(r) })));
-    },
-    create(req, res) {
-      const err = validateLead(req.body);
-      if (err) return res.status(400).json({ error: err });
-      const row = { id: nextId(), name: req.body.name, source: req.body.source, capturedAt: req.body.capturedAt };
-      leads.push(row);
-      res.status(201).json({ ...row, status: deriveLeadStatus(row) });
-    },
-  };
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Return store: Send status 200 with the leads array in GET.
-2. Protect POST: Run validation and status derivation before pushing the record.
-3. Save record: Assign a unique ID, push the item to storage, and return status 201.`,
+      build: `A route handler's job is to call helpers in the right order and translate their answers into HTTP responses — validate first, then map the derive function over whatever gets returned.`,
     },
   },
 ];

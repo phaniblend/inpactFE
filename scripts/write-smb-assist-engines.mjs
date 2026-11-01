@@ -126,12 +126,13 @@ ${conceptExtra}`,
         {
           title: fields[0]?.sample || "Row A",
           subtitle: fields[1]?.sample || "Detail",
-          meta: fields[2]?.sample || "",
+          meta: String(fields[2]?.sample ?? ""),
         },
+        // Second sample must stay in-domain (audit P11) — never the shared "Second row / Another" filler.
         {
-          title: fields[0]?.sample === fields[0]?.sample ? "Second row" : "Row B",
-          subtitle: "Another",
-          meta: fields[2]?.sample || "",
+          title: fields[0]?.sample2 || `${fields[0]?.sample || "Row"} B`,
+          subtitle: fields[1]?.sample2 || `${fields[1]?.sample || "Detail"} (alt)`,
+          meta: String(fields[2]?.sample2 ?? fields[2]?.sample ?? ""),
         },
       ],
       fields: fields.map((f) => ({ label: f.label, sample: f.sample })),
@@ -1084,9 +1085,9 @@ const MODULES = [
     submitLabel: "Publish",
     screenTitle: "Shifts",
     fields: [
-      { name: "worker", label: "Worker", sample: "Ana", ts: "string" },
-      { name: "role", label: "Role", sample: "Barista", ts: "string" },
-      { name: "startsAt", label: "Starts at", sample: "Sat 8:00", ts: "string" },
+      { name: "worker", label: "Worker", sample: "Ana", sample2: "Kai", ts: "string" },
+      { name: "role", label: "Role", sample: "Barista", sample2: "Host", ts: "string" },
+      { name: "startsAt", label: "Starts at", sample: "Sat 8:00", sample2: "Sat 12:00", ts: "string" },
     ],
     usecase:
       "Small teams still run on group chats. A shift list+form is the staffing desk they can actually use.",
@@ -1182,9 +1183,9 @@ const MODULES = [
     submitLabel: "Create quote",
     screenTitle: "Quotes",
     fields: [
-      { name: "client", label: "Client", sample: "Patel Home", ts: "string" },
-      { name: "total", label: "Total", sample: "1800", ts: "string" },
-      { name: "validUntil", label: "Valid until", sample: "2026-09-15", ts: "string" },
+      { name: "client", label: "Client", sample: "Patel Home", sample2: "River Clinic", ts: "string" },
+      { name: "total", label: "Total", sample: "1800", sample2: "640", ts: "string" },
+      { name: "validUntil", label: "Valid until", sample: "2026-09-15", sample2: "2026-10-01", ts: "string" },
     ],
     usecase:
       "Trades lose jobs between estimate and acceptance. A quote list+form is the bridge from lead to cash.",
@@ -1608,11 +1609,11 @@ function buildEngine(mod) {
       hook: \`${esc(step.deepDiveHook || step.paal)}\`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: \`${esc(mod.concept)}\`,
-      discover: \`${esc(step.expected)}\`,
-      quickRules: "- One skill per step\\n- Name the skill, not the product noun\\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\\n- Name the skill, not the product noun\\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: \`${esc(step.hint)}\`,
+      build: \`${esc(step.preCheckHint || "Follow the HOW for this step — technique, not a finished paste.")}\`,
     },
   }`;
   });

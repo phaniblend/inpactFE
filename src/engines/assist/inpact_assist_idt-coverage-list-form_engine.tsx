@@ -102,16 +102,7 @@ export function GuestList() {
       hook: `The .tsx extension tells your editor that you are mixing TypeScript rules with visual React code. Declaring the blueprint first turns on autocomplete and helps catch typos before you ever run the code.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: MENTAL_MODEL,
-      discover: `export type CoverageSlot = {
-  id: string;
-  shift: string;
-  role: string;
-};
-
-export function OpenCoverage() {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -242,31 +233,7 @@ return (
       hook: `Checking if the list is empty ensures that first-time users see a helpful status message rather than a confusing, blank screen.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: MENTAL_MODEL,
-      discover: `import { useState } from "react";
-
-export type CoverageSlot = {
-  id: string;
-  shift: string;
-  role: string;
-};
-
-export function OpenCoverage() {
-  const [requests, setRequests] = useState<CoverageSlot[]>([]);
-  return (
-    <div>
-      {requests.length === 0 ? (
-        <p>All shifts covered</p>
-      ) : (
-        <ul>
-          {requests.map((r) => (
-            <li key={r.id}>{r.shift} — {r.role}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -397,11 +364,7 @@ return (
       hook: `Controlled inputs keep the screen and memory in sync at all times, making it easy to validate text, enable buttons, or package the data on submit.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: MENTAL_MODEL,
-      discover: `const [shift, setShift] = useState("");
-const [role, setRole] = useState("");
-
-<input value={shift} onChange={(e) => setShift(e.target.value)} />
-<input value={role} onChange={(e) => setRole(e.target.value)} />`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -577,13 +540,7 @@ return (
       hook: `Stopping page refresh keeps the application state intact, allowing the new shift request to appear instantly on screen without a jarring flicker.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: MENTAL_MODEL,
-      discover: `function handleAdd(e: React.FormEvent) {
-  e.preventDefault();
-  const nextItem: CoverageSlot = { id: String(Date.now()), shift, role };
-  setRequests((prev) => [...prev, nextItem]);
-  setShift("");
-  setRole("");
-}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",

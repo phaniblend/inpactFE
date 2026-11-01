@@ -16,14 +16,14 @@ export const NODES = [
   Submit   →  the new row appears on the list
 `,
       usecase: "No-shows and forgotten nudges cost money. A reminder list+form is the light desk before SMS suites.",
-      designMock: {"kind":"list-and-form","screenTitle":"Reminders","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No reminders scheduled.","rows":[{"title":"Alex","subtitle":"sms","meta":"Fri 9:00"},{"title":"Second row","subtitle":"Another","meta":"Fri 9:00"}],"fields":[{"label":"Client","sample":"Alex"},{"label":"Channel","sample":"sms"},{"label":"Send at","sample":"Fri 9:00"}],"submitLabel":"Schedule"},
+      designMock: {"kind":"list-and-form","screenTitle":"Reminders","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No reminders scheduled.","rows":[{"title":"Alex","subtitle":"sms","meta":"Fri 9:00"},{"title":"Alex B","subtitle":"sms (alt)","meta":"Fri 9:00"}],"fields":[{"label":"Client","sample":"Alex"},{"label":"Channel","sample":"sms"},{"label":"Send at","sample":"Fri 9:00"}],"submitLabel":"Schedule"},
     },
   },
   {
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Outline a schedule blueprint (event title, notify time) and construct the component shell.","Store scheduled reminders in state; show an event row for each entry, or a \"No events scheduled\" fallback.","Connect the title and date picker inputs to state to track user choices live.","Prevent default submit refresh, append the event to the schedule list, and reset the inputs."],
+    items: ["Outline a schedule blueprint (event sendAt, notify time) and construct the component shell.","Store scheduled reminders in state; show an event row for each entry, or a \"No events scheduled\" fallback.","Connect the sendAt and date picker inputs to state to track user choices live.","Prevent default submit refresh, append the event to the schedule list, and reset the inputs."],
   },
   {
     id: "step1",
@@ -33,23 +33,24 @@ export const NODES = [
 
 This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/ReminderHub.tsx\` before anything else. Every step from here on edits that same file.
 
-Outline a schedule blueprint (event title, notify time) and construct the component shell.
+Outline a schedule blueprint (event sendAt, notify time) and construct the component shell.
 
 WHAT YOU'LL NEED
-- id (text)
-- title (text)
-- scheduledFor (text)
+- id (text — unique key, not always shown on screen)
+- client (per contract)
+- channel (per contract)
+- sendAt (per contract)
 
 Your task: Define the shape of a scheduled reminder and create the component shell.`,
     hint: `1. Blueprint declaration: Rename ScheduledItem to your type name and define required fields.
 2. Shell component: Declare your component returning an empty <div />.`,
-    example_code: `export type ScheduledItem = {
+    example_code: `export type Guest = {
   id: string;
-  title: string;
-  scheduledFor: string;
+  name: string;
+  note: string;
 };
 
-export function ScheduleManager() {
+export function GuestList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -84,13 +85,13 @@ export function ReminderHub() {
   return <div />;
 }
 `,
-    analog_example: `export type ScheduledItem = {
+    analog_example: `export type Guest = {
   id: string;
-  title: string;
-  scheduledFor: string;
+  name: string;
+  note: string;
 };
 
-export function ScheduleManager() {
+export function GuestList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -106,22 +107,11 @@ export function ScheduleManager() {
   Form     →  Client, Channel, Send at
   Submit   →  the new row appears on the list
 `,
-      discover: `export type ScheduledReminder = {
-  id: string;
-  client: string;
-  channel: string;
-  sendAt: string;
-};
-
-export function ReminderHub() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Blueprint declaration: Rename ScheduledItem to your type name and define required fields.
-2. Shell component: Declare your component returning an empty <div />.`,
+      build: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     },
   },
   {
@@ -133,28 +123,24 @@ export function ReminderHub() {
 Store scheduled reminders in state; show an event row for each entry, or a "No events scheduled" fallback.
 
 WHAT YOU'LL NEED
-- State array holding scheduled reminders.
-- Conditional empty check.
-- Map loop rendering reminder rows.
+- id (text — unique key, not always shown on screen)
+- client (per contract)
+- channel (per contract)
+- sendAt (per contract)
 
 Your task: Store scheduled reminders in state and display them, showing a placeholder if none exist.`,
     hint: `1. Set up state: Use useState<ScheduledItem[]>([]).
 2. Check for empty: Use items.length === 0 to render the empty message.
 3. Render entries: Map through items, passing key={item.id}.`,
-    example_code: `const [items, setItems] = useState<ScheduledItem[]>([]);
-
-return (
-  <div>
-    {items.length === 0 ? (
-      <p>No reminders scheduled</p>
-    ) : (
-      items.map((item) => (
-        <div key={item.id}>
-          {item.title} on {item.scheduledFor}
-        </div>
-      ))
-    )}
-  </div>
+    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     think_prompt: `\`\`\`text
 LIST — Reminders
@@ -233,20 +219,15 @@ export function ReminderHub() {
   );
 }
 `,
-    analog_example: `const [items, setItems] = useState<ScheduledItem[]>([]);
-
-return (
-  <div>
-    {items.length === 0 ? (
-      <p>No reminders scheduled</p>
-    ) : (
-      items.map((item) => (
-        <div key={item.id}>
-          {item.title} on {item.scheduledFor}
-        </div>
-      ))
-    )}
-  </div>
+    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -261,38 +242,11 @@ return (
   Form     →  Client, Channel, Send at
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type ScheduledReminder = {
-  id: string;
-  client: string;
-  channel: string;
-  sendAt: string;
-};
-
-export function ReminderHub() {
-  const [reminders, setReminders] = useState<ScheduledReminder[]>([]);
-  return (
-    <div>
-      {reminders.length === 0 ? (
-        <p>No reminders scheduled.</p>
-      ) : (
-        <ul>
-          {reminders.map((a) => (
-            <li key={a.id}>{a.client}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Set up state: Use useState<ScheduledItem[]>([]).
-2. Check for empty: Use items.length === 0 to render the empty message.
-3. Render entries: Map through items, passing key={item.id}.`,
+      build: `To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. Once it does, checking its length before deciding what to render is just an ordinary conditional — the empty case and the list case are two branches of one render.`,
     },
   },
   {
@@ -301,20 +255,19 @@ export function ReminderHub() {
     phase: "Step 3 of 4",
     paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
 
-Connect the title and date picker inputs to state to track user choices live.
+Connect the sendAt and date picker inputs to state to track user choices live.
 
 WHAT YOU'LL NEED
-- State hooks for title and scheduledFor inputs.
-- Value and onChange props wired on inputs.
+- id (text — unique key, not always shown on screen)
+- client (per contract)
+- channel (per contract)
+- sendAt (per contract)
 
 Your task: Connect reminder schedule inputs to React state.`,
-    hint: `1. Initialize states: Call useState("") for title and scheduledFor.
+    hint: `1. Initialize states: Call useState("") for sendAt and sendAt.
 2. Wire inputs: Connect value and onChange to each state variable.`,
-    example_code: `const [title, setTitle] = useState("");
-const [scheduledFor, setScheduledFor] = useState("");
-
-<input value={title} onChange={(e) => setTitle(e.target.value)} />
-<input value={scheduledFor} onChange={(e) => setScheduledFor(e.target.value)} />`,
+    example_code: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Reminders
   [ Client ]  [ Channel ]  [ Send at ]   → Schedule
@@ -388,11 +341,8 @@ export function ReminderHub() {
   );
 }
 `,
-    analog_example: `const [title, setTitle] = useState("");
-const [scheduledFor, setScheduledFor] = useState("");
-
-<input value={title} onChange={(e) => setTitle(e.target.value)} />
-<input value={scheduledFor} onChange={(e) => setScheduledFor(e.target.value)} />`,
+    analog_example: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -406,34 +356,11 @@ const [scheduledFor, setScheduledFor] = useState("");
   Form     →  Client, Channel, Send at
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type ScheduledReminder = {
-  id: string;
-  client: string;
-  channel: string;
-  sendAt: string;
-};
-
-export function ReminderHub() {
-  const [reminders, setReminders] = useState<ScheduledReminder[]>([]);
-  const [client, setClient] = useState("");
-  const [channel, setChannel] = useState("");
-  const [sendAt, setSendAt] = useState("");
-  return (
-    <form>
-        <input value={client} onChange={(e) => setClient(e.target.value)} placeholder="Client" />
-        <input value={channel} onChange={(e) => setChannel(e.target.value)} placeholder="Channel" />
-        <input value={sendAt} onChange={(e) => setSendAt(e.target.value)} placeholder="Send at" />
-    </form>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize states: Call useState("") for title and scheduledFor.
-2. Wire inputs: Connect value and onChange to each state variable.`,
+      build: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
     },
   },
   {
@@ -445,23 +372,17 @@ export function ReminderHub() {
 Prevent default submit refresh, append the event to the schedule list, and reset the inputs.
 
 WHAT YOU'LL NEED
-- Form interceptor using e.preventDefault().
-- New scheduled item object creation.
-- Spread update to state.
-- Form reset calls.
+- id (text — unique key, not always shown on screen)
+- client (per contract)
+- channel (per contract)
+- sendAt (per contract)
 
 Your task: Append the new scheduled reminder to state without a page refresh and reset the form.`,
     hint: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, title, and scheduledFor into an object.
+2. Build item: Package id, sendAt, and sendAt into an object.
 3. Append item: Use setItems((prev) => [...prev, entry]).
 4. Clear form: Reset input states to "".`,
-    example_code: `function createSchedule(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), title, scheduledFor };
-  setItems((prev) => [...prev, entry]);
-  setTitle("");
-  setScheduledFor("");
-}`,
+    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     think_prompt: `\`\`\`text
 FORM — Reminders
   [ Client ]  [ Channel ]  [ Send at ]   → Schedule
@@ -472,10 +393,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `The new reminder appears in the schedule instantly without page reloads.
-
-
-================================================================================`,
+    why_this_matters: `The new reminder appears in the schedule instantly without page reloads.`,
     answer_keywords: ["preventDefault","setReminders","prev","client","channel","sendAt"],
     seed_code: `import { useState } from "react";
 
@@ -582,21 +500,12 @@ export function ReminderHub() {
   );
 }
 `,
-    analog_example: `function createSchedule(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), title, scheduledFor };
-  setItems((prev) => [...prev, entry]);
-  setTitle("");
-  setScheduledFor("");
-}`,
+    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `The new reminder appears in the schedule instantly without page reloads.
-
-
-================================================================================`,
+      hook: `The new reminder appears in the schedule instantly without page reloads.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists reminders and a form to add one:
 
@@ -605,56 +514,11 @@ export function ReminderHub() {
   Form     →  Client, Channel, Send at
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type ScheduledReminder = {
-  id: string;
-  client: string;
-  channel: string;
-  sendAt: string;
-};
-
-export function ReminderHub() {
-  const [reminders, setReminders] = useState<ScheduledReminder[]>([]);
-  const [client, setClient] = useState("");
-  const [channel, setChannel] = useState("");
-  const [sendAt, setSendAt] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: ScheduledReminder = { id: String(Date.now()), client, channel, sendAt };
-    setReminders((prev) => [...prev, next]);
-    setClient("");
-    setChannel("");
-    setSendAt("");
-  }
-  return (
-    <div>
-      {reminders.length === 0 ? (
-        <p>No reminders scheduled.</p>
-      ) : (
-        <ul>
-          {reminders.map((a) => (
-            <li key={a.id}>{a.client} · {a.channel} · {a.sendAt}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={client} onChange={(e) => setClient(e.target.value)} placeholder="Client" />
-        <input value={channel} onChange={(e) => setChannel(e.target.value)} placeholder="Channel" />
-        <input value={sendAt} onChange={(e) => setSendAt(e.target.value)} placeholder="Send at" />
-        <button type="submit">Schedule</button>
-      </form>
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, title, and scheduledFor into an object.
-3. Append item: Use setItems((prev) => [...prev, entry]).
-4. Clear form: Reset input states to "".`,
+      build: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     },
   },
 ];

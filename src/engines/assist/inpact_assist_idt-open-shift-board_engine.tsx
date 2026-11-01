@@ -17,7 +17,7 @@ export const NODES = [
   Filter   →  only matching rows render — the full list stays in state
 `,
       usecase: "Managers filter to open coverage only. Same filter-before-map skill as other desks.",
-      designMock: {"kind":"list-and-form","screenTitle":"Open shifts","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No open coverage.","rows":[{"title":"s-3","subtitle":"Sick","meta":"open"},{"title":"Second row","subtitle":"Another","meta":"open"}],"fields":[{"label":"Shift id","sample":"s-3"},{"label":"Reason","sample":"Sick"},{"label":"Status","sample":"open"}],"submitLabel":"Request"},
+      designMock: {"kind":"list-and-form","screenTitle":"Open shifts","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No open coverage.","rows":[{"title":"s-3","subtitle":"Sick","meta":"open"},{"title":"s-3 B","subtitle":"Sick (alt)","meta":"open"}],"fields":[{"label":"Shift id","sample":"s-3"},{"label":"Reason","sample":"Sick"},{"label":"Status","sample":"open"}],"submitLabel":"Request"},
     },
   },
   {
@@ -37,20 +37,21 @@ This file doesn't exist yet — you're the first to touch it. Create it at \`src
 Create a shift blueprint with staffing status and assemble the board frame.
 
 WHAT YOU'LL NEED
-- id (text)
-- role (text)
-- status (text)
+- id (text — unique key, not always shown on screen)
+- shiftId (per contract)
+- reason (per contract)
+- status (per contract)
 
 Your task: Define the shape of a coverage request with its status tag, and build the board shell.`,
     hint: `1. Blueprint declaration: Rename ShiftItem to your type name and define required fields.
 2. Shell component: Declare your component returning an empty <div />.`,
-    example_code: `export type ShiftItem = {
+    example_code: `export type Guest = {
   id: string;
-  role: string;
-  status: string;
+  name: string;
+  note: string;
 };
 
-export function OpenShiftBoard() {
+export function GuestList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -85,13 +86,13 @@ export function OpenShiftBoard() {
   return <div />;
 }
 `,
-    analog_example: `export type ShiftItem = {
+    analog_example: `export type Guest = {
   id: string;
-  role: string;
-  status: string;
+  name: string;
+  note: string;
 };
 
-export function OpenShiftBoard() {
+export function GuestList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -108,22 +109,11 @@ export function OpenShiftBoard() {
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  status: string;
-};
-
-export function OpenShiftBoard() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Blueprint declaration: Rename ShiftItem to your type name and define required fields.
-2. Shell component: Declare your component returning an empty <div />.`,
+      build: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     },
   },
   {
@@ -135,30 +125,24 @@ export function OpenShiftBoard() {
 Filter shifts to isolate unfilled openings, displaying a "Schedule fully covered" notice if all slots are staffed.
 
 WHAT YOU'LL NEED
-- State array holding all shifts.
-- .filter() call selecting shifts where status === 'unfilled'.
-- Conditional empty check.
+- id (text — unique key, not always shown on screen)
+- shiftId (per contract)
+- reason (per contract)
+- status (per contract)
 
 Your task: Filter shifts to show only unfilled openings, displaying a message if all shifts are covered.`,
     hint: `1. Master list: Keep all records in allShifts state.
 2. Filter logic: Create openShifts using .filter(s => s.status === "unfilled").
 3. Conditional render: Check openShifts.length === 0 to render the fallback message or the list rows.`,
-    example_code: `const [allShifts, setAllShifts] = useState<ShiftItem[]>([]);
-
-const openShifts = allShifts.filter((shift) => shift.status === "unfilled");
-
-return (
-  <div>
-    {openShifts.length === 0 ? (
-      <p>All shifts are covered</p>
-    ) : (
-      openShifts.map((shift) => (
-        <div key={shift.id}>
-          {shift.role} - Open
-        </div>
-      ))
-    )}
-  </div>
+    example_code: `const visible = guests.filter((g) => g.status === "active");
+return visible.length === 0 ? (
+  <p>No matches.</p>
+) : (
+  <ul>
+    {visible.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     think_prompt: `\`\`\`text
 LIST (filtered) — Open shifts
@@ -238,22 +222,15 @@ export function OpenShiftBoard() {
   );
 }
 `,
-    analog_example: `const [allShifts, setAllShifts] = useState<ShiftItem[]>([]);
-
-const openShifts = allShifts.filter((shift) => shift.status === "unfilled");
-
-return (
-  <div>
-    {openShifts.length === 0 ? (
-      <p>All shifts are covered</p>
-    ) : (
-      openShifts.map((shift) => (
-        <div key={shift.id}>
-          {shift.role} - Open
-        </div>
-      ))
-    )}
-  </div>
+    analog_example: `const visible = guests.filter((g) => g.status === "active");
+return visible.length === 0 ? (
+  <p>No matches.</p>
+) : (
+  <ul>
+    {visible.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -269,39 +246,11 @@ return (
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `import { useState } from "react";
-
-export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  status: string;
-};
-
-export function OpenShiftBoard() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  const visible = requests.filter((a) => a.status === "open");
-  return (
-    <div>
-      {visible.length === 0 ? (
-        <p>No open coverage.</p>
-      ) : (
-        <ul>
-          {visible.map((a) => (
-            <li key={a.id}>{a.shiftId}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Master list: Keep all records in allShifts state.
-2. Filter logic: Create openShifts using .filter(s => s.status === "unfilled").
-3. Conditional render: Check openShifts.length === 0 to render the fallback message or the list rows.`,
+      build: `.filter() always returns a brand-new array and never touches the one it was called on — so the full list stays in state, and the array you check for "empty" and then map is the filtered one, not the original.`,
     },
   },
   {
@@ -313,16 +262,16 @@ export function OpenShiftBoard() {
 Link shift date and role fields to state so live typing is tracked without loss.
 
 WHAT YOU'LL NEED
-- State hooks for role and status inputs.
-- Value and onChange props wired on inputs.
+- id (text — unique key, not always shown on screen)
+- shiftId (per contract)
+- reason (per contract)
+- status (per contract)
 
 Your task: Connect shift creation input fields to React state.`,
     hint: `1. Initialize states: Call useState("") for your form inputs.
 2. Wire inputs: Connect value and onChange to each state variable.`,
-    example_code: `const [role, setRole] = useState("");
-const [status, setStatus] = useState("unfilled");
-
-<input value={role} onChange={(e) => setRole(e.target.value)} />`,
+    example_code: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Open shifts
   [ Shift id ]  [ Reason ]  [ Status ]   → Request
@@ -396,10 +345,8 @@ export function OpenShiftBoard() {
   );
 }
 `,
-    analog_example: `const [role, setRole] = useState("");
-const [status, setStatus] = useState("unfilled");
-
-<input value={role} onChange={(e) => setRole(e.target.value)} />`,
+    analog_example: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -414,34 +361,11 @@ const [status, setStatus] = useState("unfilled");
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `import { useState } from "react";
-
-export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  status: string;
-};
-
-export function OpenShiftBoard() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  const [shiftId, setShiftId] = useState("");
-  const [reason, setReason] = useState("");
-  const [status, setStatus] = useState("");
-  return (
-    <form>
-        <input value={shiftId} onChange={(e) => setShiftId(e.target.value)} placeholder="Shift id" />
-        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" />
-        <input value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status" />
-    </form>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize states: Call useState("") for your form inputs.
-2. Wire inputs: Connect value and onChange to each state variable.`,
+      build: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
     },
   },
   {
@@ -453,22 +377,17 @@ export function OpenShiftBoard() {
 Intercept submission, save the open shift to memory, reset the form, and let the unfilled filter render it.
 
 WHAT YOU'LL NEED
-- Form interceptor using e.preventDefault().
-- Object assembly matching blueprint.
-- Spread update to state.
-- Form reset calls.
+- id (text — unique key, not always shown on screen)
+- shiftId (per contract)
+- reason (per contract)
+- status (per contract)
 
 Your task: Append the new shift to state without reloading the page and reset the inputs.`,
     hint: `1. Halt refresh: Call e.preventDefault() first.
 2. Build item: Package id, role, and status into an object.
 3. Append item: Use setAllShifts((prev) => [...prev, entry]).
 4. Clear form: Reset input states to "".`,
-    example_code: `function handleAdd(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), role, status };
-  setAllShifts((prev) => [...prev, entry]);
-  setRole("");
-}`,
+    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     think_prompt: `\`\`\`text
 FORM — Open shifts
   [ Shift id ]  [ Reason ]  [ Status ]   → Request
@@ -479,10 +398,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `The new shift is added to the master list, and your filter automatically displays it if it is marked unfilled.
-
-
-================================================================================`,
+    why_this_matters: `The new shift is added to the master list, and your filter automatically displays it if it is marked unfilled.`,
     answer_keywords: ["preventDefault","setRequests","prev","shiftId","reason","status"],
     seed_code: `import { useState } from "react";
 
@@ -589,20 +505,12 @@ export function OpenShiftBoard() {
   );
 }
 `,
-    analog_example: `function handleAdd(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), role, status };
-  setAllShifts((prev) => [...prev, entry]);
-  setRole("");
-}`,
+    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `The new shift is added to the master list, and your filter automatically displays it if it is marked unfilled.
-
-
-================================================================================`,
+      hook: `The new shift is added to the master list, and your filter automatically displays it if it is marked unfilled.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists requests and a form to add one:
 
@@ -612,56 +520,11 @@ export function OpenShiftBoard() {
   Submit   →  the new row appears on the list
   Filter   →  only matching rows render — the full list stays in state
 `,
-      discover: `import { useState } from "react";
-
-export type CoverageRequest = {
-  id: string;
-  shiftId: string;
-  reason: string;
-  status: string;
-};
-
-export function OpenShiftBoard() {
-  const [requests, setRequests] = useState<CoverageRequest[]>([]);
-  const [shiftId, setShiftId] = useState("");
-  const [reason, setReason] = useState("");
-  const [status, setStatus] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: CoverageRequest = { id: String(Date.now()), shiftId, reason, status };
-    setRequests((prev) => [...prev, next]);
-    setShiftId("");
-    setReason("");
-    setStatus("");
-  }
-  return (
-    <div>
-      {requests.length === 0 ? (
-        <p>No open coverage.</p>
-      ) : (
-        <ul>
-          {requests.map((a) => (
-            <li key={a.id}>{a.shiftId} · {a.reason} · {a.status}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={shiftId} onChange={(e) => setShiftId(e.target.value)} placeholder="Shift id" />
-        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" />
-        <input value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status" />
-        <button type="submit">Request</button>
-      </form>
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, role, and status into an object.
-3. Append item: Use setAllShifts((prev) => [...prev, entry]).
-4. Clear form: Reset input states to "".`,
+      build: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     },
   },
 ];

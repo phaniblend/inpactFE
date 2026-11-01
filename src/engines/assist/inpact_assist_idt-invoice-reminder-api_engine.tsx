@@ -41,12 +41,9 @@ WHAT YOU'LL NEED
 Your task: Set up server storage for reminder records and an ID generator.`,
     hint: `1. In-memory store: Declare an empty array typed with your reminder shape.
 2. ID helper: Return an incremented string ID from your helper function.`,
-    example_code: `let reminders: ReminderRecord[] = [];
-let remIdCounter = 1;
-
-function getNextReminderId(): string {
-  return \`rem-\${remIdCounter++}\`;
-}`,
+    example_code: `let guests = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/reminders
 GET /api/reminders
@@ -74,12 +71,9 @@ let nextIdCounter = 1;
 function nextId() { return String(nextIdCounter++); }
 export function getStore() { return reminders; }
 `,
-    analog_example: `let reminders: ReminderRecord[] = [];
-let remIdCounter = 1;
-
-function getNextReminderId(): string {
-  return \`rem-\${remIdCounter++}\`;
-}`,
+    analog_example: `let guests = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -92,16 +86,11 @@ function getNextReminderId(): string {
   Validate →  required fields before insert
   Conflict →  same invoiceId + channel already pending → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let reminders = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return reminders; }
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. In-memory store: Declare an empty array typed with your reminder shape.
-2. ID helper: Return an incremented string ID from your helper function.`,
+      build: `Two requests that arrive close together must never be handed the same id — a counter that only ever increases guarantees each new record gets a value nothing before it used, which a timestamp alone cannot promise.`,
     },
   },
   {
@@ -119,9 +108,7 @@ WHAT YOU'LL NEED
 Your task: Reject reminder requests missing invoice ID, channel, or message with status 400.`,
     hint: `1. Inspect fields: Evaluate required properties using !req.body.property.
 2. Reject missing: Send status 400 with an informative error message.`,
-    example_code: `if (!req.body.invoiceId || !req.body.channel) {
-  return res.status(400).json({ error: "Invoice ID and channel are required" });
-}`,
+    example_code: `if (!input?.name?.trim()) return "name is required";`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/reminders
 POST /api/reminders
@@ -161,9 +148,7 @@ export function validateReminder(input) {
   return null;
 }
 `,
-    analog_example: `if (!req.body.invoiceId || !req.body.channel) {
-  return res.status(400).json({ error: "Invoice ID and channel are required" });
-}`,
+    analog_example: `if (!input?.name?.trim()) return "name is required";`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -176,22 +161,11 @@ export function validateReminder(input) {
   Validate →  required fields before insert
   Conflict →  same invoiceId + channel already pending → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let reminders = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return reminders; }
-export function validateReminder(input) {
-  if (typeof input?.invoiceId !== "string" || !input.invoiceId.trim()) return "invoiceId is required";
-  if (typeof input?.channel !== "string" || !input.channel.trim()) return "channel is required";
-  if (typeof input?.sendAt !== "string" || !input.sendAt.trim()) return "sendAt is required";
-  return null;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Inspect fields: Evaluate required properties using !req.body.property.
-2. Reject missing: Send status 400 with an informative error message.`,
+      build: `A validator is just a function that inspects the fields it was given and returns either a short error message or nothing at all — the caller decides what to do with that answer.`,
     },
   },
   {
@@ -210,14 +184,8 @@ Your task: Scan existing reminders to ensure a pending reminder does not already
     hint: `1. Scan store: Use .some() on your reminders array.
 2. Match criteria: Check if invoiceId, channel, and status === 'pending' all match.
 3. Reject conflicts: If found, halt execution with status 409.`,
-    example_code: `const exists = reminders.some(
-  (r) =>
-    r.invoiceId === req.body.invoiceId &&
-    r.channel === req.body.channel &&
-    r.status === "pending"
-);
-if (exists) {
-  return res.status(409).json({ error: "Pending reminder already exists on this channel" });
+    example_code: `function seatTaken(seat, holds) {
+  return holds.some((h) => h.seat === seat);
 }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/reminders
@@ -249,17 +217,11 @@ export function hasPendingReminder(candidate) {}
     expected: `let reminders = [];
 export function validateReminder(input) { return null; }
 export function hasPendingReminder(candidate) {
-  return reminders.some((row) => row.invoiceId === candidate.invoiceId && row.sendAt === candidate.sendAt);
+  return reminders.some((row) => row.invoiceId === candidate.invoiceId && row.channel === candidate.channel);
 }
 `,
-    analog_example: `const exists = reminders.some(
-  (r) =>
-    r.invoiceId === req.body.invoiceId &&
-    r.channel === req.body.channel &&
-    r.status === "pending"
-);
-if (exists) {
-  return res.status(409).json({ error: "Pending reminder already exists on this channel" });
+    analog_example: `function seatTaken(seat, holds) {
+  return holds.some((h) => h.seat === seat);
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -273,18 +235,11 @@ if (exists) {
   Validate →  required fields before insert
   Conflict →  same invoiceId + channel already pending → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let reminders = [];
-export function validateReminder(input) { return null; }
-export function hasPendingReminder(candidate) {
-  return reminders.some((row) => row.invoiceId === candidate.invoiceId && row.sendAt === candidate.sendAt);
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Scan store: Use .some() on your reminders array.
-2. Match criteria: Check if invoiceId, channel, and status === 'pending' all match.
-3. Reject conflicts: If found, halt execution with status 409.`,
+      build: `Checking one candidate record against a list of existing ones for a matching combination of fields is exactly what Array.prototype.some() is for — it stops at the first match and returns true or false.`,
     },
   },
   {
@@ -303,17 +258,7 @@ Your task: Build endpoints to fetch all reminders and save new reminders with va
     hint: `1. Return store: Send status 200 with the reminders array in GET.
 2. Protect POST: Run validation and duplicate checks before pushing the record.
 3. Save record: Assign a unique ID, append the record to the array, and return status 201.`,
-    example_code: `export function getReminders(res: Response) {
-  return res.status(200).json(reminders);
-}
-
-export function createReminder(req: Request, res: Response) {
-  // Step 2 validation check (400)
-  // Step 3 duplicate check (409)
-  const item = { id: getNextReminderId(), ...req.body, status: "pending" };
-  reminders.push(item);
-  return res.status(201).json(item);
-}`,
+    example_code: `if (seatTaken(body.seat, holds)) return res.status(409).json({ error: "taken" });`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/reminders
 GET /api/reminders
@@ -327,10 +272,7 @@ A route handler is where validation, conflict-checking, and storage come togethe
     mc_options: ["GET lists store; POST validates, rejects conflict, else 201","POST always 201 even on overlap","GET returns HTML instead of JSON"],
     mc_correct_option: "GET lists store; POST validates, rejects conflict, else 201",
     mc_anchor: "GET lists store; POST validates, rejects",
-    why_this_matters: `Clear error codes (400 for bad data, 409 for conflicts) make API behavior predictable.
-
-
-================================================================================`,
+    why_this_matters: `Clear error codes (400 for bad data, 409 for conflicts) make API behavior predictable.`,
     answer_keywords: ["409","400","201","validateReminder","hasPendingReminder"],
     seed_code: `let reminders = [];
 let nextIdCounter = 1;
@@ -358,7 +300,7 @@ let nextIdCounter = 1;
 function nextId() { return String(nextIdCounter++); }
 export function validateReminder(input) { return null; }
 export function hasPendingReminder(candidate) {
-  return reminders.some((row) => row.invoiceId === candidate.invoiceId && row.sendAt === candidate.sendAt);
+  return reminders.some((row) => row.invoiceId === candidate.invoiceId && row.channel === candidate.channel);
 }
 export function createHandlers() {
   return {
@@ -376,25 +318,12 @@ export function createHandlers() {
   };
 }
 `,
-    analog_example: `export function getReminders(res: Response) {
-  return res.status(200).json(reminders);
-}
-
-export function createReminder(req: Request, res: Response) {
-  // Step 2 validation check (400)
-  // Step 3 duplicate check (409)
-  const item = { id: getNextReminderId(), ...req.body, status: "pending" };
-  reminders.push(item);
-  return res.status(201).json(item);
-}`,
+    analog_example: `if (seatTaken(body.seat, holds)) return res.status(409).json({ error: "taken" });`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Clear error codes (400 for bad data, 409 for conflicts) make API behavior predictable.
-
-
-================================================================================`,
+      hook: `Clear error codes (400 for bad data, 409 for conflicts) make API behavior predictable.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Implement /api/reminders with persistence and a conflict rule:
 
@@ -402,35 +331,11 @@ export function createReminder(req: Request, res: Response) {
   Validate →  required fields before insert
   Conflict →  same invoiceId + channel already pending → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let reminders = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function validateReminder(input) { return null; }
-export function hasPendingReminder(candidate) {
-  return reminders.some((row) => row.invoiceId === candidate.invoiceId && row.sendAt === candidate.sendAt);
-}
-export function createHandlers() {
-  return {
-    list(_req, res) {
-      res.json(reminders);
-    },
-    create(req, res) {
-      const err = validateReminder(req.body);
-      if (err) return res.status(400).json({ error: err });
-      if (hasPendingReminder(req.body)) return res.status(409).json({ error: "conflict" });
-      const row = { id: nextId(), invoiceId: req.body.invoiceId, channel: req.body.channel, sendAt: req.body.sendAt };
-      reminders.push(row);
-      res.status(201).json(row);
-    },
-  };
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Return store: Send status 200 with the reminders array in GET.
-2. Protect POST: Run validation and duplicate checks before pushing the record.
-3. Save record: Assign a unique ID, append the record to the array, and return status 201.`,
+      build: `A route handler's job is to call helpers in the right order and translate their answers into HTTP status codes — the actual rules already live in the functions written in earlier steps.`,
     },
   },
 ];

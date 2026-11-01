@@ -41,12 +41,9 @@ WHAT YOU'LL NEED
 Your task: Set up server storage for package passes and an ID generator.`,
     hint: `1. In-memory store: Declare an empty array typed with your package shape.
 2. ID helper: Return an incremental ID string from your helper function.`,
-    example_code: `let packageStore: PackageRecord[] = [];
-let pkgIdCounter = 1;
-
-function generatePackageId(): string {
-  return \`pkg-\${pkgIdCounter++}\`;
-}`,
+    example_code: `let tasks = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/packages
 GET /api/packages
@@ -74,12 +71,9 @@ let nextIdCounter = 1;
 function nextId() { return String(nextIdCounter++); }
 export function getStore() { return packages; }
 `,
-    analog_example: `let packageStore: PackageRecord[] = [];
-let pkgIdCounter = 1;
-
-function generatePackageId(): string {
-  return \`pkg-\${pkgIdCounter++}\`;
-}`,
+    analog_example: `let tasks = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -92,16 +86,11 @@ function generatePackageId(): string {
   Validate →  required fields
   Derive   →  used >= total → empty; else active (expose remaining)
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let packages = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return packages; }
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. In-memory store: Declare an empty array typed with your package shape.
-2. ID helper: Return an incremental ID string from your helper function.`,
+      build: `Two requests that arrive close together must never be handed the same id — a counter that only ever increases guarantees each new record gets a value nothing before it used, which a timestamp alone cannot promise.`,
     },
   },
   {
@@ -119,9 +108,7 @@ WHAT YOU'LL NEED
 Your task: Reject package requests lacking client name or initial punch count with status 400.`,
     hint: `1. Inspect fields: Evaluate required properties using !req.body.property.
 2. Reject missing: Send status 400 if any required field is falsy or undefined.`,
-    example_code: `if (!req.body.client || req.body.initialPunches === undefined) {
-  return res.status(400).json({ error: "Client and punch count are required" });
-}`,
+    example_code: `if (!input?.title?.trim()) return "title is required";`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/packages
 POST /api/packages
@@ -134,7 +121,7 @@ Whatever a client sends in a request body can never be assumed well-formed — c
     mc_correct_option: "error string for bad fields, else null",
     mc_anchor: "error string for bad fields, else null",
     why_this_matters: `Validation prevents packages with missing or undefined balances from being created.`,
-    answer_keywords: ["validatePackage","client","service","totalPunches","usedPunches"],
+    answer_keywords: ["validatePackage","client","service","totalPunches"],
     seed_code: `let packages = [];
 let nextIdCounter = 1;
 function nextId() { return String(nextIdCounter++); }
@@ -158,13 +145,10 @@ export function validatePackage(input) {
   if (typeof input?.client !== "string" || !input.client.trim()) return "client is required";
   if (typeof input?.service !== "string" || !input.service.trim()) return "service is required";
   if (typeof input?.totalPunches !== "number" || input.totalPunches <= 0) return "totalPunches must be > 0";
-  if (typeof input?.usedPunches !== "number" || input.usedPunches < 0) return "usedPunches must be >= 0";
   return null;
 }
 `,
-    analog_example: `if (!req.body.client || req.body.initialPunches === undefined) {
-  return res.status(400).json({ error: "Client and punch count are required" });
-}`,
+    analog_example: `if (!input?.title?.trim()) return "title is required";`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -177,23 +161,11 @@ export function validatePackage(input) {
   Validate →  required fields
   Derive   →  used >= total → empty; else active (expose remaining)
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let packages = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return packages; }
-export function validatePackage(input) {
-  if (typeof input?.client !== "string" || !input.client.trim()) return "client is required";
-  if (typeof input?.service !== "string" || !input.service.trim()) return "service is required";
-  if (typeof input?.totalPunches !== "number" || input.totalPunches <= 0) return "totalPunches must be > 0";
-  if (typeof input?.usedPunches !== "number" || input.usedPunches < 0) return "usedPunches must be >= 0";
-  return null;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Inspect fields: Evaluate required properties using !req.body.property.
-2. Reject missing: Send status 400 if any required field is falsy or undefined.`,
+      build: `A validator is just a function that inspects the fields it was given and returns either a short error message or nothing at all — the caller decides what to do with that answer.`,
     },
   },
   {
@@ -211,7 +183,11 @@ WHAT YOU'LL NEED
 Your task: Calculate whether a package is "remaining" or "empty" based on its punch count on the server.`,
     hint: `1. Evaluate punch count: Check if remaining punches exceed 0.
 2. Set status: Assign "remaining" if positive; otherwise, assign "empty".`,
-    example_code: `const status = Number(req.body.remainingPunches) > 0 ? "remaining" : "empty";`,
+    example_code: `function taskStatus(item, today) {
+  if (item.done) return "done";
+  if (new Date(item.due) < today) return "late";
+  return "open";
+}`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/packages
 GET /api/packages
@@ -246,7 +222,11 @@ export function derivePackageStatus(row) {
   return "active";
 }
 `,
-    analog_example: `const status = Number(req.body.remainingPunches) > 0 ? "remaining" : "empty";`,
+    analog_example: `function taskStatus(item, today) {
+  if (item.done) return "done";
+  if (new Date(item.due) < today) return "late";
+  return "open";
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -259,18 +239,11 @@ export function derivePackageStatus(row) {
   Validate →  required fields
   Derive   →  used >= total → empty; else active (expose remaining)
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let packages = [];
-export function validatePackage(input) { return null; }
-export function derivePackageStatus(row) {
-  if ((row.usedPunches || 0) >= row.totalPunches) return "empty";
-  return "active";
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Evaluate punch count: Check if remaining punches exceed 0.
-2. Set status: Assign "remaining" if positive; otherwise, assign "empty".`,
+      build: `A derive function takes one stored row (plus, optionally, the current time) and returns a label computed purely from that row's own fields — it never reads anything the client sent in the current request.`,
     },
   },
   {
@@ -289,17 +262,7 @@ Your task: Build endpoints to fetch packages and create new packages with the ca
     hint: `1. Return store: Send status 200 with the packages array in GET.
 2. Protect POST: Run validation and status derivation before pushing the record.
 3. Save record: Assign a unique ID, push the item to storage, and return status 201.`,
-    example_code: `export function getPackages(res: Response) {
-  return res.status(200).json(packageStore);
-}
-
-export function createPackage(req: Request, res: Response) {
-  // Step 2 validation check
-  // Step 3 derive status
-  const item = { id: generatePackageId(), ...req.body, status };
-  packageStore.push(item);
-  return res.status(201).json(item);
-}`,
+    example_code: `res.json(tasks.map((t) => ({ ...t, status: taskStatus(t) })));`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/packages
 GET /api/packages
@@ -313,10 +276,7 @@ Attaching a computed field to data on its way out of a route means running the d
     mc_options: ["GET/POST attach derived status; POST validates first","POST stores client status verbatim","GET omits status"],
     mc_correct_option: "GET/POST attach derived status; POST validates first",
     mc_anchor: "GET/POST attach derived status; POST val",
-    why_this_matters: `The client receives back the saved package along with its server-calculated status tag.
-
-
-================================================================================`,
+    why_this_matters: `The client receives back the saved package along with its server-calculated status tag.`,
     answer_keywords: ["derivePackageStatus","validatePackage","201"],
     seed_code: `let packages = [];
 let nextIdCounter = 1;
@@ -352,32 +312,19 @@ export function createHandlers() {
     create(req, res) {
       const err = validatePackage(req.body);
       if (err) return res.status(400).json({ error: err });
-      const row = { id: nextId(), client: req.body.client, service: req.body.service, totalPunches: req.body.totalPunches, usedPunches: req.body.usedPunches, usedPunches: 0 };
+      const row = { id: nextId(), client: req.body.client, service: req.body.service, totalPunches: req.body.totalPunches, usedPunches: 0 };
       packages.push(row);
       res.status(201).json({ ...row, status: derivePackageStatus(row) });
     },
   };
 }
 `,
-    analog_example: `export function getPackages(res: Response) {
-  return res.status(200).json(packageStore);
-}
-
-export function createPackage(req: Request, res: Response) {
-  // Step 2 validation check
-  // Step 3 derive status
-  const item = { id: generatePackageId(), ...req.body, status };
-  packageStore.push(item);
-  return res.status(201).json(item);
-}`,
+    analog_example: `res.json(tasks.map((t) => ({ ...t, status: taskStatus(t) })));`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `The client receives back the saved package along with its server-calculated status tag.
-
-
-================================================================================`,
+      hook: `The client receives back the saved package along with its server-calculated status tag.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Implement /api/packages with a derived status:
 
@@ -385,32 +332,11 @@ export function createPackage(req: Request, res: Response) {
   Validate →  required fields
   Derive   →  used >= total → empty; else active (expose remaining)
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let packages = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function validatePackage(input) { return null; }
-export function derivePackageStatus(row, now = new Date()) { return "open"; }
-export function createHandlers() {
-  return {
-    list(_req, res) {
-      res.json(packages.map((r) => ({ ...r, status: derivePackageStatus(r) })));
-    },
-    create(req, res) {
-      const err = validatePackage(req.body);
-      if (err) return res.status(400).json({ error: err });
-      const row = { id: nextId(), client: req.body.client, service: req.body.service, totalPunches: req.body.totalPunches, usedPunches: req.body.usedPunches, usedPunches: 0 };
-      packages.push(row);
-      res.status(201).json({ ...row, status: derivePackageStatus(row) });
-    },
-  };
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Return store: Send status 200 with the packages array in GET.
-2. Protect POST: Run validation and status derivation before pushing the record.
-3. Save record: Assign a unique ID, push the item to storage, and return status 201.`,
+      build: `A route handler's job is to call helpers in the right order and translate their answers into HTTP responses — validate first, then map the derive function over whatever gets returned.`,
     },
   },
 ];

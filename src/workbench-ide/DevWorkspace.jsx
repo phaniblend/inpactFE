@@ -55,7 +55,7 @@ export default function DevWorkspace({ projectPath, branchHint, pullsUrl, coding
   const [sidebarTab, setSidebarTab] = useState(moduleTag ? "steps" : "git");
   const [assistOpen, setAssistOpen] = useState(false);
   const fs = useMemo(() => getFs(), []);
-  const dir = useMemo(() => projectDir(projectPath), [projectPath]);
+  const dir = useMemo(() => projectDir(projectPath, branchHint), [projectPath, branchHint]);
 
   const [phase, setPhase] = useState("cloning"); // cloning | ready | error
   const [cloneProgress, setCloneProgress] = useState("");

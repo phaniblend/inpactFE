@@ -2,35 +2,83 @@
  * Applies the review-cycle rewrite (beginner-friendly step titles + ASSIST GUIDE content) onto a
  * module's `steps` array in place, before buildEngine() turns it into NODES.
  *
- * What gets overridden per step (matched positionally — task title + step index):
- *  - paal          -> the beginner-rewritten short title (docs/task-catalog-beginner-rewrite.txt)
- *                     — this is what the Objectives list and phase panels show.
- *  - taskPanel     -> rebuilt from: the language/file-type line (every step, since a total
- *                     beginner can't assume what they're looking at) +, on step 1 only, exactly
- *                     where to create the file (nothing exists yet the first time this file is
- *                     touched) + the catalog title + the guide's "needs" list + its goal.
- *  - hint          -> the guide's numbered "HOW TO MAP THE PATTERN" steps.
- *  - analog        -> the guide's "LOOK AT THIS PATTERN (ANALOGY)" code block (feeds both
- *                     example_code and analog_example in buildEngine).
- *  - why           -> the guide's "WHY THIS HELPS YOU" paragraph.
- *  - deepDiveHook  -> same "WHY THIS HELPS YOU" paragraph.
- *
- * `mod.language` / `mod.filePath` are set by each template function in
- * write-smb-assist-engines.mjs (listFormModule/filterListModule/conflictApiModule/
- * derivedApiModule) — this file just threads them into the panel text.
+ * Audit 2026-11-01 (P03 / P08 / P09 / P25): the assist guides used different field names and empty
+ * messages than the module's `expected` / designMock. Overriding `analog` with near-task code also
+ * handed learners the answer. Overrides now keep the generator's contract and different-domain
+ * analog; guide text is rewritten to use the canonical fields and empty message.
  *
  * Deliberately NOT touched: think_prompt, mc_options/mc_correct_option/mc_anchor,
- * answer_keywords, seed_code/starter_code/expected, feedback_*, and the rest of deepDive
- * (pain/mentalModel/quickRules/watchOut/dryRun/discover) — none of the two source docs redefine
- * those, and expected/seed/starter are load-bearing for the code-correctness check.
+ * answer_keywords, seed_code/starter_code/expected, feedback_*, analog (kept from generator).
  */
 import { parseAssistGuides, parseCatalog } from "./parse-review-content.mjs";
 
 const guides = parseAssistGuides();
 const catalog = parseCatalog();
 
-function buildTaskPanel(catalogText, guide, mod, isFirstStep) {
-  const needsBlock = guide.needs.length ? `\n\nWHAT YOU'LL NEED\n${guide.needs.map((n) => `- ${n}`).join("\n")}` : "";
+/** Field names from the step's expected type body (single source of truth with the check). */
+function fieldsFromExpected(expected) {
+  const text = String(expected || "");
+  const names = [];
+  const re = /^\s*([A-Za-z_][\w]*)\s*:/gm;
+  let m;
+  while ((m = re.exec(text))) {
+    if (m[1] === "export" || m[1] === "type" || m[1] === "function") continue;
+    names.push(m[1]);
+  }
+  // Prefer fields inside the first `type X = { ... }` block only
+  const typeBlock = /type\s+\w+\s*=\s*\{([\s\S]*?)\}/.exec(text);
+  if (typeBlock) {
+    const inner = [];
+    const ir = /^\s*([A-Za-z_][\w]*)\s*:/gm;
+    let im;
+    while ((im = ir.exec(typeBlock[1]))) inner.push(im[1]);
+    if (inner.length) return inner;
+  }
+  return names.filter((n) => n !== "id" || names.indexOf(n) === names.lastIndexOf(n));
+}
+
+function uniqueFields(fields) {
+  const seen = new Set();
+  const out = [];
+  for (const f of fields) {
+    if (seen.has(f)) continue;
+    seen.add(f);
+    out.push(f);
+  }
+  return out;
+}
+
+/**
+ * Rewrite guide/catalog prose so field tokens and empty-state strings match the module contract.
+ * Keeps beginner wording from the guide without teaching a second schema.
+ */
+function alignContractText(text, { fields, emptyMsg, alienFields }) {
+  let out = String(text || "");
+  if (emptyMsg) {
+    // Common mismatched empty strings from the review docs → canonical designMock.emptyMessage
+    out = out
+      .replace(/No shifts (published for this week|scheduled)\.?/gi, emptyMsg)
+      .replace(/All shifts covered\.?/gi, emptyMsg)
+      .replace(/No open coverage requests\.?/gi, emptyMsg)
+      .replace(/No estimates (created yet|recorded)\.?/gi, emptyMsg)
+      .replace(/No quotes yet\.?/gi, emptyMsg);
+  }
+  // Drop alien field names the guide invented (e.g. shiftTime when contract is startsAt)
+  for (const alien of alienFields || []) {
+    if (!alien || (fields || []).includes(alien)) continue;
+    const closest = (fields || []).find((f) => f.toLowerCase().includes("time") || f === "startsAt" || f === "sendAt")
+      || (fields || []).find((f) => f !== "id")
+      || alien;
+    out = out.replace(new RegExp(`\\b${alien}\\b`, "g"), closest);
+  }
+  return out;
+}
+
+function buildTaskPanel(catalogText, guide, mod, isFirstStep, fields) {
+  const needs = (fields && fields.length
+    ? fields.map((n) => `${n} (${n === "id" ? "text — unique key, not always shown on screen" : "per contract"})`)
+    : guide.needs);
+  const needsBlock = needs.length ? `\n\nWHAT YOU'LL NEED\n${needs.map((n) => `- ${n}`).join("\n")}` : "";
   const languageLine = mod.language ? `${mod.language}\n\n` : "";
   const createFileLine =
     isFirstStep && mod.filePath
@@ -52,17 +100,41 @@ export function applyReviewOverrides(mod) {
     );
     return mod;
   }
+  const emptyMsg = mod.designMock?.emptyMessage || "";
+  // Tokens that appear in guides but must never disagree with expected (audit P25)
+  const knownAliens = [
+    "shiftTime",
+    "estimate",
+    "price",
+    "reviewer",
+    "comment",
+    "response",
+    "title",
+    "scheduledFor",
+    "template",
+    "recipient",
+    "project name",
+    "quantity",
+  ];
+
   mod.steps = mod.steps.map((step, i) => {
     const guide = guideSteps[i];
-    const catalogText = catalogSteps[i];
+    const fields = uniqueFields(fieldsFromExpected(step.expected));
+    const catalogText = alignContractText(catalogSteps[i], { fields, emptyMsg, alienFields: knownAliens });
+    const why = alignContractText(guide.why, { fields, emptyMsg, alienFields: knownAliens });
+    const goal = alignContractText(guide.goal, { fields, emptyMsg, alienFields: knownAliens });
+    const howToMap = (guide.howToMap || []).map((line) =>
+      alignContractText(line, { fields, emptyMsg, alienFields: knownAliens }),
+    );
+    const guideAligned = { ...guide, why, goal, howToMap };
     return {
       ...step,
       paal: catalogText,
-      taskPanel: buildTaskPanel(catalogText, guide, mod, i === 0),
-      hint: guide.howToMap.map((line, n) => `${n + 1}. ${line}`).join("\n"),
-      analog: guide.pattern,
-      why: guide.why,
-      deepDiveHook: guide.why,
+      taskPanel: buildTaskPanel(catalogText, guideAligned, mod, i === 0, fields),
+      hint: howToMap.map((line, n) => `${n + 1}. ${line}`).join("\n"),
+      // Keep generator analog (different domain) — never the guide's near-answer (audit P03)
+      why,
+      deepDiveHook: why,
     };
   });
   return mod;

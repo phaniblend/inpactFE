@@ -100,16 +100,7 @@ export function RenewalWatchlist({ passes }: WatchlistProps) {
       hook: `Importing the blueprint from the catalog task ensures this filtered view always stays in sync with catalog data.`,
       pain: "A second, redefined copy of the type would silently drift the moment the real one gains a field.",
       mentalModel: MENTAL_MODEL,
-      discover: `import type { ServicePackage } from "./PackageList";
-
-type BoardProps = {
-  packages?: ServicePackage[];
-};
-
-export function LowPackageBoard({ packages = [] }: BoardProps) {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -192,7 +183,7 @@ export function LowPackageBoard({ packages = [] }: BoardProps) {
       hook: `Filtering as a derived calculation leaves the master catalog completely intact while isolating urgent items.`,
       pain: "Mutating or re-storing the filtered result would fork it away from the live packages prop.",
       mentalModel: MENTAL_MODEL,
-      discover: `const lowPackages = packages.filter((pkg) => pkg.status === "low" || pkg.status === "empty");`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -321,15 +312,7 @@ export function LowPackageBoard({ packages = [] }: BoardProps) {
       hook: `Clear visual feedback when balances are healthy reassures reception staff that no renewals are currently overdue.`,
       pain: "A generic 'nothing here' message for a healthy catalog reads as broken, not good news.",
       mentalModel: MENTAL_MODEL,
-      discover: `{lowPackages.length === 0 ? (
-  <p>All client packages have healthy balances.</p>
-) : (
-  <ul>
-    {lowPackages.map((pkg) => (
-      <li key={pkg.id}>{pkg.client} — {pkg.service}: {pkg.remainingPunches} left ({pkg.status})</li>
-    ))}
-  </ul>
-)}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -444,11 +427,7 @@ export default function Home() {
       hook: `Holding state in the parent view ensures that when a punch is redeemed, the low-balance board updates instantly on the exact same screen.`,
       pain: "Three components each holding their own copy of packages would show three different, drifting answers to 'how many are low right now.'",
       mentalModel: MENTAL_MODEL,
-      discover: `const [packages, setPackages] = useState<ServicePackage[]>([]);
-
-<LowPackageBoard packages={packages} />
-<PackageList packages={packages} setPackages={setPackages} />
-<PunchLog packages={packages} setPackages={setPackages} />`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",

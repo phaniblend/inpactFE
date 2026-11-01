@@ -42,12 +42,9 @@ Your task: Create server-side storage for invoices and an ID generator.`,
     hint: `1. In-memory store: Declare a let variable initialized to an empty array.
 2. ID counter: Initialize a numeric counter variable.
 3. Generator: Return an incremental ID string.`,
-    example_code: `let invoiceStore: InvoiceRecord[] = [];
-let invIdCounter = 1;
-
-function generateInvoiceId(): string {
-  return \`inv-\${invIdCounter++}\`;
-}`,
+    example_code: `let tasks = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/invoices
 GET /api/invoices
@@ -75,12 +72,9 @@ let nextIdCounter = 1;
 function nextId() { return String(nextIdCounter++); }
 export function getStore() { return invoices; }
 `,
-    analog_example: `let invoiceStore: InvoiceRecord[] = [];
-let invIdCounter = 1;
-
-function generateInvoiceId(): string {
-  return \`inv-\${invIdCounter++}\`;
-}`,
+    analog_example: `let tasks = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -93,17 +87,11 @@ function generateInvoiceId(): string {
   Validate →  required fields
   Derive   →  paid → paid; else dueDate in the past → overdue; else open
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let invoices = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return invoices; }
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. In-memory store: Declare a let variable initialized to an empty array.
-2. ID counter: Initialize a numeric counter variable.
-3. Generator: Return an incremental ID string.`,
+      build: `Two requests that arrive close together must never be handed the same id — a counter that only ever increases guarantees each new record gets a value nothing before it used, which a timestamp alone cannot promise.`,
     },
   },
   {
@@ -121,9 +109,7 @@ WHAT YOU'LL NEED
 Your task: Verify incoming invoices include client name and due date, rejecting with 400 if missing.`,
     hint: `1. Check body: Evaluate required properties using !req.body.property.
 2. Reject invalid: Return res.status(400).json(...) if any check fails.`,
-    example_code: `if (!req.body.client || !req.body.dueDate) {
-  return res.status(400).json({ error: "Client and due date are required" });
-}`,
+    example_code: `if (!input?.title?.trim()) return "title is required";`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/invoices
 POST /api/invoices
@@ -163,9 +149,7 @@ export function validateInvoice(input) {
   return null;
 }
 `,
-    analog_example: `if (!req.body.client || !req.body.dueDate) {
-  return res.status(400).json({ error: "Client and due date are required" });
-}`,
+    analog_example: `if (!input?.title?.trim()) return "title is required";`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -178,22 +162,11 @@ export function validateInvoice(input) {
   Validate →  required fields
   Derive   →  paid → paid; else dueDate in the past → overdue; else open
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let invoices = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return invoices; }
-export function validateInvoice(input) {
-  if (typeof input?.client !== "string" || !input.client.trim()) return "client is required";
-  if (typeof input?.amount !== "number" || input.amount <= 0) return "amount must be > 0";
-  if (typeof input?.dueDate !== "string" || !input.dueDate.trim()) return "dueDate is required";
-  return null;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Check body: Evaluate required properties using !req.body.property.
-2. Reject invalid: Return res.status(400).json(...) if any check fails.`,
+      build: `A validator is just a function that inspects the fields it was given and returns either a short error message or nothing at all — the caller decides what to do with that answer.`,
     },
   },
   {
@@ -211,8 +184,11 @@ WHAT YOU'LL NEED
 Your task: Calculate whether the invoice is "current" or "overdue" by comparing its due date against the current date.`,
     hint: `1. Compare timestamps: Parse dueDate and compare against the current timestamp.
 2. Set status: Assign "overdue" if past due; otherwise, assign "current".`,
-    example_code: `const isLate = new Date(req.body.dueDate).getTime() < Date.now();
-const status = isLate ? "overdue" : "current";`,
+    example_code: `function taskStatus(item, today) {
+  if (item.done) return "done";
+  if (new Date(item.due) < today) return "late";
+  return "open";
+}`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/invoices
 GET /api/invoices
@@ -248,8 +224,11 @@ export function deriveStatus(row, now = new Date()) {
   return "open";
 }
 `,
-    analog_example: `const isLate = new Date(req.body.dueDate).getTime() < Date.now();
-const status = isLate ? "overdue" : "current";`,
+    analog_example: `function taskStatus(item, today) {
+  if (item.done) return "done";
+  if (new Date(item.due) < today) return "late";
+  return "open";
+}`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -262,19 +241,11 @@ const status = isLate ? "overdue" : "current";`,
   Validate →  required fields
   Derive   →  paid → paid; else dueDate in the past → overdue; else open
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let invoices = [];
-export function validateInvoice(input) { return null; }
-export function deriveStatus(row, now = new Date()) {
-  if (row.paid === true) return "paid";
-  if (new Date(row.dueDate) < now) return "overdue";
-  return "open";
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Compare timestamps: Parse dueDate and compare against the current timestamp.
-2. Set status: Assign "overdue" if past due; otherwise, assign "current".`,
+      build: `A derive function takes one stored row (plus, optionally, the current time) and returns a label computed purely from that row's own fields — it never reads anything the client sent in the current request.`,
     },
   },
   {
@@ -292,17 +263,7 @@ WHAT YOU'LL NEED
 Your task: Expose a GET endpoint to return invoices and a POST endpoint to create invoices with the calculated status.`,
     hint: `1. Read route: Return status 200 with the storage array.
 2. Write route: Run validation and status derivation, save the item, and return 201 with the created record.`,
-    example_code: `export function getInvoices(res: Response) {
-  return res.status(200).json(invoiceStore);
-}
-
-export function createInvoice(req: Request, res: Response) {
-  // Step 2 validation check
-  // Step 3 derive overdue status
-  const item = { id: generateInvoiceId(), ...req.body, status };
-  invoiceStore.push(item);
-  return res.status(201).json(item);
-}`,
+    example_code: `res.json(tasks.map((t) => ({ ...t, status: taskStatus(t) })));`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/invoices
 GET /api/invoices
@@ -316,10 +277,7 @@ Attaching a computed field to data on its way out of a route means running the d
     mc_options: ["GET/POST attach derived status; POST validates first","POST stores client status verbatim","GET omits status"],
     mc_correct_option: "GET/POST attach derived status; POST validates first",
     mc_anchor: "GET/POST attach derived status; POST val",
-    why_this_matters: `The client receives the finalized invoice with the calculated status included.
-
-
-================================================================================`,
+    why_this_matters: `The client receives the finalized invoice with the calculated status included.`,
     answer_keywords: ["deriveStatus","validateInvoice","201"],
     seed_code: `let invoices = [];
 let nextIdCounter = 1;
@@ -362,25 +320,12 @@ export function createHandlers() {
   };
 }
 `,
-    analog_example: `export function getInvoices(res: Response) {
-  return res.status(200).json(invoiceStore);
-}
-
-export function createInvoice(req: Request, res: Response) {
-  // Step 2 validation check
-  // Step 3 derive overdue status
-  const item = { id: generateInvoiceId(), ...req.body, status };
-  invoiceStore.push(item);
-  return res.status(201).json(item);
-}`,
+    analog_example: `res.json(tasks.map((t) => ({ ...t, status: taskStatus(t) })));`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `The client receives the finalized invoice with the calculated status included.
-
-
-================================================================================`,
+      hook: `The client receives the finalized invoice with the calculated status included.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Implement /api/invoices with a derived status:
 
@@ -388,31 +333,11 @@ export function createInvoice(req: Request, res: Response) {
   Validate →  required fields
   Derive   →  paid → paid; else dueDate in the past → overdue; else open
   Routes   →  GET/POST attach computed status (do not trust client status)`,
-      discover: `let invoices = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function validateInvoice(input) { return null; }
-export function deriveStatus(row, now = new Date()) { return "open"; }
-export function createHandlers() {
-  return {
-    list(_req, res) {
-      res.json(invoices.map((r) => ({ ...r, status: deriveStatus(r) })));
-    },
-    create(req, res) {
-      const err = validateInvoice(req.body);
-      if (err) return res.status(400).json({ error: err });
-      const row = { id: nextId(), client: req.body.client, amount: req.body.amount, dueDate: req.body.dueDate, paid: false };
-      invoices.push(row);
-      res.status(201).json({ ...row, status: deriveStatus(row) });
-    },
-  };
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Read route: Return status 200 with the storage array.
-2. Write route: Run validation and status derivation, save the item, and return 201 with the created record.`,
+      build: `A route handler's job is to call helpers in the right order and translate their answers into HTTP responses — validate first, then map the derive function over whatever gets returned.`,
     },
   },
 ];

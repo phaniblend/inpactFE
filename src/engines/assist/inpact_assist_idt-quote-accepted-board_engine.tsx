@@ -117,17 +117,7 @@ export function GuestList() {
   Filter   →  only matching rows render — the full list stays in state
   Accept   →  one click moves a quote onto the accepted board
 `,
-      discover: `export type Quote = {
-  id: string;
-  client: string;
-  total: string;
-  status: string;
-};
-
-export function AcceptedBoard() {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -265,33 +255,7 @@ return visible.length === 0 ? (
   Filter   →  only matching rows render — the full list stays in state
   Accept   →  one click moves a quote onto the accepted board
 `,
-      discover: `import { useState } from "react";
-
-export type Quote = {
-  id: string;
-  client: string;
-  total: string;
-  status: string;
-};
-
-export function AcceptedBoard() {
-  const [quotes, setQuotes] = useState<Quote[]>([]);
-  const visible = quotes.filter((a) => a.status === "accepted");
-  return (
-    <div>
-      {visible.length === 0 ? (
-        <p>No accepted quotes.</p>
-      ) : (
-        <ul>
-          {visible.map((a) => (
-            <li key={a.id}>{a.client}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -401,29 +365,7 @@ export function AcceptedBoard() {
   Filter   →  only matching rows render — the full list stays in state
   Accept   →  one click moves a quote onto the accepted board
 `,
-      discover: `import { useState } from "react";
-
-export type Quote = {
-  id: string;
-  client: string;
-  total: string;
-  status: string;
-};
-
-export function AcceptedBoard() {
-  const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [client, setClient] = useState("");
-  const [total, setTotal] = useState("");
-  const [status, setStatus] = useState("");
-  return (
-    <form>
-        <input value={client} onChange={(e) => setClient(e.target.value)} placeholder="Client" />
-        <input value={total} onChange={(e) => setTotal(e.target.value)} placeholder="Total" />
-        <input value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status" />
-    </form>
-  );
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -573,49 +515,7 @@ export function AcceptedBoard() {
   Filter   →  only matching rows render — the full list stays in state
   Accept   →  one click moves a quote onto the accepted board
 `,
-      discover: `import { useState } from "react";
-
-export type Quote = {
-  id: string;
-  client: string;
-  total: string;
-  status: string;
-};
-
-export function AcceptedBoard() {
-  const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [client, setClient] = useState("");
-  const [total, setTotal] = useState("");
-  const [status, setStatus] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: Quote = { id: String(Date.now()), client, total, status };
-    setQuotes((prev) => [...prev, next]);
-    setClient("");
-    setTotal("");
-    setStatus("");
-  }
-  return (
-    <div>
-      {quotes.length === 0 ? (
-        <p>No accepted quotes.</p>
-      ) : (
-        <ul>
-          {quotes.map((a) => (
-            <li key={a.id}>{a.client} · {a.total} · {a.status}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={client} onChange={(e) => setClient(e.target.value)} placeholder="Client" />
-        <input value={total} onChange={(e) => setTotal(e.target.value)} placeholder="Total" />
-        <input value={status} onChange={(e) => setStatus(e.target.value)} placeholder="Status" />
-        <button type="submit">Create</button>
-      </form>
-    </div>
-  );
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -819,9 +719,7 @@ export function AcceptedBoard() {
   Filter   →  only matching rows render — the full list stays in state
   Accept   →  one click moves a quote onto the accepted board
 `,
-      discover: `function acceptQuote(id: string) {
-  setQuotes((prev) => prev.map((q) => (q.id === id ? { ...q, status: "accepted" } : q)));
-}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not mutate the found quote object in place — always return a new object for the matching id.",
       dryRun: "Write the same by-id update-in-place pattern for a different one-click status change.",

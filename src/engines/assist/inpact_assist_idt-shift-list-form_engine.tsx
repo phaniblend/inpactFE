@@ -16,14 +16,14 @@ export const NODES = [
   Submit   →  the new row appears on the list
 `,
       usecase: "Small teams still run on group chats. A shift list+form is the staffing desk they can actually use.",
-      designMock: {"kind":"list-and-form","screenTitle":"Shifts","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No shifts yet.","rows":[{"title":"Ana","subtitle":"Barista","meta":"Sat 8:00"},{"title":"Second row","subtitle":"Another","meta":"Sat 8:00"}],"fields":[{"label":"Worker","sample":"Ana"},{"label":"Role","sample":"Barista"},{"label":"Starts at","sample":"Sat 8:00"}],"submitLabel":"Publish"},
+      designMock: {"kind":"list-and-form","screenTitle":"Shifts","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No shifts yet.","rows":[{"title":"Ana","subtitle":"Barista","meta":"Sat 8:00"},{"title":"Kai","subtitle":"Host","meta":"Sat 12:00"}],"fields":[{"label":"Worker","sample":"Ana"},{"label":"Role","sample":"Barista"},{"label":"Starts at","sample":"Sat 8:00"}],"submitLabel":"Publish"},
     },
   },
   {
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Outline a shift blueprint (worker name, shift hours, role) and build the board container.","Store shifts in state; display each scheduled shift row, or show a \"No shifts published for this week\" message.","Connect worker name and time slot inputs to state to keep typing synchronized.","Stop default submit reload, publish the shift into the active schedule, and clear the form fields."],
+    items: ["Outline a shift blueprint (worker name, shift hours, role) and build the board container.","Store shifts in state; display each scheduled shift row, or show a \"No shifts yet.\" message.","Connect worker name and time slot inputs to state to keep typing synchronized.","Stop default submit reload, publish the shift into the active schedule, and clear the form fields."],
   },
   {
     id: "step1",
@@ -36,20 +36,21 @@ This file doesn't exist yet — you're the first to touch it. Create it at \`src
 Outline a shift blueprint (worker name, shift hours, role) and build the board container.
 
 WHAT YOU'LL NEED
-- id (text)
-- worker (text)
-- shiftTime (text)
+- id (text — unique key, not always shown on screen)
+- worker (per contract)
+- role (per contract)
+- startsAt (per contract)
 
 Your task: Define the shape of a scheduled shift and create the component shell.`,
     hint: `1. Blueprint declaration: Rename WorkShift to your type name and define required fields.
 2. Shell component: Declare your component returning an empty <div />.`,
-    example_code: `export type WorkShift = {
+    example_code: `export type Guest = {
   id: string;
-  worker: string;
-  shiftTime: string;
+  name: string;
+  note: string;
 };
 
-export function ShiftPlanner() {
+export function GuestList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -84,13 +85,13 @@ export function ShiftBoard() {
   return <div />;
 }
 `,
-    analog_example: `export type WorkShift = {
+    analog_example: `export type Guest = {
   id: string;
-  worker: string;
-  shiftTime: string;
+  name: string;
+  note: string;
 };
 
-export function ShiftPlanner() {
+export function GuestList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -106,22 +107,11 @@ export function ShiftPlanner() {
   Form     →  Worker, Role, Starts at
   Submit   →  the new row appears on the list
 `,
-      discover: `export type Shift = {
-  id: string;
-  worker: string;
-  role: string;
-  startsAt: string;
-};
-
-export function ShiftBoard() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Blueprint declaration: Rename WorkShift to your type name and define required fields.
-2. Shell component: Declare your component returning an empty <div />.`,
+      build: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     },
   },
   {
@@ -130,31 +120,27 @@ export function ShiftBoard() {
     phase: "Step 2 of 4",
     paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
 
-Store shifts in state; display each scheduled shift row, or show a "No shifts published for this week" message.
+Store shifts in state; display each scheduled shift row, or show a "No shifts yet." message.
 
 WHAT YOU'LL NEED
-- State array holding shifts.
-- Conditional empty check.
-- Map loop rendering shift entries.
+- id (text — unique key, not always shown on screen)
+- worker (per contract)
+- role (per contract)
+- startsAt (per contract)
 
 Your task: Store shifts in state and display them, showing a placeholder if the schedule is empty.`,
     hint: `1. Set up state: Use useState<WorkShift[]>([]).
 2. Check for empty: Use shifts.length === 0 to render the empty message.
 3. Render entries: Map through shifts, passing key={s.id}.`,
-    example_code: `const [shifts, setShifts] = useState<WorkShift[]>([]);
-
-return (
-  <div>
-    {shifts.length === 0 ? (
-      <p>No shifts scheduled</p>
-    ) : (
-      shifts.map((s) => (
-        <div key={s.id}>
-          {s.worker} working {s.shiftTime}
-        </div>
-      ))
-    )}
-  </div>
+    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     think_prompt: `\`\`\`text
 LIST — Shifts
@@ -233,20 +219,15 @@ export function ShiftBoard() {
   );
 }
 `,
-    analog_example: `const [shifts, setShifts] = useState<WorkShift[]>([]);
-
-return (
-  <div>
-    {shifts.length === 0 ? (
-      <p>No shifts scheduled</p>
-    ) : (
-      shifts.map((s) => (
-        <div key={s.id}>
-          {s.worker} working {s.shiftTime}
-        </div>
-      ))
-    )}
-  </div>
+    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -261,38 +242,11 @@ return (
   Form     →  Worker, Role, Starts at
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Shift = {
-  id: string;
-  worker: string;
-  role: string;
-  startsAt: string;
-};
-
-export function ShiftBoard() {
-  const [shifts, setShifts] = useState<Shift[]>([]);
-  return (
-    <div>
-      {shifts.length === 0 ? (
-        <p>No shifts yet.</p>
-      ) : (
-        <ul>
-          {shifts.map((a) => (
-            <li key={a.id}>{a.worker}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Set up state: Use useState<WorkShift[]>([]).
-2. Check for empty: Use shifts.length === 0 to render the empty message.
-3. Render entries: Map through shifts, passing key={s.id}.`,
+      build: `To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. Once it does, checking its length before deciding what to render is just an ordinary conditional — the empty case and the list case are two branches of one render.`,
     },
   },
   {
@@ -304,17 +258,16 @@ export function ShiftBoard() {
 Connect worker name and time slot inputs to state to keep typing synchronized.
 
 WHAT YOU'LL NEED
-- State hooks for worker and shiftTime inputs.
-- Value and onChange props wired on inputs.
+- id (text — unique key, not always shown on screen)
+- worker (per contract)
+- role (per contract)
+- startsAt (per contract)
 
 Your task: Connect shift publishing inputs to React state.`,
-    hint: `1. Initialize states: Call useState("") for worker and shiftTime.
+    hint: `1. Initialize states: Call useState("") for worker and startsAt.
 2. Wire inputs: Connect value and onChange to each state variable.`,
-    example_code: `const [worker, setWorker] = useState("");
-const [shiftTime, setShiftTime] = useState("");
-
-<input value={worker} onChange={(e) => setWorker(e.target.value)} />
-<input value={shiftTime} onChange={(e) => setShiftTime(e.target.value)} />`,
+    example_code: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Shifts
   [ Worker ]  [ Role ]  [ Starts at ]   → Publish
@@ -388,11 +341,8 @@ export function ShiftBoard() {
   );
 }
 `,
-    analog_example: `const [worker, setWorker] = useState("");
-const [shiftTime, setShiftTime] = useState("");
-
-<input value={worker} onChange={(e) => setWorker(e.target.value)} />
-<input value={shiftTime} onChange={(e) => setShiftTime(e.target.value)} />`,
+    analog_example: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -406,34 +356,11 @@ const [shiftTime, setShiftTime] = useState("");
   Form     →  Worker, Role, Starts at
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Shift = {
-  id: string;
-  worker: string;
-  role: string;
-  startsAt: string;
-};
-
-export function ShiftBoard() {
-  const [shifts, setShifts] = useState<Shift[]>([]);
-  const [worker, setWorker] = useState("");
-  const [role, setRole] = useState("");
-  const [startsAt, setStartsAt] = useState("");
-  return (
-    <form>
-        <input value={worker} onChange={(e) => setWorker(e.target.value)} placeholder="Worker" />
-        <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" />
-        <input value={startsAt} onChange={(e) => setStartsAt(e.target.value)} placeholder="Starts at" />
-    </form>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize states: Call useState("") for worker and shiftTime.
-2. Wire inputs: Connect value and onChange to each state variable.`,
+      build: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
     },
   },
   {
@@ -445,23 +372,17 @@ export function ShiftBoard() {
 Stop default submit reload, publish the shift into the active schedule, and clear the form fields.
 
 WHAT YOU'LL NEED
-- Form interceptor using e.preventDefault().
-- New shift object creation.
-- Spread update to state.
-- Form reset calls.
+- id (text — unique key, not always shown on screen)
+- worker (per contract)
+- role (per contract)
+- startsAt (per contract)
 
 Your task: Append the new shift to state without a page refresh and reset the form.`,
     hint: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, worker, and shiftTime into an object.
+2. Build item: Package id, worker, and startsAt into an object.
 3. Append item: Use setShifts((prev) => [...prev, entry]).
 4. Clear form: Reset input states to "".`,
-    example_code: `function publishShift(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), worker, shiftTime };
-  setShifts((prev) => [...prev, entry]);
-  setWorker("");
-  setShiftTime("");
-}`,
+    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     think_prompt: `\`\`\`text
 FORM — Shifts
   [ Worker ]  [ Role ]  [ Starts at ]   → Publish
@@ -472,10 +393,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `Published shifts appear on the board instantly without page reloads.
-
-
-================================================================================`,
+    why_this_matters: `Published shifts appear on the board instantly without page reloads.`,
     answer_keywords: ["preventDefault","setShifts","prev","worker","role","startsAt"],
     seed_code: `import { useState } from "react";
 
@@ -582,21 +500,12 @@ export function ShiftBoard() {
   );
 }
 `,
-    analog_example: `function publishShift(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), worker, shiftTime };
-  setShifts((prev) => [...prev, entry]);
-  setWorker("");
-  setShiftTime("");
-}`,
+    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Published shifts appear on the board instantly without page reloads.
-
-
-================================================================================`,
+      hook: `Published shifts appear on the board instantly without page reloads.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists shifts and a form to add one:
 
@@ -605,56 +514,11 @@ export function ShiftBoard() {
   Form     →  Worker, Role, Starts at
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Shift = {
-  id: string;
-  worker: string;
-  role: string;
-  startsAt: string;
-};
-
-export function ShiftBoard() {
-  const [shifts, setShifts] = useState<Shift[]>([]);
-  const [worker, setWorker] = useState("");
-  const [role, setRole] = useState("");
-  const [startsAt, setStartsAt] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: Shift = { id: String(Date.now()), worker, role, startsAt };
-    setShifts((prev) => [...prev, next]);
-    setWorker("");
-    setRole("");
-    setStartsAt("");
-  }
-  return (
-    <div>
-      {shifts.length === 0 ? (
-        <p>No shifts yet.</p>
-      ) : (
-        <ul>
-          {shifts.map((a) => (
-            <li key={a.id}>{a.worker} · {a.role} · {a.startsAt}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={worker} onChange={(e) => setWorker(e.target.value)} placeholder="Worker" />
-        <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role" />
-        <input value={startsAt} onChange={(e) => setStartsAt(e.target.value)} placeholder="Starts at" />
-        <button type="submit">Publish</button>
-      </form>
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, worker, and shiftTime into an object.
-3. Append item: Use setShifts((prev) => [...prev, entry]).
-4. Clear form: Reset input states to "".`,
+      build: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     },
   },
 ];

@@ -118,22 +118,7 @@ export function SalesPipeline({ orders, onFulfill }: SalesPipelineProps) {
       hook: `A board that only renders what it's handed keeps every panel on the page showing the same real, current data.`,
       pain: "A component that fetches its own copy of shared sales-order data can drift out of sync with what the procurement panel or inventory table just changed.",
       mentalModel: MENTAL_MODEL,
-      discover: `export type SalesOrder = {
-  id: string;
-  soNumber: string;
-  totalAmount: number;
-  status: string;
-};
-
-type SalesFulfillmentBoardProps = {
-  orders: SalesOrder[];
-  onFulfill: () => void;
-};
-
-export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoardProps) {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not fetch /api/so from inside this component — that's the parent page's job.",
       dryRun: "Write the same props-only shell for a different list + action pair.",
@@ -268,9 +253,7 @@ export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoa
       hook: `Showing the real order number and status gives warehouse staff exactly what they need to decide what to ship next.`,
       pain: "Skipping the empty check leaves a blank board with no explanation before any SO has ever been created.",
       mentalModel: MENTAL_MODEL,
-      discover: `orders.map((so) => (
-  <div key={so.id}>{so.soNumber} - \${so.totalAmount.toFixed(2)} ({so.status})</div>
-))`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Render the same kind of list for a different resource with the same shape.",
@@ -442,8 +425,7 @@ export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoa
       hook: `The pipeline view guides orders smoothly through each fulfillment stage while enforcing stock availability at the exact moment of dispatch.`,
       pain: "A button not scoped to its own row's id or its own status risks shipping the wrong order, or shipping one already shipped.",
       mentalModel: MENTAL_MODEL,
-      discover: `async function handleFulfill(id: string) {
-  await fetch(\`/api/so/\${id}/fulfill\`, { method: "POST" });
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.", { method: "POST" });
 }`,
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not hardcode a single SO id — always use the row's own so.id.",
@@ -635,12 +617,7 @@ export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoa
       hook: `Refreshing on success keeps every panel synced with the ledger; surfacing a real 409 keeps staff from believing an order shipped when stock genuinely ran out.`,
       pain: "Ignoring the response leaves staff clicking a button that looks like it worked, even on a real 409 rejection.",
       mentalModel: MENTAL_MODEL,
-      discover: `if (res.ok) {
-  onFulfill();
-} else {
-  const body = await res.json();
-  alert(body.error);
-}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not assume every fetch succeeds — always branch on res.ok.",
       dryRun: "Handle success/failure the same way for a different action button.",

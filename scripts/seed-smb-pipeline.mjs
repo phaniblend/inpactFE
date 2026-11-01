@@ -228,13 +228,34 @@ function engineRel(tag) {
 }
 
 function taskDescription(productName, t) {
+  // Audit P07: desk tasks were fragments ("List quotes / form client/total…"). Expand into a
+  // readable ticket while keeping the keyed lines Workbench already parses.
+  const goal =
+    t.goal ||
+    (t.focus === "frontend"
+      ? `Build the screen described in the story so a teammate can use it without reading this ticket twice.`
+      : `Implement the API behaviour in the acceptance criteria; return clear status codes the UI can trust.`);
+  const outOfScope =
+    t.outOfScope ||
+    (t.focus === "frontend"
+      ? `Saving to a remote server is out of scope for this task — local React state is enough unless acceptance criteria say otherwise.`
+      : `UI components are out of scope — this task is the API only.`);
+  const acLines = String(t.ac || "")
+    .split(";")
+    .map((s) => s.trim())
+    .filter(Boolean);
   const lines = [
     `Epic: ${t.epic}`,
-    `Story: ${t.story}`,
+    `Story: As a teammate on ${productName}, I want to ${String(t.story || t.title || "complete this work").replace(/^./, (c) => c.toLowerCase())} so the desk stays usable without a side chat thread.`,
+    `Goal: ${goal}`,
+    `OutOfScope: ${outOfScope}`,
     `Trade: ${t.trade}`,
     t.tech ? `TechLevel: ${t.tech}` : null,
     `Cohort: ${productName}`,
     `AcceptanceCriteria: ${t.ac}`,
+    "",
+    "What done looks like:",
+    ...acLines.map((line, i) => `${i + 1}. ${line}`),
   ];
   if (t.assist) {
     lines.push(`AssistModule: ${t.assist}`);
@@ -242,7 +263,7 @@ function taskDescription(productName, t) {
     lines.push("TutorialExempt: true");
   }
   if (t.focus) lines.push(`CodingFocus: ${t.focus}`);
-  return lines.filter(Boolean).join("\n");
+  return lines.filter((l) => l != null).join("\n");
 }
 
 function gitIn(dir, ...args) {

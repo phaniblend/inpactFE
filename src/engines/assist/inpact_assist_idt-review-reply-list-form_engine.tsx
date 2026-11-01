@@ -16,14 +16,14 @@ export const NODES = [
   Submit   →  the new row appears on the list
 `,
       usecase: "Replies are a second list+form — what we said, on which channel.",
-      designMock: {"kind":"list-and-form","screenTitle":"Replies","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No replies yet.","rows":[{"title":"r-1","subtitle":"Thanks Sam!","meta":"google"},{"title":"Second row","subtitle":"Another","meta":"google"}],"fields":[{"label":"Review id","sample":"r-1"},{"label":"Body","sample":"Thanks Sam!"},{"label":"Channel","sample":"google"}],"submitLabel":"Post reply"},
+      designMock: {"kind":"list-and-form","screenTitle":"Replies","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No replies yet.","rows":[{"title":"r-1","subtitle":"Thanks Sam!","meta":"google"},{"title":"r-1 B","subtitle":"Thanks Sam! (alt)","meta":"google"}],"fields":[{"label":"Review id","sample":"r-1"},{"label":"Body","sample":"Thanks Sam!"},{"label":"Channel","sample":"google"}],"submitLabel":"Post reply"},
     },
   },
   {
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Create a reply blueprint (response text, author) and assemble the reply thread container.","Hold replies in state; render each response in the thread, or show \"No replies posted yet\" if empty.","Connect the reply input box to state to track responses as you write them.","Prevent form submit refresh, append the response to the conversation, and clear the input area."],
+    items: ["Create a reply blueprint (reviewId text, author) and assemble the reply thread container.","Hold replies in state; render each reviewId in the thread, or show \"No replies posted yet\" if empty.","Connect the reply input box to state to track responses as you write them.","Prevent form submit refresh, append the reviewId to the conversation, and clear the input area."],
   },
   {
     id: "step1",
@@ -33,23 +33,24 @@ export const NODES = [
 
 This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/ReviewReplyDesk.tsx\` before anything else. Every step from here on edits that same file.
 
-Create a reply blueprint (response text, author) and assemble the reply thread container.
+Create a reply blueprint (reviewId text, author) and assemble the reply thread container.
 
 WHAT YOU'LL NEED
-- id (text)
-- reviewId (text)
-- response (text)
+- id (text — unique key, not always shown on screen)
+- reviewId (per contract)
+- body (per contract)
+- channel (per contract)
 
 Your task: Define the shape of a review reply and create the component shell.`,
     hint: `1. Blueprint declaration: Rename ReplyItem to your type name and define required fields.
 2. Shell component: Declare your component returning an empty <div />.`,
-    example_code: `export type ReplyItem = {
+    example_code: `export type Guest = {
   id: string;
-  reviewId: string;
-  response: string;
+  name: string;
+  note: string;
 };
 
-export function RepliesManager() {
+export function GuestList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -84,13 +85,13 @@ export function ReviewReplyDesk() {
   return <div />;
 }
 `,
-    analog_example: `export type ReplyItem = {
+    analog_example: `export type Guest = {
   id: string;
-  reviewId: string;
-  response: string;
+  name: string;
+  note: string;
 };
 
-export function RepliesManager() {
+export function GuestList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -106,22 +107,11 @@ export function RepliesManager() {
   Form     →  Review id, Body, Channel
   Submit   →  the new row appears on the list
 `,
-      discover: `export type ReviewReply = {
-  id: string;
-  reviewId: string;
-  body: string;
-  channel: string;
-};
-
-export function ReviewReplyDesk() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Blueprint declaration: Rename ReplyItem to your type name and define required fields.
-2. Shell component: Declare your component returning an empty <div />.`,
+      build: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     },
   },
   {
@@ -130,31 +120,27 @@ export function ReviewReplyDesk() {
     phase: "Step 2 of 4",
     paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
 
-Hold replies in state; render each response in the thread, or show "No replies posted yet" if empty.
+Hold replies in state; render each reviewId in the thread, or show "No replies posted yet" if empty.
 
 WHAT YOU'LL NEED
-- State array holding reply items.
-- Conditional empty check.
-- Map loop rendering reply entries.
+- id (text — unique key, not always shown on screen)
+- reviewId (per contract)
+- body (per contract)
+- channel (per contract)
 
 Your task: Store replies in state and display them, showing a placeholder if no replies exist.`,
     hint: `1. Set up state: Use useState<ReplyItem[]>([]).
 2. Check for empty: Use replies.length === 0 to render the empty message.
 3. Render entries: Map through replies, passing key={rep.id}.`,
-    example_code: `const [replies, setReplies] = useState<ReplyItem[]>([]);
-
-return (
-  <div>
-    {replies.length === 0 ? (
-      <p>No replies sent</p>
-    ) : (
-      replies.map((rep) => (
-        <div key={rep.id}>
-          Reply to #{rep.reviewId}: {rep.response}
-        </div>
-      ))
-    )}
-  </div>
+    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     think_prompt: `\`\`\`text
 LIST — Replies
@@ -233,20 +219,15 @@ export function ReviewReplyDesk() {
   );
 }
 `,
-    analog_example: `const [replies, setReplies] = useState<ReplyItem[]>([]);
-
-return (
-  <div>
-    {replies.length === 0 ? (
-      <p>No replies sent</p>
-    ) : (
-      replies.map((rep) => (
-        <div key={rep.id}>
-          Reply to #{rep.reviewId}: {rep.response}
-        </div>
-      ))
-    )}
-  </div>
+    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -261,38 +242,11 @@ return (
   Form     →  Review id, Body, Channel
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type ReviewReply = {
-  id: string;
-  reviewId: string;
-  body: string;
-  channel: string;
-};
-
-export function ReviewReplyDesk() {
-  const [replies, setReplies] = useState<ReviewReply[]>([]);
-  return (
-    <div>
-      {replies.length === 0 ? (
-        <p>No replies yet.</p>
-      ) : (
-        <ul>
-          {replies.map((a) => (
-            <li key={a.id}>{a.reviewId}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Set up state: Use useState<ReplyItem[]>([]).
-2. Check for empty: Use replies.length === 0 to render the empty message.
-3. Render entries: Map through replies, passing key={rep.id}.`,
+      build: `To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. Once it does, checking its length before deciding what to render is just an ordinary conditional — the empty case and the list case are two branches of one render.`,
     },
   },
   {
@@ -304,17 +258,16 @@ export function ReviewReplyDesk() {
 Connect the reply input box to state to track responses as you write them.
 
 WHAT YOU'LL NEED
-- State hooks for reviewId and response inputs.
-- Value and onChange props wired on inputs.
+- id (text — unique key, not always shown on screen)
+- reviewId (per contract)
+- body (per contract)
+- channel (per contract)
 
 Your task: Connect reply authoring inputs to React state.`,
-    hint: `1. Initialize states: Call useState("") for reviewId and response.
+    hint: `1. Initialize states: Call useState("") for reviewId and reviewId.
 2. Wire inputs: Connect value and onChange to each state variable.`,
-    example_code: `const [reviewId, setReviewId] = useState("");
-const [response, setResponse] = useState("");
-
-<input value={reviewId} onChange={(e) => setReviewId(e.target.value)} />
-<textarea value={response} onChange={(e) => setResponse(e.target.value)} />`,
+    example_code: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Replies
   [ Review id ]  [ Body ]  [ Channel ]   → Post reply
@@ -388,11 +341,8 @@ export function ReviewReplyDesk() {
   );
 }
 `,
-    analog_example: `const [reviewId, setReviewId] = useState("");
-const [response, setResponse] = useState("");
-
-<input value={reviewId} onChange={(e) => setReviewId(e.target.value)} />
-<textarea value={response} onChange={(e) => setResponse(e.target.value)} />`,
+    analog_example: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -406,34 +356,11 @@ const [response, setResponse] = useState("");
   Form     →  Review id, Body, Channel
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type ReviewReply = {
-  id: string;
-  reviewId: string;
-  body: string;
-  channel: string;
-};
-
-export function ReviewReplyDesk() {
-  const [replies, setReplies] = useState<ReviewReply[]>([]);
-  const [reviewId, setReviewId] = useState("");
-  const [body, setBody] = useState("");
-  const [channel, setChannel] = useState("");
-  return (
-    <form>
-        <input value={reviewId} onChange={(e) => setReviewId(e.target.value)} placeholder="Review id" />
-        <input value={body} onChange={(e) => setBody(e.target.value)} placeholder="Body" />
-        <input value={channel} onChange={(e) => setChannel(e.target.value)} placeholder="Channel" />
-    </form>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize states: Call useState("") for reviewId and response.
-2. Wire inputs: Connect value and onChange to each state variable.`,
+      build: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
     },
   },
   {
@@ -442,26 +369,20 @@ export function ReviewReplyDesk() {
     phase: "Step 4 of 4",
     paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
 
-Prevent form submit refresh, append the response to the conversation, and clear the input area.
+Prevent form submit refresh, append the reviewId to the conversation, and clear the input area.
 
 WHAT YOU'LL NEED
-- Form interceptor using e.preventDefault().
-- New reply object creation.
-- Spread update to state.
-- Form reset calls.
+- id (text — unique key, not always shown on screen)
+- reviewId (per contract)
+- body (per contract)
+- channel (per contract)
 
 Your task: Append the new reply to state without a page refresh and reset the form.`,
     hint: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, reviewId, and response into an object.
+2. Build item: Package id, reviewId, and reviewId into an object.
 3. Append item: Use setReplies((prev) => [...prev, entry]).
 4. Clear form: Reset input states to "".`,
-    example_code: `function sendReply(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), reviewId, response };
-  setReplies((prev) => [...prev, entry]);
-  setReviewId("");
-  setResponse("");
-}`,
+    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     think_prompt: `\`\`\`text
 FORM — Replies
   [ Review id ]  [ Body ]  [ Channel ]   → Post reply
@@ -472,10 +393,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `Replies appear instantly in the sent list without page reloads.
-
-
-================================================================================`,
+    why_this_matters: `Replies appear instantly in the sent list without page reloads.`,
     answer_keywords: ["preventDefault","setReplies","prev","reviewId","body","channel"],
     seed_code: `import { useState } from "react";
 
@@ -582,21 +500,12 @@ export function ReviewReplyDesk() {
   );
 }
 `,
-    analog_example: `function sendReply(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), reviewId, response };
-  setReplies((prev) => [...prev, entry]);
-  setReviewId("");
-  setResponse("");
-}`,
+    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Replies appear instantly in the sent list without page reloads.
-
-
-================================================================================`,
+      hook: `Replies appear instantly in the sent list without page reloads.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists replies and a form to add one:
 
@@ -605,56 +514,11 @@ export function ReviewReplyDesk() {
   Form     →  Review id, Body, Channel
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type ReviewReply = {
-  id: string;
-  reviewId: string;
-  body: string;
-  channel: string;
-};
-
-export function ReviewReplyDesk() {
-  const [replies, setReplies] = useState<ReviewReply[]>([]);
-  const [reviewId, setReviewId] = useState("");
-  const [body, setBody] = useState("");
-  const [channel, setChannel] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: ReviewReply = { id: String(Date.now()), reviewId, body, channel };
-    setReplies((prev) => [...prev, next]);
-    setReviewId("");
-    setBody("");
-    setChannel("");
-  }
-  return (
-    <div>
-      {replies.length === 0 ? (
-        <p>No replies yet.</p>
-      ) : (
-        <ul>
-          {replies.map((a) => (
-            <li key={a.id}>{a.reviewId} · {a.body} · {a.channel}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={reviewId} onChange={(e) => setReviewId(e.target.value)} placeholder="Review id" />
-        <input value={body} onChange={(e) => setBody(e.target.value)} placeholder="Body" />
-        <input value={channel} onChange={(e) => setChannel(e.target.value)} placeholder="Channel" />
-        <button type="submit">Post reply</button>
-      </form>
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, reviewId, and response into an object.
-3. Append item: Use setReplies((prev) => [...prev, entry]).
-4. Clear form: Reset input states to "".`,
+      build: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     },
   },
 ];

@@ -323,10 +323,21 @@ export default function TaskStepsPanel({ moduleTag, getCheckPayload }) {
   }, []);
 
   function toggleDone(id) {
+    // Audit P22: Mark done must not advance progress without a passing check.
     setDone((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        if (!aiVerified.has(id)) {
+          showCheckMessage(
+            "Run Check my code first — Mark done unlocks after this step passes.",
+            "Mark done",
+          );
+          return prev;
+        }
+        next.add(id);
+      }
       saveDoneSet(moduleTag, next);
       return next;
     });

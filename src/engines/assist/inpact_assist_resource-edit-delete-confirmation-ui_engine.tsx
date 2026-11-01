@@ -137,24 +137,7 @@ Imagine you're setting up a new project, and you've just created your first comp
       mentalModel: `
 **Mental model:** The "Global JSX Interpreter." Think of your TypeScript compiler (specifically, when configured for React) as having a built-in, always-on interpreter for JSX syntax. This interpreter doesn't need a specific \`React\` object imported into *every* file to understand the *syntax* of \`<div />\` or \`<MyComponent />\`. Instead, it knows how to transform that syntax into function calls (e.g., \`React.createElement(...)\` or a modern JSX runtime equivalent) because it's configured to do so globally. The actual \`React\` runtime is still needed for your application to run, but the *compiler* doesn't need to see an \`import React\` statement in every file to process the JSX *syntax*.
       `,
-      discover: `
-**Pattern - JSX Runtime:**
-\`\`\`tsx
-// No import needed for JSX syntax itself
-function MyComponent() {
-  return <div>Hello, World!</div>;
-}
-
-// If you need React hooks or other named exports, then you import them:
-// import { useState } from 'react';
-// function MyComponentWithState() {
-//   const [count, setCount] = useState(0);
-//   return <button onClick={() => setCount(count + 1)}>{count}</button>;
-// }
-\`\`\`
--   **Global Availability:** In modern React projects with a JSX runtime (like the automatic JSX runtime introduced in React 17), the compiler transforms JSX into calls that don't directly reference \`React\` in your source file.
--   **Type Definitions:** The \`JSX.Element\` type is typically provided by \`@types/react\` and is globally available in \`.tsx\` files, meaning you don't need to import it just for type annotations.
--   **When Imports ARE Needed:** You still need to import \`React\` or specific named exports (like \`useState\`, \`useEffect\`, \`useContext\`) if you are actually *using* those specific APIs within your component.
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.", \`useEffect\`, \`useContext\`) if you are actually *using* those specific APIs within your component.
 -   **Clean Code:** Omitting unnecessary imports leads to cleaner, more readable code and can slightly improve build performance.
       `,
       quickRules: `
@@ -273,21 +256,7 @@ You've likely seen React components defined in two primary ways: as a traditiona
       mentalModel: `
 **Mental model:** "Component Blueprint vs. Component Recipe." A \`function ItemList() { ... }\` is like a traditional architectural blueprint: it's a named, well-defined structure that exists from the moment the program starts. An \`const ItemList = () => { ... }\` is more like a recipe: it's a set of instructions assigned to a variable, and that variable needs to be defined before it can be used. Both create a component, but their underlying JavaScript mechanics differ slightly in how they are "prepared" by the engine.
       `,
-      discover: `
-**Pattern - Component Definition Styles:**
-\`\`\`tsx
-// Function Declaration (often preferred for default exports)
-export default function MyFunctionComponent() {
-  return <div>Hello from Function!</div>;
-}
-
-// Arrow Function Expression (common for named exports or inline definitions)
-export const MyArrowComponent = () => {
-  return <div>Hello from Arrow!</div>;
-};
-\`\`\`
--   **Hoisting:** Function declarations are "hoisted," meaning they can be called before they are defined in the code. Arrow functions (as variable assignments) are not hoisted and must be defined before use.
--   **\`this\` Binding:** In traditional functions, \`this\` is dynamically bound based on how the function is called. Arrow functions lexically bind \`this\`, meaning \`this\` refers to the \`this\` of the enclosing scope, which is generally simpler and safer in React functional components (though \`this\` is rarely used directly in modern functional components).
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.", meaning \`this\` refers to the \`this\` of the enclosing scope, which is generally simpler and safer in React functional components (though \`this\` is rarely used directly in modern functional components).
 -   **Debugging:** Function declarations provide clearer names in stack traces, which can be helpful during debugging. Arrow functions assigned to variables might sometimes appear as "anonymous" in older debuggers, though modern tools are better at inferring names.
 -   **Readability:** For default exports, \`export default function ComponentName() { ... }\` is often considered more readable as the component name is immediately visible.
       `,
@@ -441,39 +410,7 @@ When you first encounter \`useState\`, it seems straightforward: provide an init
       mentalModel: `
 **Mental model:** "The State's Life Cycle Blueprint." Imagine your state variable isn't just a single value, but a blueprint that describes all possible values it can hold throughout its existence. For an array, it starts empty but will eventually hold many items. For a selected object, it starts as "no selection" (\`null\`) and then becomes a specific object. The \`useState\` hook, especially with TypeScript, requires you to provide a blueprint that covers *all* these phases, not just the initial one.
       `,
-      discover: `
-**Pattern - Typed \`useState\` with Union Types:**
-\`\`\`tsx
-import { useState } from 'react';
-
-interface User {
-  id: string;
-  name: string;
-}
-
-function UserProfile() {
-  // State for a list of users, starts empty
-  const [users, setUsers] = useState<User[]>([]);
-
-  // State for a currently selected user, starts as null (no user selected)
-  // The type is a union: User OR null
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-
-  // State for a boolean flag, inferred as boolean
-  const [isLoading, setIsLoading] = useState(false);
-
-  return (
-    <div>
-      {/* ... */}
-    </div>
-  );
-}
-\`\`\`
--   **Explicit Array Types:** For arrays, always specify the element type, e.g., \`useState<Item[]>([])\`. This tells TypeScript that the array will contain \`Item\` objects.
--   **Union Types for Optional Objects:** When an object state might be \`null\` or \`undefined\` initially, but later hold a full object, use a union type like \`Item | null\` or \`Item | undefined\`. This explicitly tells TypeScript about the possible states.
--   **Boolean Inference:** For simple booleans or numbers, TypeScript can often infer the type from the initial value, e.g., \`useState(false)\` infers \`boolean\`.
--   **\`null\` vs. \`undefined\`:** In React state, \`null\` is generally preferred over \`undefined\` to signify "no value" or "no object selected" because \`null\` is a primitive value representing the intentional absence of any object value, whereas \`undefined\` often means a variable has been declared but not yet assigned a value.
-      `,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `
 **Quick rules:**
 -   ✅  Always explicitly type arrays in \`useState\` (e.g., \`useState<MyType[]>([])\`).
@@ -695,34 +632,7 @@ Imagine building a complex user interface where different parts of the screen ne
       mentalModel: `
 **Mental model:** "The UI Gatekeeper." Think of conditional rendering as a gatekeeper for your UI elements. Each gatekeeper (a conditional expression) decides whether a specific section of the UI is allowed to pass through and be rendered to the screen. If the condition is met, the gate opens, and the element is displayed. If not, the gate remains closed, and the element is completely omitted from the rendered output. This is more efficient than rendering an element and then hiding it with CSS.
       `,
-      discover: `
-**Pattern - Conditional Rendering with Logical && and Ternary Operator:**
-\`\`\`tsx
-function MyComponent({ isLoggedIn, userMessage }: { isLoggedIn: boolean; userMessage: string | null }) {
-  return (
-    <div>
-      {/* Logical && for simple "show if true" */}
-      {isLoggedIn && <button>Logout</button>}
-
-      {/* Ternary operator for "show A if true, else show B" */}
-      {userMessage ? (
-        <p>Welcome, {userMessage}!</p>
-      ) : (
-        <p>Please log in.</p>
-      )}
-
-      {/* Showing a list only if it has items */}
-      {isLoggedIn && userMessage && (
-        <ul>
-          <li>Item 1</li>
-          <li>Item 2</li>
-        </ul>
-      )}
-    </div>
-  );
-}
-\`\`\`
--   **Logical \`&&\` Operator:** This is the most common and concise way to conditionally render an element when you only want to show it if a condition is true, and show nothing otherwise. If the left-hand side is \`false\`, \`null\`, \`undefined\`, or \`0\`, React renders nothing.
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.", \`null\`, \`undefined\`, or \`0\`, React renders nothing.
 -   **Ternary Operator (\`condition ? true_expression : false_expression\`):** Use this when you need to render one thing if a condition is true, and a *different* thing if it's false. It's ideal for "if-else" scenarios.
 -   **\`map()\` for Lists:** When rendering lists, the \`map()\` method is used to transform an array of data into an array of JSX elements. Combine this with a conditional check for \`array.length\` to show a "no items" message.
 -   **Fragments (\`</>\`):** If you need to return multiple elements from a conditional block without adding an extra DOM node, wrap them in a React Fragment.
@@ -1077,59 +987,7 @@ In a React component, you often need to perform actions that don't directly invo
       mentalModel: `
 **Mental model:** "The Component's Lifecycle Manager." Think of \`useEffect\` as a specialized manager that oversees operations tied to your component's lifecycle. It has a 'to-do list' (the effect function) and a 'watch list' (the dependency array). The manager only performs tasks on its to-do list when something on its watch list changes. If the watch list is empty, it performs the task once when it first starts (mounts) and then never again (unless it's cleaning up).
       `,
-      discover: `
-**Pattern - \`useEffect\` for Data Fetching and Cleanup:**
-\`\`\`tsx
-import { useEffect, useState } from 'react';
-
-function DataDisplay() {
-  const [data, setData] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true; // Flag to prevent state updates on unmounted component
-    const fetchData = async () => {
-      try {
-        const response = await fetch('/api/some-data');
-        if (!response.ok) {
-          throw new Error(\`HTTP error! status: \${response.status}\`);
-        }
-        const result = await response.json();
-        if (isMounted) { // Only update if component is still mounted
-          setData(result.message);
-        }
-      } catch (err: any) {
-        if (isMounted) {
-          setError(err.message);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchData();
-
-    // Cleanup function: runs when component unmounts or before effect re-runs
-    return () => {
-      isMounted = false; // Set flag to false
-      console.log("Cleanup for DataDisplay effect.");
-    };
-  }, []); // Empty dependency array: runs once on mount, cleans up on unmount
-
-  if (isLoading) return <p>Loading data...</p>;
-  if (error) return <p>Error: {error}</p>;
-  return <p>Data: {data}</p>;
-}
-\`\`\`
--   **Effect Function:** The first argument to \`useEffect\` is a function that contains the side effect logic. This function can optionally return a cleanup function.
--   **Dependency Array:** The second argument is an array of values that the effect depends on. The effect will re-run only if any of these values change between renders.
--   **Empty Array (\`[]\`):** If the dependency array is empty, the effect runs once after the initial render and its cleanup function runs once when the component unmounts. This is ideal for initial data fetching.
--   **No Array (omitted):** If the dependency array is omitted, the effect runs after *every* render, which is rarely what you want for side effects like data fetching.
--   **Cleanup Function:** The function returned by the effect runs before the component unmounts, or before the effect re-runs (if dependencies change). This is crucial for preventing memory leaks (e.g., clearing timers, unsubscribing from events).
-      `,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `
 **Quick rules:**
 -   ✅  Use \`useEffect\` for any operation that is a "side effect" (e.g., data fetching, subscriptions, manual DOM manipulation).
@@ -1624,69 +1482,7 @@ When a user interacts with a form, whether it's to update their profile, add a n
       mentalModel: `
 **Mental model:** "The Data Synchronizer." Think of your component as a data synchronizer. When a form is submitted, it takes the user's input, packages it up, and sends it to the "master data source" (your API). Once the master data source confirms the change, the synchronizer then updates its local copy (component state) to reflect the new reality. For deletions, it's a similar process: confirm with the user, tell the master data source to remove, then remove from the local copy.
       `,
-      discover: `
-**Pattern - Asynchronous Form Submission and State Update:**
-\`\`\`tsx
-import { useState } from 'react';
-
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-}
-
-function ProfileEditor({ user }: { user: UserProfile }) {
-  const [name, setName] = useState(user.name);
-  const [email, setEmail] = useState(user.email);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value);
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value);
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault(); // Prevent default browser form submission
-    setIsSaving(true);
-    setError(null);
-
-    const updatedProfile = { ...user, name, email };
-
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      console.log("Profile updated:", updatedProfile);
-      // In a real app, you'd update global state or re-fetch data
-      alert("Profile saved successfully!");
-    } catch (err: any) {
-      setError("Failed to save profile: " + err.message);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <label>
-        Name:
-        <input type="text" value={name} onChange={handleNameChange} />
-      </label>
-      <label>
-        Email:
-        <input type="email" value={email} onChange={handleEmailChange} />
-      </label>
-      <button type="submit" disabled={isSaving}>
-        {isSaving ? "Saving..." : "Save Profile"}
-      </button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-    </form>
-  );
-}
-\`\`\`
--   **\`event.preventDefault()\`:** Always call this inside your form's \`onSubmit\` handler to stop the browser from performing its default form submission behavior (which typically causes a full page reload).
--   **Controlled Components:** For form inputs, use \`value\` and \`onChange\` props to bind the input's value to state, making it a "controlled component." This gives React full control over the input's state.
--   **Asynchronous Operations:** Form submissions and deletions often involve API calls, which are asynchronous. Use \`async/await\` to manage these operations cleanly.
--   **Optimistic vs. Pessimistic Updates:** For updates, you can either update the UI immediately (optimistic) and revert on error, or wait for the API response (pessimistic) before updating. The example uses a pessimistic approach. For deletions, it's often pessimistic with a confirmation step.
-      `,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `
 **Quick rules:**
 -   ✅  Always call \`event.preventDefault()\` in \`onSubmit\` handlers.
@@ -2277,44 +2073,7 @@ You've built the visual structure of your component and defined the functions th
       mentalModel: `
 **Mental model:** "The UI's Remote Control." Imagine each interactive UI element (button, form, input) has a remote control slot. You need to program that slot with the correct command (your event handler function). Sometimes, the command is simple and needs no extra information (e.g., "close modal"). Other times, the command needs specific details (e.g., "delete *this specific item*"). The way you "program" the slot (pass the function) depends on whether it needs those extra details.
       `,
-      discover: `
-**Pattern - Passing Event Handlers to JSX:**
-\`\`\`tsx
-function InteractiveComponent({ itemId }: { itemId: string }) {
-  const handleClick = () => {
-    console.log("Button clicked!");
-  };
-
-  const handleItemSpecificClick = (id: string) => {
-    console.log(\`Item \${id} clicked!\`);
-  };
-
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    console.log("Form submitted!");
-  };
-
-  return (
-    <div>
-      {/* 1. No arguments needed: pass function reference directly */}
-      <button onClick={handleClick}>Simple Click</button>
-
-      {/* 2. Arguments needed: wrap in an arrow function */}
-      <button onClick={() => handleItemSpecificClick(itemId)}>Click Item {itemId}</button>
-
-      {/* 3. Form submission: pass function reference to onSubmit */}
-      <form onSubmit={handleSubmit}>
-        <button type="submit">Submit Form</button>
-      </form>
-    </div>
-  );
-}
-\`\`\`
--   **Direct Function Reference:** If your event handler doesn't need any arguments from the event itself (or only needs the synthetic event object, which is passed by default), you can pass the function reference directly: \`onClick={handleClick}\`.
--   **Arrow Function Wrapper:** If your event handler needs specific arguments (like an \`item.id\` from a mapped list), you must wrap the function call in an arrow function: \`onClick={() => handleItemSpecificClick(item.id)}\`. This ensures the function is called *only* when the event occurs, not immediately during rendering.
--   **\`onSubmit\` for Forms:** For forms, the \`onSubmit\` prop is used, and it typically receives the synthetic \`FormEvent\`. You'll usually pass a direct function reference to this.
--   **\`onChange\` for Inputs:** For controlled inputs, \`onChange\` is used, and it receives a \`ChangeEvent\`.
-      `,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: `
 **Quick rules:**
 -   ✅  Pass a function reference directly (\`onClick={myHandler}\`) if no custom arguments are needed.

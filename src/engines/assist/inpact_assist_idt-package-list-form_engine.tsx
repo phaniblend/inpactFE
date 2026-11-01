@@ -114,19 +114,7 @@ export function MembershipCatalog() {
       hook: `Defining the complete package blueprint upfront gives your editor the type checklist needed to prevent missing-property errors later.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: MENTAL_MODEL,
-      discover: `export type ServicePackage = {
-  id: string;
-  client: string;
-  service: string;
-  totalPunches: number;
-  remainingPunches: number;
-  status: string;
-};
-
-export function PackageList() {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -302,9 +290,7 @@ export function MembershipCatalog({ passes: passesProp, setPasses: setPassesProp
       hook: `Falling back to local state when no props are given means this exact component works both on its own right now, and inside the shared page you'll build once every task in this product is done.`,
       pain: "A component that only ever manages its own state can't share data with siblings — a component that only ever takes props can't be tested alone.",
       mentalModel: MENTAL_MODEL,
-      discover: `const [ownPackages, setOwnPackages] = useState<ServicePackage[]>([]);
-const packages = packagesProp ?? ownPackages;
-const setPackages = setPackagesProp ?? setOwnPackages;`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -448,13 +434,7 @@ const [visits, setVisits] = useState("5");
       hook: `Controlled inputs ensure form data is validated and instantly accessible when the sell button is clicked.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: MENTAL_MODEL,
-      discover: `const [client, setClient] = useState("");
-const [service, setService] = useState("");
-const [totalPunches, setTotalPunches] = useState("5");
-
-<input value={client} onChange={(e) => setClient(e.target.value)} />
-<input value={service} onChange={(e) => setService(e.target.value)} />
-<input value={totalPunches} onChange={(e) => setTotalPunches(e.target.value)} type="number" />`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -671,11 +651,7 @@ export function PackageList({ packages: packagesProp, setPackages: setPackagesPr
       hook: `Halting page refresh keeps user state intact and lets the new package render immediately without screen flicker.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: MENTAL_MODEL,
-      discover: `function handleSell(e: React.FormEvent) {
-  e.preventDefault();
-  const count = Number(totalPunches);
-  const newPackage: ServicePackage = {
-    id: \`pkg-\${Date.now()}\`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
     client,
     service,
     totalPunches: count,

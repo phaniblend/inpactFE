@@ -41,12 +41,9 @@ WHAT YOU'LL NEED
 Your task: Set up server storage for worker shifts and an ID generator.`,
     hint: `1. In-memory store: Declare an empty array typed with your shift interface.
 2. ID helper: Return an incremental ID string from your helper function.`,
-    example_code: `let roster: ShiftRecord[] = [];
-let shiftIdCounter = 1;
-
-function generateShiftId(): string {
-  return \`shift-\${shiftIdCounter++}\`;
-}`,
+    example_code: `let guests = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/shifts
 GET /api/shifts
@@ -74,12 +71,9 @@ let nextIdCounter = 1;
 function nextId() { return String(nextIdCounter++); }
 export function getStore() { return shifts; }
 `,
-    analog_example: `let roster: ShiftRecord[] = [];
-let shiftIdCounter = 1;
-
-function generateShiftId(): string {
-  return \`shift-\${shiftIdCounter++}\`;
-}`,
+    analog_example: `let guests = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -92,16 +86,11 @@ function generateShiftId(): string {
   Validate →  required fields before insert
   Conflict →  same worker + same startsAt → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let shifts = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return shifts; }
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. In-memory store: Declare an empty array typed with your shift interface.
-2. ID helper: Return an incremental ID string from your helper function.`,
+      build: `Two requests that arrive close together must never be handed the same id — a counter that only ever increases guarantees each new record gets a value nothing before it used, which a timestamp alone cannot promise.`,
     },
   },
   {
@@ -119,9 +108,7 @@ WHAT YOU'LL NEED
 Your task: Reject shift requests missing worker ID, start time, or end time with status 400.`,
     hint: `1. Inspect fields: Evaluate required properties using !req.body.property.
 2. Reject missing: Send status 400 if any required field is falsy.`,
-    example_code: `if (!req.body.workerId || !req.body.startTime || !req.body.endTime) {
-  return res.status(400).json({ error: "Worker ID, start time, and end time are required" });
-}`,
+    example_code: `if (!input?.name?.trim()) return "name is required";`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/shifts
 POST /api/shifts
@@ -161,9 +148,7 @@ export function validateShift(input) {
   return null;
 }
 `,
-    analog_example: `if (!req.body.workerId || !req.body.startTime || !req.body.endTime) {
-  return res.status(400).json({ error: "Worker ID, start time, and end time are required" });
-}`,
+    analog_example: `if (!input?.name?.trim()) return "name is required";`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -176,22 +161,11 @@ export function validateShift(input) {
   Validate →  required fields before insert
   Conflict →  same worker + same startsAt → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let shifts = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return shifts; }
-export function validateShift(input) {
-  if (typeof input?.worker !== "string" || !input.worker.trim()) return "worker is required";
-  if (typeof input?.role !== "string" || !input.role.trim()) return "role is required";
-  if (typeof input?.startsAt !== "string" || !input.startsAt.trim()) return "startsAt is required";
-  return null;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Inspect fields: Evaluate required properties using !req.body.property.
-2. Reject missing: Send status 400 if any required field is falsy.`,
+      build: `A validator is just a function that inspects the fields it was given and returns either a short error message or nothing at all — the caller decides what to do with that answer.`,
     },
   },
   {
@@ -210,13 +184,8 @@ Your task: Scan existing shifts and reject with status 409 if this worker is alr
     hint: `1. Scan store: Use .some() on your roster array.
 2. Match criteria: Check if workerId matches and time windows overlap.
 3. Reject conflicts: If found, halt execution with status 409.`,
-    example_code: `const hasConflict = roster.some(
-  (s) =>
-    s.workerId === req.body.workerId &&
-    !(req.body.endTime <= s.startTime || req.body.startTime >= s.endTime)
-);
-if (hasConflict) {
-  return res.status(409).json({ error: "Worker already scheduled during this shift window" });
+    example_code: `function seatTaken(seat, holds) {
+  return holds.some((h) => h.seat === seat);
 }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/shifts
@@ -251,13 +220,8 @@ export function hasWorkerOverlap(candidate) {
   return shifts.some((row) => row.worker === candidate.worker && row.startsAt === candidate.startsAt);
 }
 `,
-    analog_example: `const hasConflict = roster.some(
-  (s) =>
-    s.workerId === req.body.workerId &&
-    !(req.body.endTime <= s.startTime || req.body.startTime >= s.endTime)
-);
-if (hasConflict) {
-  return res.status(409).json({ error: "Worker already scheduled during this shift window" });
+    analog_example: `function seatTaken(seat, holds) {
+  return holds.some((h) => h.seat === seat);
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -271,18 +235,11 @@ if (hasConflict) {
   Validate →  required fields before insert
   Conflict →  same worker + same startsAt → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let shifts = [];
-export function validateShift(input) { return null; }
-export function hasWorkerOverlap(candidate) {
-  return shifts.some((row) => row.worker === candidate.worker && row.startsAt === candidate.startsAt);
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Scan store: Use .some() on your roster array.
-2. Match criteria: Check if workerId matches and time windows overlap.
-3. Reject conflicts: If found, halt execution with status 409.`,
+      build: `Checking one candidate record against a list of existing ones for a matching combination of fields is exactly what Array.prototype.some() is for — it stops at the first match and returns true or false.`,
     },
   },
   {
@@ -301,17 +258,7 @@ Your task: Build endpoints to return shifts and create new shifts with validatio
     hint: `1. Return store: Send status 200 with the roster array in GET.
 2. Protect POST: Run validation and overlap checks before pushing the record.
 3. Save record: Assign a unique ID, push the item to storage, and return status 201.`,
-    example_code: `export function getShifts(res: Response) {
-  return res.status(200).json(roster);
-}
-
-export function assignShift(req: Request, res: Response) {
-  // Step 2 validation check (400)
-  // Step 3 worker overlap check (409)
-  const item = { id: generateShiftId(), ...req.body };
-  roster.push(item);
-  return res.status(201).json(item);
-}`,
+    example_code: `if (seatTaken(body.seat, holds)) return res.status(409).json({ error: "taken" });`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/shifts
 GET /api/shifts
@@ -371,17 +318,7 @@ export function createHandlers() {
   };
 }
 `,
-    analog_example: `export function getShifts(res: Response) {
-  return res.status(200).json(roster);
-}
-
-export function assignShift(req: Request, res: Response) {
-  // Step 2 validation check (400)
-  // Step 3 worker overlap check (409)
-  const item = { id: generateShiftId(), ...req.body };
-  roster.push(item);
-  return res.status(201).json(item);
-}`,
+    analog_example: `if (seatTaken(body.seat, holds)) return res.status(409).json({ error: "taken" });`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -394,35 +331,11 @@ export function assignShift(req: Request, res: Response) {
   Validate →  required fields before insert
   Conflict →  same worker + same startsAt → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let shifts = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function validateShift(input) { return null; }
-export function hasWorkerOverlap(candidate) {
-  return shifts.some((row) => row.worker === candidate.worker && row.startsAt === candidate.startsAt);
-}
-export function createHandlers() {
-  return {
-    list(_req, res) {
-      res.json(shifts);
-    },
-    create(req, res) {
-      const err = validateShift(req.body);
-      if (err) return res.status(400).json({ error: err });
-      if (hasWorkerOverlap(req.body)) return res.status(409).json({ error: "conflict" });
-      const row = { id: nextId(), worker: req.body.worker, role: req.body.role, startsAt: req.body.startsAt };
-      shifts.push(row);
-      res.status(201).json(row);
-    },
-  };
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Return store: Send status 200 with the roster array in GET.
-2. Protect POST: Run validation and overlap checks before pushing the record.
-3. Save record: Assign a unique ID, push the item to storage, and return status 201.`,
+      build: `A route handler's job is to call helpers in the right order and translate their answers into HTTP status codes — the actual rules already live in the functions written in earlier steps.`,
     },
   },
 ];

@@ -96,8 +96,9 @@ Feedback requirements (critical):
 - feedback: For "partial" or "wrong": 1–3 clear, specific sentences. Never use vague or single-word feedback like "Not found", "Incorrect", "Wrong", or "Missing" without explanation. For "correct": keep it very brief (see below).
 - For "correct": Do NOT repeat what they did in detail. Use a short appreciation and nudge to proceed, e.g. "Nice! Proceed to the next step." or "Good. Move on to the next step." One short sentence only. Never say things like "You correctly imported X and Y using named imports. This satisfies the step's requirement."
 - For "partial": Say exactly what is good, what is missing or wrong, and what to change. Pinpoint location and fix. Use syntax and conventions appropriate to the step's language/track (provided in the user message).
-- For "wrong": Explain what the step asked for, pinpoint where the lesson is in their code, and give a concrete next step or snippet (e.g. "Move the FormState interface outside the Form component, directly under the imports.").
+- For "wrong": Explain what the step asked for and pinpoint where the lesson is in their code. Give the next rung on the feedback ladder (below) — never the full solution.
 - Never include optional/nice-to-have advice in feedback (for example: "you may add...", "optional", "not required"). Mention only required criteria for this step and the minimum fix needed to pass.
+- Feedback ladder (audit P04 — critical): On wrong/partial, NEVER paste the reference solution, a complete type body, a full component, or "Create path containing …" with finished code. Climb one rung only: (1) name what is missing as a requirement (file/type/hook), (2) name the concept + what to look up, (3) a partial hint (e.g. "total should be a number, not a string"), (4+) tell them to ask their reviewer — do not hand over the answer. Accept \`export function\` and \`export const\` as equivalent.
 - hint: optional; add a short nudge (syntax or next step) when useful. Omit if feedback is enough. For "correct" result, omit hint.
 - errors: optional array of 1–3 short, specific items; when placement is wrong, include e.g. "FormState is defined inside the component; it must be at module level." Omit if none. For "correct" result, omit errors.`;
 
@@ -145,8 +146,8 @@ ${phaseLine ? `${phaseLine}\n` : ""}${titleLine ? `${titleLine}\n` : ""}
 ${keywordsBlock}Success criteria for this step:
 ${criteriaText}
 
-Expected outcome / reference (for context only):
-${expectedOutcome || "(none)"}
+Grading notes (internal — NEVER quote or paste into feedback):
+${expectedOutcome ? "A private reference exists for this step. Use it only to judge correctness. Do not reproduce it, paraphrase it as finished code, or tell the learner to create a file containing a full solution." : "(no private reference)"}
 
 Starter/seed code for this step:
 \`\`\`

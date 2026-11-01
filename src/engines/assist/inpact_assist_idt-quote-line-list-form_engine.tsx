@@ -16,14 +16,14 @@ export const NODES = [
   Submit   →  the new row appears on the list
 `,
       usecase: "Estimates are built from lines. Same list+form skill — different nouns.",
-      designMock: {"kind":"list-and-form","screenTitle":"Quote lines","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No line items yet.","rows":[{"title":"q-1","subtitle":"Labor","meta":"900"},{"title":"Second row","subtitle":"Another","meta":"900"}],"fields":[{"label":"Quote id","sample":"q-1"},{"label":"Label","sample":"Labor"},{"label":"Amount","sample":"900"}],"submitLabel":"Add line"},
+      designMock: {"kind":"list-and-form","screenTitle":"Quote lines","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No line items yet.","rows":[{"title":"q-1","subtitle":"Labor","meta":"900"},{"title":"q-1 B","subtitle":"Labor (alt)","meta":"900"}],"fields":[{"label":"Quote id","sample":"q-1"},{"label":"Label","sample":"Labor"},{"label":"Amount","sample":"900"}],"submitLabel":"Add line"},
     },
   },
   {
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Create a blueprint for an individual line item (description, quantity, price) and build the table frame.","Store line items in state; render an itemized row for each entry, or a \"No items added to estimate\" message.","Connect item description and price inputs to state to capture values as the user types.","Intercept submit, add the new item line to the running quote, and clear the inputs."],
+    items: ["Create a blueprint for an individual line item (description, quoteId, quoteId) and build the table frame.","Store line items in state; render an itemized row for each entry, or a \"No items added to quoteId\" message.","Connect item description and quoteId inputs to state to capture values as the user types.","Intercept submit, add the new item line to the running quote, and clear the inputs."],
   },
   {
     id: "step1",
@@ -33,23 +33,24 @@ export const NODES = [
 
 This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/QuoteLines.tsx\` before anything else. Every step from here on edits that same file.
 
-Create a blueprint for an individual line item (description, quantity, price) and build the table frame.
+Create a blueprint for an individual line item (description, quoteId, quoteId) and build the table frame.
 
 WHAT YOU'LL NEED
-- id (text)
-- label (text)
-- price (number or text)
+- id (text — unique key, not always shown on screen)
+- quoteId (per contract)
+- label (per contract)
+- amount (per contract)
 
 Your task: Define the shape of a quote line item and create the component shell.`,
     hint: `1. Blueprint declaration: Rename LineItem to your type name and define required fields.
 2. Shell component: Declare your component returning an empty <div />.`,
-    example_code: `export type LineItem = {
+    example_code: `export type Guest = {
   id: string;
-  label: string;
-  price: string;
+  name: string;
+  note: string;
 };
 
-export function LineItemsTable() {
+export function GuestList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -84,13 +85,13 @@ export function QuoteLines() {
   return <div />;
 }
 `,
-    analog_example: `export type LineItem = {
+    analog_example: `export type Guest = {
   id: string;
-  label: string;
-  price: string;
+  name: string;
+  note: string;
 };
 
-export function LineItemsTable() {
+export function GuestList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -106,22 +107,11 @@ export function LineItemsTable() {
   Form     →  Quote id, Label, Amount
   Submit   →  the new row appears on the list
 `,
-      discover: `export type QuoteLine = {
-  id: string;
-  quoteId: string;
-  label: string;
-  amount: string;
-};
-
-export function QuoteLines() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Blueprint declaration: Rename LineItem to your type name and define required fields.
-2. Shell component: Declare your component returning an empty <div />.`,
+      build: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     },
   },
   {
@@ -130,31 +120,27 @@ export function QuoteLines() {
     phase: "Step 2 of 4",
     paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
 
-Store line items in state; render an itemized row for each entry, or a "No items added to estimate" message.
+Store line items in state; render an itemized row for each entry, or a "No items added to quoteId" message.
 
 WHAT YOU'LL NEED
-- State array holding line items.
-- Conditional empty check.
-- Map loop rendering line items.
+- id (text — unique key, not always shown on screen)
+- quoteId (per contract)
+- label (per contract)
+- amount (per contract)
 
 Your task: Store line items in state and display them, showing a placeholder if no items exist.`,
     hint: `1. Set up state: Use useState<LineItem[]>([]).
 2. Check for empty: Use lines.length === 0 to render the empty message.
 3. Render entries: Map through lines, passing key={item.id}.`,
-    example_code: `const [lines, setLines] = useState<LineItem[]>([]);
-
-return (
-  <div>
-    {lines.length === 0 ? (
-      <p>No line items added</p>
-    ) : (
-      lines.map((item) => (
-        <div key={item.id}>
-          {item.label}: \${item.price}
-        </div>
-      ))
-    )}
-  </div>
+    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     think_prompt: `\`\`\`text
 LIST — Quote lines
@@ -233,20 +219,15 @@ export function QuoteLines() {
   );
 }
 `,
-    analog_example: `const [lines, setLines] = useState<LineItem[]>([]);
-
-return (
-  <div>
-    {lines.length === 0 ? (
-      <p>No line items added</p>
-    ) : (
-      lines.map((item) => (
-        <div key={item.id}>
-          {item.label}: \${item.price}
-        </div>
-      ))
-    )}
-  </div>
+    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -261,38 +242,11 @@ return (
   Form     →  Quote id, Label, Amount
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type QuoteLine = {
-  id: string;
-  quoteId: string;
-  label: string;
-  amount: string;
-};
-
-export function QuoteLines() {
-  const [lines, setLines] = useState<QuoteLine[]>([]);
-  return (
-    <div>
-      {lines.length === 0 ? (
-        <p>No line items yet.</p>
-      ) : (
-        <ul>
-          {lines.map((a) => (
-            <li key={a.id}>{a.quoteId}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Set up state: Use useState<LineItem[]>([]).
-2. Check for empty: Use lines.length === 0 to render the empty message.
-3. Render entries: Map through lines, passing key={item.id}.`,
+      build: `To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. Once it does, checking its length before deciding what to render is just an ordinary conditional — the empty case and the list case are two branches of one render.`,
     },
   },
   {
@@ -301,20 +255,19 @@ export function QuoteLines() {
     phase: "Step 3 of 4",
     paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
 
-Connect item description and price inputs to state to capture values as the user types.
+Connect item description and quoteId inputs to state to capture values as the user types.
 
 WHAT YOU'LL NEED
-- State hooks for label and price inputs.
-- Value and onChange props wired on inputs.
+- id (text — unique key, not always shown on screen)
+- quoteId (per contract)
+- label (per contract)
+- amount (per contract)
 
 Your task: Connect line item input fields to React state.`,
-    hint: `1. Initialize states: Call useState("") for label and price.
+    hint: `1. Initialize states: Call useState("") for label and quoteId.
 2. Wire inputs: Connect value and onChange to each state variable.`,
-    example_code: `const [label, setLabel] = useState("");
-const [price, setPrice] = useState("");
-
-<input value={label} onChange={(e) => setLabel(e.target.value)} />
-<input value={price} onChange={(e) => setPrice(e.target.value)} />`,
+    example_code: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Quote lines
   [ Quote id ]  [ Label ]  [ Amount ]   → Add line
@@ -388,11 +341,8 @@ export function QuoteLines() {
   );
 }
 `,
-    analog_example: `const [label, setLabel] = useState("");
-const [price, setPrice] = useState("");
-
-<input value={label} onChange={(e) => setLabel(e.target.value)} />
-<input value={price} onChange={(e) => setPrice(e.target.value)} />`,
+    analog_example: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -406,34 +356,11 @@ const [price, setPrice] = useState("");
   Form     →  Quote id, Label, Amount
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type QuoteLine = {
-  id: string;
-  quoteId: string;
-  label: string;
-  amount: string;
-};
-
-export function QuoteLines() {
-  const [lines, setLines] = useState<QuoteLine[]>([]);
-  const [quoteId, setQuoteId] = useState("");
-  const [label, setLabel] = useState("");
-  const [amount, setAmount] = useState("");
-  return (
-    <form>
-        <input value={quoteId} onChange={(e) => setQuoteId(e.target.value)} placeholder="Quote id" />
-        <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Label" />
-        <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount" />
-    </form>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize states: Call useState("") for label and price.
-2. Wire inputs: Connect value and onChange to each state variable.`,
+      build: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
     },
   },
   {
@@ -445,23 +372,17 @@ export function QuoteLines() {
 Intercept submit, add the new item line to the running quote, and clear the inputs.
 
 WHAT YOU'LL NEED
-- Form interceptor using e.preventDefault().
-- Object assembly matching blueprint.
-- Spread update to state.
-- Form reset calls.
+- id (text — unique key, not always shown on screen)
+- quoteId (per contract)
+- label (per contract)
+- amount (per contract)
 
 Your task: Append the new line item to state without a page refresh and reset the form.`,
     hint: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, label, and price into an object.
+2. Build item: Package id, label, and quoteId into an object.
 3. Append item: Use setLines((prev) => [...prev, entry]).
 4. Clear form: Reset input states to "".`,
-    example_code: `function addLine(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), label, price };
-  setLines((prev) => [...prev, entry]);
-  setLabel("");
-  setPrice("");
-}`,
+    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     think_prompt: `\`\`\`text
 FORM — Quote lines
   [ Quote id ]  [ Label ]  [ Amount ]   → Add line
@@ -472,10 +393,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `The new line item appears in the list instantly, keeping estimate creation responsive.
-
-
-================================================================================`,
+    why_this_matters: `The new line item appears in the list instantly, keeping quoteId creation responsive.`,
     answer_keywords: ["preventDefault","setLines","prev","quoteId","label","amount"],
     seed_code: `import { useState } from "react";
 
@@ -582,21 +500,12 @@ export function QuoteLines() {
   );
 }
 `,
-    analog_example: `function addLine(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), label, price };
-  setLines((prev) => [...prev, entry]);
-  setLabel("");
-  setPrice("");
-}`,
+    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `The new line item appears in the list instantly, keeping estimate creation responsive.
-
-
-================================================================================`,
+      hook: `The new line item appears in the list instantly, keeping quoteId creation responsive.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists lines and a form to add one:
 
@@ -605,56 +514,11 @@ export function QuoteLines() {
   Form     →  Quote id, Label, Amount
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type QuoteLine = {
-  id: string;
-  quoteId: string;
-  label: string;
-  amount: string;
-};
-
-export function QuoteLines() {
-  const [lines, setLines] = useState<QuoteLine[]>([]);
-  const [quoteId, setQuoteId] = useState("");
-  const [label, setLabel] = useState("");
-  const [amount, setAmount] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: QuoteLine = { id: String(Date.now()), quoteId, label, amount };
-    setLines((prev) => [...prev, next]);
-    setQuoteId("");
-    setLabel("");
-    setAmount("");
-  }
-  return (
-    <div>
-      {lines.length === 0 ? (
-        <p>No line items yet.</p>
-      ) : (
-        <ul>
-          {lines.map((a) => (
-            <li key={a.id}>{a.quoteId} · {a.label} · {a.amount}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={quoteId} onChange={(e) => setQuoteId(e.target.value)} placeholder="Quote id" />
-        <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Label" />
-        <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount" />
-        <button type="submit">Add line</button>
-      </form>
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, label, and price into an object.
-3. Append item: Use setLines((prev) => [...prev, entry]).
-4. Clear form: Reset input states to "".`,
+      build: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     },
   },
 ];

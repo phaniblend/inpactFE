@@ -105,17 +105,7 @@ export function SessionAuditView() {
       hook: `Typing the punch record guarantees transaction history retains the package link and service name cleanly.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: MENTAL_MODEL,
-      discover: `export type PunchRecord = {
-  id: string;
-  packageId: string;
-  timestamp: string;
-  serviceName: string;
-};
-
-export function PunchLog() {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -247,32 +237,7 @@ return (
       hook: `Displaying logged punches reassures clients that their visit was successfully counted.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: MENTAL_MODEL,
-      discover: `import { useState } from "react";
-
-export type PunchRecord = {
-  id: string;
-  packageId: string;
-  timestamp: string;
-  serviceName: string;
-};
-
-export function PunchLog() {
-  const [punches, setPunches] = useState<PunchRecord[]>([]);
-  return (
-    <div>
-      {punches.length === 0 ? (
-        <p>No punches redeemed today.</p>
-      ) : (
-        <ul>
-          {punches.map((punch) => (
-            <li key={punch.id}>{punch.serviceName} — package {punch.packageId} at {punch.timestamp}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -422,10 +387,7 @@ const isDepleted = currentPass ? currentPass.remainingVisits <= 0 : true;
       hook: `Disabling the button immediately stops staff from attempting to punch a card that has no balance left.`,
       pain: "A dropdown with its own copy of package data would drift out of sync with what PackageList actually sold.",
       mentalModel: MENTAL_MODEL,
-      discover: `const activePkg = packages.find((p) => p.id === selectedPkgId);
-const isDepleted = !activePkg || activePkg.remainingPunches <= 0;
-
-<button type="submit" disabled={isDepleted}>Redeem visit</button>`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
@@ -670,17 +632,7 @@ export function PunchLog({ packages = [], setPackages = () => {} }: PunchLogProp
       hook: `Synchronizing the punch log and the package balance in memory ensures immediate visual confirmation on screen.`,
       pain: "Forgetting the depleted guard would let a double-click redeem the same last punch twice, driving a balance negative.",
       mentalModel: MENTAL_MODEL,
-      discover: `setPackages((prev) =>
-  prev.map((p) => {
-    if (p.id !== activePkg.id) return p;
-    const nextRemaining = p.remainingPunches - 1;
-    return {
-      ...p,
-      remainingPunches: nextRemaining,
-      status: nextRemaining <= 0 ? "empty" : nextRemaining <= 2 ? "low" : "ok",
-    };
-  })
-);`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",

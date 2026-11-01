@@ -116,20 +116,7 @@ export function StockCatalog() {
       hook: `A blueprint that matches the real API's actual shape is what lets your editor catch a typo'd field name before you ever run the code.`,
       pain: "A type that guesses wrong about the real response shape produces confusing runtime bugs TypeScript should have caught.",
       mentalModel: MENTAL_MODEL,
-      discover: `export type Item = {
-  id: string;
-  sku: string;
-  name: string;
-  costPrice: number;
-  sellingPrice: number;
-  stockOnHand: number;
-  reorderPoint: number;
-};
-
-export function InventoryTable() {
-  return <div />;
-}
-`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not guess a field's type — check what the real endpoint actually returns.",
       dryRun: "Write the same step for a different real endpoint you haven't used before.",
@@ -254,14 +241,7 @@ useEffect(() => {
       hook: `Running fetch inside useEffect with a loading flag means the request fires exactly once, and users see an honest "still loading" instead of a false "empty" for a moment.`,
       pain: "Without a loading flag, a genuinely empty catalog and a catalog that just hasn't loaded yet look identical to the user.",
       mentalModel: MENTAL_MODEL,
-      discover: `useEffect(() => {
-  fetch("/api/items")
-    .then((res) => res.json())
-    .then((data) => {
-      setItems(data);
-      setLoading(false);
-    });
-}, []);`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not call fetch() directly inside the component body (outside useEffect) — that refetches on every render.",
       dryRun: "Write the same fetch-on-mount step for a different real endpoint on this same backend.",
@@ -454,12 +434,7 @@ return (
       hook: `A real semantic table (not a styled <div> grid) is what screen readers and browser table features actually understand.`,
       pain: "Skipping the empty check leaves a permanently blank table with no explanation once the fetch resolves to nothing.",
       mentalModel: MENTAL_MODEL,
-      discover: `<table>
-  <thead><tr><th>SKU</th><th>Name</th><th>Cost (MAC)</th><th>Price</th><th>Stock</th></tr></thead>
-  <tbody>
-    {items.map((i) => <tr key={i.id}>...</tr>)}
-  </tbody>
-</table>`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not skip the empty-array check — a table with zero rows and no message reads as broken.",
       dryRun: "Draw the same table shape for a different real dataset with different columns.",
@@ -675,11 +650,7 @@ export function InventoryTable() {
       hook: `A clear per-item stock table gives immediate visibility into exactly which products need replenishment, using each product's own real threshold.`,
       pain: "A hardcoded threshold would misflag items that are genuinely fine at their own lower reorder point, or miss ones that are genuinely critical at a higher one.",
       mentalModel: MENTAL_MODEL,
-      discover: `{i.stockOnHand <= i.reorderPoint ? (
-  <span style={{ color: "red", fontWeight: 700 }}>REORDER</span>
-) : (
-  <span style={{ color: "green" }}>HEALTHY</span>
-)}`,
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
       quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
       watchOut: "Do not hardcode a single stock threshold for every item — always compare a row to its own reorderPoint.",
       dryRun: "Add the same kind of threshold badge to a different table with a different pair of fields.",

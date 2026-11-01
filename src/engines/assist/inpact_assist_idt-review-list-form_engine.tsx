@@ -16,14 +16,14 @@ export const NODES = [
   Submit   →  the new row appears on the list
 `,
       usecase: "Unanswered reviews cost trust. A list+form inbox is the light alternative to reputation suites.",
-      designMock: {"kind":"list-and-form","screenTitle":"Reviews","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No reviews yet.","rows":[{"title":"Sam","subtitle":"5","meta":"Great cut"},{"title":"Second row","subtitle":"Another","meta":"Great cut"}],"fields":[{"label":"Author","sample":"Sam"},{"label":"Rating","sample":"5"},{"label":"Body","sample":"Great cut"}],"submitLabel":"Log review"},
+      designMock: {"kind":"list-and-form","screenTitle":"Reviews","caption":"This is the screen you are building. Match the pieces — list, empty message, form, submit — not the brand colors. Try typing and submitting.","listCaption":"LIST — sample rows","emptyCaption":"EMPTY — when there are no rows","emptyMessage":"No reviews yet.","rows":[{"title":"Sam","subtitle":"5","meta":"Great cut"},{"title":"Sam B","subtitle":"5 (alt)","meta":"Great cut"}],"fields":[{"label":"Author","sample":"Sam"},{"label":"Rating","sample":"5"},{"label":"Body","sample":"Great cut"}],"submitLabel":"Log review"},
     },
   },
   {
     id: "objectives",
     type: "objectives",
     phase: "Objectives",
-    items: ["Create a customer review blueprint (reviewer, star rating, feedback text) and build the inbox view.","Store reviews in memory; display each review card, or show a \"No customer reviews yet\" message when empty.","Wire star rating and review comment fields to state for real-time tracking.","Block default page reload, drop the review into the inbox, and clear the form fields."],
+    items: ["Create a customer review blueprint (author, star rating, feedback text) and build the inbox view.","Store reviews in memory; display each review card, or show a \"No customer reviews yet\" message when empty.","Wire star rating and review author fields to state for real-time tracking.","Block default page reload, drop the review into the inbox, and clear the form fields."],
   },
   {
     id: "step1",
@@ -33,23 +33,24 @@ export const NODES = [
 
 This file doesn't exist yet — you're the first to touch it. Create it at \`src/components/ReviewInbox.tsx\` before anything else. Every step from here on edits that same file.
 
-Create a customer review blueprint (reviewer, star rating, feedback text) and build the inbox view.
+Create a customer review blueprint (author, star rating, feedback text) and build the inbox view.
 
 WHAT YOU'LL NEED
-- id (text)
-- reviewer (text)
-- comment (text)
+- id (text — unique key, not always shown on screen)
+- author (per contract)
+- rating (per contract)
+- body (per contract)
 
 Your task: Define the shape of a review and create the component shell.`,
     hint: `1. Blueprint declaration: Rename Review to your type name and define required fields.
 2. Shell component: Declare your component returning an empty <div />.`,
-    example_code: `export type Review = {
+    example_code: `export type Guest = {
   id: string;
-  reviewer: string;
-  comment: string;
+  name: string;
+  note: string;
 };
 
-export function ReviewInbox() {
+export function GuestList() {
   return <div />;
 }`,
     think_prompt: `\`\`\`text
@@ -84,13 +85,13 @@ export function ReviewInbox() {
   return <div />;
 }
 `,
-    analog_example: `export type Review = {
+    analog_example: `export type Guest = {
   id: string;
-  reviewer: string;
-  comment: string;
+  name: string;
+  note: string;
 };
 
-export function ReviewInbox() {
+export function GuestList() {
   return <div />;
 }`,
     deepDiveLabel: "Why this step matters",
@@ -106,22 +107,11 @@ export function ReviewInbox() {
   Form     →  Author, Rating, Body
   Submit   →  the new row appears on the list
 `,
-      discover: `export type Review = {
-  id: string;
-  author: string;
-  rating: string;
-  body: string;
-};
-
-export function ReviewInbox() {
-  return <div />;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Blueprint declaration: Rename Review to your type name and define required fields.
-2. Shell component: Declare your component returning an empty <div />.`,
+      build: `A TypeScript type is a contract naming every field a value must have; a component is a function that returns JSX. Before either holds or renders real data, the type just needs its fields right and the component just needs to exist.`,
     },
   },
   {
@@ -133,28 +123,24 @@ export function ReviewInbox() {
 Store reviews in memory; display each review card, or show a "No customer reviews yet" message when empty.
 
 WHAT YOU'LL NEED
-- State array holding reviews.
-- Conditional empty check.
-- Map loop rendering review entries.
+- id (text — unique key, not always shown on screen)
+- author (per contract)
+- rating (per contract)
+- body (per contract)
 
 Your task: Store reviews in state and display them, showing a placeholder if the inbox is empty.`,
     hint: `1. Set up state: Use useState<Review[]>([]).
 2. Check for empty: Use reviews.length === 0 to render the empty message.
 3. Render entries: Map through reviews, passing key={rev.id}.`,
-    example_code: `const [reviews, setReviews] = useState<Review[]>([]);
-
-return (
-  <div>
-    {reviews.length === 0 ? (
-      <p>No customer reviews logged</p>
-    ) : (
-      reviews.map((rev) => (
-        <div key={rev.id}>
-          <strong>{rev.reviewer}:</strong> {rev.comment}
-        </div>
-      ))
-    )}
-  </div>
+    example_code: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     think_prompt: `\`\`\`text
 LIST — Reviews
@@ -233,20 +219,15 @@ export function ReviewInbox() {
   );
 }
 `,
-    analog_example: `const [reviews, setReviews] = useState<Review[]>([]);
-
-return (
-  <div>
-    {reviews.length === 0 ? (
-      <p>No customer reviews logged</p>
-    ) : (
-      reviews.map((rev) => (
-        <div key={rev.id}>
-          <strong>{rev.reviewer}:</strong> {rev.comment}
-        </div>
-      ))
-    )}
-  </div>
+    analog_example: `const [guests, setGuests] = useState<Guest[]>([]);
+return guests.length === 0 ? (
+  <p>No names yet.</p>
+) : (
+  <ul>
+    {guests.map((g) => (
+      <li key={g.id}>{g.name}</li>
+    ))}
+  </ul>
 );`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -261,38 +242,11 @@ return (
   Form     →  Author, Rating, Body
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Review = {
-  id: string;
-  author: string;
-  rating: string;
-  body: string;
-};
-
-export function ReviewInbox() {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  return (
-    <div>
-      {reviews.length === 0 ? (
-        <p>No reviews yet.</p>
-      ) : (
-        <ul>
-          {reviews.map((a) => (
-            <li key={a.id}>{a.author}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Set up state: Use useState<Review[]>([]).
-2. Check for empty: Use reviews.length === 0 to render the empty message.
-3. Render entries: Map through reviews, passing key={rev.id}.`,
+      build: `To re-render on change, the array has to live in a hook that both holds the value and gives you a setter. Once it does, checking its length before deciding what to render is just an ordinary conditional — the empty case and the list case are two branches of one render.`,
     },
   },
   {
@@ -301,20 +255,19 @@ export function ReviewInbox() {
     phase: "Step 3 of 4",
     paal: `You're writing this in TypeScript + React — a \`.tsx\` file (TypeScript types alongside JSX markup).
 
-Wire star rating and review comment fields to state for real-time tracking.
+Wire star rating and review author fields to state for real-time tracking.
 
 WHAT YOU'LL NEED
-- State hooks for reviewer and comment inputs.
-- Value and onChange props wired on inputs.
+- id (text — unique key, not always shown on screen)
+- author (per contract)
+- rating (per contract)
+- body (per contract)
 
 Your task: Connect review logging inputs to React state.`,
-    hint: `1. Initialize states: Call useState("") for reviewer and comment.
+    hint: `1. Initialize states: Call useState("") for author and author.
 2. Wire inputs: Connect value and onChange to each state variable.`,
-    example_code: `const [reviewer, setReviewer] = useState("");
-const [comment, setComment] = useState("");
-
-<input value={reviewer} onChange={(e) => setReviewer(e.target.value)} />
-<textarea value={comment} onChange={(e) => setComment(e.target.value)} />`,
+    example_code: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     think_prompt: `\`\`\`text
 FORM — Reviews
   [ Author ]  [ Rating ]  [ Body ]   → Log review
@@ -388,11 +341,8 @@ export function ReviewInbox() {
   );
 }
 `,
-    analog_example: `const [reviewer, setReviewer] = useState("");
-const [comment, setComment] = useState("");
-
-<input value={reviewer} onChange={(e) => setReviewer(e.target.value)} />
-<textarea value={comment} onChange={(e) => setComment(e.target.value)} />`,
+    analog_example: `const [name, setName] = useState("");
+<input value={name} onChange={(e) => setName(e.target.value)} />`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -406,34 +356,11 @@ const [comment, setComment] = useState("");
   Form     →  Author, Rating, Body
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Review = {
-  id: string;
-  author: string;
-  rating: string;
-  body: string;
-};
-
-export function ReviewInbox() {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [author, setAuthor] = useState("");
-  const [rating, setRating] = useState("");
-  const [body, setBody] = useState("");
-  return (
-    <form>
-        <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Author" />
-        <input value={rating} onChange={(e) => setRating(e.target.value)} placeholder="Rating" />
-        <input value={body} onChange={(e) => setBody(e.target.value)} placeholder="Body" />
-    </form>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Initialize states: Call useState("") for reviewer and comment.
-2. Wire inputs: Connect value and onChange to each state variable.`,
+      build: `In a functional component, a piece of typed text is just another value that can live in state — the input's value prop reads it back out, and onChange is the only place that ever changes it.`,
     },
   },
   {
@@ -445,23 +372,17 @@ export function ReviewInbox() {
 Block default page reload, drop the review into the inbox, and clear the form fields.
 
 WHAT YOU'LL NEED
-- Form interceptor using e.preventDefault().
-- New review object creation.
-- Spread update to state.
-- Form reset calls.
+- id (text — unique key, not always shown on screen)
+- author (per contract)
+- rating (per contract)
+- body (per contract)
 
 Your task: Append the new review to state without a page refresh and reset the form.`,
     hint: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, reviewer, and comment into an object.
+2. Build item: Package id, author, and author into an object.
 3. Append item: Use setReviews((prev) => [...prev, entry]).
 4. Clear form: Reset input states to "".`,
-    example_code: `function logReview(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), reviewer, comment };
-  setReviews((prev) => [...prev, entry]);
-  setReviewer("");
-  setComment("");
-}`,
+    example_code: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     think_prompt: `\`\`\`text
 FORM — Reviews
   [ Author ]  [ Rating ]  [ Body ]   → Log review
@@ -472,10 +393,7 @@ Submitting an HTML form reloads the page by default; canceling that default lets
     mc_options: ["preventDefault, append one item, clear fields","window.location.reload after every submit","only console.log the form values"],
     mc_correct_option: "preventDefault, append one item, clear fields",
     mc_anchor: "preventDefault, append one item, clear f",
-    why_this_matters: `Reviews appear instantly in the inbox without page reloads.
-
-
-================================================================================`,
+    why_this_matters: `Reviews appear instantly in the inbox without page reloads.`,
     answer_keywords: ["preventDefault","setReviews","prev","author","rating","body"],
     seed_code: `import { useState } from "react";
 
@@ -582,21 +500,12 @@ export function ReviewInbox() {
   );
 }
 `,
-    analog_example: `function logReview(e: React.FormEvent) {
-  e.preventDefault();
-  const entry = { id: String(Date.now()), reviewer, comment };
-  setReviews((prev) => [...prev, entry]);
-  setReviewer("");
-  setComment("");
-}`,
+    analog_example: `setGuests((prev) => [...prev, { id: String(Date.now()), name, note }]);`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Reviews appear instantly in the inbox without page reloads.
-
-
-================================================================================`,
+      hook: `Reviews appear instantly in the inbox without page reloads.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Build a screen that lists reviews and a form to add one:
 
@@ -605,56 +514,11 @@ export function ReviewInbox() {
   Form     →  Author, Rating, Body
   Submit   →  the new row appears on the list
 `,
-      discover: `import { useState } from "react";
-
-export type Review = {
-  id: string;
-  author: string;
-  rating: string;
-  body: string;
-};
-
-export function ReviewInbox() {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [author, setAuthor] = useState("");
-  const [rating, setRating] = useState("");
-  const [body, setBody] = useState("");
-  function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: Review = { id: String(Date.now()), author, rating, body };
-    setReviews((prev) => [...prev, next]);
-    setAuthor("");
-    setRating("");
-    setBody("");
-  }
-  return (
-    <div>
-      {reviews.length === 0 ? (
-        <p>No reviews yet.</p>
-      ) : (
-        <ul>
-          {reviews.map((a) => (
-            <li key={a.id}>{a.author} · {a.rating} · {a.body}</li>
-          ))}
-        </ul>
-      )}
-      <form onSubmit={onSubmit}>
-        <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Author" />
-        <input value={rating} onChange={(e) => setRating(e.target.value)} placeholder="Rating" />
-        <input value={body} onChange={(e) => setBody(e.target.value)} placeholder="Body" />
-        <button type="submit">Log review</button>
-      </form>
-    </div>
-  );
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Halt refresh: Call e.preventDefault() first.
-2. Build item: Package id, reviewer, and comment into an object.
-3. Append item: Use setReviews((prev) => [...prev, entry]).
-4. Clear form: Reset input states to "".`,
+      build: `A submit handler runs in a fixed order: stop the default page reload, build the new record from the current field values, add it to state without mutating the old array, then clear the fields for the next entry.`,
     },
   },
 ];

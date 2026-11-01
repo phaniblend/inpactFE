@@ -26,12 +26,18 @@ export default function GlobalHeader() {
   const isAspirant = session?.accountType === "js";
   // After Google OAuth, aspirants land on their desk — not the public cinematic.
   const googleHref = `/api/auth/google/start?returnTo=${encodeURIComponent("#/home")}`;
+  // Audit P24: hide floating Home / My tasks / Sign out over full-screen workbench chrome
+  // (task mock, Assist Me, Start Dev) so it cannot cover titles or modal close targets.
+  const hideForWorkbenchFocus =
+    onMyTasks && typeof document !== "undefined" && document.body?.dataset?.inpactWorkbenchFocus === "1";
 
   async function handleSignOut() {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.hash = "#/";
     window.location.reload();
   }
+
+  if (hideForWorkbenchFocus) return null;
 
   return (
     <header className="gh-bar" aria-label="Inpact">

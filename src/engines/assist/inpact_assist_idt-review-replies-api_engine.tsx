@@ -41,12 +41,9 @@ WHAT YOU'LL NEED
 Your task: Set up server storage for review replies and an ID generator.`,
     hint: `1. In-memory store: Declare an empty array typed with your reply interface.
 2. ID helper: Return an incremental ID string from your helper function.`,
-    example_code: `let replyStore: ReplyRecord[] = [];
-let repIdCounter = 1;
-
-function generateReplyId(): string {
-  return \`rep-\${repIdCounter++}\`;
-}`,
+    example_code: `let guests = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/review-replies
 GET /api/review-replies
@@ -74,12 +71,9 @@ let nextIdCounter = 1;
 function nextId() { return String(nextIdCounter++); }
 export function getStore() { return replies; }
 `,
-    analog_example: `let replyStore: ReplyRecord[] = [];
-let repIdCounter = 1;
-
-function generateReplyId(): string {
-  return \`rep-\${repIdCounter++}\`;
-}`,
+    analog_example: `let guests = [];
+let nextIdCounter = 1;
+function nextId() { return String(nextIdCounter++); }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -92,16 +86,11 @@ function generateReplyId(): string {
   Validate →  required fields before insert
   Conflict →  same reviewId + channel already replied → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let replies = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return replies; }
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. In-memory store: Declare an empty array typed with your reply interface.
-2. ID helper: Return an incremental ID string from your helper function.`,
+      build: `Two requests that arrive close together must never be handed the same id — a counter that only ever increases guarantees each new record gets a value nothing before it used, which a timestamp alone cannot promise.`,
     },
   },
   {
@@ -119,9 +108,7 @@ WHAT YOU'LL NEED
 Your task: Reject reply submissions missing reviewId, channel, or message with status 400.`,
     hint: `1. Inspect fields: Evaluate required properties using !req.body.property.
 2. Reject missing: Send status 400 if any required field is falsy.`,
-    example_code: `if (!req.body.reviewId || !req.body.channel || !req.body.message) {
-  return res.status(400).json({ error: "Review ID, channel, and message are required" });
-}`,
+    example_code: `if (!input?.name?.trim()) return "name is required";`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/review-replies
 POST /api/review-replies
@@ -161,9 +148,7 @@ export function validateReply(input) {
   return null;
 }
 `,
-    analog_example: `if (!req.body.reviewId || !req.body.channel || !req.body.message) {
-  return res.status(400).json({ error: "Review ID, channel, and message are required" });
-}`,
+    analog_example: `if (!input?.name?.trim()) return "name is required";`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
@@ -176,22 +161,11 @@ export function validateReply(input) {
   Validate →  required fields before insert
   Conflict →  same reviewId + channel already replied → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let replies = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function getStore() { return replies; }
-export function validateReply(input) {
-  if (typeof input?.reviewId !== "string" || !input.reviewId.trim()) return "reviewId is required";
-  if (typeof input?.body !== "string" || !input.body.trim()) return "body is required";
-  if (typeof input?.channel !== "string" || !input.channel.trim()) return "channel is required";
-  return null;
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Inspect fields: Evaluate required properties using !req.body.property.
-2. Reject missing: Send status 400 if any required field is falsy.`,
+      build: `A validator is just a function that inspects the fields it was given and returns either a short error message or nothing at all — the caller decides what to do with that answer.`,
     },
   },
   {
@@ -210,11 +184,8 @@ Your task: Scan existing replies and reject with status 409 if this review alrea
     hint: `1. Scan store: Use .some() on your replyStore array.
 2. Match criteria: Compare reviewId and channel properties.
 3. Reject duplicates: If found, halt execution with status 409.`,
-    example_code: `const exists = replyStore.some(
-  (r) => r.reviewId === req.body.reviewId && r.channel === req.body.channel
-);
-if (exists) {
-  return res.status(409).json({ error: "A reply has already been posted to this review on this channel" });
+    example_code: `function seatTaken(seat, holds) {
+  return holds.some((h) => h.seat === seat);
 }`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/review-replies
@@ -249,11 +220,8 @@ export function hasReplyAlready(candidate) {
   return replies.some((row) => row.reviewId === candidate.reviewId && row.channel === candidate.channel);
 }
 `,
-    analog_example: `const exists = replyStore.some(
-  (r) => r.reviewId === req.body.reviewId && r.channel === req.body.channel
-);
-if (exists) {
-  return res.status(409).json({ error: "A reply has already been posted to this review on this channel" });
+    analog_example: `function seatTaken(seat, holds) {
+  return holds.some((h) => h.seat === seat);
 }`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
@@ -267,18 +235,11 @@ if (exists) {
   Validate →  required fields before insert
   Conflict →  same reviewId + channel already replied → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let replies = [];
-export function validateReply(input) { return null; }
-export function hasReplyAlready(candidate) {
-  return replies.some((row) => row.reviewId === candidate.reviewId && row.channel === candidate.channel);
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Scan store: Use .some() on your replyStore array.
-2. Match criteria: Compare reviewId and channel properties.
-3. Reject duplicates: If found, halt execution with status 409.`,
+      build: `Checking one candidate record against a list of existing ones for a matching combination of fields is exactly what Array.prototype.some() is for — it stops at the first match and returns true or false.`,
     },
   },
   {
@@ -297,17 +258,7 @@ Your task: Build endpoints to return replies and post new replies with validatio
     hint: `1. Return store: Send status 200 with the replyStore array in GET.
 2. Protect POST: Run validation and duplicate checks before pushing the record.
 3. Save record: Assign a unique ID, push the item to storage, and return status 201.`,
-    example_code: `export function getReplies(res: Response) {
-  return res.status(200).json(replyStore);
-}
-
-export function postReply(req: Request, res: Response) {
-  // Step 2 validation check (400)
-  // Step 3 duplicate check (409)
-  const item = { id: generateReplyId(), ...req.body };
-  replyStore.push(item);
-  return res.status(201).json(item);
-}`,
+    example_code: `if (seatTaken(body.seat, holds)) return res.status(409).json({ error: "taken" });`,
     think_prompt: `\`\`\`text
 SAMPLE — /api/review-replies
 GET /api/review-replies
@@ -321,10 +272,7 @@ A route handler is where validation, conflict-checking, and storage come togethe
     mc_options: ["GET lists store; POST validates, rejects conflict, else 201","POST always 201 even on overlap","GET returns HTML instead of JSON"],
     mc_correct_option: "GET lists store; POST validates, rejects conflict, else 201",
     mc_anchor: "GET lists store; POST validates, rejects",
-    why_this_matters: `Consistent error codes (400 for bad data, 409 for duplicates) make API behavior predictable.
-
-
-================================================================================`,
+    why_this_matters: `Consistent error codes (400 for bad data, 409 for duplicates) make API behavior predictable.`,
     answer_keywords: ["409","400","201","validateReply","hasReplyAlready"],
     seed_code: `let replies = [];
 let nextIdCounter = 1;
@@ -370,25 +318,12 @@ export function createHandlers() {
   };
 }
 `,
-    analog_example: `export function getReplies(res: Response) {
-  return res.status(200).json(replyStore);
-}
-
-export function postReply(req: Request, res: Response) {
-  // Step 2 validation check (400)
-  // Step 3 duplicate check (409)
-  const item = { id: generateReplyId(), ...req.body };
-  replyStore.push(item);
-  return res.status(201).json(item);
-}`,
+    analog_example: `if (seatTaken(body.seat, holds)) return res.status(409).json({ error: "taken" });`,
     deepDiveLabel: "Why this step matters",
     deepDive: {
       // Fix 7: lead with the general concept (why a shared pattern matters), not the task
       // instruction restated verbatim.
-      hook: `Consistent error codes (400 for bad data, 409 for duplicates) make API behavior predictable.
-
-
-================================================================================`,
+      hook: `Consistent error codes (400 for bad data, 409 for duplicates) make API behavior predictable.`,
       pain: "Skipping this step leaves later code with no data shape or no source of truth.",
       mentalModel: `Implement /api/review-replies with persistence and a conflict rule:
 
@@ -396,35 +331,11 @@ export function postReply(req: Request, res: Response) {
   Validate →  required fields before insert
   Conflict →  same reviewId + channel already replied → conflict
   Routes   →  GET list, POST create (400 on bad/conflict)`,
-      discover: `let replies = [];
-let nextIdCounter = 1;
-function nextId() { return String(nextIdCounter++); }
-export function validateReply(input) { return null; }
-export function hasReplyAlready(candidate) {
-  return replies.some((row) => row.reviewId === candidate.reviewId && row.channel === candidate.channel);
-}
-export function createHandlers() {
-  return {
-    list(_req, res) {
-      res.json(replies);
-    },
-    create(req, res) {
-      const err = validateReply(req.body);
-      if (err) return res.status(400).json({ error: err });
-      if (hasReplyAlready(req.body)) return res.status(409).json({ error: "conflict" });
-      const row = { id: nextId(), reviewId: req.body.reviewId, body: req.body.body, channel: req.body.channel };
-      replies.push(row);
-      res.status(201).json(row);
-    },
-  };
-}
-`,
-      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses the same pattern",
+      discover: "Re-read the WHAT / HOW for this step. The check verifies those requirements — not a pasted answer.",
+      quickRules: "- One skill per step\n- Name the skill, not the product noun\n- Example uses a different domain",
       watchOut: "Do not turn a single import or interface into its own lesson.",
       dryRun: "Write the same step for a different resource with the same shape.",
-      build: `1. Return store: Send status 200 with the replyStore array in GET.
-2. Protect POST: Run validation and duplicate checks before pushing the record.
-3. Save record: Assign a unique ID, push the item to storage, and return status 201.`,
+      build: `A route handler's job is to call helpers in the right order and translate their answers into HTTP status codes — the actual rules already live in the functions written in earlier steps.`,
     },
   },
 ];
