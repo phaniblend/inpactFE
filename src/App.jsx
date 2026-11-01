@@ -1134,11 +1134,21 @@ import { useConsumeLoginCode } from './auth/useConsumeLoginCode.js'
 export default function App() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { refresh: refreshIpfSession } = useAuth()
+  const { refresh: refreshIpfSession, status: ipfStatus, session: ipfSession } = useAuth()
   useConsumeLoginCode(async () => {
     await refreshIpfSession()
     setUser(getStoredUser())
   })
+
+  // Signed-in aspirants skip the public cinematic — land on their desk instead.
+  useEffect(() => {
+    if (ipfStatus !== 'signedIn') return
+    if (ipfSession?.accountType !== 'js') return
+    const p = location.pathname
+    if (p === '/' || p === '') {
+      navigate('/home', { replace: true })
+    }
+  }, [ipfStatus, ipfSession?.accountType, location.pathname, navigate])
 
   const [track, setTrack] = useState(LEARNER_FOCUS_TRACK)
   const [lessonTrack, setLessonTrack] = useState(null) // track locked when lesson is opened (so React TS lesson never uses react-js)
@@ -1693,6 +1703,13 @@ export default function App() {
       )
     }
     if (showCinematic) {
+      // IPF aspirant session: never replay the marketing cinematic after login.
+      if (ipfStatus === 'signedIn' && ipfSession?.accountType === 'js') {
+        return null
+      }
+      if (ipfStatus === 'loading') {
+        return null
+      }
       return (
         <CinematicLanding
           onEnterEnterprise={() => {

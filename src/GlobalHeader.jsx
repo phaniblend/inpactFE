@@ -12,20 +12,20 @@ function isAlreadyBranded(pathname) {
 }
 
 /**
- * Persistent header chrome on every route: Log in (signed out) or My tasks + Sign out (signed in).
+ * Persistent header chrome on every route: Log in (signed out) or Home / My tasks + Sign out (signed in).
  * Fixed so it never reflows page layouts; high z-index so cinematic / lesson chrome cannot cover it.
  */
 export default function GlobalHeader() {
   const location = useLocation();
-  const { status } = useAuth();
+  const { status, session } = useAuth();
   const branded = isAlreadyBranded(location.pathname);
+  const onHome = location.pathname === "/home";
   const onMyTasks = location.pathname === "/workbench";
   const signedIn = status === "signedIn";
   const signedOut = status === "signedOut";
-  const returnTo = `${location.pathname}${location.search || ""}`;
-  const googleHref = `/api/auth/google/start?returnTo=${encodeURIComponent(
-    returnTo.startsWith("/") ? `#${returnTo}` : returnTo || "#/workbench"
-  )}`;
+  const isAspirant = session?.accountType === "js";
+  // After Google OAuth, aspirants land on their desk — not the public cinematic.
+  const googleHref = `/api/auth/google/start?returnTo=${encodeURIComponent("#/home")}`;
 
   async function handleSignOut() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -36,7 +36,7 @@ export default function GlobalHeader() {
   return (
     <header className="gh-bar" aria-label="Inpact">
       {!branded ? (
-        <Link to="/" className="gh-logo-link" aria-label="Inpact home">
+        <Link to={signedIn && isAspirant ? "/home" : "/"} className="gh-logo-link" aria-label="Inpact home">
           <InpactLogo height={44} />
         </Link>
       ) : (
@@ -45,6 +45,11 @@ export default function GlobalHeader() {
       <nav className="gh-nav" aria-label="Account">
         {signedIn ? (
           <>
+            {isAspirant ? (
+              <Link to="/home" className={`gh-nav-link${onHome ? " gh-nav-link-active" : ""}`}>
+                Home
+              </Link>
+            ) : null}
             <Link
               to="/workbench"
               className={`gh-nav-link${onMyTasks ? " gh-nav-link-active" : ""}`}

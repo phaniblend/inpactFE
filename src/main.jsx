@@ -25,6 +25,7 @@ import JsExperienceHome from './JsExperienceHome.jsx'
 import ProductOverview from './products/ProductOverview.jsx'
 import { TeamChatProvider } from './team-messaging/TeamChatProvider.jsx'
 import GlobalHeader from './GlobalHeader.jsx'
+import AspirantWelcome from './aspirant/AspirantWelcome.jsx'
 
 const ANY_CORE_ROLE = ['PD', 'PMGT', 'ID', 'CD']
 
@@ -41,6 +42,7 @@ createRoot(document.getElementById('root')).render(
         <Routes>
           {/* IPF ops / recruit — never fall through to App's JS cinematic landing. */}
           <Route path="/pd-studio" element={<RequireRole roles={['PD']}><PDStudio /></RequireRole>} />
+          <Route path="/home" element={<RequireRole roles={[]}><AspirantWelcome /></RequireRole>} />
           <Route path="/workbench" element={<RequireRole roles={[]}><Workbench /></RequireRole>} />
           <Route path="/apply" element={<Apply />} />
           {/* Public, shareable product overview + animated engineering walkthrough — a pilot

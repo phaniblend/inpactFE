@@ -1034,6 +1034,9 @@ export default function Workbench() {
   if (isJS) {
     const aspirantChrome = (
       <div className="workbench-aspirant-chrome">
+        <a className="workbench-chrome-link" href="#/home">
+          Home
+        </a>
         <a className="workbench-chrome-link workbench-chrome-link-active" href="#/workbench">
           My tasks
         </a>

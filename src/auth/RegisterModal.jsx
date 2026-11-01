@@ -187,12 +187,12 @@ export default function RegisterModal({
   const handleGoogleSignIn = () => {
     setSubmitError("");
     setSubmitErrorHint("");
-    const hash = typeof window !== "undefined" ? window.location.hash || "#/workbench" : "#/workbench";
+    const hash = typeof window !== "undefined" ? window.location.hash || "#/home" : "#/home";
     const returnTo = hash.startsWith("#") ? hash : `#${hash}`;
-    // Prefer returning to My tasks so a Google round-trip from this modal is useful.
+    // Prefer the aspirant desk after Google — skip the public cinematic.
     const dest =
       returnTo === "#/" || returnTo === "#" || returnTo.startsWith("#/?")
-        ? "#/workbench"
+        ? "#/home"
         : returnTo;
     window.location.href = `/api/auth/google/start?returnTo=${encodeURIComponent(dest)}`;
   };
