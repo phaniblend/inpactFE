@@ -414,7 +414,7 @@ export function RouteStopBoard() {
     feedback_correct: "Correct — real stops, real sequence order, one row per stop.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Check route === null first, then sort a copy of stops by sequence before rendering.",
-    pre_check_hint: `Once loading is done, this is the same list-render pattern you've used before — check for the empty case, then sort and map instead of rendering raw array order.
+    pre_check_hint: `Once loading is done, List render means: check for the empty case, then sort and map instead of rendering raw array order.
 
 - Check route === null and render "No active route assigned." when true.
 - Otherwise, make a sorted copy of route.stops ordered by each stop's own sequence.

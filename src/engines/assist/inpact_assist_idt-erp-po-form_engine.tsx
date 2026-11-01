@@ -200,7 +200,7 @@ export function ProcurementPanel({ orders, onReceive }: ProcurementPanelProps) {
     feedback_correct: "Correct — every real purchase order now renders, or an honest empty message.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Branch on orders.length === 0 first, then map each order into a row with a stable key.",
-    pre_check_hint: `List all purchase orders. For each, this is just the familiar length-check-then-map pattern, showing poNumber, totalAmount, and status per row.`,
+    pre_check_hint: `List all purchase orders. For each, Check length for the empty case, then map rows — showing poNumber, totalAmount, and status per row.`,
     expected: `export type PurchaseOrder = {
   id: string;
   poNumber: string;

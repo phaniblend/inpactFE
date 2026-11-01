@@ -203,7 +203,7 @@ export function SalesFulfillmentBoard({ orders, onFulfill }: SalesFulfillmentBoa
     feedback_correct: "Correct — every real sales order now renders, or an honest empty message.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Branch on orders.length === 0 first, then map each order into a row with a stable key.",
-    pre_check_hint: `Render sales orders grouped by status. For each, this is the familiar length-check-then-map pattern, showing soNumber, totalAmount, and status per row.`,
+    pre_check_hint: `Render sales orders grouped by status. For each, Check length for the empty case, then map rows — showing soNumber, totalAmount, and status per row.`,
     expected: `export type SalesOrder = {
   id: string;
   soNumber: string;

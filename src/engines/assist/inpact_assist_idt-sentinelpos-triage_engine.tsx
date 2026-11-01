@@ -372,7 +372,7 @@ export function IncidentTriage() {
     feedback_correct: "Correct — real rows, real columns, one per fetched incident.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Check incidents.length === 0 first, then draw a real <table> with one <tr> per incident.",
-    pre_check_hint: `Once loading is done, this is the same list-render pattern you've used before — check length for the empty case, then .map() into table rows instead of list items.
+    pre_check_hint: `Once loading is done, List render means: check length for the empty case, then .map() into table rows instead of list items.
 
 - Check incidents.length === 0 first and render "No open incidents." when true.
 - Otherwise, render a real <table> with a header row naming each column.

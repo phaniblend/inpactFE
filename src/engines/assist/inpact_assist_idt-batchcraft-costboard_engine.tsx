@@ -559,7 +559,7 @@ export function RecipeCostBoard() {
     feedback_correct: "Correct — real rows, real columns, one per fetched recipe.",
     feedback_partial: "Close — check the hint and try again.",
     feedback_wrong: "Check loading first, then recipes.length === 0, then render a real <table> with one <tr> per recipe.",
-    pre_check_hint: `This is the same list-render pattern you've used before — check loading, then check length for the empty case, then .map() into table rows.
+    pre_check_hint: `List render means: check loading, then check length for the empty case, then .map() into table rows.
 
 - While loading is true, render "Loading…".
 - Otherwise, if recipes.length === 0, render "No recipes costed yet."

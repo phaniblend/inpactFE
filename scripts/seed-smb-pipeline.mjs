@@ -175,42 +175,44 @@ function buildProduct(name, blurb, epic) {
 const PRODUCTS = [
   buildProduct(
     "BookingDepositDesk",
-    "Appointments + deposits for salons/clinics — SMBs pay for Calendly+Square+spreadsheets; this is one desk.",
+    "Appointments and deposits on one desk. Frontend tickets use local React state; the paired API ticket owns booking conflicts.",
     "Booking desk",
   ),
   buildProduct(
     "InvoiceFollowUpTracker",
-    "Quote → invoice → overdue nudge for solo trades — replaces sticky notes + unpaid PDF chaos.",
+    "Invoice list through overdue nudge. Frontend tickets use local React state; the paired API ticket owns overdue derivation.",
     "Collections desk",
   ),
   buildProduct(
     "LeadFollowUpInbox",
-    "Capture + stale follow-up for micro SMBs who bounce off HubSpot Pro pricing — a light lead inbox.",
+    "Capture leads and stale follow-up. Frontend tickets use local React state; the paired API ticket owns stale derivation.",
     "Lead desk",
   ),
+  // Audit P10: FE desk tasks are local React state only. Product overview must not promise
+  // server conflict rules those FE tickets never exercise (overlap/409 lives on the paired API task).
   buildProduct(
     "ShiftCoverageBoard",
-    "Publish shifts + open coverage for cafes/salons — without an HR/workforce suite seat tax.",
+    "Publish shifts and open coverage on one desk. Frontend tickets use local React state; the paired API ticket owns overlap conflicts.",
     "Shift desk",
   ),
   buildProduct(
     "QuoteEstimateDesk",
-    "Estimates → expiry → accepted for solo trades — without a full Jobber/Housecall stack.",
+    "Estimates through expiry and accepted. Frontend tickets use local React state; the paired API ticket owns expiry and duplicate-line rules.",
     "Quote desk",
   ),
   buildProduct(
     "ReviewReplyInbox",
-    "Log reviews + reply + unanswered triage — without Birdeye/Podium-class reputation spend.",
+    "Log reviews, write replies, and triage unanswered. Frontend tickets use local React state; the paired API ticket owns needs-reply derivation.",
     "Review desk",
   ),
   buildProduct(
     "ClientReminderHub",
-    "Schedule reminders + due board — without SMS-suite / Pro-tier reminder upsells.",
+    "Schedule reminders and a due board. Frontend tickets use local React state; the paired API ticket owns due/open derivation.",
     "Reminder desk",
   ),
   buildProduct(
     "PackagePunchCard",
-    "Prepaid punch cards + redeem — without POS loyalty / per-staff package add-ons.",
+    "Prepaid punch cards and redeem flows. Frontend tickets compose list/log/board screens; the paired API ticket owns remaining-balance rules.",
     "Package desk",
   ),
 ];
