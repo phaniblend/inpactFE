@@ -3,6 +3,8 @@ import {
   setRegistered,
   FREE_LESSONS_AFTER_REGISTER,
   hasEverRegistered,
+  isGoogleBoundEmail,
+  markGoogleBoundEmail,
 } from "./lessonAccess.js";
 import {
   isSupabaseConfigured,
@@ -12,12 +14,6 @@ import {
   updateUserPassword,
   getUser,
 } from "./supabase.js";
-import {
-  isFirebaseConfigured,
-  signInWithGoogle,
-  profileFromFirebaseUser,
-} from "./firebase.js";
-
 const overlay = {
   position: "fixed",
   inset: 0,
@@ -130,16 +126,6 @@ function getDismissButtonText(dismissCount) {
   return "Not now — remind me later";
 }
 
-function mapGoogleSignInError(err) {
-  const code = err?.code || "";
-  const msg = (err?.message || "").trim();
-  if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request")
-    return "Sign-in was closed before it finished. Try again when you’re ready.";
-  if (code === "auth/popup-blocked") return "Your browser blocked the pop-up. Allow pop-ups for this site and try again.";
-  if (code === "auth/network-request-failed") return "Network error. Check your connection and try again.";
-  return msg || "Google sign-in didn’t complete. Please try again.";
-}
-
 /** Map Supabase Auth errors to a short line + optional setup hint for operators. */
 function mapSignUpError(err) {
   const raw = (err?.message || "").trim();
@@ -196,25 +182,43 @@ export default function RegisterModal({
   const [confirmationSent, setConfirmationSent] = useState(false);
   const [confirmationEmail, setConfirmationEmail] = useState("");
 
-  const handleGoogleSignIn = async () => {
+  /** Always use IPF Google OAuth (same as Apply) so aspirants land in a real session for My tasks.
+   * Firebase lesson sync is optional and must not replace / hide this path. */
+  const handleGoogleSignIn = () => {
     setSubmitError("");
     setSubmitErrorHint("");
-    if (!isFirebaseConfigured) {
-      setSubmitError("Google sign-in isn’t set up on this install yet.");
-      return;
-    }
-    setSubmitLoading(true);
-    try {
-      const fbUser = await signInWithGoogle();
-      const profile = profileFromFirebaseUser(fbUser);
-      if (profile) setRegistered(profile);
-      onSuccess?.({ flow: "google" });
-    } catch (err) {
-      setSubmitError(mapGoogleSignInError(err));
-    } finally {
-      setSubmitLoading(false);
-    }
+    const hash = typeof window !== "undefined" ? window.location.hash || "#/workbench" : "#/workbench";
+    const returnTo = hash.startsWith("#") ? hash : `#${hash}`;
+    // Prefer returning to My tasks so a Google round-trip from this modal is useful.
+    const dest =
+      returnTo === "#/" || returnTo === "#" || returnTo.startsWith("#/?")
+        ? "#/workbench"
+        : returnTo;
+    window.location.href = `/api/auth/google/start?returnTo=${encodeURIComponent(dest)}`;
   };
+
+  const GOOGLE_EMAIL_TAKEN =
+    "This email already signs in with Google. Use Continue with Google — don’t create a separate password account for it.";
+
+  async function rejectIfGoogleBound(em) {
+    if (isGoogleBoundEmail(em)) return GOOGLE_EMAIL_TAKEN;
+    try {
+      const r = await fetch("/api/auth/me");
+      if (r.ok) {
+        const s = await r.json();
+        if (
+          s?.accountType === "js" &&
+          String(s.email || "").trim().toLowerCase() === em.trim().toLowerCase()
+        ) {
+          markGoogleBoundEmail(em);
+          return GOOGLE_EMAIL_TAKEN;
+        }
+      }
+    } catch {
+      /* ignore — local check above still applies */
+    }
+    return null;
+  }
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -234,8 +238,14 @@ export default function RegisterModal({
       setSubmitError("Password must be at least 8 characters.");
       return;
     }
+    const googleBlock = await rejectIfGoogleBound(em);
+    if (googleBlock) {
+      setSubmitError(googleBlock);
+      setMode("login");
+      return;
+    }
     if (!isSupabaseConfigured) {
-      setRegistered({ name: n, emailOrPhone: em });
+      setRegistered({ name: n, emailOrPhone: em, authProvider: "email" });
       onSuccess?.({ flow: "register" });
       return;
     }
@@ -283,8 +293,13 @@ export default function RegisterModal({
       setSubmitError("Enter your password.");
       return;
     }
+    const googleBlock = await rejectIfGoogleBound(em);
+    if (googleBlock) {
+      setSubmitError(googleBlock);
+      return;
+    }
     if (!isSupabaseConfigured) {
-      setRegistered({ name: em.split("@")[0], emailOrPhone: em });
+      setRegistered({ name: em.split("@")[0], emailOrPhone: em, authProvider: "email" });
       onSuccess?.({ flow: "login" });
       return;
     }
@@ -382,11 +397,11 @@ export default function RegisterModal({
   const extraFreeLabel =
     FREE_LESSONS_AFTER_REGISTER === 1 ? "one more included lesson" : `${FREE_LESSONS_AFTER_REGISTER} more included lessons`;
   const softVoluntarySub = hasEverRegistered()
-    ? "You already have an account. Log in to pick up any remaining included lessons on this browser."
+    ? "Welcome back — continue with Google (same Gmail you used before), or use email if that’s how you signed up."
     : `Use your email, or sign in with Google. After your guest previews, registering unlocks ${extraFreeLabel} and saved progress.`;
-  const hardGateCallout = `You’ve had two commitment-free previews in this browser. To open the next lesson — and the rest of your free tier — sign in or create an account. We’ve saved a seat for you.`;
+  const hardGateCallout = `You’ve had two commitment-free previews in this browser. To open the next lesson — and the rest of your free tier — sign in with Google or create an account. We’ve saved a seat for you.`;
   const loginWallCallout =
-    "You’ve used your guest previews on this browser. Log in with the account you created to continue and use any remaining included lessons.";
+    "You’ve used your guest previews on this browser. Continue with Google if that’s how you joined, or log in with email.";
   const startFreeSub =
     "Sign in with Google for the fastest path, or use your email if you already have an account. Want to look around first? You can continue without signing in.";
 
@@ -486,7 +501,7 @@ export default function RegisterModal({
               gap: "10px",
             }}
             onClick={handleGoogleSignIn}
-            disabled={submitLoading || !isFirebaseConfigured}
+            disabled={submitLoading}
           >
             {submitLoading ? "\u2026" : (
               <>
@@ -500,11 +515,6 @@ export default function RegisterModal({
               </>
             )}
           </button>
-          {!isFirebaseConfigured ? (
-            <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "8px" }}>
-              Google sign-in is not available on this install yet.
-            </div>
-          ) : null}
           <div
             style={{
               textAlign: "center",
@@ -552,8 +562,10 @@ export default function RegisterModal({
     <div style={sub}>{softGateFirstSub}</div>
   );
 
-  const showGoogleOnForm = isFirebaseConfigured && !isLoginWall && !passwordRecovery && !isStartFree;
-  const showGoogleOnStartFreeEmail = isFirebaseConfigured && isStartFree && startFreeStep === "email";
+  // Always offer Google on login/register (including the returning-user wall). Firebase when
+  // configured; otherwise IPF `/api/auth/google/start` — same Gmail path as first Apply.
+  const showGoogleOnForm = !passwordRecovery && !isStartFree;
+  const showGoogleOnStartFreeEmail = isStartFree && startFreeStep === "email";
 
   return (
     <div

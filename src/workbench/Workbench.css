@@ -1,9 +1,45 @@
 .workbench {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 40px 24px 90px;
+  /* Extra top padding clears the fixed GlobalHeader (logo + My tasks). */
+  padding: 72px 24px 90px;
   font-family: "Comfortaa", system-ui, sans-serif;
   color: #0f172a;
+}
+
+/* In-page aspirant nav — visible even when GlobalHeader is an old cached build. */
+.workbench-aspirant-chrome {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 8px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+}
+
+.workbench-chrome-link {
+  font-family: "Plus Jakarta Sans", "DM Sans", system-ui, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #155e75;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+}
+
+.workbench-chrome-link:hover {
+  border-color: #0891b2;
+  color: #0e7490;
+}
+
+.workbench-chrome-link-active {
+  background: #0e7490;
+  border-color: #0e7490;
+  color: #fff;
 }
 
 .workbench-header {

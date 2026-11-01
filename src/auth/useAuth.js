@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { syncIpfSessionToLessonUser } from "./lessonAccess.js";
 
 /** Current session, polled once on mount from /api/auth/me — the same endpoint the backend's
  * requireRole() middleware checks against, so "can the UI show this" and "will the API actually
@@ -18,6 +19,10 @@ export function useAuth() {
       .then((data) => {
         setSession(data);
         setStatus(data ? "signedIn" : "signedOut");
+        // One email, one account: Google/IPF session owns that address for lesson register too.
+        if (data?.email && data.accountType === "js") {
+          syncIpfSessionToLessonUser(data);
+        }
         return data;
       })
       .catch(() => {
@@ -33,8 +38,14 @@ export function useAuth() {
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    setSession(null);
-    setStatus("signedOut");
+    // Not just setSession(null) here — found live 2026-09-01: useAuth() has no shared context, so
+    // every component that calls it (Workbench, and separately the RequireRole wrapping it) holds
+    // its own independent copy of session state. Clearing only this instance's copy left
+    // RequireRole — the actual route guard — still holding its stale "signed in" session, so it
+    // kept rendering the gated screen instead of falling back to CoreLogin. A hard reload forces
+    // every useAuth() instance on the page to remount and re-fetch /api/auth/me fresh, which is now
+    // genuinely signed out server-side.
+    window.location.reload();
   }
 
   return { session, status, refresh, logout };

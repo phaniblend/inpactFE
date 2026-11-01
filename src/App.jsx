@@ -1124,12 +1124,21 @@ import {
   isSupabaseAuthUserId,
 } from './auth/supabase.js'
 import { signOutFirebase } from './auth/firebase.js'
-import { setRegistered as setRegisteredLocal } from './auth/lessonAccess.js'
+import {
+  setRegistered as setRegisteredLocal,
+} from './auth/lessonAccess.js'
 import { LEARNER_FOCUS_TRACK } from './auth/learnerFocus.js'
+import { useAuth } from './auth/useAuth.js'
+import { useConsumeLoginCode } from './auth/useConsumeLoginCode.js'
 
 export default function App() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { refresh: refreshIpfSession } = useAuth()
+  useConsumeLoginCode(async () => {
+    await refreshIpfSession()
+    setUser(getStoredUser())
+  })
 
   const [track, setTrack] = useState(LEARNER_FOCUS_TRACK)
   const [lessonTrack, setLessonTrack] = useState(null) // track locked when lesson is opened (so React TS lesson never uses react-js)

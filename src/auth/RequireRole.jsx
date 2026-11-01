@@ -1,64 +1,7 @@
-import { useEffect, useState } from "react";
-import { useSearchParams, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useAuth, hasRole } from "./useAuth.js";
+import { useConsumeLoginCode } from "./useConsumeLoginCode.js";
 import CoreLogin from "./CoreLogin.jsx";
-
-/** Exchange a one-time loginCode on whatever route Google returned to (Workbench, Assist Me, Apply,
- * …) — without this, only Apply knew how to finish OAuth, so a returnTo deep-link sat behind the
- * login wall forever even after Google succeeded.
- * Returns true while an exchange is in flight so RequireRole doesn't flash CoreLogin first. */
-function useConsumeLoginCode(refresh) {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const loginCode = searchParams.get("loginCode");
-  const authError = searchParams.get("authError");
-  const [exchanging, setExchanging] = useState(Boolean(loginCode));
-
-  useEffect(() => {
-    if (authError) {
-      setSearchParams(
-        (p) => {
-          p.delete("authError");
-          return p;
-        },
-        { replace: true }
-      );
-      setExchanging(false);
-      return;
-    }
-    if (!loginCode) {
-      setExchanging(false);
-      return;
-    }
-
-    setExchanging(true);
-    fetch("/api/auth/exchange-login-code", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: loginCode }),
-    })
-      .then((r) => r.json().then((data) => ({ ok: r.ok, data })))
-      .then(async ({ ok, data }) => {
-        if (!ok) throw new Error(data.error || "Sign-in link expired");
-        await refresh();
-      })
-      .catch((err) => {
-        console.error("[auth] loginCode exchange failed:", err.message);
-      })
-      .finally(() => {
-        setExchanging(false);
-        setSearchParams(
-          (p) => {
-            p.delete("loginCode");
-            return p;
-          },
-          { replace: true }
-        );
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- consume whatever code is in the URL at mount
-  }, []);
-
-  return exchanging;
-}
 
 /** Wraps a screen so it's only reachable with a session holding one of `roles` — same check the
  * backend's own requireRole() middleware makes, so a UI that lets you in always means the API

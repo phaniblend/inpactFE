@@ -1,13 +1,23 @@
-/* A bare floating image glued to the exact corner reads as stray debris, not a deliberate UI
-   element, no matter how its size/offset get tuned — confirmed live, twice ("its still cramped on
-   top left" even after bumping the offset and size once already). A real padded, backgrounded chip
-   gives it the same "this is on purpose" visual anchor the chat launcher's circular button already
-   has, instead of an unframed image sitting raw against the corner. */
-.gh-logo-link {
+/* Fixed corner chrome: logo + Log in / My tasks / Sign out — never reflows page layouts. */
+.gh-bar {
   position: fixed;
   top: 16px;
   left: 16px;
-  z-index: 900;
+  right: 16px;
+  z-index: 40000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.gh-logo-link,
+.gh-nav {
+  pointer-events: auto;
+}
+
+.gh-logo-link {
   display: flex;
   align-items: center;
   padding: 8px 14px;
@@ -15,24 +25,99 @@
   border-radius: 12px;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 20px rgba(15, 23, 42, 0.12);
   opacity: 0.96;
+  text-decoration: none;
 }
 
 .gh-logo-link:hover {
   opacity: 1;
 }
 
+.gh-logo-spacer {
+  width: 0;
+  height: 0;
+}
+
+.gh-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 6px 8px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+
+.gh-nav-link {
+  font-family: "Plus Jakarta Sans", "DM Sans", system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #155e75;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  letter-spacing: 0.01em;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+}
+
+.gh-nav-link:hover {
+  background: #e8f4f7;
+  color: #0e7490;
+}
+
+.gh-nav-link-active {
+  background: #e8f4f7;
+  color: #0e7490;
+}
+
+.gh-nav-btn {
+  font: inherit;
+}
+
+.gh-nav-link-primary {
+  background: #0e7490;
+  color: #fff !important;
+}
+
+.gh-nav-link-primary:hover {
+  background: #155e75;
+  color: #fff !important;
+}
+
+.gh-nav-muted {
+  color: #94a3b8;
+  cursor: default;
+  min-width: 1.5rem;
+  justify-content: center;
+}
+
+.gh-nav-muted:hover {
+  background: transparent;
+  color: #94a3b8;
+}
+
 @media (max-width: 600px) {
-  .gh-logo-link {
+  .gh-bar {
     top: 10px;
     left: 10px;
+    right: 10px;
+  }
+
+  .gh-logo-link {
     padding: 6px 10px;
   }
 
-  /* The 44px logo (set via an inline height style on the <img> itself) is comfortable at desktop
-     widths but crowds a narrow page's own top content — shrink it back down here specifically,
-     not everywhere, since the "too small to read" complaint was about the base 28px size, not
-     this already-cramped mobile case. */
   .gh-logo-link img {
     height: 30px !important;
+  }
+
+  .gh-nav-link {
+    font-size: 0.8rem;
+    padding: 5px 10px;
   }
 }
