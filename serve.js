@@ -95,6 +95,19 @@ async function listAllIssues(creds) {
   return all;
 }
 
+/** OneDev pages projects. A single page of 100 misses the oldest desks (Booking, Invoice, Lead),
+ * so My tasks labeled them `project-<id>` and Continue online cloned `/api/git/project-<id>.git` → 403. */
+async function listAllProjects(creds) {
+  const all = [];
+  for (let offset = 0; offset < 2000; offset += 100) {
+    const batch = await onedevFetch(creds, `/projects?offset=${offset}&count=100`);
+    if (!Array.isArray(batch) || batch.length === 0) break;
+    all.push(...batch);
+    if (batch.length < 100) break;
+  }
+  return all;
+}
+
 /**
  * Assign every open FE Coding task (desk products + live products) to an aspirant.
  * POST /ops/assign-live-fe  header X-Bootstrap-Token + JSON { email, name?, user?, pass?, allFe?: true }
@@ -119,7 +132,7 @@ app.post("/ops/assign-live-fe", express.json({ limit: "1mb" }), async (req, res)
 
   try {
     const [projects, issues] = await Promise.all([
-      onedevFetch(creds, "/projects?offset=0&count=100"),
+      listAllProjects(creds),
       listAllIssues(creds),
     ]);
     const pname = (id) => projects.find((p) => p.id === id)?.name || `project-${id}`;
@@ -299,7 +312,7 @@ app.get("/api/recruit/my-tasks", async (req, res) => {
     }
 
     const [projects, issues] = await Promise.all([
-      onedevFetch(creds, "/projects?offset=0&count=100"),
+      listAllProjects(creds),
       listAllIssues(creds),
     ]);
     const pname = (id) => projects.find((p) => p.id === id)?.name || `project-${id}`;
